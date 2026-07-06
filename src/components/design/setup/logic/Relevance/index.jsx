@@ -59,7 +59,10 @@ function Relevance({ code, t }) {
   };
 
   const onLogicChange = useCallback(
-    ({ jsonLogic }) => setRelevance({ rule: "show_if", logic: jsonLogic }),
+    ({ jsonLogic, isEmpty }) =>
+      isEmpty
+        ? setRelevance({ rule: "show_always", logic: undefined })
+        : setRelevance({ rule: "show_if", logic: jsonLogic }),
     [setRelevance]
   );
 

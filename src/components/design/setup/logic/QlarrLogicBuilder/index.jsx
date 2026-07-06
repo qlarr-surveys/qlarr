@@ -22,7 +22,11 @@ function InlineLogicBuilderSync({ onChange }) {
   useEffect(() => {
     if (isDirty) {
       const newJsonLogic = treeToJsonLogic(tree);
-      onChangeRef.current({ jsonLogic: newJsonLogic, queryString: '' });
+      onChangeRef.current({
+        jsonLogic: newJsonLogic,
+        queryString: '',
+        isEmpty: tree.children.length === 0,
+      });
     }
   }, [tree, isDirty]);
 
