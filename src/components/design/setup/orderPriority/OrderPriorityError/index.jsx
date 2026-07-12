@@ -1,10 +1,15 @@
 import { Box } from "@mui/material";
-import styles from "./RandomError.module.css";
+import styles from "./OrderPriorityError.module.css";
 import { Trans, useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 
-export default function RandomError({ errors }) {
+// Renders validation errors for both random_group and priority_groups instructions.
+export default function OrderPriorityError({ errors }) {
   const { t } = useTranslation(NAMESPACES.DESIGN_CORE);
+
+  if (!errors?.length) {
+    return null;
+  }
 
   return (
     <Box key="box" className={styles.errorDisplay}>

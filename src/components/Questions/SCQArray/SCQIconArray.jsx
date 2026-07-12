@@ -5,7 +5,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableRow from "@mui/material/TableRow";
 import { useTheme } from "@emotion/react";
-import { useSelector } from "react-redux";
+import { shallowEqual, useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { valueChange } from "~/state/runState";
 import Validation from "~/components/run/Validation";
@@ -25,9 +25,23 @@ function SCQIconArray(props) {
   );
   let rows = props.component.answers.filter((answer) => answer.type == "row");
 
+  // Columns can be hidden by relevance (e.g. column prioritisation), the same
+  // way rows are. Drop any column whose relevance is explicitly false.
+  const columnRelevance = useSelector(
+    (state) =>
+      columns.map(
+        (option) => state.runState.values[option.qualifiedCode]?.relevance
+      ),
+    shallowEqual
+  );
+  const visibleColumns = columns.filter(
+    (_, index) =>
+      typeof columnRelevance[index] === "undefined" || columnRelevance[index]
+  );
+
   return (
     <TableContainer className={styles.tableContainer}>
-      <Table className={styles.table} style={{ '--qlarr-table-min-width': `${columns.length * width}px` }}>
+      <Table className={styles.table} style={{ '--qlarr-table-min-width': `${visibleColumns.length * width}px` }}>
         <TableHead>
           <TableRow>
             <TableCell
@@ -35,7 +49,7 @@ function SCQIconArray(props) {
               className={styles.emptyHeader}
               style={{ '--qlarr-cell-width': width }}
             ></TableCell>
-            {columns.map((option) => {
+            {visibleColumns.map((option) => {
               return (
                 <TableCell
                   className={styles.columnHeader}
@@ -59,7 +73,7 @@ function SCQIconArray(props) {
                 <SCQArrayRow
                   key={answer.qualifiedCode}
                   answer={answer}
-                  choices={columns}
+                  choices={visibleColumns}
                   width={width}
                 />
               </React.Fragment>

@@ -103,6 +103,11 @@ function ImageRankingItem(props) {
     };
   }, shallowEqual);
 
+  // a ranking item can be hidden by relevance (e.g. prioritisation / conditional relevance)
+  if (!state.showAnswer) {
+    return null;
+  }
+
   const backgroundImage = props.option.resources?.image
     ? `url('${buildResourceUrl(props.option.resources.image)}')`
     : `url('/placeholder-image.jpg')`;

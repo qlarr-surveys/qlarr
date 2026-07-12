@@ -3,6 +3,7 @@ import styles from "./ActionToolbar.module.css";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import React, { useCallback, useState } from "react";
 import ShuffleIcon from "@mui/icons-material/Shuffle";
+import LowPriorityIcon from "@mui/icons-material/LowPriority";
 import MoveDownIcon from "@mui/icons-material/MoveDown";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
@@ -145,6 +146,18 @@ function ActionToolbar({ code, isGroup, parentCode, showActions }) {
       : undefined;
   });
 
+  const priorityRule = useSelector((state) => {
+    return state.designState[code].prioritise_questions
+      ? "prioritise_questions"
+      : state.designState[code].prioritise_options
+      ? "prioritise_options"
+      : state.designState[code].prioritise_rows
+      ? "prioritise_rows"
+      : state.designState[code].prioritise_columns
+      ? "prioritise_columns"
+      : undefined;
+  });
+
   return (
     <div
       className={styles.actionControl}
@@ -194,6 +207,16 @@ function ActionToolbar({ code, isGroup, parentCode, showActions }) {
             onClick={() => expandRandom(randomRule)}
           >
             <ShuffleIcon />
+          </IconButton>
+        </CustomTooltip>
+      )}
+      {priorityRule && (
+        <CustomTooltip title={tTooltips("is_prioritized")} showIcon={false}>
+          <IconButton
+            className={styles.statusIcon}
+            onClick={() => expandRandom(priorityRule)}
+          >
+            <LowPriorityIcon />
           </IconButton>
         </CustomTooltip>
       )}

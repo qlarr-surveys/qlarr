@@ -23,6 +23,20 @@ function Array(props) {
   let rows = props.component.answers.filter((answer) => answer.type == "row");
   const { header, rowLabel } = useColumnMinWidth(null, props.component);
 
+  // Columns can be hidden by relevance (e.g. column prioritisation), the same
+  // way rows are. Drop any column whose relevance is explicitly false.
+  const columnRelevance = useSelector(
+    (state) =>
+      columns.map(
+        (option) => state.runState.values[option.qualifiedCode]?.relevance
+      ),
+    shallowEqual
+  );
+  const visibleColumns = columns.filter(
+    (_, index) =>
+      typeof columnRelevance[index] === "undefined" || columnRelevance[index]
+  );
+
   return (
     <TableContainer className={styles.tableContainer}>
       <Table className={styles.table}>
@@ -33,7 +47,7 @@ function Array(props) {
               className={styles.rowLabelHeader}
               style={{ '--qlarr-cell-width': rowLabel + 'px' }}
             ></TableCell>
-            {columns.map((option) => {
+            {visibleColumns.map((option) => {
               return (
                 <TableCell
                   className={styles.columnHeader}
@@ -58,7 +72,7 @@ function Array(props) {
                   type={props.component.type}
                   key={answer.qualifiedCode}
                   answer={answer}
-                  choices={columns}
+                  choices={visibleColumns}
                 />
               </React.Fragment>
             );
