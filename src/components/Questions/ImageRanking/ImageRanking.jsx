@@ -103,9 +103,9 @@ function ImageRankingItem(props) {
     };
   }, shallowEqual);
 
-  const backgroundImage = props.option.resources?.image
-    ? `url('${buildResourceUrl(props.option.resources.image)}')`
-    : `url('/placeholder-image.jpg')`;
+  const imageSrc = props.option.resources?.image
+    ? buildResourceUrl(props.option.resources.image)
+    : '/placeholder-image.jpg';
 
   return (
     <Box
@@ -122,10 +122,10 @@ function ImageRankingItem(props) {
         alignItems="center"
         style={{
           paddingTop: 100 / props.aspectRatio + "%",
-          backgroundImage: backgroundImage,
           height: props.imageHeight + "px",
         }}
       >
+        <img className={styles.image} src={imageSrc} alt="" />
         {state.value > 0 && (
           <div
             className={`${styles.rankContainer} ${styles.rankBadgeBg}`}
