@@ -4,6 +4,7 @@ import styles from "./SideTabs.module.css";
 import React from "react";
 import {
   Edit,
+  LowPriority,
   Palette,
   Settings,
   Translate,
@@ -21,7 +22,9 @@ import {
   setDesignModeToDesign,
   setDesignModeToLang,
   setDesignModeToTheme,
+  setup,
 } from "~/state/design/designState";
+import { surveySetup } from "~/constants/design";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 
 function SideTabs({ selectedPage, onPageChange, availablePages, surveyId }) {
@@ -54,6 +57,15 @@ function SideTabs({ selectedPage, onPageChange, availablePages, surveyId }) {
     return state.designState.designMode;
   });
 
+  const orderPriorityActive = useSelector((state) => {
+    const setupState = state.designState.setup;
+    return (
+      state.designState.designMode === DESIGN_SURVEY_MODE.DESIGN &&
+      setupState?.code === "Survey" &&
+      !!setupState?.rules?.some((rule) => rule.key === "random")
+    );
+  });
+
   function component() {
     return (
       <List data-tour="side-tabs">
@@ -62,7 +74,9 @@ function SideTabs({ selectedPage, onPageChange, availablePages, surveyId }) {
             <SideTab
               tooltip={t("design")}
               buttonSx={getTabButtonSx(
-                selectedPage == MANAGE_SURVEY_LANDING_PAGES.DESIGN && designMode == DESIGN_SURVEY_MODE.DESIGN
+                selectedPage == MANAGE_SURVEY_LANDING_PAGES.DESIGN &&
+                  designMode == DESIGN_SURVEY_MODE.DESIGN &&
+                  !orderPriorityActive
               )}
               link={routes.designSurvey.replace(":surveyId", surveyId)}
               icon={<Edit sx={{ color: "#fff" }} />}
@@ -93,6 +107,18 @@ function SideTabs({ selectedPage, onPageChange, availablePages, surveyId }) {
               onClick={() => {
                 onPageChange(MANAGE_SURVEY_LANDING_PAGES.DESIGN);
                 dispatch(setDesignModeToLang());
+              }}
+            />
+            <SideTab
+              dataTour="side-tab-order-priority"
+              tooltip={t("order_priority")}
+              link={routes.designSurvey.replace(":surveyId", surveyId)}
+              buttonSx={getTabButtonSx(orderPriorityActive)}
+              icon={<LowPriority sx={{ color: "#fff" }} />}
+              onClick={() => {
+                onPageChange(MANAGE_SURVEY_LANDING_PAGES.DESIGN);
+                dispatch(setDesignModeToDesign());
+                dispatch(setup(surveySetup));
               }}
             />
           </>

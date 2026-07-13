@@ -43,6 +43,7 @@ import {
   processValidation,
   removeInstruction,
   updateRandomByRule,
+  updatePriorityByRule,
 } from "./addInstructions";
 import { defaultSurveyTheme } from "~/constants/theme";
 
@@ -217,6 +218,20 @@ export const designState = createSlice({
         ].indexOf(action.payload.key) > -1
       ) {
         updateRandomByRule(
+          state[payload.code],
+          action.payload.key,
+          !originalValue || originalValue == "NONE",
+        );
+      } else if (
+        [
+          "prioritise_questions",
+          "prioritise_groups",
+          "prioritise_options",
+          "prioritise_rows",
+          "prioritise_columns",
+        ].indexOf(action.payload.key) > -1
+      ) {
+        updatePriorityByRule(
           state[payload.code],
           action.payload.key,
           !originalValue || originalValue == "NONE",
@@ -667,6 +682,19 @@ export const designState = createSlice({
         removeInstruction(componentState, "random_group");
       }
     },
+    updatePriority: (state, action) => {
+      const payload = action.payload;
+      const componentState = state[payload.code];
+      if (payload.priorities && payload.priorities.length) {
+        const instruction = {
+          code: "priority_groups",
+          priorities: payload.priorities,
+        };
+        changeInstruction(componentState, instruction);
+      } else {
+        removeInstruction(componentState, "priority_groups");
+      }
+    },
 
     // === SKIP LOGIC REDUCERS ===
     addSkipRule: (state, action) => {
@@ -951,6 +979,7 @@ export const {
   changeValidationValue,
   updateRandom,
   updateRandomByType,
+  updatePriority,
   addSkipRule,
   updateSkipRule,
   removeSkipRule,
@@ -984,6 +1013,23 @@ const cleanupRandomRules = (componentState) => {
   } else if (componentState["randomize_columns"]) {
     updateRandomByRule(componentState, "randomize_columns");
   }
+  cleanupPriorityRules(componentState);
+};
+
+const cleanupPriorityRules = (componentState) => {
+  // an array question can have both rows and columns prioritised at once, so
+  // clean every active rule (not else-if) to prune stale codes from each axis
+  [
+    "prioritise_questions",
+    "prioritise_groups",
+    "prioritise_options",
+    "prioritise_rows",
+    "prioritise_columns",
+  ].forEach((rule) => {
+    if (componentState[rule]) {
+      updatePriorityByRule(componentState, rule);
+    }
+  });
 };
 
 const cleanupFormatInstructions = (componentState) => {

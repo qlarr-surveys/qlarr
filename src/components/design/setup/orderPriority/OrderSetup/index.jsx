@@ -1,5 +1,5 @@
 import React from "react";
-import { Checkbox, MenuItem, Select, Typography } from "@mui/material";
+import { Checkbox, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { shallowEqual, useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { changeAttribute, updateRandom } from "~/state/design/designState";
@@ -117,6 +117,9 @@ export default function OrderSetup({ t, rule, code }) {
     );
   });
 
+  const reorderedCount = children.filter((c) => c.inRandomGroup).length;
+  const pinnedCount = children.length - reorderedCount;
+
   const handleCheckboxChange = (checked, checkedIndex) => {
     const childCodes = children
       .filter(
@@ -148,52 +151,82 @@ export default function OrderSetup({ t, rule, code }) {
   return (
     <>
       <div className={styles.label}>
-        <CustomTooltip body={tTooltips(title)} />  <Typography fontWeight={700}>{t(`${title}`)}</Typography>
+        <CustomTooltip body={tTooltips(title)} />
+        <Typography fontWeight={700}>
+          {type ? t(title) : t("op_order_section")}
+        </Typography>
       </div>
-      <Select
-        fullWidth
-        id="select-value"
+
+      <ToggleButtonGroup
+        className={styles.modeGroup}
+        size="small"
+        exclusive
         value={value}
-        onChange={(e) => {
-          onChange(e.target.value);
+        onChange={(_e, next) => {
+          if (next !== null) onChange(next);
         }}
       >
-        {labels.map((element, index) => {
-          return (
-            <MenuItem key={element} value={values[index]}>
-              {element}
-            </MenuItem>
-          );
-        })}
-      </Select>
+        {values.map((val, index) => (
+          <ToggleButton key={val} value={val}>
+            {labels[index]}
+          </ToggleButton>
+        ))}
+      </ToggleButtonGroup>
 
       {value != "NONE" && value != undefined && (
-        <ul className={styles.list}>
-          {children &&
-            children.map((item, index) => (
-              <RandomisedChildDisplay
-                key={index}
-                code={item.code}
-                handleChange={(checked) => handleCheckboxChange(checked, index)}
-                checked={item.inRandomGroup}
-                label={item.label}
-              />
-            ))}
-        </ul>
+        <>
+          <Typography
+            className={styles.summary}
+            variant="body2"
+            color="text.secondary"
+          >
+            {pinnedCount === 0
+              ? t("order_applies_all", { count: children.length })
+              : t("order_pinned_some", {
+                  count: pinnedCount,
+                  total: children.length,
+                })}
+          </Typography>
+          <ul className={styles.list}>
+            {children &&
+              children.map((item, index) => (
+                <RandomisedChildDisplay
+                  key={index}
+                  code={item.code}
+                  handleChange={(checked) => handleCheckboxChange(checked, index)}
+                  checked={item.inRandomGroup}
+                  label={item.label}
+                />
+              ))}
+          </ul>
+          <Typography
+            className={styles.hint}
+            variant="body2"
+            color="text.secondary"
+          >
+            {t("op_fixed_hint")}
+          </Typography>
+        </>
       )}
     </>
   );
 }
 
 function RandomisedChildDisplay({ code, label, checked, handleChange }) {
-
+  const text = stripTags(label);
   return (
-    <li className={styles.listItem}>
+    <li className={styles.listItem} onClick={() => handleChange(!checked)}>
       <Checkbox
         checked={checked}
+        onClick={(e) => e.stopPropagation()}
         onChange={(e) => handleChange(e.target.checked)}
       />
-      {code}: {stripTags(label)}
+      <span className={styles.codeChip} title={code}>
+        {code}
+      </span>
+      <span className={styles.itemLabel} title={text}>
+        {text}
+      </span>
     </li>
   );
 }

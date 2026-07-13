@@ -30,6 +30,7 @@ function MultipleTextItem({ item }) {
     return {
       value: answerState?.value || "",
       invalid: invalid,
+      relevance: answerState?.relevance,
     };
   }, shallowEqual);
   const dispatch = useDispatch();
@@ -53,6 +54,10 @@ function MultipleTextItem({ item }) {
     }
     dispatch(setDirty(event.target.name));
   };
+  // a field can be hidden by relevance (e.g. prioritisation / conditional relevance)
+  if (state.relevance === false) {
+    return null;
+  }
   return (
     <Box
       data-code={item.code}

@@ -1107,6 +1107,133 @@ export const updateRandomByRule = (
   }
 };
 
+// v1 prioritization uses equal weights — a priority group is just the member
+// codes plus a "show N of M" limit (1..size-1). Build one from a code list.
+const priorityGroupFromCodes = (codes, limit) => ({
+  weights: codes.map((code) => ({ code })),
+  limit: Math.min(Math.max(limit ?? codes.length - 1, 1), codes.length - 1),
+});
+
+const writePriorities = (componentState, rule, priorities) => {
+  if (priorities.length === 0) {
+    componentState[rule] = undefined;
+    removeInstruction(componentState, "priority_groups");
+  } else {
+    changeInstruction(componentState, { code: "priority_groups", priorities });
+  }
+};
+
+// Mirrors updateRandomByRule, but writes the `priority_groups` instruction
+// ({ priorities: [{ weights:[{code}], limit }] }). Single-group rules
+// (questions/groups/options) own the whole instruction; rows/columns coexist
+// as separate groups in the same instruction (one per axis).
+export const updatePriorityByRule = (
+  componentState,
+  priorityRule,
+  initialSetup = false,
+) => {
+  if (
+    ["prioritise_questions", "prioritise_groups", "prioritise_options"].indexOf(
+      priorityRule,
+    ) > -1
+  ) {
+    const isGroups = priorityRule === "prioritise_groups";
+    const childCodes =
+      componentState.children
+        ?.filter((it) => {
+          const groupType = it.groupType?.toLowerCase();
+          // engine rejects welcome/end groups inside a priority group
+          if (groupType === "end" || (isGroups && groupType === "welcome")) {
+            return false;
+          }
+          // on initial setup, drop special answer types (mirror randomization)
+          return initialSetup
+            ? ["other", "none", "all"].indexOf(it.type?.toLowerCase()) === -1
+            : true;
+        })
+        ?.map((it) => it.code) || [];
+
+    // a valid priority group needs at least 2 items (limit must be 1..size-1)
+    if (childCodes.length < 2 || !componentState[priorityRule]) {
+      componentState[priorityRule] = undefined;
+      removeInstruction(componentState, "priority_groups");
+      return;
+    }
+
+    if (initialSetup) {
+      changeInstruction(componentState, {
+        code: "priority_groups",
+        priorities: [priorityGroupFromCodes(childCodes)],
+      });
+      return;
+    }
+
+    // prune existing group(s) to surviving child codes and re-clamp the limit
+    const instruction = instructionByCode(componentState, "priority_groups");
+    if (!instruction) {
+      componentState[priorityRule] = undefined;
+      return;
+    }
+    const priorities = (instruction.priorities || [])
+      .map((group) => {
+        const codes = (group.weights || [])
+          .map((w) => w.code)
+          .filter((code) => childCodes.includes(code));
+        return codes.length >= 2
+          ? priorityGroupFromCodes(codes, group.limit)
+          : undefined;
+      })
+      .filter((group) => group !== undefined);
+    writePriorities(componentState, priorityRule, priorities);
+  } else if (
+    priorityRule === "prioritise_rows" ||
+    priorityRule === "prioritise_columns"
+  ) {
+    const childType = priorityRule === "prioritise_rows" ? "row" : "column";
+    const childCodes =
+      componentState.children
+        ?.filter((c) => c.type === childType)
+        ?.map((it) => it.code) || [];
+    const instruction = instructionByCode(componentState, "priority_groups");
+    const priorities = instruction?.priorities || [];
+    // groups for the OTHER axis (no overlap with this axis's children) are kept
+    const otherGroups = priorities.filter(
+      (group) => !(group.weights || []).some((w) => childCodes.includes(w.code)),
+    );
+
+    if (childCodes.length < 2 || !componentState[priorityRule]) {
+      componentState[priorityRule] = undefined;
+      writePriorities(componentState, priorityRule, otherGroups);
+      return;
+    }
+
+    if (initialSetup) {
+      writePriorities(componentState, priorityRule, [
+        ...otherGroups,
+        priorityGroupFromCodes(childCodes),
+      ]);
+      return;
+    }
+
+    // prune this axis's existing group to surviving codes, keep the other axis
+    const axisGroup = priorities.find((group) =>
+      (group.weights || []).some((w) => childCodes.includes(w.code)),
+    );
+    const includedCodes = (axisGroup?.weights || [])
+      .map((w) => w.code)
+      .filter((code) => childCodes.includes(code));
+    if (includedCodes.length >= 2) {
+      writePriorities(componentState, priorityRule, [
+        ...otherGroups,
+        priorityGroupFromCodes(includedCodes, axisGroup.limit),
+      ]);
+    } else {
+      componentState[priorityRule] = undefined;
+      writePriorities(componentState, priorityRule, otherGroups);
+    }
+  }
+};
+
 const getQuestionType = (state, code) => {
   const match = code.match(/^Q[a-z0-9_]+/);
   const captured = match ? match[0] : null;
