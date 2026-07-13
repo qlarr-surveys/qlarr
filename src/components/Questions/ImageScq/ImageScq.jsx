@@ -39,9 +39,9 @@ function ImageScq(props) {
       style={{ '--qlarr-spacing': `${props.component.spacing}px` }}
     >
       {props.component.answers.map((option) => {
-        const backgroundImage = option.resources?.image
-          ? `url('${buildResourceUrl(option.resources?.image)}')`
-          : `url('/placeholder-image.jpg')`;
+        const imageSrc = option.resources?.image
+          ? buildResourceUrl(option.resources?.image)
+          : '/placeholder-image.jpg';
 
         const relevance = runValues[option.qualifiedCode]?.relevance ?? true;
         if (!relevance) return null;
@@ -57,11 +57,9 @@ function ImageScq(props) {
           >
             <Box
               className={`${styles.imageContainer} ${state.value === option.code ? styles.imageContainerSelected : ''}`}
-              style={{
-                paddingTop: `${100 / props.component.imageAspectRatio}%`,
-                backgroundImage: backgroundImage,
-              }}
+              style={{ paddingTop: `${100 / props.component.imageAspectRatio}%` }}
             >
+              <img className={styles.image} src={imageSrc} alt="" />
               <div className={styles.selection}>
                 <Radio
                   checked={state.value === option.code}

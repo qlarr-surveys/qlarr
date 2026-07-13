@@ -69,9 +69,9 @@ function ImageMcqItem(props) {
     dispatch(setDirty(props.option.qualifiedCode));
     dispatch(setDirty(props.parentCode));
   };
-  const backgroundImage = props.option.resources?.image
-    ? `url('${buildResourceUrl(props.option.resources?.image)}')`
-    : `url('/placeholder-image.jpg')`;
+  const imageSrc = props.option.resources?.image
+    ? buildResourceUrl(props.option.resources?.image)
+    : '/placeholder-image.jpg';
 
   return (
     <Box
@@ -83,11 +83,9 @@ function ImageMcqItem(props) {
       <Box
         className={`${styles.imageContainer} ${checked ? styles.imageContainerSelected : ''}`}
         onClick={handleChange}
-        style={{
-          paddingTop: 100 / props.aspectRatio + "%",
-          backgroundImage: backgroundImage,
-        }}
+        style={{ paddingTop: 100 / props.aspectRatio + "%" }}
       >
+        <img className={styles.image} src={imageSrc} alt="" />
         <div className={styles.selection}>
           <Checkbox
             onChange={handleChange}
