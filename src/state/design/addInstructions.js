@@ -1359,10 +1359,7 @@ const jsonToJs = (json, nested, getComponentType, getQuestionType) => {
     case "between":
     case "not_between":
       let type = getComponentType(capture(value[0]));
-      let leftOperand =
-        type == "date" || type == "date_time" || type == "time"
-          ? `QlarrScripts.sqlDateTimeToDate(${capture(value[0])}.value)`
-          : `${capture(value[0])}.value`;
+      let leftOperand = `${capture(value[0])}.value`;
       if (["==", "!=", "<", "<=", ">", ">="].includes(key)) {
         return `${leftOperand}${key}${capture(value[1], type)}`;
       } else if (key == "between") {
@@ -1455,18 +1452,25 @@ const wrapIfNested = (nested, text) => {
   return (nested ? "(" : "") + text + (nested ? ")" : "");
 };
 
+// Normalizes a logic-builder date/time value to the canonical full SQL string the
+// stored answer uses ("YYYY-MM-DD HH:MM:SS"). That format sorts lexicographically the
+// same as chronologically, so both sides are compared as plain strings.
+const captureSqlDateTime = (value, type) => {
+  const sqlDateTime =
+    type == "time"
+      ? `1970-01-01 ${value}` // "13:00:00" -> "1970-01-01 13:00:00"
+      : type == "date"
+        ? `${value} 00:00:00` // "2025-06-15" -> "2025-06-15 00:00:00"
+        : `${value}`; // date_time already "YYYY-MM-DD HH:mm:ss"
+  return `\"${sqlDateTime}\"`;
+};
+
 const capture = (value, type) => {
-  if (type == "time") {
-    return `QlarrScripts.sqlDateTimeToDate(\"1970-01-01 ${integerToTime(
-      value,
-    )}\")`;
-  } else if (
-    typeof value === "object" &&
-    Object.prototype.toString.call(value) === "[object Date]"
+  if (
+    typeof value === "string" &&
+    (type == "time" || type == "date" || type == "date_time")
   ) {
-    return type == "date_time"
-      ? `QlarrScripts.sqlDateTimeToDate(\"${toSqlDateTime(value)}\")`
-      : `QlarrScripts.sqlDateTimeToDate(\"${toSqlDateTimeIgnoreTime(value)}\")`;
+    return captureSqlDateTime(value, type);
   }
   if (typeof value === "object") {
     return value[Object.keys(value)[0]];
@@ -1475,42 +1479,6 @@ const capture = (value, type) => {
   } else {
     return value;
   }
-};
-
-const integerToTime = (time) => {
-  let hours = Math.floor(time / 3600);
-  let hoursString = hours >= 10 && hours <= 23 ? "" + hours : "0" + hours;
-  let minutes = (time % 3600) / 60;
-  let minutesString =
-    minutes >= 10 && minutes <= 59 ? "" + minutes : "0" + minutes;
-  return hoursString + ":" + minutesString + ":00";
-};
-
-const toSqlDateTime = (date) => {
-  return (
-    date.getFullYear() +
-    "-" +
-    ("00" + (date.getMonth() + 1)).slice(-2) +
-    "-" +
-    ("00" + date.getDate()).slice(-2) +
-    " " +
-    ("00" + date.getHours()).slice(-2) +
-    ":" +
-    ("00" + date.getMinutes()).slice(-2) +
-    ":" +
-    ("00" + date.getSeconds()).slice(-2)
-  );
-};
-
-const toSqlDateTimeIgnoreTime = (date) => {
-  return (
-    date.getFullYear() +
-    "-" +
-    ("00" + (date.getMonth() + 1)).slice(-2) +
-    "-" +
-    ("00" + date.getDate()).slice(-2) +
-    " 00:00:00"
-  );
 };
 
 export const instructionByCode = (component, code) =>

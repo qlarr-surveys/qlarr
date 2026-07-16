@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { TextField } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers';
+import { DatePicker, TimePicker, DateTimePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import { FIELD_TYPES, DATE_FORMATS, PICKER_POPPER_PROPS } from '../../config/constants';
 import { getCompactTextFieldProps } from '../../utils/inputProps';
@@ -102,6 +102,98 @@ export const RangeInput = React.memo(function RangeInput({ fieldType, value, onC
             }}
             inputFormat={DATE_FORMATS.DATE_DISPLAY}
             PopperProps={PICKER_POPPER_PROPS}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                {...toProps}
+                sx={{ ...toProps.sx, flex: 1, minWidth: 0 }}
+                error={inverted}
+              />
+            )}
+          />
+        </div>
+        {errorElement}
+      </div>
+    );
+  }
+
+  // Time range
+  if (fieldType === FIELD_TYPES.TIME) {
+    const fromProps = getCompactTextFieldProps(compact, t('logic_builder.from'));
+    const toProps = getCompactTextFieldProps(compact, t('logic_builder.to'));
+    return (
+      <div className={styles.rangeInputWrapper}>
+        <div className={styles.rangeInput}>
+          <TimePicker
+            label={compact ? undefined : t('logic_builder.from')}
+            value={min ? dayjs(`2000-01-01 ${min}`) : null}
+            onChange={(newValue) => {
+              handleMinChange(newValue ? newValue.format(DATE_FORMATS.TIME_VALUE) : '');
+            }}
+            inputFormat={DATE_FORMATS.TIME_DISPLAY}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                {...fromProps}
+                sx={{ ...fromProps.sx, flex: 1, minWidth: 0 }}
+                error={inverted}
+              />
+            )}
+          />
+          <span className={styles.rangeSeparator}>-</span>
+          <TimePicker
+            label={compact ? undefined : t('logic_builder.to')}
+            value={max ? dayjs(`2000-01-01 ${max}`) : null}
+            onChange={(newValue) => {
+              handleMaxChange(newValue ? newValue.format(DATE_FORMATS.TIME_VALUE) : '');
+            }}
+            inputFormat={DATE_FORMATS.TIME_DISPLAY}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                {...toProps}
+                sx={{ ...toProps.sx, flex: 1, minWidth: 0 }}
+                error={inverted}
+              />
+            )}
+          />
+        </div>
+        {errorElement}
+      </div>
+    );
+  }
+
+  // DateTime range
+  if (fieldType === FIELD_TYPES.DATETIME) {
+    const fromProps = getCompactTextFieldProps(compact, t('logic_builder.from'));
+    const toProps = getCompactTextFieldProps(compact, t('logic_builder.to'));
+    return (
+      <div className={styles.rangeInputWrapper}>
+        <div className={styles.rangeInput}>
+          <DateTimePicker
+            label={compact ? undefined : t('logic_builder.from')}
+            value={min ? dayjs(min) : null}
+            onChange={(newValue) => {
+              handleMinChange(newValue ? newValue.format(DATE_FORMATS.DATETIME_VALUE) : '');
+            }}
+            inputFormat={DATE_FORMATS.DATETIME_DISPLAY}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                {...fromProps}
+                sx={{ ...fromProps.sx, flex: 1, minWidth: 0 }}
+                error={inverted}
+              />
+            )}
+          />
+          <span className={styles.rangeSeparator}>-</span>
+          <DateTimePicker
+            label={compact ? undefined : t('logic_builder.to')}
+            value={max ? dayjs(max) : null}
+            onChange={(newValue) => {
+              handleMaxChange(newValue ? newValue.format(DATE_FORMATS.DATETIME_VALUE) : '');
+            }}
+            inputFormat={DATE_FORMATS.DATETIME_DISPLAY}
             renderInput={(params) => (
               <TextField
                 {...params}
