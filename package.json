@@ -68,19 +68,13 @@
     "tippy.js": "^6.3.7",
     "yup": "^1.4.0"
   },
-  "workspaces": [
-    "backend"
-  ],
   "scripts": {
     "start": "vite",
     "build": "vite build",
     "build-staging": "vite build --mode staging",
     "build-android": "vite build --mode android",
     "build-android-debuggable": "vite build --mode android-debuggable",
-    "serve": "vite preview",
-    "backend:dev": "npm run start:dev --workspace backend",
-    "backend:build": "npm run build --workspace backend",
-    "backend:start": "npm run start:prod --workspace backend"
+    "serve": "vite preview"
   },
   "eslintConfig": {
     "extends": "react-app"
