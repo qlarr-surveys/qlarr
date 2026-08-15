@@ -1,0 +1,58 @@
+# Local dev infrastructure for the Qlarr monorepo.
+# Copied from backend-enterprise/docker-compose.yml — INFRA services only.
+# The app services (Node backend, ai/, react) are intentionally omitted for
+# now: the original committed live AWS/JWT/Mailgun secrets, and this repo is
+# public. They'll be added with env-based config (a .env, not hardcoded keys)
+# as the backend is containerized.
+#
+#   docker compose up -d postgres-cloud     # just the DB
+#   docker compose up -d                    # DB + pgAdmin + MailHog + MinIO
+#
+# MinIO (S3-compatible store for survey files): API on :9000, console on :9001
+# (login minioadmin/minioadmin). The `minio-createbucket` init container makes
+# the `qlarr-surveys` bucket on startup, matching backend/.env.
+
+networks:
+  docker-local_net:
+    driver: bridge
+
+services:
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+    networks:
+      - docker-local_net
+
+  postgres-cloud:
+    container_name: 'postgres-cloud'
+    image: postgres:15.1
+    networks:
+      - docker-local_net
+    environment:
+      - POSTGRES_USER=qlarr
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=qlarrdb
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    volumes:
+      - ./docker-cloud-data/postgres:/var/lib/postgresql/data
+
+  postgres_admin:
+    container_name: postgres_admin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: qlarr@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: password
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - ./docker-cloud-data/postgres-admin-data:/var/lib/postgresql/data
+      - ./docker-cloud-data/postgres-admin-bkp:/var/lib/postgresql/bkp
+    ports:
+      - "5050:80"
+    networks:
+      - docker-local_net
+    restart: unless-stopped

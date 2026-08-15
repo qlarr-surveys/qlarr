@@ -1,0 +1,120 @@
+name: build & push backend to public ecr
+
+# Builds the NestJS backend (backend/Dockerfile) as a multi-arch image and pushes
+# it to ECR Public (public.ecr.aws/u2n3x2r5/backend). Reuses the shared
+# .github/actions/setup-docker-and-ecr-login composite action (OIDC → us-east-1
+# → ECR Public login).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-build-push-ecr.yaml"
+  workflow_dispatch: {}
+
+env:
+  REPO_NAME: "u2n3x2r5/backend"
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  build:
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      full_image_tag: ${{ steps.populate-env.outputs.full_image_tag }}
+      full_repo_name: ${{ steps.populate-env.outputs.full_repo_name }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ./.github/actions/setup-docker-and-ecr-login
+        id: docker-setup
+        with:
+          role-to-assume: arn:aws:iam::148174262075:role/terraform
+
+      - name: populate ecr image env vars
+        id: populate-env
+        run: |
+          echo 'full_image_tag=${{
+              steps.docker-setup.outputs.registry
+            }}/${{ env.REPO_NAME }}:${{ env.IMAGE_TAG }}' >> $GITHUB_OUTPUT
+          echo 'full_repo_name=${{
+              steps.docker-setup.outputs.registry
+            }}/${{ env.REPO_NAME }}' >> $GITHUB_OUTPUT
+
+      - name: build and push amd64 image
+        id: build-amd64
+        uses: docker/build-push-action@v6
+        with:
+          # The backend now lives in a subfolder of this repo.
+          context: backend
+          file: backend/Dockerfile
+          push: true
+          platforms: amd64
+          tags: ${{ steps.populate-env.outputs.full_repo_name }}
+          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: build and push arm64 image
+        id: build-arm64
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          file: backend/Dockerfile
+          push: true
+          platforms: arm64
+          tags: ${{ steps.populate-env.outputs.full_repo_name }}
+          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: export digest
+        run: |
+          mkdir -p ${{ runner.temp }}/digests
+
+          amd64_digest="${{ steps.build-amd64.outputs.digest }}"
+          touch "${{ runner.temp }}/digests/${amd64_digest#sha256:}"
+
+          arm64_digest="${{ steps.build-arm64.outputs.digest }}"
+          touch "${{ runner.temp }}/digests/${arm64_digest#sha256:}"
+
+      - name: upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    needs:
+      - build
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digests
+          merge-multiple: true
+
+      - uses: ./.github/actions/setup-docker-and-ecr-login
+        with:
+          role-to-assume: arn:aws:iam::148174262075:role/terraform
+
+      - name: create manifest list and push
+        working-directory: ${{ runner.temp }}/digests
+        run: |
+          docker buildx imagetools create -t ${{ needs.build.outputs.full_image_tag }} \
+            $(printf '${{ needs.build.outputs.full_repo_name }}@sha256:%s ' *)
+
+      - name: inspect image
+        run: |
+          docker buildx imagetools inspect ${{ needs.build.outputs.full_image_tag }}
