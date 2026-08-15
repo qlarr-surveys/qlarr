@@ -8,6 +8,9 @@ jobs:
       id-token: write
       contents: read
       packages: write
+    defaults:
+      run:
+        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
 
@@ -16,6 +19,7 @@ jobs:
         with:
           node-version: 18
           cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
           registry-url: https://npm.pkg.github.com
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}

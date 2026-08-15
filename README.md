@@ -53,7 +53,7 @@ See the [deployment guide](https://qlarr-surveys.github.io/docs/guides/deploymen
 ```bash
 # Clone the repository
 git clone https://github.com/qlarr-surveys/frontend.git
-cd frontend
+cd frontend/frontend   # repo root, then the frontend app subfolder
 
 # Install dependencies
 npm install

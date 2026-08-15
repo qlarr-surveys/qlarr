@@ -40,6 +40,8 @@ jobs:
         id: build-amd64
         uses: docker/build-push-action@v6
         with:
+          context: frontend
+          file: frontend/Dockerfile
           push: true
           platforms: amd64
           tags: ${{ steps.populate-env.outputs.full_repo_name }}
@@ -50,6 +52,8 @@ jobs:
         id: build-arm64
         uses: docker/build-push-action@v6
         with:
+          context: frontend
+          file: frontend/Dockerfile
           push: true
           platforms: arm64
           tags: ${{ steps.populate-env.outputs.full_repo_name }}
