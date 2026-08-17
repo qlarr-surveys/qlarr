@@ -1,0 +1,1146 @@
+{
+  "groups": [
+    {
+      "questions": [
+        {
+          "code": "Q303fhu",
+          "type": "text",
+          "maxChars": 30,
+          "showHint": true,
+          "instructionList": [
+            {
+              "code": "value",
+              "text": "",
+              "returnType": "string",
+              "isActive": false
+            },
+            {
+              "code": "label",
+              "text": "",
+              "returnType": "string",
+              "isActive": false
+            },
+            {
+              "code": "relevance",
+              "text": "true",
+              "returnType": "boolean",
+              "isActive": false
+            },
+            {
+              "code": "validity",
+              "text": "true",
+              "returnType": "boolean",
+              "isActive": false
+            },
+            {
+              "code": "in_current_navigation",
+              "text": "true",
+              "returnType": "boolean",
+              "isActive": false
+            },
+            {
+              "code": "priority",
+              "text": "0",
+              "returnType": "int",
+              "isActive": false
+            },
+            {
+              "code": "order",
+              "text": "0",
+              "returnType": "int",
+              "isActive": false
+            },
+            {
+              "code": "format_kabaka",
+              "text": "Qthis.value.length > 0",
+              "returnType": "string",
+              "isActive": true
+            }
+          ],
+          "content": {
+            "en": {
+              "label": "<p></p>"
+            }
+          },
+          "qualifiedCode": "Q303fhu"
+        },
+        {
+          "code": "Q699dtx",
+          "type": "file_upload",
+          "instructionList": [
+            {
+              "code": "value",
+              "text": "",
+              "returnType": "file",
+              "isActive": false
+            },
+            {
+              "code": "label",
+              "text": "",
+              "returnType": "string",
+              "isActive": false
+            },
+            {
+              "code": "relevance",
+              "text": "true",
+              "returnType": "boolean",
+              "isActive": false
+            },
+            {
+              "code": "validity",
+              "text": "true",
+              "returnType": "boolean",
+              "isActive": false
+            },
+            {
+              "code": "in_current_navigation",
+              "text": "true",
+              "returnType": "boolean",
+              "isActive": false
+            },
+            {
+              "code": "priority",
+              "text": "1",
+              "returnType": "int",
+              "isActive": false
+            },
+            {
+              "code": "order",
+              "text": "1",
+              "returnType": "int",
+              "isActive": false
+            }
+          ],
+          "content": {
+            "en": {
+              "label": "<p></p>"
+            }
+          },
+          "qualifiedCode": "Q699dtx"
+        },
+        {
+          "code": "Q527aze",
+          "type": "paragraph",
+          "showHint": true,
+          "instructionList": [
+            {
+              "code": "value",
+              "text": "",
+              "returnType": "string",
+              "isActive": false
+            },
+            {
+              "code": "label",
+              "text": "",
+              "returnType": "string",
+              "isActive": false
+            },
+            {
+              "code": "relevance",
+              "text": "true",
+              "returnType": "boolean",
+              "isActive": false
+            },
+            {
+              "code": "validity",
+              "text": "true",
+              "returnType": "boolean",
+              "isActive": false
+            },
+            {
+              "code": "in_current_navigation",
+              "text": "true",
+              "returnType": "boolean",
+              "isActive": false
+            },
+            {
+              "code": "priority",
+              "text": "2",
+              "returnType": "int",
+              "isActive": false
+            },
+            {
+              "code": "order",
+              "text": "2",
+              "returnType": "int",
+              "isActive": false
+            }
+          ],
+          "content": {
+            "en": {
+              "label": "<p></p>"
+            }
+          },
+          "qualifiedCode": "Q527aze"
+        },
+        {
+          "code": "Q016zau",
+          "type": "paragraph",
+          "showHint": true,
+          "instructionList": [
+            {
+              "code": "value",
+              "text": "",
+              "returnType": "string",
+              "isActive": false
+            },
+            {
+              "code": "label",
+              "text": "",
+              "returnType": "string",
+              "isActive": false
+            },
+            {
+              "code": "relevance",
+              "text": "true",
+              "returnType": "boolean",
+              "isActive": false
+            },
+            {
+              "code": "validity",
+              "text": "true",
+              "returnType": "boolean",
+              "isActive": false
+            },
+            {
+              "code": "in_current_navigation",
+              "text": "true",
+              "returnType": "boolean",
+              "isActive": false
+            },
+            {
+              "code": "priority",
+              "text": "3",
+              "returnType": "int",
+              "isActive": false
+            },
+            {
+              "code": "order",
+              "text": "3",
+              "returnType": "int",
+              "isActive": false
+            }
+          ],
+          "content": {
+            "en": {
+              "label": "<p></p>"
+            }
+          },
+          "qualifiedCode": "Q016zau"
+        },
+        {
+          "code": "Q829iqb",
+          "type": "email",
+          "maxChars": 30,
+          "showHint": true,
+          "validation": {
+            "validation_pattern_email": {
+              "isActive": true
+            }
+          },
+          "instructionList": [
+            {
+              "code": "value",
+              "text": "",
+              "returnType": "string",
+              "isActive": false
+            },
+            {
+              "code": "validation_pattern_email",
+              "text": "QlarrScripts.isNotVoid(Q829iqb.value) &&  !/^\\w+@[a-zA-Z_]+?\\.[a-zA-Z]{2,3}$/.test(Q829iqb.value)",
+              "returnType": "boolean",
+              "isActive": true
+            },
+            {
+              "code": "label",
+              "text": "",
+              "returnType": "string",
+              "isActive": false
+            },
+            {
+              "code": "relevance",
+              "text": "true",
+              "returnType": "boolean",
+              "isActive": false
+            },
+            {
+              "code": "validity",
+              "text": "!Q829iqb.validation_pattern_email",
+              "returnType": "boolean",
+              "isActive": true
+            },
+            {
+              "code": "in_current_navigation",
+              "text": "true",
+              "returnType": "boolean",
+              "isActive": false
+            },
+            {
+              "code": "priority",
+              "text": "4",
+              "returnType": "int",
+              "isActive": false
+            },
+            {
+              "code": "order",
+              "text": "4",
+              "returnType": "int",
+              "isActive": false
+            }
+          ],
+          "content": {
+            "en": {
+              "label": "<p></p>"
+            }
+          },
+          "qualifiedCode": "Q829iqb"
+        },
+        {
+          "code": "Q880htp",
+          "type": "number",
+          "maxChars": 30,
+          "showHint": true,
+          "instructionList": [
+            {
+              "code": "value",
+              "text": "",
+              "returnType": "double",
+              "isActive": false
+            },
+            {
+              "code": "label",
+              "text": "",
+              "returnType": "string",
+              "isActive": false
+            },
+            {
+              "code": "relevance",
+              "text": "true",
+              "returnType": "boolean",
+              "isActive": false
+            },
+            {
+              "code": "validity",
+              "text": "true",
+              "returnType": "boolean",
+              "isActive": false
+            },
+            {
+              "code": "in_current_navigation",
+              "text": "true",
+              "returnType": "boolean",
+              "isActive": false
+            },
+            {
+              "code": "priority",
+              "text": "5",
+              "returnType": "int",
+              "isActive": false
+            },
+            {
+              "code": "order",
+              "text": "5",
+              "returnType": "int",
+              "isActive": false
+            }
+          ],
+          "content": {
+            "en": {
+              "label": "<p></p>"
+            }
+          },
+          "qualifiedCode": "Q880htp"
+        },
+        {
+          "answers": [
+            {
+              "code": "Ac1",
+              "type": "column",
+              "instructionList": [
+                {
+                  "code": "label",
+                  "text": "",
+                  "returnType": "string",
+                  "isActive": false
+                },
+                {
+                  "code": "relevance",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "validity",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "in_current_navigation",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "priority",
+                  "text": "0",
+                  "returnType": "int",
+                  "isActive": false
+                },
+                {
+                  "code": "order",
+                  "text": "0",
+                  "returnType": "int",
+                  "isActive": false
+                }
+              ],
+              "qualifiedCode": "Q510begAc1"
+            },
+            {
+              "code": "Ac2",
+              "type": "column",
+              "instructionList": [
+                {
+                  "code": "label",
+                  "text": "",
+                  "returnType": "string",
+                  "isActive": false
+                },
+                {
+                  "code": "relevance",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "validity",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "in_current_navigation",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "priority",
+                  "text": "1",
+                  "returnType": "int",
+                  "isActive": false
+                },
+                {
+                  "code": "order",
+                  "text": "1",
+                  "returnType": "int",
+                  "isActive": false
+                }
+              ],
+              "qualifiedCode": "Q510begAc2"
+            },
+            {
+              "code": "Ac3",
+              "type": "column",
+              "instructionList": [
+                {
+                  "code": "label",
+                  "text": "",
+                  "returnType": "string",
+                  "isActive": false
+                },
+                {
+                  "code": "relevance",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "validity",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "in_current_navigation",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "priority",
+                  "text": "2",
+                  "returnType": "int",
+                  "isActive": false
+                },
+                {
+                  "code": "order",
+                  "text": "2",
+                  "returnType": "int",
+                  "isActive": false
+                }
+              ],
+              "qualifiedCode": "Q510begAc3"
+            },
+            {
+              "code": "A1",
+              "type": "row",
+              "instructionList": [
+                {
+                  "code": "value",
+                  "text": "",
+                  "returnType": {
+                    "type": "enum",
+                    "values": [
+                      "Ac1",
+                      "Ac2",
+                      "Ac3"
+                    ]
+                  },
+                  "isActive": false
+                },
+                {
+                  "code": "masked_value",
+                  "text": "Q510begA1.value ? QlarrScripts.safeAccess({\"Ac1\": QlarrScripts.stripTags(Q510begAc1.label),\"Ac2\": QlarrScripts.stripTags(Q510begAc2.label),\"Ac3\": QlarrScripts.stripTags(Q510begAc3.label)},Q510begA1.value) : ''",
+                  "returnType": "string",
+                  "isActive": true
+                },
+                {
+                  "code": "label",
+                  "text": "",
+                  "returnType": "string",
+                  "isActive": false
+                },
+                {
+                  "code": "relevance",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "validity",
+                  "text": "!Q510begA1.validation_enum",
+                  "returnType": "boolean",
+                  "isActive": true
+                },
+                {
+                  "code": "in_current_navigation",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "priority",
+                  "text": "3",
+                  "returnType": "int",
+                  "isActive": false
+                },
+                {
+                  "code": "order",
+                  "text": "3",
+                  "returnType": "int",
+                  "isActive": false
+                },
+                {
+                  "code": "validation_enum",
+                  "text": "QlarrScripts.isNotVoid(Q510begA1.value) && [\"Ac1\",\"Ac2\",\"Ac3\"].indexOf(Q510begA1.value) == -1",
+                  "returnType": "boolean",
+                  "isActive": true
+                }
+              ],
+              "qualifiedCode": "Q510begA1"
+            },
+            {
+              "code": "A2",
+              "type": "row",
+              "instructionList": [
+                {
+                  "code": "value",
+                  "text": "",
+                  "returnType": {
+                    "type": "enum",
+                    "values": [
+                      "Ac1",
+                      "Ac2",
+                      "Ac3"
+                    ]
+                  },
+                  "isActive": false
+                },
+                {
+                  "code": "masked_value",
+                  "text": "Q510begA2.value ? QlarrScripts.safeAccess({\"Ac1\": QlarrScripts.stripTags(Q510begAc1.label),\"Ac2\": QlarrScripts.stripTags(Q510begAc2.label),\"Ac3\": QlarrScripts.stripTags(Q510begAc3.label)},Q510begA2.value) : ''",
+                  "returnType": "string",
+                  "isActive": true
+                },
+                {
+                  "code": "label",
+                  "text": "",
+                  "returnType": "string",
+                  "isActive": false
+                },
+                {
+                  "code": "relevance",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "validity",
+                  "text": "!Q510begA2.validation_enum",
+                  "returnType": "boolean",
+                  "isActive": true
+                },
+                {
+                  "code": "in_current_navigation",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "priority",
+                  "text": "4",
+                  "returnType": "int",
+                  "isActive": false
+                },
+                {
+                  "code": "order",
+                  "text": "4",
+                  "returnType": "int",
+                  "isActive": false
+                },
+                {
+                  "code": "validation_enum",
+                  "text": "QlarrScripts.isNotVoid(Q510begA2.value) && [\"Ac1\",\"Ac2\",\"Ac3\"].indexOf(Q510begA2.value) == -1",
+                  "returnType": "boolean",
+                  "isActive": true
+                }
+              ],
+              "qualifiedCode": "Q510begA2"
+            },
+            {
+              "code": "A3",
+              "type": "row",
+              "instructionList": [
+                {
+                  "code": "value",
+                  "text": "",
+                  "returnType": {
+                    "type": "enum",
+                    "values": [
+                      "Ac1",
+                      "Ac2",
+                      "Ac3"
+                    ]
+                  },
+                  "isActive": false
+                },
+                {
+                  "code": "masked_value",
+                  "text": "Q510begA3.value ? QlarrScripts.safeAccess({\"Ac1\": QlarrScripts.stripTags(Q510begAc1.label),\"Ac2\": QlarrScripts.stripTags(Q510begAc2.label),\"Ac3\": QlarrScripts.stripTags(Q510begAc3.label)},Q510begA3.value) : ''",
+                  "returnType": "string",
+                  "isActive": true
+                },
+                {
+                  "code": "label",
+                  "text": "",
+                  "returnType": "string",
+                  "isActive": false
+                },
+                {
+                  "code": "relevance",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "validity",
+                  "text": "!Q510begA3.validation_enum",
+                  "returnType": "boolean",
+                  "isActive": true
+                },
+                {
+                  "code": "in_current_navigation",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "priority",
+                  "text": "5",
+                  "returnType": "int",
+                  "isActive": false
+                },
+                {
+                  "code": "order",
+                  "text": "5",
+                  "returnType": "int",
+                  "isActive": false
+                },
+                {
+                  "code": "validation_enum",
+                  "text": "QlarrScripts.isNotVoid(Q510begA3.value) && [\"Ac1\",\"Ac2\",\"Ac3\"].indexOf(Q510begA3.value) == -1",
+                  "returnType": "boolean",
+                  "isActive": true
+                }
+              ],
+              "qualifiedCode": "Q510begA3"
+            }
+          ],
+          "code": "Q510beg",
+          "type": "scq_array",
+          "instructionList": [
+            {
+              "code": "label",
+              "text": "",
+              "returnType": "string",
+              "isActive": false
+            },
+            {
+              "code": "relevance",
+              "text": "true",
+              "returnType": "boolean",
+              "isActive": false
+            },
+            {
+              "code": "validity",
+              "text": "(!Q510begA1.relevance || Q510begA1.validity) && (!Q510begA2.relevance || Q510begA2.validity) && (!Q510begA3.relevance || Q510begA3.validity)",
+              "returnType": "boolean",
+              "isActive": true
+            },
+            {
+              "code": "in_current_navigation",
+              "text": "true",
+              "returnType": "boolean",
+              "isActive": false
+            },
+            {
+              "code": "priority",
+              "text": "6",
+              "returnType": "int",
+              "isActive": false
+            },
+            {
+              "code": "order",
+              "text": "6",
+              "returnType": "int",
+              "isActive": false
+            }
+          ],
+          "content": {
+            "en": {
+              "label": "<p></p>"
+            }
+          },
+          "qualifiedCode": "Q510beg"
+        },
+        {
+          "answers": [
+            {
+              "code": "A1",
+              "instructionList": [
+                {
+                  "code": "label",
+                  "text": "",
+                  "returnType": "string",
+                  "isActive": false
+                },
+                {
+                  "code": "relevance",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "validity",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "in_current_navigation",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "priority",
+                  "text": "0",
+                  "returnType": "int",
+                  "isActive": false
+                },
+                {
+                  "code": "order",
+                  "text": "0",
+                  "returnType": "int",
+                  "isActive": false
+                }
+              ],
+              "qualifiedCode": "Q293sqiA1"
+            },
+            {
+              "code": "A2",
+              "instructionList": [
+                {
+                  "code": "label",
+                  "text": "",
+                  "returnType": "string",
+                  "isActive": false
+                },
+                {
+                  "code": "relevance",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "validity",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "in_current_navigation",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "priority",
+                  "text": "1",
+                  "returnType": "int",
+                  "isActive": false
+                },
+                {
+                  "code": "order",
+                  "text": "1",
+                  "returnType": "int",
+                  "isActive": false
+                }
+              ],
+              "qualifiedCode": "Q293sqiA2"
+            },
+            {
+              "code": "A3",
+              "instructionList": [
+                {
+                  "code": "label",
+                  "text": "",
+                  "returnType": "string",
+                  "isActive": false
+                },
+                {
+                  "code": "relevance",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "validity",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "in_current_navigation",
+                  "text": "true",
+                  "returnType": "boolean",
+                  "isActive": false
+                },
+                {
+                  "code": "priority",
+                  "text": "2",
+                  "returnType": "int",
+                  "isActive": false
+                },
+                {
+                  "code": "order",
+                  "text": "2",
+                  "returnType": "int",
+                  "isActive": false
+                }
+              ],
+              "qualifiedCode": "Q293sqiA3"
+            }
+          ],
+          "code": "Q293sqi",
+          "type": "mcq",
+          "instructionList": [
+            {
+              "code": "value",
+              "text": "",
+              "returnType": {
+                "type": "list",
+                "values": [
+                  "A1",
+                  "A2",
+                  "A3"
+                ]
+              },
+              "isActive": false
+            },
+            {
+              "code": "masked_value",
+              "text": "QlarrScripts.listStrings((Q293sqi.value || []).map(function(el){return QlarrScripts.safeAccess({\"A1\": QlarrScripts.stripTags(Q293sqiA1.label),\"A2\": QlarrScripts.stripTags(Q293sqiA2.label),\"A3\": QlarrScripts.stripTags(Q293sqiA3.label)},el)}), Survey.lang)",
+              "returnType": "string",
+              "isActive": true
+            },
+            {
+              "code": "label",
+              "text": "",
+              "returnType": "string",
+              "isActive": false
+            },
+            {
+              "code": "relevance",
+              "text": "true",
+              "returnType": "boolean",
+              "isActive": false
+            },
+            {
+              "code": "validity",
+              "text": "!Q293sqi.validation_list",
+              "returnType": "boolean",
+              "isActive": true
+            },
+            {
+              "code": "in_current_navigation",
+              "text": "true",
+              "returnType": "boolean",
+              "isActive": false
+            },
+            {
+              "code": "priority",
+              "text": "7",
+              "returnType": "int",
+              "isActive": false
+            },
+            {
+              "code": "validation_list",
+              "text": "QlarrScripts.isNotVoid(Q293sqi.value) && !Q293sqi.value.every(element => [\"A1\",\"A2\",\"A3\"].includes(element))",
+              "returnType": "boolean",
+              "isActive": true
+            },
+            {
+              "code": "order",
+              "text": "7",
+              "returnType": "int",
+              "isActive": false
+            }
+          ],
+          "content": {
+            "en": {
+              "label": "<p>sdf</p>"
+            }
+          },
+          "qualifiedCode": "Q293sqi"
+        }
+      ],
+      "code": "G1",
+      "content": {
+        "en": {
+          "label": "New Survey"
+        }
+      },
+      "groupType": "GROUP",
+      "instructionList": [
+        {
+          "code": "label",
+          "text": "",
+          "returnType": "string",
+          "isActive": false
+        },
+        {
+          "code": "relevance",
+          "text": "true",
+          "returnType": "boolean",
+          "isActive": false
+        },
+        {
+          "code": "validity",
+          "text": "(!Q303fhu.in_current_navigation || !Q303fhu.relevance || Q303fhu.validity) && (!Q699dtx.in_current_navigation || !Q699dtx.relevance || Q699dtx.validity) && (!Q527aze.in_current_navigation || !Q527aze.relevance || Q527aze.validity) && (!Q016zau.in_current_navigation || !Q016zau.relevance || Q016zau.validity) && (!Q829iqb.in_current_navigation || !Q829iqb.relevance || Q829iqb.validity) && (!Q880htp.in_current_navigation || !Q880htp.relevance || Q880htp.validity) && (!Q510beg.in_current_navigation || !Q510beg.relevance || Q510beg.validity) && (!Q293sqi.in_current_navigation || !Q293sqi.relevance || Q293sqi.validity)",
+          "returnType": "boolean",
+          "isActive": true
+        },
+        {
+          "code": "in_current_navigation",
+          "text": "true",
+          "returnType": "boolean",
+          "isActive": false
+        },
+        {
+          "code": "priority",
+          "text": "0",
+          "returnType": "int",
+          "isActive": false
+        },
+        {
+          "code": "order",
+          "text": "0",
+          "returnType": "int",
+          "isActive": false
+        }
+      ],
+      "qualifiedCode": "G1"
+    },
+    {
+      "code": "G2",
+      "content": {
+        "en": {
+          "label": "Thank you for taking the time to complete this survey."
+        }
+      },
+      "groupType": "END",
+      "instructionList": [
+        {
+          "code": "label",
+          "text": "",
+          "returnType": "string",
+          "isActive": false
+        },
+        {
+          "code": "relevance",
+          "text": "true",
+          "returnType": "boolean",
+          "isActive": false
+        },
+        {
+          "code": "validity",
+          "text": "true",
+          "returnType": "boolean",
+          "isActive": false
+        },
+        {
+          "code": "in_current_navigation",
+          "text": "true",
+          "returnType": "boolean",
+          "isActive": false
+        },
+        {
+          "code": "priority",
+          "text": "1",
+          "returnType": "int",
+          "isActive": false
+        },
+        {
+          "code": "order",
+          "text": "1",
+          "returnType": "int",
+          "isActive": false
+        }
+      ],
+      "qualifiedCode": "G2"
+    }
+  ],
+  "code": "Survey",
+  "defaultLang": {
+    "code": "en",
+    "name": "English"
+  },
+  "navigationMode": "group_by_group",
+  "allowPrevious": true,
+  "skipInvalid": true,
+  "allowIncomplete": true,
+  "allowJump": true,
+  "instructionList": [
+    {
+      "code": "lang",
+      "text": "en",
+      "returnType": "string",
+      "isActive": false
+    },
+    {
+      "code": "mode",
+      "text": "mixed",
+      "returnType": "string",
+      "isActive": false
+    },
+    {
+      "code": "disqualified",
+      "text": "false",
+      "returnType": "boolean",
+      "isActive": false
+    },
+    {
+      "code": "relevance_map",
+      "text": "{G1: G1.relevance,Q303fhu: Q303fhu.relevance,Q699dtx: Q699dtx.relevance,Q527aze: Q527aze.relevance,Q016zau: Q016zau.relevance,Q829iqb: Q829iqb.relevance,Q880htp: Q880htp.relevance,Q510beg: Q510beg.relevance,Q293sqi: Q293sqi.relevance,G2: G2.relevance}",
+      "returnType": "map",
+      "isActive": true
+    },
+    {
+      "code": "validity_map",
+      "text": "{G1: G1.validity,Q303fhu: Q303fhu.validity,Q699dtx: Q699dtx.validity,Q527aze: Q527aze.validity,Q016zau: Q016zau.validity,Q829iqb: Q829iqb.validity,Q880htp: Q880htp.validity,Q510beg: Q510beg.validity,Q293sqi: Q293sqi.validity,G2: G2.validity}",
+      "returnType": "map",
+      "isActive": true
+    },
+    {
+      "code": "before_navigation",
+      "text": "[]",
+      "returnType": {
+        "type": "list",
+        "values": []
+      },
+      "isActive": false
+    },
+    {
+      "code": "after_navigation",
+      "text": "[]",
+      "returnType": {
+        "type": "list",
+        "values": []
+      },
+      "isActive": false
+    },
+    {
+      "code": "has_previous",
+      "text": "(function(){if(!Survey.before_navigation||!Survey.relevance_map){return false;}for(var i=0;i<Survey.before_navigation.length;i++){if(Survey.relevance_map[Survey.before_navigation[i]]){return true}}return false;})()",
+      "returnType": "boolean",
+      "isActive": true
+    },
+    {
+      "code": "has_next",
+      "text": "(function(){if(!Survey.after_navigation||!Survey.relevance_map){return false;}for(var i=0;i<Survey.after_navigation.length;i++){if(Survey.relevance_map[Survey.after_navigation[i]]){return true}}return false;})()",
+      "returnType": "boolean",
+      "isActive": true
+    },
+    {
+      "code": "validity",
+      "text": "(!G1.in_current_navigation || !G1.relevance || G1.validity) && (!G2.in_current_navigation || !G2.relevance || G2.validity)",
+      "returnType": "boolean",
+      "isActive": true
+    }
+  ],
+  "theme": {
+    "textStyles": {
+      "group": {
+        "font": "Rubik",
+        "size": 32,
+        "color": "#091133"
+      },
+      "question": {
+        "font": "Rubik",
+        "size": 18,
+        "color": "#091133"
+      },
+      "text": {
+        "font": "Rubik",
+        "size": 14,
+        "color": "#091133"
+      }
+    },
+    "primaryColor": "#2d3cb1",
+    "bgColor": "#dfe2ef",
+    "paperColor": "#ffffff"
+  },
+  "additionalLang": [
+    {
+      "code": "de",
+      "name": "Deutsch"
+    },
+    {
+      "code": "ar",
+      "name": "العربية"
+    }
+  ],
+  "qualifiedCode": "Survey"
+}

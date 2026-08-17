@@ -1,0 +1,51 @@
+name: backend tests
+
+# Runs the NestJS backend's unit, integration and e2e suites. The integration/
+# e2e suites use Testcontainers to spin up a real Postgres — ubuntu-latest ships
+# with a running Docker daemon, so no extra services/setup are needed.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-tests.yaml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-tests.yaml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: backend-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: install (reproducible)
+        run: npm ci
+
+      - name: build (type-check)
+        run: npm run build
+
+      - name: unit tests
+        run: npm run test:unit
+
+      - name: integration tests (Testcontainers → Postgres)
+        run: npm run test:int
+
+      - name: e2e tests
+        run: npm run test:e2e

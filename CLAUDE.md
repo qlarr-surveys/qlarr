@@ -20,7 +20,18 @@ Surveys are defined as JSON (UI-agnostic components) with JavaScript instruction
 - **Rich text editor**: TipTap
 - **Drag & drop**: react-dnd
 
-## Project Structure
+## Repo Layout
+The repo holds two independent apps plus shared orchestration:
+```
+frontend/   # this React app (source, build config, Dockerfile) — details below
+backend/    # NestJS survey backend (its own package.json + lockfile)
+deploy/     # docker-compose + Caddy for deploying both
+.github/    # CI workflows
+```
+Each app installs independently (its own `package-lock.json`); there is no root
+`package.json` / npm workspace. Run frontend commands from `frontend/`.
+
+## Frontend Structure (`frontend/`)
 ```
 src/
   components/    # UI components organized by feature (auth, common, design, manage, run, Questions)
@@ -44,6 +55,7 @@ src/
 `~/` maps to `src/` (configured in `jsconfig.json`)
 
 ## Development
+- Run all frontend commands from the `frontend/` directory
 - **Package manager**: npm
 - **Node version**: 16+
 - Copy `.env.example` to `.env` and set `VITE_BE_URL` to point to the backend API
