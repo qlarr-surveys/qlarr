@@ -1,8 +1,20 @@
-# Qlarr Frontend
+# Qlarr
 
 [Discord 💬](https://discord.gg/9mbRh6SpGj) | [Demo 🖥️](https://console.qlarr.com/) | [Docs 📄](https://qlarr-surveys.github.io/docs/) | [Deploy Locally in 30 Sec! 🚀](https://qlarr-surveys.github.io/docs/guides/deployment/local)
 
-The frontend application for **[Qlarr](https://github.com/qlarr-surveys)** — an open-source framework for creating and running customizable, scientific, and offline-first surveys as code on all platforms. Surveys are defined using JSON to represent UI-agnostic survey components and [JavaScript instructions](https://github.com/qlarr-surveys/survey-engine-script) to represent complex survey logic.
+**[Qlarr](https://github.com/qlarr-surveys)** is an open-source framework for creating and running customizable, scientific, and offline-first surveys as code on all platforms. Surveys are defined using JSON to represent UI-agnostic survey components and [JavaScript instructions](https://github.com/qlarr-surveys/survey-engine-script) to represent complex survey logic.
+
+This repository is a monorepo containing the web frontend, the API backend, and deployment orchestration.
+
+## Repository Layout
+
+| Directory | What it is | Docs |
+|-----------|------------|------|
+| [`frontend/`](frontend) | React web app — WYSIWYG survey editor, survey renderer, and admin GUI | [frontend/README.md](frontend/README.md) |
+| [`backend/`](backend) | NestJS API server — survey CRUD, run/navigation, responses, exports, offline sync, auth | [backend/README.md](backend/README.md) |
+| [`deploy/`](deploy) | Docker Compose + Caddy to run frontend and backend together | — |
+
+Each app installs independently (its own `package-lock.json`) — there is no root `package.json` or npm workspace. Run frontend commands from `frontend/` and backend commands from `backend/`.
 
 ## Key Features
 
@@ -17,77 +29,27 @@ The frontend application for **[Qlarr](https://github.com/qlarr-surveys)** — a
 - 🎨 **Conditional Formatting** — Dynamic styling based on responses
 - ⏱️📊 **Time Limits & Scoring** (WIP) — Perfect for quizzes and timed assessments
 
-## What It Does
-
-- **WYSIWYG Survey Editor** — Create and edit surveys using the Qlarr [Survey Engine](https://github.com/qlarr-surveys/survey-engine-kmp) DSL
-- **Survey Renderer** — Render and run surveys powered by the Survey Engine (used in both Web and [Android](https://github.com/qlarr-surveys/android) apps)
-- **Admin GUI** — Survey management, user management, login, cloning, and other administrative functionalities exposed by the [backend](https://github.com/qlarr-surveys/backend)
-
-## Tech Stack
-
-- React 18
-- Vite 5
-- MUI v5
-- Redux Toolkit
-- React Router v6
-- i18next (en, ar, de, es, pt, fr, nl)
-
 ## Quick Start
 
-### Using Docker (Recommended)
-
-The easiest way to run Qlarr is using Docker Compose from the backend repo, which deploys both frontend and backend:
+The easiest way to run the full stack locally is with Docker Compose:
 
 ```bash
-git clone https://github.com/qlarr-surveys/backend.git
-cd backend
+git clone https://github.com/qlarr-surveys/frontend.git qlarr
+cd qlarr/deploy
 docker-compose up
 ```
 
-See the [deployment guide](https://qlarr-surveys.github.io/docs/guides/deployment/local) for more details.
-
-### Local Development
-
-**Prerequisites:** Node.js 16+, npm
-
-```bash
-# Clone the repository
-git clone https://github.com/qlarr-surveys/frontend.git
-cd frontend/frontend   # repo root, then the frontend app subfolder
-
-# Install dependencies
-npm install
-
-# Configure environment
-# Edit public/config.js to set BE_URL to point to the backend API
-
-# Run the development server
-npm start
-```
-
-The application will be available at `http://localhost:3000`.
-
-### Build
-
-```bash
-# Production build
-npm run build
-
-# Staging build (ES2018, sourcemaps)
-npm run build-staging
-
-# Android build (ES2015, minified)
-npm run build-android
-```
+See the [deployment guide](https://qlarr-surveys.github.io/docs/guides/deployment/local) for details. To run either app on its own for development, follow the setup in [`frontend/README.md`](frontend/README.md) or [`backend/README.md`](backend/README.md).
 
 ## Architecture
 
-This frontend is one component of the Qlarr ecosystem:
+The Qlarr ecosystem is made up of:
 
 1. **[Survey Engine (KMP)](https://github.com/qlarr-surveys/survey-engine-kmp)** — Core UI-agnostic engine that parses survey definitions, generates state machines, and manages survey execution
 2. **[Survey Engine Script](https://github.com/qlarr-surveys/survey-engine-script)** — JavaScript validation library for dynamic survey instructions
-3. **[Backend](https://github.com/qlarr-surveys/backend)** — Spring Boot application exposing REST APIs for survey CRUD, offline sync, auth, and administration
-4. **Frontend** (this repo) — React web application for survey editing, rendering, and management
+3. **Backend** ([`backend/`](backend)) — NestJS application exposing REST APIs for survey CRUD, offline sync, auth, and administration
+4. **Frontend** ([`frontend/`](frontend)) — React web application for survey editing, rendering, and management
+5. **[Android](https://github.com/qlarr-surveys/android)** — Native app that reuses the same Survey Engine to render and run surveys offline
 
 ## Contributing
 
@@ -96,6 +58,8 @@ We welcome contributors! The easiest way to get involved:
 1. Join our [Discord server](https://discord.gg/9mbRh6SpGj) and talk to us directly
 2. For new features: start a Discussion / Idea
 3. For bugs: raise an issue with clear steps to reproduce — export the survey with the issue and include it in your bug report
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for more.
 
 ## License
 
