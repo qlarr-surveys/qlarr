@@ -1,0 +1,113 @@
+# Qlarr local stack — the full app on your machine, no domain or TLS needed.
+# Uses the SAME published images as production (frontend + NestJS backend), so
+# it's representative; secrets are hardcoded throwaway dev values.
+#
+#   cd deploy
+#   docker compose -f docker-compose.local.yml up -d
+#
+#   Frontend    http://localhost:3000
+#   Backend API http://localhost:8080
+#   Mailhog UI  http://localhost:8025   (all outbound mail is captured here)
+#
+# Default login: admin@admin.admin / admin (seeded on first run).
+
+networks:
+  docker-local_net:
+    driver: bridge
+
+volumes:
+  db: {}
+  survey-files: {}
+
+services:
+  caddy:
+    container_name: 'qlarr-caddy'
+    image: public.ecr.aws/qlarr/frontend:d4aaf542b5eebe10620b2918c34358d43fb7fc16
+    environment:
+      VITE_PROTOCOL: "http"
+      VITE_FRONT_END_HOST: "localhost:3000"
+      VITE_BE_URL: "http://localhost:8080"
+    depends_on:
+      - backend-app
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./Caddyfile.local:/etc/caddy/Caddyfile:ro
+    networks:
+      - docker-local_net
+
+  mailhog:
+    container_name: 'qlarr-mailhog'
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - docker-local_net
+
+  # The backend runs as the non-root `node` user (uid 1000); a fresh named volume
+  # mounts root-owned, so the boot-time storage write-probe would fail. Chown the
+  # survey-files volume before the backend starts.
+  storage-init:
+    container_name: 'qlarr-storage-init'
+    image: busybox:1.36
+    command: sh -c "chown -R 1000:1000 /var/qlarr/resources"
+    volumes:
+      - survey-files:/var/qlarr/resources
+
+  backend-app:
+    container_name: 'qlarr-backend'
+    image: public.ecr.aws/qlarr/backend:a62057db23f395c816983b6329a8de7c1d004816
+    ports:
+      - "8080:8080"
+    networks:
+      - docker-local_net
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      storage-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    volumes:
+      - survey-files:/var/qlarr/resources
+    environment:
+      # --- database ---
+      DB_HOST: "postgres-db"
+      DB_PORT: "5432"
+      DB_NAME: "qlarr"
+      DB_USER: "qlarr"
+      DB_PASSWORD: "qlarr"
+      DB_SSL: "false"
+      # --- auth & app (throwaway dev secret; JWT_SECRET must be >=16 chars) ---
+      JWT_SECRET: "bG9jYWwtZGV2LXNlY3JldC1jaGFuZ2UtbWUtbmVlZHMtdG8tYmUtbG9uZy1lbm91Z2g="
+      FRONTEND_URL: "http://localhost:3000"
+      SEED_ADMIN_PASSWORD: "admin"
+      # --- local file storage (absolute path on the mounted volume) ---
+      FILE_SYSTEM_ROOT_FOLDER: "/var/qlarr/resources"
+      # --- mail -> Mailhog (no auth/TLS) ---
+      MAIL_HOST: "mailhog"
+      MAIL_PORT: "1025"
+      MAIL_USERNAME: "noreply@qlarr.local"
+      MAIL_PASSWORD: ""
+      MAIL_NAME: "Qlarr"
+      MAIL_SMTP_SSL: "false"
+      MAIL_SMTP_STARTTLS: "false"
+
+  postgres-db:
+    container_name: 'postgres-db'
+    image: postgres:15.1
+    networks:
+      - docker-local_net
+    environment:
+      POSTGRES_USER: "qlarr"
+      POSTGRES_PASSWORD: "qlarr"
+      POSTGRES_DB: "qlarr"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    restart: unless-stopped
+    volumes:
+      - db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qlarr"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
