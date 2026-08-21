@@ -1,4 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { WrongCredentialsException } from './user.exceptions';
 import * as bcrypt from 'bcryptjs';
 import { CurrentUserPrincipal } from '../../auth/jwt.types';
 import { LoginIssuer } from '../../auth/login-issuer';
@@ -29,7 +30,7 @@ export class AccessService {
       email.trim().toLowerCase(),
     );
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      throw new UnauthorizedException('Wrong credentials');
+      throw new WrongCredentialsException();
     }
 
     return this.issuer.issue(this.db.manager, user);
