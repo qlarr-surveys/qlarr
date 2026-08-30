@@ -5,12 +5,14 @@ import { Box, Tab, Tabs } from "@mui/material";
 import styles from "./ResponsesSurvey.module.css";
 import ResponsesList from "./ResponsesList";
 import AnalyticsSurvey from "~/pages/manage/AnalyticsSurvey";
+import CrosstabsSurvey from "~/pages/manage/CrosstabsSurvey";
 
 function ResponsesSurvey() {
   const { t } = useTranslation(NAMESPACES.MANAGE);
   const [activeTab, setActiveTab] = useState("responses");
   const hasVisitedResponses = useRef(activeTab === "responses");
   const hasVisitedAnalytics = useRef(activeTab === "analytics");
+  const hasVisitedCrosstabs = useRef(activeTab === "crosstabs");
 
   const handleTabChange = (_, newValue) => {
     setActiveTab(newValue);
@@ -19,6 +21,9 @@ function ResponsesSurvey() {
     }
     if (newValue === "analytics") {
       hasVisitedAnalytics.current = true;
+    }
+    if (newValue === "crosstabs") {
+      hasVisitedCrosstabs.current = true;
     }
   };
 
@@ -36,6 +41,10 @@ function ResponsesSurvey() {
         <Tab
           label={t("responses.tab_analytics", "Analytics")}
           value="analytics"
+        />
+        <Tab
+          label={t("responses.tab_crosstabs", "Crosstabs")}
+          value="crosstabs"
         />
       </Tabs>
 
@@ -63,6 +72,19 @@ function ResponsesSurvey() {
           }}
         >
           <AnalyticsSurvey />
+        </Box>
+      )}
+
+      {hasVisitedCrosstabs.current && (
+        <Box
+          sx={{
+            display: activeTab === "crosstabs" ? "block" : "none",
+            flex: 1,
+            overflow: "auto",
+            pt: 2,
+          }}
+        >
+          <CrosstabsSurvey />
         </Box>
       )}
     </Box>
