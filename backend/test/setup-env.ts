@@ -21,3 +21,9 @@ process.env.THROTTLE_DISABLED ??= 'true';
 // committed `.env` with ENGINE_WORKERS=true doesn't force the pool on. `??=` so
 // a suite can still override.
 process.env.ENGINE_WORKERS ??= 'false';
+// Empty MAIL_HOST → EmailService logs instead of dialing SMTP, so the
+// forgot-password/reset flows return their real status without a live Mailhog.
+// Set here (before ConfigModule's dotenv load, which won't override an
+// already-set var) so a committed `.env` pointing at localhost:1025 doesn't
+// make these flows 500 in CI. `??=` so a suite can still override.
+process.env.MAIL_HOST ??= '';
