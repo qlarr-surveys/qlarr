@@ -2,7 +2,7 @@
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .ruleHeader {
@@ -18,5 +18,5 @@
 }
 
 .ruleBody {
-  margin-top: 8px;
+  margin-top: 0px;
 }
