@@ -1,0 +1,22 @@
+.ruleCard {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.ruleHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ruleTitle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ruleBody {
+  margin-top: 8px;
+}

@@ -1,15 +1,16 @@
 import React from "react";
-import Switch from "@mui/material/Switch";
-import { TextField, Typography } from "@mui/material";
+import { IconButton, TextField, Typography } from "@mui/material";
+import { EditOutlined, RestartAltOutlined } from "@mui/icons-material";
 import styles from "./ValidationSetupMessage.module.css";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import { changeContent, changeValidationValue } from "~/state/design/designState";
+import {
+  changeContent,
+  changeValidationValue,
+} from "~/state/design/designState";
 
 function ValidationSetupMessage({ validationRule, code, rule, t }) {
   const dispatch = useDispatch();
-
-  const isCustomErrorActive = validationRule.isCustomErrorActive || false;
 
   const languagesList = useSelector((state) => {
     return state.designState.langInfo.languagesList;
@@ -19,87 +20,120 @@ function ValidationSetupMessage({ validationRule, code, rule, t }) {
     return state.designState[code]?.content;
   });
 
-  const checkedCustomError = (checked) => {
-    dispatch(
-      changeValidationValue({
-        code,
-        rule: rule,
-        key: "isCustomErrorActive",
-        value: checked,
-      })
-    );
+  const customFor = (lang) => componentContent?.[lang]?.[rule] || "";
+
+  // A language is "editing" when it already has a saved custom message, or the
+  // user explicitly clicked edit. Kept in local state so clearing the field
+  // while typing doesn't collapse the input back to the standard message.
+  const [editingLangs, setEditingLangs] = React.useState(
+    () =>
+      new Set(
+        languagesList.filter((l) => customFor(l.code)).map((l) => l.code),
+      ),
+  );
+
+  // Only the field the user just opened should grab focus (not pre-filled ones
+  // rendered on mount).
+  const [focusLang, setFocusLang] = React.useState(null);
+
+  const startEditing = (lang) => {
+    setEditingLangs((prev) => new Set(prev).add(lang));
+    setFocusLang(lang);
+    // Ensure the run side honours the custom message (legacy records may have
+    // isCustomErrorActive explicitly set to false).
+    if (validationRule.isCustomErrorActive === false) {
+      dispatch(
+        changeValidationValue({
+          code,
+          rule,
+          key: "isCustomErrorActive",
+          value: true,
+        }),
+      );
+    }
+  };
+
+  const resetToStandard = (lang) => {
+    setEditingLangs((prev) => {
+      const next = new Set(prev);
+      next.delete(lang);
+      return next;
+    });
+    dispatch(changeContent({ code, key: rule, lang, value: "" }));
   };
 
   const onContentUpdate = (lang, value) => {
-    dispatch(
-      changeContent({ code, key: rule, lang, value })
-    );
+    dispatch(changeContent({ code, key: rule, lang, value }));
   };
 
-  const label = { inputProps: { "aria-label": "Switch validation" } };
+  // Leaving the custom field empty falls back to the standard message.
+  const onFieldBlur = (lang) => {
+    if (!customFor(lang)) {
+      setEditingLangs((prev) => {
+        const next = new Set(prev);
+        next.delete(lang);
+        return next;
+      });
+    }
+  };
+
   return (
-    <>
-      <Typography fontWeight={700}>{t("standard_error")}</Typography>
-      <div className={styles.errorWrapper}>
-        <div className={styles.errorLabelWrapper}>
-          {languagesList.map((l) => (
-            <div
-              className={`${styles.errorItem} ${styles.uppercase}`}
-              key={l.code}
-            >
-              {l.code}:
-            </div>
-          ))}
-        </div>
-        <div>
-          {languagesList.map((l) => (
-            <div className={styles.errorItem} key={l.code}>
-              {t(rule, { ns: "run", lng: l.code, ...validationRule })}
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className={styles.title}>
-        <Typography fontWeight={700} className={styles.mt10}>
-          {t("custom_error")}
-        </Typography>
-        <Switch
-          {...label}
-          checked={isCustomErrorActive}
-          onChange={(event) => checkedCustomError(event.target.checked)}
-        />
-      </div>
-      {isCustomErrorActive ? (
-        <div className={styles.errorWrapper}>
-          <div className={styles.errorLabelWrapper}>
-            {languagesList.map((l) => (
-              <div
-                className={`${styles.errorItem} ${styles.uppercase}`}
-                key={l.code}
-              >
-                {l.code}:
-              </div>
-            ))}
-          </div>
-          <div className={styles.errorItemContainer}>
-            {languagesList.map((l) => (
-              <div className={styles.errorItem} key={l.code}>
+    <div>
+      <Typography fontWeight={700} className={styles.heading}>
+        {t("error_message")}
+      </Typography>
+      {languagesList.map((l) => {
+        const isEditing = editingLangs.has(l.code);
+        return (
+          <div className={styles.messageRow} key={l.code}>
+            <div className={styles.rowLabel}>{l.code}:</div>
+            <div className={styles.rowContent}>
+              {isEditing ? (
                 <TextField
+                  fullWidth
                   size="small"
                   variant="standard"
-                  value={componentContent?.[l.code]?.[rule] || ""}
+                  placeholder={t(rule, {
+                    ns: "run",
+                    lng: l.code,
+                    ...validationRule,
+                  })}
+                  autoFocus={focusLang === l.code}
+                  value={customFor(l.code)}
                   onChange={(event) =>
                     onContentUpdate(l.code, event.target.value)
                   }
+                  onBlur={() => onFieldBlur(l.code)}
                 />
-              </div>
-            ))}
+              ) : (
+                <span className={styles.standardText}>
+                  {t(rule, { ns: "run", lng: l.code, ...validationRule })}
+                </span>
+              )}
+            </div>
+            {isEditing ? (
+              <IconButton
+                size="small"
+                aria-label={t("reset_to_standard_error")}
+                title={t("reset_to_standard_error")}
+                onClick={() => resetToStandard(l.code)}
+              >
+                <RestartAltOutlined fontSize="small" />
+              </IconButton>
+            ) : (
+              <IconButton
+                size="small"
+                aria-label={t("edit_error_message")}
+                title={t("edit_error_message")}
+                onClick={() => startEditing(l.code)}
+              >
+                <EditOutlined fontSize="small" />
+              </IconButton>
+            )}
           </div>
-        </div>
-      ) : (
-        ""
-      )}
-    </>
+        );
+      })}
+    </div>
   );
 }
 

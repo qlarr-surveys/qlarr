@@ -1,60 +1,26 @@
-.boxContainer {
-  border: 1px solid;
-  padding: 15px;
-
-  h4 {
-    margin: 0;
-  }
-
-  .mt10 {
-    margin-top: 10px;
-  }
-
-  .uppercase {
-    text-transform: uppercase;
-  }
+.heading {
+  margin-bottom: 6px;
 }
 
-.title {
+.messageRow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  p {
-    margin: 0;
-    margin-right: 30px;
-  }
+  gap: 8px;
+  min-height: 36px;
 }
 
-.titleContent {
-  display: flex;
-  align-items: center;
+.rowLabel {
+  text-transform: uppercase;
+  min-width: 28px;
+  color: rgba(0, 0, 0, 0.6);
+  flex-shrink: 0;
 }
 
-.standardError {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-
-  p {
-    margin: 0;
-    margin-right: 30px;
-  }
+.rowContent {
+  flex: 1;
+  min-width: 0;
 }
 
-.errorWrapper {
-  display: flex;
-}
-
-.errorLabelWrapper {
-  margin-right: 10px;
-}
-
-.errorItem {
-  display: flex;
-  align-items: center;
-  margin-bottom: 5px;
-  min-height: 30px;
-}
-.errorItemContainer {
-  width: 100%;
+.standardText {
+  color: rgba(0, 0, 0, 0.6);
 }
