@@ -1,12 +1,12 @@
 .heading {
-  margin-bottom: 6px;
+  margin-top: 6px;
 }
 
 .messageRow {
+  font-size: 14px;
   display: flex;
   align-items: center;
   gap: 8px;
-  min-height: 36px;
 }
 
 .rowLabel {
