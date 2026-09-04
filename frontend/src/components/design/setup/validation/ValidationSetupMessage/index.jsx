@@ -4,6 +4,8 @@ import { EditOutlined, RestartAltOutlined } from "@mui/icons-material";
 import styles from "./ValidationSetupMessage.module.css";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
+import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import {
   changeContent,
   changeValidationValue,
@@ -11,10 +13,27 @@ import {
 
 function ValidationSetupMessage({ validationRule, code, rule, t }) {
   const dispatch = useDispatch();
+  const { i18n } = useTranslation();
 
   const languagesList = useSelector((state) => {
     return state.designState.langInfo.languagesList;
   });
+
+  // The standard message is shown for every survey language via
+  // t(rule, { lng, ns: "run" }). With load: "currentOnly" the run bundle is
+  // only fetched for the current design language, so other languages would
+  // fall back to English. Ensure the run namespace is loaded for each survey
+  // language, then force a re-render so the freshly fetched messages replace
+  // the English fallback without waiting for an unrelated UI update.
+  const [, forceRender] = React.useReducer((x) => x + 1, 0);
+  React.useEffect(() => {
+    const missing = languagesList
+      .map((l) => l.code)
+      .filter((lng) => !i18n.hasResourceBundle(lng, NAMESPACES.RUN));
+    if (missing.length) {
+      i18n.loadLanguages(missing).then(forceRender);
+    }
+  }, [i18n, languagesList]);
 
   const componentContent = useSelector((state) => {
     return state.designState[code]?.content;
