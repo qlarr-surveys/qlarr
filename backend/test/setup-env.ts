@@ -15,3 +15,9 @@ process.env.JWT_SECRET ??= 'dGVzdC1zZWNyZXQtMTYtYnl0ZXMtbWluaW11bQ==';
 // re-enables it (sets THROTTLE_DISABLED=false before booting). `??=` so a suite
 // can override.
 process.env.THROTTLE_DISABLED ??= 'true';
+// Engine workers off in tests — ts-jest runs from `src`, where only the `.ts`
+// worker exists, so Piscina can't resolve `engine.worker.js`. Set here (before
+// ConfigModule's dotenv load, which won't override an already-set var) so a
+// committed `.env` with ENGINE_WORKERS=true doesn't force the pool on. `??=` so
+// a suite can still override.
+process.env.ENGINE_WORKERS ??= 'false';
