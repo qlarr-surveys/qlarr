@@ -1,5 +1,5 @@
 import { createSlice, current } from "@reduxjs/toolkit";
-import { firstIndexInArray, isEquivalent, nextId } from "~/utils/design/utils";
+import { firstIndexInArray, isEquivalent, nextId, buildCodeIndex } from "~/utils/design/utils";
 import { createGroup } from "~/components/design/NewComponentsPanel";
 
 import { lastIndexInArray } from "~/utils/design/utils";
@@ -1384,31 +1384,6 @@ const buildIndex = (state) => {
       groupObj.children.forEach((question) => {
         if (question?.code) {
           retrunRestult.push(question.code);
-        }
-      });
-    }
-  });
-  return retrunRestult;
-};
-
-const buildCodeIndex = (state) => {
-  let retrunRestult = {};
-  let groupCount = 0;
-  let questionCount = 0;
-  state.Survey.children?.forEach((group) => {
-    groupCount++;
-    retrunRestult[group.code] = "P" + groupCount;
-    let groupObj = state[group.code];
-    if (groupObj.children) {
-      groupObj.children.forEach((question) => {
-        questionCount++;
-        retrunRestult[question.code] = "Q" + questionCount;
-        let questionObj = state[question.code];
-        if (questionObj.children) {
-          questionObj.children.forEach((answer) => {
-            retrunRestult[answer.qualifiedCode] =
-              "Q" + questionCount + answer.code;
-          });
         }
       });
     }
