@@ -1346,6 +1346,20 @@ const reorderAnswersByType = (state, payload) => {
   component.children = reorder(component.children, fromIndex, toIndex);
 };
 
+const ARRAY_ANSWER_TYPE_ORDER = { column: 0, row: 1 };
+
+// Array question children are read as a flat, ordered list by the survey
+// engine, so "row" answers referencing a "column" answer's `.label` that
+// comes later in that list trip the engine's ForwardDependency check. A
+// stable sort keeps each type's relative order (drag-and-drop reordering
+// within a type still works) while guaranteeing columns always come first.
+const stableSortByAnswerType = (children) =>
+  [...children].sort(
+    (a, b) =>
+      (ARRAY_ANSWER_TYPE_ORDER[a.type] ?? 0) -
+      (ARRAY_ANSWER_TYPE_ORDER[b.type] ?? 0),
+  );
+
 const insertAnswer = (state, answer, parentCode, index) => {
   const component = state[parentCode];
   if (component) {
@@ -1366,6 +1380,14 @@ const insertAnswer = (state, answer, parentCode, index) => {
             (child) => child.type == answer.type || !child.type,
           );
     component.children.splice(insertIndex + 1, 0, answer);
+    if (CONVERTIBLE_ARRAY_TYPES.includes(component.type)) {
+      // Columns must precede rows in the persisted order: each row's
+      // auto-generated masked_value instruction references every column's
+      // `.label`, and the engine flags that as a ForwardDependency (silently
+      // dropping the instruction) when a column sits after the row in the
+      // component tree.
+      component.children = stableSortByAnswerType(component.children);
+    }
     component.designErrors = questionDesignError(component);
     cleanupValidation(state, parentCode);
     addMaskedValuesInstructions(parentCode, component, state);
