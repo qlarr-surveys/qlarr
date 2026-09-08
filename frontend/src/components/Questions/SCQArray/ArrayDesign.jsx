@@ -1,6 +1,7 @@
 import styles from "./SCQArrayDesign.module.css";
 
 import {
+  alpha,
   Box,
   Button,
   Checkbox,
@@ -17,13 +18,16 @@ import { useSelector } from "react-redux";
 import React, { useRef, useEffect } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import BuildIcon from "@mui/icons-material/Build";
 import {
   addNewAnswer,
   addNewAnswers,
   onDrag,
   onNewLine,
   removeAnswer,
+  setup,
 } from "~/state/design/designState";
+import { setupOptions } from "~/constants/design";
 import { useDispatch } from "react-redux";
 import { useDrag, useDrop } from "react-dnd";
 import { rtlLanguage } from "~/utils/common";
@@ -93,6 +97,12 @@ function ArrayDesign(props) {
                   />
                 );
               })}
+              {inDesign(props.designMode) && (
+                <TableCell
+                  className={styles.removeColumnHeader}
+                  key="setup"
+                ></TableCell>
+              )}
               {inDesign(props.designMode) && (
                 <TableCell
                   className={styles.removeColumnHeader}
@@ -170,11 +180,18 @@ function ArrayRowDesign({
   parentQualifiedCode,
 }) {
   const dispatch = useDispatch();
+  const theme = useTheme();
   const { guard, modal } = useReleaseGuard();
   const ref = useRef();
   const inputRef = useRef();
 
   const onMainLang = langInfo.lang === langInfo.mainLang;
+
+  const isInSetup = useSelector((state) => {
+    return state.designState.setup?.code == item.qualifiedCode;
+  });
+
+  const contrastColor = alpha(theme.textStyles.question.color, 0.2);
 
   const content = useSelector((state) => {
     return state.designState[item.qualifiedCode].content?.[langInfo.lang]?.[
@@ -260,6 +277,7 @@ function ArrayRowDesign({
     <TableRow
       data-code={item.code}
       className={isDragging ? styles.dragging : ''}
+      sx={{ backgroundColor: isInSetup ? contrastColor : "inherit" }}
       ref={ref}
       key={item.code}
       data-handler-id={handlerId}
@@ -307,6 +325,23 @@ function ArrayRowDesign({
           </TableCell>
         );
       })}
+      {inDesign(designMode) && (
+        <TableCell
+          onClick={(e) => {
+            e.stopPropagation();
+            dispatch(
+              setup({
+                code: item.qualifiedCode,
+                rules: setupOptions("options"),
+              })
+            );
+          }}
+          key="setup"
+          className={styles.setupCellDesign}
+        >
+          <BuildIcon color="action" />
+        </TableCell>
+      )}
       {inDesign(designMode) && (
         <TableCell
           onClick={(e) => {
