@@ -117,7 +117,7 @@ const ValidationInput = ({
     <TextField
       error={isInError}
       value={value}
-      variant="outlined"
+      variant="standard"
       helperText={
         isInError ? (
           <Trans

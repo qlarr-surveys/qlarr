@@ -1,9 +1,11 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
   HttpCode,
   Param,
+  Post,
   Query,
   Res,
 } from '@nestjs/common';
@@ -12,6 +14,12 @@ import { Role } from '../../auth/role.enum';
 import { Roles } from '../../auth/roles.decorator';
 import { AnalyticsDto } from './analytics.dto';
 import { AnalyticsService, DEFAULT_MAX_RESPONSES } from './analytics.service';
+import {
+  CrosstabCatalogueDto,
+  CrosstabRequestDto,
+  CrosstabResultDto,
+} from './crosstab.dto';
+import { CrosstabService } from './crosstab.service';
 import { responseStatusFrom, ResponsesSummaryDto } from './response.dto';
 import {
   exportContentType,
@@ -38,6 +46,7 @@ export class ResponseController {
   constructor(
     private readonly responses: ResponseService,
     private readonly analytics: AnalyticsService,
+    private readonly crosstab: CrosstabService,
   ) {}
 
   @Get(':surveyId/response/analytics')
@@ -50,6 +59,23 @@ export class ResponseController {
       surveyId,
       toInt(maxResponses) ?? DEFAULT_MAX_RESPONSES,
     );
+  }
+
+  @Get(':surveyId/response/crosstab-catalogue')
+  @Roles(Role.SUPER_ADMIN, Role.SURVEY_ADMIN, Role.ANALYST)
+  getCrosstabCatalogue(
+    @Param('surveyId') surveyId: string,
+  ): Promise<CrosstabCatalogueDto> {
+    return this.crosstab.getCatalogue(surveyId);
+  }
+
+  @Post(':surveyId/response/crosstab')
+  @Roles(Role.SUPER_ADMIN, Role.SURVEY_ADMIN, Role.ANALYST)
+  getCrosstab(
+    @Param('surveyId') surveyId: string,
+    @Body() config: CrosstabRequestDto,
+  ): Promise<CrosstabResultDto> {
+    return this.crosstab.tabulate(surveyId, config);
   }
 
   @Get(':surveyId/response/summary')

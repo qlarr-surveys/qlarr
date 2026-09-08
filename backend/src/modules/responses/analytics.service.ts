@@ -22,25 +22,25 @@ const CHOICE_TYPES = new Set([
   'ICON_SCQ', 'ICON_MCQ', 'IMAGE_SCQ', 'IMAGE_MCQ', 'NPS',
 ]);
 const MULTIPLE_TEXT = 'MULTIPLE_TEXT';
-const MCQ_ARRAY = 'MCQ_ARRAY';
-const MATRIX_TYPES = new Set(['SCQ_ARRAY', MCQ_ARRAY, 'SCQ_ICON_ARRAY', 'MCQ_ICON_ARRAY']);
+export const MCQ_ARRAY = 'MCQ_ARRAY';
+export const MATRIX_TYPES = new Set(['SCQ_ARRAY', MCQ_ARRAY, 'SCQ_ICON_ARRAY', 'MCQ_ICON_ARRAY']);
 const RANKING_TYPES = new Set(['RANKING', 'IMAGE_RANKING']);
 const ICON_IMAGE_CHOICE_TYPES = new Set(['ICON_SCQ', 'ICON_MCQ', 'IMAGE_SCQ', 'IMAGE_MCQ']);
-const SINGLE_CHOICE_TYPES = new Set(['SCQ', 'AUTOCOMPLETE', 'IMAGE_SCQ', 'ICON_SCQ']);
-const MULTI_CHOICE_TYPES = new Set(['MCQ', 'IMAGE_MCQ', 'ICON_MCQ']);
+export const SINGLE_CHOICE_TYPES = new Set(['SCQ', 'AUTOCOMPLETE', 'IMAGE_SCQ', 'ICON_SCQ']);
+export const MULTI_CHOICE_TYPES = new Set(['MCQ', 'IMAGE_MCQ', 'ICON_MCQ']);
 const FILE_UPLOAD_TYPES = new Set(['SIGNATURE', 'PHOTO_CAPTURE', 'VIDEO_CAPTURE']);
 const AUTOCOMPLETE_TYPE = 'AUTOCOMPLETE';
-const NPS_TYPE = 'NPS';
+export const NPS_TYPE = 'NPS';
 const NUMBER_TYPE = 'NUMBER';
-const ANSWER_ROW_TYPE = 'ROW';
-const ANSWER_COL_TYPE = 'COLUMN';
+export const ANSWER_ROW_TYPE = 'ROW';
+export const ANSWER_COL_TYPE = 'COLUMN';
 const CHILD_KEYS = ['children', 'groups', 'questions', 'answers'];
 
 const round2 = (v: number): number => Math.round(v * 100) / 100;
-const toValueKey = (f: ResponseField): string =>
+export const toValueKey = (f: ResponseField): string =>
   `${f.componentCode}.${String(f.columnName).toLowerCase()}`;
 
-interface AnalyticsContext {
+export interface AnalyticsContext {
   labels: Record<string, string>;
   schemaMap: Record<string, ResponseField>;
   componentIndexList: Array<{ code: string; children?: string[] }>;
@@ -87,49 +87,17 @@ export class AnalyticsService {
     return { totalResponses: completed + incomplete, incompleteResponses: incomplete, questions };
   }
 
-  private async buildContext(
+  private buildContext(
     surveyId: string,
     maxResponses: number,
   ): Promise<AnalyticsContext> {
-    const processed = await this.design.getProcessedSurvey(surveyId, false);
-    const survey = processed.output.survey;
-    const lang =
-      (survey.defaultLang as { code?: string } | undefined)?.code ?? 'en';
-
-    const rawLabels = this.engine.labels(survey, lang);
-    const labels: Record<string, string> = {};
-    for (const [code, value] of Object.entries(rawLabels)) {
-      if (value !== '') labels[code] = stripTags(value); // filter non-empty, then strip
-    }
-
-    const schemaMap: Record<string, ResponseField> = {};
-    for (const f of processed.output.schema) {
-      if (String(f.columnName) === 'VALUE') schemaMap[f.componentCode] = f;
-    }
-
-    const { questionTypes, answerTypes, resources } = extractQuestionMetadata(
-      survey,
+    return buildAnalyticsContext(
+      this.design,
       this.engine,
-    );
-
-    const rows: Array<{ values: string }> = await this.db.manager.query(
-      `SELECT CAST("values" AS TEXT) AS values FROM responses
-       WHERE survey_id = $1 AND submit_date IS NOT NULL AND preview = false
-       ORDER BY survey_response_index ASC LIMIT $2`,
-      [surveyId, maxResponses],
-    );
-    const responses = rows.map((r) => JSON.parse(r.values) as Record<string, unknown>);
-
-    return {
-      labels,
-      schemaMap,
-      componentIndexList: processed.output.componentIndexList,
-      questionTypes,
-      answerTypes,
-      resources,
+      this.db,
       surveyId,
-      responses,
-    };
+      maxResponses,
+    );
   }
 
   private buildAnalyticsQuestion(
@@ -230,6 +198,66 @@ export class AnalyticsService {
   }
 }
 
+// --- shared context building (reused by CrosstabService) ---
+
+/**
+ * Load the processed design + (optionally) the completed responses for a survey
+ * into the shape both AnalyticsService and CrosstabService consume. Pass
+ * `loadResponses = false` to skip the response query when only the design
+ * metadata (labels, schema, component index, types) is needed.
+ */
+export async function buildAnalyticsContext(
+  design: DesignService,
+  engine: EngineService,
+  db: DbContext,
+  surveyId: string,
+  maxResponses: number,
+  loadResponses = true,
+): Promise<AnalyticsContext> {
+  const processed = await design.getProcessedSurvey(surveyId, false);
+  const survey = processed.output.survey;
+  const lang =
+    (survey.defaultLang as { code?: string } | undefined)?.code ?? 'en';
+
+  const rawLabels = engine.labels(survey, lang);
+  const labels: Record<string, string> = {};
+  for (const [code, value] of Object.entries(rawLabels)) {
+    if (value !== '') labels[code] = stripTags(value); // filter non-empty, then strip
+  }
+
+  const schemaMap: Record<string, ResponseField> = {};
+  for (const f of processed.output.schema) {
+    if (String(f.columnName) === 'VALUE') schemaMap[f.componentCode] = f;
+  }
+
+  const { questionTypes, answerTypes, resources } = extractQuestionMetadata(
+    survey,
+    engine,
+  );
+
+  let responses: Array<Record<string, unknown>> = [];
+  if (loadResponses) {
+    const rows: Array<{ values: string }> = await db.manager.query(
+      `SELECT CAST("values" AS TEXT) AS values FROM responses
+       WHERE survey_id = $1 AND submit_date IS NOT NULL AND preview = false
+       ORDER BY survey_response_index ASC LIMIT $2`,
+      [surveyId, maxResponses],
+    );
+    responses = rows.map((r) => JSON.parse(r.values) as Record<string, unknown>);
+  }
+
+  return {
+    labels,
+    schemaMap,
+    componentIndexList: processed.output.componentIndexList,
+    questionTypes,
+    answerTypes,
+    resources,
+    surveyId,
+    responses,
+  };
+}
+
 // --- tree traversal ---
 
 function traverseSurveyTree(
@@ -291,7 +319,7 @@ function isEmptyValue(value: unknown): boolean {
 
 // --- options ---
 
-function toAnalyticsOptions(
+export function toAnalyticsOptions(
   answerCodes: string[],
   questionCode: string,
   labels: Record<string, string>,

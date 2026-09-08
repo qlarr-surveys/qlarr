@@ -3,6 +3,10 @@ dist
 coverage
 *.log
 
+# Local runtime data (survey file storage, docker volumes)
+/docker-cloud-data/
+/local-data/
+
 # The backend keeps a committed .env with the local/dev defaults (values that
 # used to be hard-coded in src/config/*). Force-track it, overriding the root
 # .gitignore's `.env` rule. Personal overrides still go in .env.local (ignored).

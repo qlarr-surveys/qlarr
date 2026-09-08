@@ -173,6 +173,20 @@ class SurveyService extends BaseService {
     );
     return response.data;
   }
+
+  async getCrosstabCatalogue(surveyId) {
+    const response = await this.handleRequest(() =>
+      authenticatedApi.get(`/survey/${surveyId}/response/crosstab-catalogue`)
+    );
+    return response.data;
+  }
+
+  async computeCrosstab(surveyId, config) {
+    const response = await this.handleRequest(() =>
+      authenticatedApi.post(`/survey/${surveyId}/response/crosstab`, config)
+    );
+    return response.data;
+  }
 }
 
 export default SurveyService;

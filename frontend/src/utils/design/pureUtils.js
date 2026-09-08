@@ -1,3 +1,39 @@
+import {
+  QUESTION_CODE_PATTERN,
+  GROUP_CODE_PATTERN,
+} from "~/constants/instruction";
+
+export const isQuestion = (code) => QUESTION_CODE_PATTERN.test(code);
+export const isGroup = (code) => GROUP_CODE_PATTERN.test(code);
+
+// Maps every component's actual code to a human-facing numeric code
+// (groups → `P1`, `P2`; questions → `Q1`, `Q2`; answers → `Q1A1`). Pure:
+// derived from the survey state, not stored.
+export const buildCodeIndex = (state) => {
+  let retrunRestult = {};
+  let groupCount = 0;
+  let questionCount = 0;
+  state.Survey.children?.forEach((group) => {
+    groupCount++;
+    retrunRestult[group.code] = "P" + groupCount;
+    let groupObj = state[group.code];
+    if (groupObj.children) {
+      groupObj.children.forEach((question) => {
+        questionCount++;
+        retrunRestult[question.code] = "Q" + questionCount;
+        let questionObj = state[question.code];
+        if (questionObj.children) {
+          questionObj.children.forEach((answer) => {
+            retrunRestult[answer.qualifiedCode] =
+              "Q" + questionCount + answer.code;
+          });
+        }
+      });
+    }
+  });
+  return retrunRestult;
+};
+
 export const isEquivalent = (a, b, visited = new WeakSet()) => {
   if (a === b) return true;
 

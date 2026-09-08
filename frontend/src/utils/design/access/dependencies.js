@@ -1,4 +1,4 @@
-import { isGroup, isQuestion } from "~/utils/design/utils";
+import { isGroup, isQuestion } from "~/utils/design/pureUtils";
 
 export const accessibleDependencies = (componentIndices, code) => {
   let dependencies = [];

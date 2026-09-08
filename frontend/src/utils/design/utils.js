@@ -1,16 +1,15 @@
 import { useSelector } from "react-redux";
 import { useResponsive } from "~/hooks/use-responsive";
-import {
-  QUESTION_CODE_PATTERN,
-  GROUP_CODE_PATTERN,
-  STRIP_TAGS_PATTERN,
-} from "~/constants/instruction";
+import { STRIP_TAGS_PATTERN } from "~/constants/instruction";
 
 export {
   isEquivalent,
   nextId,
   firstIndexInArray,
   lastIndexInArray,
+  isQuestion,
+  isGroup,
+  buildCodeIndex,
 } from "./pureUtils";
 import { isEquivalent } from "./pureUtils";
 
@@ -108,8 +107,6 @@ export function truncateWithEllipsis(text, maxLength) {
   }
 }
 
-export const isQuestion = (code) => QUESTION_CODE_PATTERN.test(code);
-export const isGroup = (code) => GROUP_CODE_PATTERN.test(code);
 
 export const isNotEmptyHtml = (value) => {
   if (!value) return false;

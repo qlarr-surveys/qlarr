@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import styles from "./DateTimeQuestion.module.css";
 import { useTheme } from "@mui/system";
 import { valueChange } from "~/state/runState";
+import { setDirty } from "~/state/templateState";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 
 function DateTimeQuestion(props) {
@@ -54,6 +55,7 @@ function DateTimeQuestion(props) {
               : window.QlarrScripts.toSqlDateTimeIgnoreTime(finalDate),
       })
     );
+    dispatch(setDirty(props.component.qualifiedCode));
   };
 
   const dateFormat = props.component.dateFormat

@@ -2,6 +2,7 @@ import FieldSize from "~/components/design/setup/FieldSize";
 import ShowHint, { SetupTextInput } from "~/components/design/setup/ShowHint";
 import ValidationSetupItem from "~/components/design/setup/validation/ValidationSetupItem";
 import CustomValidationRules from "../validation/CustomValidationRules";
+import ValidationRulesPanel from "../validation/ValidationRulesPanel";
 import OrderInstructions from "../advanced/OrderInstructions";
 import ConditionalRelevance from "../advanced/ConditionalRelevance";
 import React from "react";
@@ -115,8 +116,6 @@ const SetupComponent = React.memo(({ code, rule, t, isQuickOptions }) => {
   }
 
   switch (rule) {
-    case "custom_validation_rules":
-      return <CustomValidationRules code={code} t={t} key={code + rule} />;
     case "order_instructions":
       return <OrderInstructions code={code} t={t} key={code + rule} />;
     case "conditional_relevance":
@@ -642,13 +641,23 @@ const SetupSection = React.memo(({ highlighted, rules, code, t, theme }) => {
                   : "background.paper",
             }}
           >
-            {rules[selectedTab]?.rules?.map((el) => (
-              <div className={styles.setupContainer} key={el}>
-                <Box sx={rowSx(el)}>
-                  <SetupComponent key={el} code={code} rule={el} t={t} />
-                </Box>
+            {rules[selectedTab]?.key === "validation" ? (
+              <div className={styles.setupContainer}>
+                <ValidationRulesPanel
+                  code={code}
+                  t={t}
+                  validationRules={rules[selectedTab].rules}
+                />
               </div>
-            ))}
+            ) : (
+              rules[selectedTab]?.rules?.map((el) => (
+                <div className={styles.setupContainer} key={el}>
+                  <Box sx={rowSx(el)}>
+                    <SetupComponent key={el} code={code} rule={el} t={t} />
+                  </Box>
+                </div>
+              ))
+            )}
           </Box>
 
           <Box sx={{ display: "flex", justifyContent: "center", marginTop: "2em" }}>
