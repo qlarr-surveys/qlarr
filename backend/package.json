@@ -2,7 +2,7 @@
   "name": "@qlarr-surveys/backend",
   "version": "0.1.0",
   "private": true,
-  "description": "Qlarr backend (NestJS) — single-tenant open-source survey backend.",
+  "description": "Qlarr backend (NestJS) \u2014 single-tenant open-source survey backend.",
   "scripts": {
     "build": "nest build",
     "start": "TZ=UTC nest start",
@@ -68,5 +68,8 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "overrides": {
+    "lodash": "4.18.0"
   }
 }
