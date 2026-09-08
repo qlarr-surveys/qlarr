@@ -62,6 +62,11 @@
 :global(.MuiTableCell-root).choiceCell {
   padding: 0;
 }
+:global(.MuiTableCell-root).setupCellDesign {
+  width: 30px;
+  padding: 0;
+  cursor: pointer;
+}
 :global(.MuiTableCell-root).removeCellDesign {
   width: 30px;
   padding: 0;
