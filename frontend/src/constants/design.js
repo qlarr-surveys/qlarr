@@ -46,6 +46,10 @@ export const themeSetup = {
   code: "Survey",
   rules: [{ title: "", rules: ["theme"] }],
 };
+export const quotaSetup = {
+  code: "Survey",
+  rules: [{ title: "", rules: ["quotas"] }],
+};
 export const languageSetup = {
   code: "Survey",
   rules: [{ title: "", rules: ["language"] }],

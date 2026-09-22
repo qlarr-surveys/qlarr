@@ -107,5 +107,6 @@
   "validation_ranking_count": "Définir un nombre exact d'éléments que l'utilisateur doit classer.",
   "validation_required": "Rendre cette question obligatoire avant que les utilisateurs puissent continuer.",
   "video_capture": "Enregistrer et télécharger de courtes vidéos (mode hors ligne)",
-  "video_display": "Afficher une vidéo pour soutenir votre contenu"
+  "video_display": "Afficher une vidéo pour soutenir votre contenu",
+  "quotas": "Les quotas limitent le nombre de réponses complètes qu'un groupe peut donner, par ex. 50 hommes et 50 femmes.\n\n● Chaque quota a une condition basée sur vos questions et une limite\n● Les répondants sont vérifiés à chaque passage à l'étape suivante\n● Si le quota auquel ils correspondent est plein, l'enquête passe à la fin et la réponse est marquée comme disqualifiée\n● Si un quota se remplit pendant qu'une personne répond, elle est envoyée à la fin au passage suivant"
 }

@@ -107,5 +107,6 @@
   "validation_ranking_count": "Stel een exact aantal items in dat de gebruiker moet rangschikken.",
   "validation_required": "Maak deze vraag verplicht voordat gebruikers kunnen doorgaan.",
   "video_capture": "Neem en upload korte video's op (offline modus)",
-  "video_display": "Toon een video om je inhoud te ondersteunen"
+  "video_display": "Toon een video om je inhoud te ondersteunen",
+  "quotas": "Quota's beperken hoeveel voltooide reacties een groep kan geven, bijv. 50 mannen en 50 vrouwen.\n\n● Elk quotum heeft een voorwaarde op basis van je vragen en een limiet\n● Respondenten worden gecontroleerd bij elke stap vooruit\n● Is het quotum waar ze bij horen vol, dan gaat de enquête naar het einde en wordt de reactie als gediskwalificeerd gemarkeerd\n● Raakt een quotum vol terwijl iemand bezig is, dan gaat die bij de volgende stap naar het einde"
 }

@@ -15,6 +15,7 @@ import {
   VersionDto,
 } from './design.dto';
 import { DesignService } from './design.service';
+import { QuotaStatusDto } from './quota.service';
 
 /**
  * Survey design endpoints (the edit-loop subset).
@@ -29,6 +30,12 @@ export class DesignController {
   @Roles(Role.SUPER_ADMIN, Role.SURVEY_ADMIN)
   getDesign(@Param('surveyId') surveyId: string): Promise<DesignDto> {
     return this.design.getDesign(surveyId);
+  }
+
+  @Get(':surveyId/quotas')
+  @Roles(Role.SUPER_ADMIN, Role.SURVEY_ADMIN)
+  quotaStatus(@Param('surveyId') surveyId: string): Promise<QuotaStatusDto> {
+    return this.design.quotaStatus(surveyId);
   }
 
   @Post(':surveyId/offline/design')

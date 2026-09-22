@@ -3,6 +3,7 @@ import TableRowsIcon from "@mui/icons-material/TableRows";
 import styles from "./SideTabs.module.css";
 import React from "react";
 import {
+  DonutSmall,
   Edit,
   LowPriority,
   Palette,
@@ -21,6 +22,7 @@ import { Link } from "react-router-dom";
 import {
   setDesignModeToDesign,
   setDesignModeToLang,
+  setDesignModeToQuotas,
   setDesignModeToTheme,
   setup,
 } from "~/state/design/designState";
@@ -107,6 +109,20 @@ function SideTabs({ selectedPage, onPageChange, availablePages, surveyId }) {
               onClick={() => {
                 onPageChange(MANAGE_SURVEY_LANDING_PAGES.DESIGN);
                 dispatch(setDesignModeToLang());
+              }}
+            />
+            <SideTab
+              dataTour="side-tab-quotas"
+              tooltip={t("quotas")}
+              link={routes.designSurvey.replace(":surveyId", surveyId)}
+              buttonSx={getTabButtonSx(
+                selectedPage == MANAGE_SURVEY_LANDING_PAGES.DESIGN &&
+                  designMode == DESIGN_SURVEY_MODE.QUOTAS
+              )}
+              icon={<DonutSmall sx={{ color: "#fff" }} />}
+              onClick={() => {
+                onPageChange(MANAGE_SURVEY_LANDING_PAGES.DESIGN);
+                dispatch(setDesignModeToQuotas());
               }}
             />
             <SideTab

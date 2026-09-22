@@ -49,8 +49,14 @@ export function useFieldConfig(
       group: groupLabels.system,
     });
 
-    // Get accessible dependencies using the existing utility
-    const dependencies = accessibleDependencies(componentIndices, currentCode);
+    // Survey-level logic (quotas) may reference every page and question;
+    // everything else only what comes before it.
+    const dependencies =
+      currentCode === 'Survey'
+        ? componentIndices
+            .map((el) => el.code)
+            .filter((code) => isGroup(code) || isQuestion(code))
+        : accessibleDependencies(componentIndices, currentCode);
 
     // Build index lookup map for O(1) access during sort
     const indexMap = new Map(

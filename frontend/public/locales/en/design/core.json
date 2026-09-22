@@ -530,5 +530,20 @@
     "code_changed_after_publish": "Cannot change component code after it was published",
     "duplicate_to_code": "This code belongs to another group or question",
     "code_invalid": "Invalid code. Please try again."
-  }
+  },
+  "quotas": "Quotas",
+  "quotas_description": "Limit how many completed responses each group of respondents can give. A respondent who matches a full quota skips to the end and is marked disqualified.",
+  "quotas_empty": "No quotas yet.",
+  "add_quota": "Add quota",
+  "quota_untitled": "Untitled quota",
+  "quota_no_condition": "No condition set",
+  "quota_full": "Full",
+  "quota_no_limit": "no limit",
+  "quota_condition_error": "This condition references a question or option that no longer exists.",
+  "quota_label": "Label",
+  "quota_limit": "Limit",
+  "quota_limit_hint": "Completed responses allowed. Leave empty for no limit.",
+  "quota_condition": "Counts respondents where",
+  "quota_and": "and",
+  "quota_or": "or"
 }

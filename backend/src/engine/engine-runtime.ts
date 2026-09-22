@@ -196,6 +196,7 @@ export function runNavigate(params: NavigateParams): NavigationJsonOutput {
     toNavigationDirection(params.navigationDirection),
     params.skipInvalid,
     toSurveyMode(params.surveyMode),
+    JSON.stringify(params.fullQuotas ?? []),
   );
   return JSON.parse(
     quietly(() => wrapper.navigate(scriptengine.createNavigationEngine())),
@@ -303,6 +304,19 @@ export function runChangeCode(
       applyToPath(result.survey, path, (n) =>
         replaceInField(n, 'skip_logic', from, to),
       );
+    }
+  }
+
+  // Rewrite quota conditions (designer rules on the Survey node) when renaming a
+  // group/question; the compiled `quota_*` instructions are renamed by the engine.
+  if (ext.isGroupCode(from) || ext.isQuestionCode(from)) {
+    const quotas = result.survey['quotas'];
+    if (Array.isArray(quotas)) {
+      for (const quota of quotas) {
+        if (quota && typeof quota === 'object') {
+          replaceInField(quota as Record<string, unknown>, 'condition', from, to);
+        }
+      }
     }
   }
 

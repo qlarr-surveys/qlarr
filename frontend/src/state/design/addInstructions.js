@@ -1244,6 +1244,22 @@ const getQuestionType = (state, code) => {
   }
 };
 
+// A quota's condition compiles to a `quota_<code>` boolean instruction on the Survey node;
+// the engine saves its result per response as `Survey.quota_<code>`.
+export const quotaInstruction = (quota, state) => {
+  const code = `quota_${quota.code}`;
+  const text = jsonToJs(
+    quota.condition?.logic,
+    false,
+    (componentCode) => state[componentCode]?.type,
+    (componentCode) => getQuestionType(state, componentCode),
+  );
+  if (!text) {
+    return { code, remove: true };
+  }
+  return { code, text, isActive: true, returnType: "boolean" };
+};
+
 export const conditionalRelevanceEquation = (logic, rule, state) => {
   const code = "conditional_relevance";
   if (rule == "show_always") {

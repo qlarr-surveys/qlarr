@@ -84,6 +84,9 @@ const MUTATING = [
   "designState/onDrag",
   "designState/setDefaultValue",
   "designState/convertQuestion",
+  "designState/addQuota",
+  "designState/updateQuota",
+  "designState/removeQuota",
 ];
 
 const setState = (store, state) => {
@@ -150,6 +153,7 @@ const reservedKeys = [
   "designStateReceived",
   "versionDto",
   "globalSetup",
+  "quotaHighlight",
 ];
 
 function getDiff(currentState, latestState) {

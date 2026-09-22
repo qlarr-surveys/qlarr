@@ -107,5 +107,6 @@
   "validation_ranking_count": "Establecer un número exacto de elementos que el usuario debe clasificar.",
   "validation_required": "Hacer esta pregunta obligatoria antes de que los usuarios puedan continuar.",
   "video_capture": "Grabar y subir videos cortos (modo sin conexión)",
-  "video_display": "Mostrar un video para apoyar tu contenido"
+  "video_display": "Mostrar un video para apoyar tu contenido",
+  "quotas": "Las cuotas limitan cuántas respuestas completas puede dar un grupo, p. ej. 50 hombres y 50 mujeres.\n\n● Cada cuota tiene una condición basada en tus preguntas y un límite\n● Los encuestados se comprueban cada vez que avanzan\n● Si la cuota que cumplen está llena, la encuesta salta al final y la respuesta se marca como descalificada\n● Si una cuota se llena mientras alguien responde, pasa al final en su siguiente avance"
 }

@@ -530,5 +530,20 @@
   "tour_step9_intro": "Stel gegevensverzameling, enquêtetoegang, navigatie, quota's en antwoordregels in vóór publicatie.",
   "tour_step9_next": "Volgende: Antwoorden",
   "tour_step10_title": "Antwoorden",
-  "tour_step10_intro": "Volg antwoorden en analyses, bekijk resultaten en beheer of exporteer uw gegevens."
+  "tour_step10_intro": "Volg antwoorden en analyses, bekijk resultaten en beheer of exporteer uw gegevens.",
+  "quotas": "Quota's",
+  "quotas_description": "Beperk hoeveel voltooide reacties elke groep respondenten kan geven. Een respondent die bij een vol quotum hoort, gaat naar het einde en wordt als gediskwalificeerd gemarkeerd.",
+  "quotas_empty": "Nog geen quota's.",
+  "add_quota": "Quotum toevoegen",
+  "quota_untitled": "Quotum zonder titel",
+  "quota_no_condition": "Geen voorwaarde ingesteld",
+  "quota_full": "Vol",
+  "quota_no_limit": "geen limiet",
+  "quota_condition_error": "Deze voorwaarde verwijst naar een vraag of optie die niet meer bestaat.",
+  "quota_label": "Label",
+  "quota_limit": "Limiet",
+  "quota_limit_hint": "Toegestane voltooide reacties. Leeg laten voor geen limiet.",
+  "quota_condition": "Telt respondenten waarbij",
+  "quota_and": "en",
+  "quota_or": "of"
 }

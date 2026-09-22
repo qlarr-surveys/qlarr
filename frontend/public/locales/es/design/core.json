@@ -530,5 +530,20 @@
   "tour_step9_intro": "Configura la recopilación de datos, acceso, navegación, cuotas y reglas de respuesta antes de publicar.",
   "tour_step9_next": "Siguiente: Respuestas",
   "tour_step10_title": "Respuestas",
-  "tour_step10_intro": "Realiza seguimiento de respuestas y análisis, revisa resultados y gestiona o exporta tus datos."
+  "tour_step10_intro": "Realiza seguimiento de respuestas y análisis, revisa resultados y gestiona o exporta tus datos.",
+  "quotas": "Cuotas",
+  "quotas_description": "Limita cuántas respuestas completas puede dar cada grupo de encuestados. Quien coincida con una cuota llena salta al final y se marca como descalificado.",
+  "quotas_empty": "Aún no hay cuotas.",
+  "add_quota": "Añadir cuota",
+  "quota_untitled": "Cuota sin título",
+  "quota_no_condition": "Sin condición",
+  "quota_full": "Llena",
+  "quota_no_limit": "sin límite",
+  "quota_condition_error": "Esta condición hace referencia a una pregunta u opción que ya no existe.",
+  "quota_label": "Etiqueta",
+  "quota_limit": "Límite",
+  "quota_limit_hint": "Respuestas completas permitidas. Déjalo vacío para no poner límite.",
+  "quota_condition": "Cuenta a los encuestados cuando",
+  "quota_and": "y",
+  "quota_or": "o"
 }

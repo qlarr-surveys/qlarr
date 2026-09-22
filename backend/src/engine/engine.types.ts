@@ -99,4 +99,6 @@ export interface NavigateParams {
   navigationDirection: NavigationDirectionJson;
   skipInvalid: boolean;
   surveyMode: SurveyModeName;
+  /** Codes of segment quotas that are already full. */
+  fullQuotas?: string[];
 }

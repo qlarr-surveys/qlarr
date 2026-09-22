@@ -41,6 +41,7 @@ import EntityCodeEditor from "../EntityCodeEditor";
 import CustomCSS from "../CustomCss";
 import ConvertQuestionType from "../ConvertQuestionType";
 import LogoSetup from "../LogoSetup";
+import Quotas from "../Quotas";
 
 function SetupPanel({ t }) {
   const dispatch = useDispatch();
@@ -128,6 +129,8 @@ const SetupComponent = React.memo(({ code, rule, t, isQuickOptions }) => {
       return <LogoSetup t={t} key={code + rule} />;
     case "language":
       return <ManageLanguages t={t} key={code + rule} />;
+    case "quotas":
+      return <Quotas t={t} key={code + rule} />;
     case "maxChars":
       return (
         <FieldSize

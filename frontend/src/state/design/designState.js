@@ -17,6 +17,7 @@ import {
   CONVERTIBLE_TEXT_TYPES,
   CONVERTIBLE_DATE_TIME_TYPES,
   languageSetup,
+  quotaSetup,
   setupOptions,
   themeSetup,
 } from "~/constants/design";
@@ -41,6 +42,7 @@ import {
   conditionalRelevanceEquation,
   instructionByCode,
   processValidation,
+  quotaInstruction,
   removeInstruction,
   updateRandomByRule,
   updatePriorityByRule,
@@ -62,6 +64,7 @@ const reservedKeys = [
   "index",
   "skipScroll",
   "advancedByCode",
+  "quotaHighlight",
 ];
 
 export const designState = createSlice({
@@ -169,6 +172,7 @@ export const designState = createSlice({
         state.globalSetup = {};
       }
       delete state["setup"];
+      delete state["quotaHighlight"];
     },
     setDesignModeToDesign(state) {
       designState.caseReducers.resetSetup(state);
@@ -183,6 +187,44 @@ export const designState = createSlice({
       designState.caseReducers.resetSetup(state);
       designState.caseReducers.setup(state, { payload: themeSetup });
       state.designMode = DESIGN_SURVEY_MODE.THEME;
+    },
+    setDesignModeToQuotas(state) {
+      designState.caseReducers.resetSetup(state);
+      designState.caseReducers.setup(state, { payload: quotaSetup });
+      state.designMode = DESIGN_SURVEY_MODE.QUOTAS;
+    },
+    addQuota: (state) => {
+      const survey = state.Survey;
+      survey.quotas = survey.quotas || [];
+      survey.quotas.push({
+        code: nextQuotaCode(survey.quotas),
+        label: "",
+        limit: 0,
+        condition: { logic: null },
+      });
+    },
+    // payload: { code, changes: { label?, limit?, condition? } }
+    updateQuota: (state, action) => {
+      const { code, changes } = action.payload;
+      const quota = state.Survey.quotas?.find((quota) => quota.code === code);
+      if (!quota) {
+        return;
+      }
+      Object.assign(quota, changes);
+      if ("condition" in changes) {
+        refreshQuotaInstructions(state);
+      }
+    },
+    removeQuota: (state, action) => {
+      const survey = state.Survey;
+      survey.quotas = (survey.quotas || []).filter(
+        (quota) => quota.code !== action.payload,
+      );
+      refreshQuotaInstructions(state);
+    },
+    // component codes the selected quota references, outlined on the canvas
+    setQuotaHighlight: (state, action) => {
+      state.quotaHighlight = action.payload;
     },
     changeAttribute: (state, action) => {
       let payload = action.payload;
@@ -971,6 +1013,11 @@ export const {
   setDesignModeToDesign,
   setDesignModeToLang,
   setDesignModeToTheme,
+  setDesignModeToQuotas,
+  addQuota,
+  updateQuota,
+  removeQuota,
+  setQuotaHighlight,
   removeAnswer,
   setup,
   clearHighlighted,
@@ -1424,6 +1471,27 @@ const cleanupValidation = (state, code) => {
   }
   const ruleKeys = Object.keys(component["validation"]);
   ruleKeys.forEach((key) => processValidation(state, code, key, true));
+};
+
+const nextQuotaCode = (quotas) => {
+  const max = quotas.reduce((acc, quota) => {
+    const match = /^QT(\d+)$/.exec(quota.code);
+    return match ? Math.max(acc, parseInt(match[1], 10)) : acc;
+  }, 0);
+  return `QT${max + 1}`;
+};
+
+const refreshQuotaInstructions = (state) => {
+  const survey = state.Survey;
+  survey.instructionList = (survey.instructionList || []).filter(
+    (instruction) => !instruction.code.startsWith("quota_"),
+  );
+  (survey.quotas || []).forEach((quota) => {
+    const instruction = quotaInstruction(quota, state);
+    if (!instruction.remove) {
+      survey.instructionList.push(instruction);
+    }
+  });
 };
 
 const addRelevanceInstructions = (state, code, relevance) => {

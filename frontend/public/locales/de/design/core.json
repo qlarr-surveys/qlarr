@@ -530,5 +530,20 @@
   "tour_step9_intro": "Richten Sie Datenerfassung, Umfragezugang, Navigation, Kontingente und Antwortregeln vor der Veröffentlichung ein.",
   "tour_step9_next": "Weiter: Antworten",
   "tour_step10_title": "Antworten",
-  "tour_step10_intro": "Verfolgen Sie Antworten und Analysen, überprüfen Sie Ergebnisse und verwalten oder exportieren Sie Ihre Daten."
+  "tour_step10_intro": "Verfolgen Sie Antworten und Analysen, überprüfen Sie Ergebnisse und verwalten oder exportieren Sie Ihre Daten.",
+  "quotas": "Quoten",
+  "quotas_description": "Begrenzen Sie, wie viele abgeschlossene Antworten jede Gruppe von Teilnehmenden abgeben kann. Wer einer vollen Quote entspricht, springt zum Ende und wird als disqualifiziert markiert.",
+  "quotas_empty": "Noch keine Quoten.",
+  "add_quota": "Quote hinzufügen",
+  "quota_untitled": "Unbenannte Quote",
+  "quota_no_condition": "Keine Bedingung festgelegt",
+  "quota_full": "Voll",
+  "quota_no_limit": "kein Limit",
+  "quota_condition_error": "Diese Bedingung verweist auf eine Frage oder Option, die nicht mehr existiert.",
+  "quota_label": "Bezeichnung",
+  "quota_limit": "Limit",
+  "quota_limit_hint": "Erlaubte abgeschlossene Antworten. Leer lassen für kein Limit.",
+  "quota_condition": "Zählt Teilnehmende, bei denen",
+  "quota_and": "und",
+  "quota_or": "oder"
 }

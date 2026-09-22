@@ -8,6 +8,7 @@ export const DESIGN_SURVEY_MODE = {
   DESIGN: "design",
   THEME: "theme",
   LANGUAGES: "languages",
+  QUOTAS: "quotas",
 };
 
 export const inDesign = (mode) => {

@@ -107,5 +107,6 @@
   "allow_previous": "Ermöglichen Sie es den Befragten, zu vorherigen Seiten zurückzukehren, um ihre Antworten zu überprüfen oder zu ändern.",
   "allow_jump": "Aktivieren Sie einen Umfrageindex, damit Befragte zu jeder Seite in der Umfrage springen können.",
   "allow_incomplete": "Lassen Sie die Befragten ihren Fortschritt speichern und später zurückkehren, um die Umfrage zu vervollständigen.",
-  "skip_invalid": "Ermöglichen Sie es den Befragten, fortzufahren, auch wenn einige Antworten ungültig sind, und erzwingen Sie die Validierung nur beim Absenden der Umfrage."
+  "skip_invalid": "Ermöglichen Sie es den Befragten, fortzufahren, auch wenn einige Antworten ungültig sind, und erzwingen Sie die Validierung nur beim Absenden der Umfrage.",
+  "quotas": "Quoten begrenzen, wie viele abgeschlossene Antworten eine Gruppe abgeben kann, z. B. 50 männliche und 50 weibliche Teilnehmende.\n\n● Jede Quote hat eine Bedingung aus Ihren Fragen und ein Limit\n● Teilnehmende werden bei jedem Schritt vorwärts geprüft\n● Ist eine Quote, der sie entsprechen, voll, springt die Umfrage zum Ende und die Antwort wird als disqualifiziert markiert\n● Füllt sich eine Quote, während jemand antwortet, wird er beim nächsten Schritt zum Ende geleitet"
 }

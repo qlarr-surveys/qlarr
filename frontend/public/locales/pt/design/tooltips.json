@@ -107,5 +107,6 @@
   "validation_ranking_count": "Definir um número exato de itens que o usuário deve classificar.",
   "validation_required": "Tornar esta pergunta obrigatória antes que os usuários possam continuar.",
   "video_capture": "Gravar e enviar vídeos curtos (modo offline)",
-  "video_display": "Mostrar um vídeo para apoiar seu conteúdo"
+  "video_display": "Mostrar um vídeo para apoiar seu conteúdo",
+  "quotas": "As cotas limitam quantas respostas completas um grupo pode dar, ex.: 50 homens e 50 mulheres.\n\n● Cada cota tem uma condição baseada nas suas perguntas e um limite\n● Os respondentes são verificados sempre que avançam\n● Se a cota que corresponde estiver cheia, a pesquisa pula para o final e a resposta é marcada como desqualificada\n● Se uma cota encher enquanto alguém responde, ele vai para o final no próximo avanço"
 }
