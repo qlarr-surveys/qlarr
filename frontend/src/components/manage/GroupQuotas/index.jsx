@@ -4,11 +4,16 @@ import {
   Box,
   Button,
   Chip,
-  IconButton,
+  LinearProgress,
   TextField,
   Typography,
 } from "@mui/material";
-import { Add, DeleteOutline, ExpandLess, ExpandMore } from "@mui/icons-material";
+import {
+  Add,
+  DeleteOutline,
+  ExpandLess,
+  ExpandMore,
+} from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import { useService } from "~/hooks/use-service";
@@ -90,58 +95,73 @@ function GroupQuotas({ disabled }) {
   const toggle = (quota) =>
     setExpanded(expanded === quota.code ? null : quota.code);
 
+  const addButton = !disabled && (
+    <Button
+      variant="outlined"
+      size="small"
+      startIcon={<Add />}
+      onClick={() => dispatch(addQuota())}
+    >
+      {t("group_quotas.add")}
+    </Button>
+  );
+
   return (
     <Box className={styles.container}>
       <Box className={styles.header}>
-        <CustomTooltip body={t("tooltips.group_quotas")} />
-        <Typography color="#1a2052" fontWeight="600" variant="subtitle1">
-          {t("group_quotas.title")}
-        </Typography>
+        <Box className={styles.headerTitle}>
+          <CustomTooltip body={t("tooltips.group_quotas")} />
+          <Typography color="#1a2052" fontWeight="600" variant="subtitle1">
+            {t("group_quotas.title")}
+          </Typography>
+        </Box>
+        {quotas.length > 0 && addButton}
       </Box>
       <Typography variant="body2" color="text.secondary">
         {t("group_quotas.description")}
       </Typography>
-      {published === false && (
-        <Typography variant="body2" color="warning.main">
-          {t("group_quotas.unpublished_note")}
-        </Typography>
+      {published === false && quotas.length > 0 && (
+        <Box
+          className={styles.notice}
+          sx={{
+            backgroundColor: "warning.lighter",
+            border: 1,
+            borderColor: "warning.light",
+          }}
+        >
+          <Typography variant="body2" color="warning.dark">
+            {t("group_quotas.unpublished_note")}
+          </Typography>
+        </Box>
       )}
 
-      {quotas.length === 0 && (
-        <Typography variant="body2" className={styles.empty}>
-          {t("group_quotas.empty")}
-        </Typography>
-      )}
-
-      {quotas.map((quota) => (
-        <QuotaCard
-          key={quota.code}
-          quota={quota}
-          count={countsByCode[quota.code] ?? 0}
-          errors={errorsByCode[quota.code] || []}
-          expanded={!disabled && expanded === quota.code}
-          onToggle={() => toggle(quota)}
-          disabled={disabled}
-          fields={fields}
-          designState={designState}
-          componentIndex={componentIndex}
-          mainLang={mainLang}
-          langList={langList}
-          t={t}
-          tDesign={tDesign}
-        />
-      ))}
-
-      {!disabled && (
-        <Box className={styles.actions}>
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<Add />}
-            onClick={() => dispatch(addQuota())}
-          >
-            {t("group_quotas.add")}
-          </Button>
+      {quotas.length === 0 ? (
+        <Box className={styles.empty}>
+          <Typography variant="body2" color="text.secondary">
+            {t("group_quotas.empty")}
+          </Typography>
+          {addButton}
+        </Box>
+      ) : (
+        <Box className={styles.list}>
+          {quotas.map((quota) => (
+            <QuotaCard
+              key={quota.code}
+              quota={quota}
+              count={countsByCode[quota.code] ?? 0}
+              errors={errorsByCode[quota.code] || []}
+              expanded={!disabled && expanded === quota.code}
+              onToggle={() => toggle(quota)}
+              disabled={disabled}
+              fields={fields}
+              designState={designState}
+              componentIndex={componentIndex}
+              mainLang={mainLang}
+              langList={langList}
+              t={t}
+              tDesign={tDesign}
+            />
+          ))}
         </Box>
       )}
     </Box>
@@ -166,7 +186,12 @@ function QuotaCard({
   const dispatch = useDispatch();
   const limit = quota.limit > 0 ? quota.limit : 0;
   const full = limit > 0 && count >= limit;
-  const description = describeCondition(quota.condition?.logic, fields, t, tDesign);
+  const description = describeCondition(
+    quota.condition?.logic,
+    fields,
+    t,
+    tDesign,
+  );
 
   const update = (changes) =>
     dispatch(updateQuota({ code: quota.code, changes }));
@@ -174,13 +199,19 @@ function QuotaCard({
   const onLogicChange = useCallback(
     ({ jsonLogic, isEmpty }) => {
       const logic = isEmpty ? null : jsonLogic;
-      dispatch(updateQuota({ code: quota.code, changes: { condition: { logic } } }));
+      dispatch(
+        updateQuota({ code: quota.code, changes: { condition: { logic } } }),
+      );
     },
     [dispatch, quota.code],
   );
 
   return (
-    <Box className={`${styles.card} ${full ? styles.cardFull : ""}`}>
+    <Box
+      className={`${styles.card} ${full ? styles.cardFull : ""} ${
+        expanded ? styles.cardExpanded : ""
+      }`}
+    >
       <Box
         className={`${styles.cardHeader} ${disabled ? styles.cardHeaderStatic : ""}`}
         onClick={disabled ? undefined : onToggle}
@@ -197,43 +228,73 @@ function QuotaCard({
           {full ? (
             <Chip size="small" color="error" label={t("group_quotas.full")} />
           ) : null}
-          <Typography variant="body2" fontWeight={600}>
-            {limit > 0
-              ? `${count} / ${limit}`
-              : `${count} / ${t("group_quotas.no_limit")}`}
-          </Typography>
-          {!disabled && (expanded ? <ExpandLess /> : <ExpandMore />)}
+          <Box className={styles.fill}>
+            <Typography variant="body2" fontWeight={600} color="#1a2052">
+              {count}
+              <Typography
+                component="span"
+                variant="body2"
+                color="text.secondary"
+              >
+                {" / "}
+                {limit > 0 ? limit : t("group_quotas.no_limit")}
+              </Typography>
+            </Typography>
+            {limit > 0 && (
+              <LinearProgress
+                variant="determinate"
+                color={full ? "error" : "primary"}
+                value={Math.min(100, (count / limit) * 100)}
+                className={styles.fillBar}
+              />
+            )}
+          </Box>
+          {!disabled &&
+            (expanded ? (
+              <ExpandLess color="action" />
+            ) : (
+              <ExpandMore color="action" />
+            ))}
         </Box>
       </Box>
 
       {errors.length > 0 && (
-        <Typography variant="caption" color="error" display="block">
+        <Typography
+          variant="caption"
+          color="error"
+          display="block"
+          className={styles.cardError}
+        >
           {t("group_quotas.condition_error")}
         </Typography>
       )}
 
       {expanded && (
         <Box className={styles.cardBody}>
-          <TextField
-            size="small"
-            fullWidth
-            label={t("group_quotas.label")}
-            value={quota.label || ""}
-            onChange={(event) => update({ label: event.target.value })}
-          />
-          <TextField
-            size="small"
-            type="number"
-            fullWidth
-            label={t("group_quotas.limit")}
-            helperText={t("group_quotas.limit_hint")}
-            value={limit > 0 ? limit : ""}
-            inputProps={{ min: 0, inputMode: "numeric" }}
-            onChange={(event) => {
-              const value = parseInt(event.target.value, 10);
-              update({ limit: Number.isInteger(value) && value > 0 ? value : 0 });
-            }}
-          />
+          <Box className={styles.fieldRow}>
+            <TextField
+              size="small"
+              fullWidth
+              label={t("group_quotas.label")}
+              value={quota.label || ""}
+              onChange={(event) => update({ label: event.target.value })}
+            />
+            <TextField
+              size="small"
+              type="number"
+              className={styles.limitField}
+              label={t("group_quotas.limit")}
+              helperText={t("group_quotas.limit_hint")}
+              value={limit > 0 ? limit : ""}
+              inputProps={{ min: 0, inputMode: "numeric" }}
+              onChange={(event) => {
+                const value = parseInt(event.target.value, 10);
+                update({
+                  limit: Number.isInteger(value) && value > 0 ? value : 0,
+                });
+              }}
+            />
+          </Box>
           <Typography variant="body2" fontWeight={600}>
             {t("group_quotas.condition")}
           </Typography>
@@ -248,12 +309,14 @@ function QuotaCard({
             t={tDesign}
           />
           <Box className={styles.cardFooter}>
-            <IconButton
-              aria-label={t("action_btn.delete")}
+            <Button
+              size="small"
+              color="error"
+              startIcon={<DeleteOutline />}
               onClick={() => dispatch(removeQuota(quota.code))}
             >
-              <DeleteOutline />
-            </IconButton>
+              {t("action_btn.delete")}
+            </Button>
           </Box>
         </Box>
       )}
@@ -274,11 +337,16 @@ function describeCondition(logic, fields, t, tDesign) {
       const operatorLabel = operator
         ? tDesign(operator.labelKey, { defaultValue: operator.displayLabel })
         : rule.operator;
-      return [field?.label || rule.field, operatorLabel, formatValue(rule.value, field)]
+      return [
+        field?.label || rule.field,
+        operatorLabel,
+        formatValue(rule.value, field),
+      ]
         .filter((part) => part !== "" && part != null)
         .join(" ");
     });
-  const joiner = tree.conjunction === "or" ? t("group_quotas.or") : t("group_quotas.and");
+  const joiner =
+    tree.conjunction === "or" ? t("group_quotas.or") : t("group_quotas.and");
   return parts.join(` ${joiner} `);
 }
 

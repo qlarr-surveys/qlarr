@@ -175,7 +175,7 @@
     "surveyor": "Encuestador",
     "surveyor_admin": "Administrador de Encuestador",
     "to": "A",
-    "total_responses_limit": "Límite Total de Respuestas: ",
+    "total_responses_limit": "Límite Total de Respuestas",
     "sort_by": "Ordenar Por",
     "unpublished_changes": "Tiene Cambios No Publicados",
     "responses": "Respuestas Completas : {{count}}",

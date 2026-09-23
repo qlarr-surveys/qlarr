@@ -174,7 +174,7 @@
     "surveyor": "Surveyor",
     "surveyor_admin": "Surveyor admin",
     "to": "To",
-    "total_responses_limit": "Total Responses Limit: ",
+    "total_responses_limit": "Total Responses Limit",
     "sort_by": "Sort By",
     "unpublished_changes": "Has Unpublished Changes",
     "responses": "Complete Responses : {{count}}",

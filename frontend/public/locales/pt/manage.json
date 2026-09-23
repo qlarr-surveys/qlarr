@@ -175,7 +175,7 @@
     "surveyor": "Pesquisador",
     "surveyor_admin": "Administrador de Pesquisador",
     "to": "A",
-    "total_responses_limit": "Limite Total de Respostas: ",
+    "total_responses_limit": "Limite Total de Respostas",
     "sort_by": "Ordenar Por",
     "unpublished_changes": "Tem Alterações Não Publicadas",
     "responses": "Respostas Completas : {{count}}",

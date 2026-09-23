@@ -4,6 +4,7 @@ import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
+import Divider from "@mui/material/Divider";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import styles from "./EditSurvey.module.css";
 import { useTranslation } from "react-i18next";
@@ -51,13 +52,9 @@ function EditSurvey({ onPublish }) {
       id: "quotas",
       title: t("edit_survey.quotas"),
       component: (
-        <Box display="flex" flexDirection="column" gap={4}>
-          <Box display="flex" flexDirection="column" gap={2}>
-            <Typography color="#1a2052" fontWeight="600" variant="subtitle1">
-              {t("edit_survey.total_responses")}
-            </Typography>
-            <SurveyQuota />
-          </Box>
+        <Box display="flex" flexDirection="column" gap={3}>
+          <SurveyQuota />
+          {designReady && <Divider />}
           {designReady && (
             <GroupQuotas
               disabled={

@@ -175,7 +175,7 @@
     "surveyor": "Sondeur",
     "surveyor_admin": "Administrateur de Sondeur",
     "to": "À",
-    "total_responses_limit": "Limite Totale de Réponses : ",
+    "total_responses_limit": "Limite Totale de Réponses",
     "sort_by": "Trier Par",
     "unpublished_changes": "A des Modifications Non Publiées",
     "responses": "Réponses Complètes : {{count}}",
