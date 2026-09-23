@@ -9,19 +9,22 @@ import { treeToJsonLogic } from './utils/jsonLogic';
  * Component is "uncontrolled" - initializes from props but maintains its own state
  * This allows incomplete rules to exist in the UI while only saving valid rules
  */
-function InlineLogicBuilderSync({ onChange }) {
-  const { state } = useLogicBuilder();
+function InlineLogicBuilderSync({ onChange, jsonLogic }) {
+  const { state, dispatch, fields } = useLogicBuilder();
   const { tree, isDirty } = state;
 
   // Use ref to store onChange to avoid triggering effect when callback reference changes
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
 
+  const lastEmittedRef = useRef(serialize(jsonLogic));
+
   // Sync local changes to parent whenever tree changes
   // Only valid rules are saved (incomplete rules are filtered by treeToJsonLogic)
   useEffect(() => {
     if (isDirty) {
       const newJsonLogic = treeToJsonLogic(tree);
+      lastEmittedRef.current = serialize(newJsonLogic);
       onChangeRef.current({
         jsonLogic: newJsonLogic,
         queryString: '',
@@ -30,8 +33,18 @@ function InlineLogicBuilderSync({ onChange }) {
     }
   }, [tree, isDirty]);
 
+  useEffect(() => {
+    const incoming = serialize(jsonLogic);
+    if (incoming !== lastEmittedRef.current) {
+      lastEmittedRef.current = incoming;
+      dispatch({ type: 'LOAD_FROM_JSON_LOGIC', jsonLogic, fields });
+    }
+  }, [jsonLogic, dispatch, fields]);
+
   return <QlarrLogicBuilderInline />;
 }
+
+const serialize = (logic) => JSON.stringify(logic ?? null);
 
 /**
  * QlarrLogicBuilderInlineWrapper - Inline version for sidebar display
@@ -57,7 +70,7 @@ export function QlarrLogicBuilderInlineWrapper({
       langList={langList}
       t={t}
     >
-      <InlineLogicBuilderSync onChange={onChange} />
+      <InlineLogicBuilderSync onChange={onChange} jsonLogic={jsonLogic} />
     </LogicBuilderProvider>
   );
 }
@@ -75,4 +88,5 @@ QlarrLogicBuilderInlineWrapper.propTypes = {
 
 InlineLogicBuilderSync.propTypes = {
   onChange: PropTypes.func.isRequired,
+  jsonLogic: PropTypes.object,
 };
