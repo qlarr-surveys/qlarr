@@ -36,10 +36,7 @@ function QuestionDesign({
   const theme = useTheme();
 
   const isInSetup = useSelector((state) => {
-    return (
-      state.designState.setup?.code == code ||
-      !!state.designState.quotaHighlight?.includes(code)
-    );
+    return state.designState.setup?.code == code;
   });
 
   const order = useSelector((state) => {

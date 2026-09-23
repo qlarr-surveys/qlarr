@@ -153,7 +153,6 @@ const reservedKeys = [
   "designStateReceived",
   "versionDto",
   "globalSetup",
-  "quotaHighlight",
 ];
 
 function getDiff(currentState, latestState) {

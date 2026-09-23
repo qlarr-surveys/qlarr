@@ -13,30 +13,28 @@ import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import { useService } from "~/hooks/use-service";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
-import {
-  addQuota,
-  removeQuota,
-  setQuotaHighlight,
-  updateQuota,
-} from "~/state/design/designState";
-import { isGroup, isQuestion } from "~/utils/design/utils";
-import { QlarrLogicBuilderInlineWrapper } from "../logic/QlarrLogicBuilder";
-import { useFieldConfig } from "../logic/QlarrLogicBuilder/hooks/useFieldConfig";
-import { jsonLogicToTree } from "../logic/QlarrLogicBuilder/utils/jsonLogic";
-import { OPERATORS } from "../logic/QlarrLogicBuilder/config/operators";
-import styles from "./Quotas.module.css";
+import { addQuota, removeQuota, updateQuota } from "~/state/design/designState";
+import { QlarrLogicBuilderInlineWrapper } from "~/components/design/setup/logic/QlarrLogicBuilder";
+import { useFieldConfig } from "~/components/design/setup/logic/QlarrLogicBuilder/hooks/useFieldConfig";
+import { jsonLogicToTree } from "~/components/design/setup/logic/QlarrLogicBuilder/utils/jsonLogic";
+import { OPERATORS } from "~/components/design/setup/logic/QlarrLogicBuilder/config/operators";
+import styles from "./GroupQuotas.module.css";
 
-function Quotas() {
+// Per-group quotas live in the survey design (Survey.quotas), so edits here
+// auto-save as a design change and only apply to respondents once published.
+function GroupQuotas({ disabled }) {
   const dispatch = useDispatch();
   const designService = useService("design");
-  const { t } = useTranslation(NAMESPACES.DESIGN_CORE);
-  const { t: tTooltips } = useTranslation(NAMESPACES.DESIGN_TOOLTIPS);
+  const { t } = useTranslation(NAMESPACES.MANAGE);
+  // the logic builder and operator labels read from the designer namespace
+  const { t: tDesign } = useTranslation(NAMESPACES.DESIGN_CORE);
 
   const designState = useSelector((state) => state.designState);
   const survey = designState.Survey;
   const quotas = useMemo(() => survey?.quotas || [], [survey?.quotas]);
   const componentIndex = designState.componentIndex;
   const isSaving = designState.isSaving;
+  const published = designState.versionDto?.published;
   const mainLang = designState.langInfo?.mainLang;
   const langList = useMemo(
     () => designState.langInfo?.languagesList?.map((lang) => lang.code) || [],
@@ -49,7 +47,7 @@ function Quotas() {
     designState,
     mainLang,
     langList,
-    t,
+    tDesign,
   );
 
   const [status, setStatus] = useState(null);
@@ -89,44 +87,29 @@ function Quotas() {
     [survey?.instructionList],
   );
 
-  const highlight = useCallback(
-    (quota) => {
-      const codes = referencedCodes(quota?.condition?.logic, componentIndex);
-      dispatch(setQuotaHighlight(codes));
-      if (codes.length) {
-        document
-          .querySelector(`[data-code="${codes[0]}"]`)
-          ?.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    },
-    [componentIndex, dispatch],
-  );
-
-  useEffect(() => () => dispatch(setQuotaHighlight([])), [dispatch]);
-
-  const toggle = (quota) => {
-    if (expanded === quota.code) {
-      setExpanded(null);
-      dispatch(setQuotaHighlight([]));
-    } else {
-      setExpanded(quota.code);
-      highlight(quota);
-    }
-  };
+  const toggle = (quota) =>
+    setExpanded(expanded === quota.code ? null : quota.code);
 
   return (
     <Box className={styles.container}>
       <Box className={styles.header}>
-        <CustomTooltip body={tTooltips("quotas")} />
-        <Typography fontWeight={700}>{t("quotas")}</Typography>
+        <CustomTooltip body={t("tooltips.group_quotas")} />
+        <Typography color="#1a2052" fontWeight="600" variant="subtitle1">
+          {t("group_quotas.title")}
+        </Typography>
       </Box>
       <Typography variant="body2" color="text.secondary">
-        {t("quotas_description")}
+        {t("group_quotas.description")}
       </Typography>
+      {published === false && (
+        <Typography variant="body2" color="warning.main">
+          {t("group_quotas.unpublished_note")}
+        </Typography>
+      )}
 
       {quotas.length === 0 && (
         <Typography variant="body2" className={styles.empty}>
-          {t("quotas_empty")}
+          {t("group_quotas.empty")}
         </Typography>
       )}
 
@@ -136,28 +119,31 @@ function Quotas() {
           quota={quota}
           count={countsByCode[quota.code] ?? 0}
           errors={errorsByCode[quota.code] || []}
-          expanded={expanded === quota.code}
+          expanded={!disabled && expanded === quota.code}
           onToggle={() => toggle(quota)}
+          disabled={disabled}
           fields={fields}
           designState={designState}
           componentIndex={componentIndex}
           mainLang={mainLang}
           langList={langList}
-          onHighlight={highlight}
           t={t}
+          tDesign={tDesign}
         />
       ))}
 
-      <Box className={styles.actions}>
-        <Button
-          variant="contained"
-          size="small"
-          startIcon={<Add />}
-          onClick={() => dispatch(addQuota())}
-        >
-          {t("add_quota")}
-        </Button>
-      </Box>
+      {!disabled && (
+        <Box className={styles.actions}>
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<Add />}
+            onClick={() => dispatch(addQuota())}
+          >
+            {t("group_quotas.add")}
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 }
@@ -168,18 +154,19 @@ function QuotaCard({
   errors,
   expanded,
   onToggle,
+  disabled,
   fields,
   designState,
   componentIndex,
   mainLang,
   langList,
-  onHighlight,
   t,
+  tDesign,
 }) {
   const dispatch = useDispatch();
   const limit = quota.limit > 0 ? quota.limit : 0;
   const full = limit > 0 && count >= limit;
-  const description = describeCondition(quota.condition?.logic, fields, t);
+  const description = describeCondition(quota.condition?.logic, fields, t, tDesign);
 
   const update = (changes) =>
     dispatch(updateQuota({ code: quota.code, changes }));
@@ -188,36 +175,40 @@ function QuotaCard({
     ({ jsonLogic, isEmpty }) => {
       const logic = isEmpty ? null : jsonLogic;
       dispatch(updateQuota({ code: quota.code, changes: { condition: { logic } } }));
-      onHighlight({ condition: { logic } });
     },
-    [dispatch, quota.code, onHighlight],
+    [dispatch, quota.code],
   );
 
   return (
     <Box className={`${styles.card} ${full ? styles.cardFull : ""}`}>
-      <Box className={styles.cardHeader} onClick={onToggle}>
+      <Box
+        className={`${styles.cardHeader} ${disabled ? styles.cardHeaderStatic : ""}`}
+        onClick={disabled ? undefined : onToggle}
+      >
         <Box className={styles.cardTitle}>
           <Typography fontWeight={600} noWrap>
-            {quota.label || t("quota_untitled")}
+            {quota.label || t("group_quotas.untitled")}
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            {description || t("quota_no_condition")}
+            {description || t("group_quotas.no_condition")}
           </Typography>
         </Box>
         <Box className={styles.cardMeta}>
           {full ? (
-            <Chip size="small" color="error" label={t("quota_full")} />
+            <Chip size="small" color="error" label={t("group_quotas.full")} />
           ) : null}
           <Typography variant="body2" fontWeight={600}>
-            {limit > 0 ? `${count} / ${limit}` : `${count} / ${t("quota_no_limit")}`}
+            {limit > 0
+              ? `${count} / ${limit}`
+              : `${count} / ${t("group_quotas.no_limit")}`}
           </Typography>
-          {expanded ? <ExpandLess /> : <ExpandMore />}
+          {!disabled && (expanded ? <ExpandLess /> : <ExpandMore />)}
         </Box>
       </Box>
 
       {errors.length > 0 && (
         <Typography variant="caption" color="error" display="block">
-          {t("quota_condition_error")}
+          {t("group_quotas.condition_error")}
         </Typography>
       )}
 
@@ -226,7 +217,7 @@ function QuotaCard({
           <TextField
             size="small"
             fullWidth
-            label={t("quota_label")}
+            label={t("group_quotas.label")}
             value={quota.label || ""}
             onChange={(event) => update({ label: event.target.value })}
           />
@@ -234,8 +225,8 @@ function QuotaCard({
             size="small"
             type="number"
             fullWidth
-            label={t("quota_limit")}
-            helperText={t("quota_limit_hint")}
+            label={t("group_quotas.limit")}
+            helperText={t("group_quotas.limit_hint")}
             value={limit > 0 ? limit : ""}
             inputProps={{ min: 0, inputMode: "numeric" }}
             onChange={(event) => {
@@ -244,7 +235,7 @@ function QuotaCard({
             }}
           />
           <Typography variant="body2" fontWeight={600}>
-            {t("quota_condition")}
+            {t("group_quotas.condition")}
           </Typography>
           <QlarrLogicBuilderInlineWrapper
             code="Survey"
@@ -254,11 +245,11 @@ function QuotaCard({
             designState={designState}
             mainLang={mainLang}
             langList={langList}
-            t={t}
+            t={tDesign}
           />
           <Box className={styles.cardFooter}>
             <IconButton
-              aria-label={t("delete")}
+              aria-label={t("action_btn.delete")}
               onClick={() => dispatch(removeQuota(quota.code))}
             >
               <DeleteOutline />
@@ -271,7 +262,7 @@ function QuotaCard({
 }
 
 /** "Gender includes Male and Age more than 18" from the quota's JSON Logic. */
-function describeCondition(logic, fields, t) {
+function describeCondition(logic, fields, t, tDesign) {
   if (!logic) return "";
   const tree = jsonLogicToTree(logic, fields);
   const fieldMap = new Map(fields.map((field) => [field.code, field]));
@@ -281,13 +272,13 @@ function describeCondition(logic, fields, t) {
       const field = fieldMap.get(rule.field);
       const operator = OPERATORS[rule.operator];
       const operatorLabel = operator
-        ? t(operator.labelKey, { defaultValue: operator.displayLabel })
+        ? tDesign(operator.labelKey, { defaultValue: operator.displayLabel })
         : rule.operator;
       return [field?.label || rule.field, operatorLabel, formatValue(rule.value, field)]
         .filter((part) => part !== "" && part != null)
         .join(" ");
     });
-  const joiner = tree.conjunction === "or" ? t("quota_or") : t("quota_and");
+  const joiner = tree.conjunction === "or" ? t("group_quotas.or") : t("group_quotas.and");
   return parts.join(` ${joiner} `);
 }
 
@@ -301,28 +292,4 @@ function formatValue(value, field) {
   return labels.join(", ");
 }
 
-/** Page/question codes a condition references, for outlining them on the canvas. */
-function referencedCodes(logic, componentIndex) {
-  const vars = [];
-  const collect = (node) => {
-    if (Array.isArray(node)) {
-      node.forEach(collect);
-    } else if (node && typeof node === "object") {
-      if (typeof node.var === "string") {
-        vars.push(node.var);
-      }
-      Object.values(node).forEach(collect);
-    }
-  };
-  collect(logic);
-  const componentCodes = (componentIndex || [])
-    .map((item) => item.code)
-    .filter((code) => isQuestion(code) || isGroup(code))
-    .sort((a, b) => b.length - a.length);
-  const codes = vars
-    .map((name) => componentCodes.find((code) => name === code || name.startsWith(code)))
-    .filter(Boolean);
-  return [...new Set(codes)];
-}
-
-export default React.memo(Quotas);
+export default React.memo(GroupQuotas);

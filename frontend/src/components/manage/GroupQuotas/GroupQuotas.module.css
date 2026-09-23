@@ -66,3 +66,7 @@
   flex-wrap: wrap;
   gap: 8px;
 }
+
+.cardHeaderStatic {
+  cursor: default;
+}

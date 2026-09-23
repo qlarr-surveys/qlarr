@@ -20,7 +20,6 @@ import {
   setDesignModeToDesign,
   setDesignModeToLang,
   setDesignModeToTheme,
-  setDesignModeToQuotas,
   refreshDsl,
 } from "~/state/design/designState";
 import { DESIGN_SURVEY_MODE } from "~/routes";
@@ -78,8 +77,6 @@ function DesignSurvey() {
       dispatch(setDesignModeToLang());
     } else if (designMode == DESIGN_SURVEY_MODE.THEME) {
       dispatch(setDesignModeToTheme());
-    } else if (designMode == DESIGN_SURVEY_MODE.QUOTAS) {
-      dispatch(setDesignModeToQuotas());
     } else {
       dispatch(setDesignModeToDesign());
     }

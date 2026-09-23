@@ -17,7 +17,6 @@ import {
   CONVERTIBLE_TEXT_TYPES,
   CONVERTIBLE_DATE_TIME_TYPES,
   languageSetup,
-  quotaSetup,
   setupOptions,
   themeSetup,
 } from "~/constants/design";
@@ -64,7 +63,6 @@ const reservedKeys = [
   "index",
   "skipScroll",
   "advancedByCode",
-  "quotaHighlight",
 ];
 
 export const designState = createSlice({
@@ -172,7 +170,6 @@ export const designState = createSlice({
         state.globalSetup = {};
       }
       delete state["setup"];
-      delete state["quotaHighlight"];
     },
     setDesignModeToDesign(state) {
       designState.caseReducers.resetSetup(state);
@@ -187,11 +184,6 @@ export const designState = createSlice({
       designState.caseReducers.resetSetup(state);
       designState.caseReducers.setup(state, { payload: themeSetup });
       state.designMode = DESIGN_SURVEY_MODE.THEME;
-    },
-    setDesignModeToQuotas(state) {
-      designState.caseReducers.resetSetup(state);
-      designState.caseReducers.setup(state, { payload: quotaSetup });
-      state.designMode = DESIGN_SURVEY_MODE.QUOTAS;
     },
     addQuota: (state) => {
       const survey = state.Survey;
@@ -221,10 +213,6 @@ export const designState = createSlice({
         (quota) => quota.code !== action.payload,
       );
       refreshQuotaInstructions(state);
-    },
-    // component codes the selected quota references, outlined on the canvas
-    setQuotaHighlight: (state, action) => {
-      state.quotaHighlight = action.payload;
     },
     changeAttribute: (state, action) => {
       let payload = action.payload;
@@ -1013,11 +1001,9 @@ export const {
   setDesignModeToDesign,
   setDesignModeToLang,
   setDesignModeToTheme,
-  setDesignModeToQuotas,
   addQuota,
   updateQuota,
   removeQuota,
-  setQuotaHighlight,
   removeAnswer,
   setup,
   clearHighlighted,

@@ -43,6 +43,7 @@
   "ai_prompt_placeholder": "bijv., Maak een klanttevredenheidsenquête voor een restaurant met vragen over voedselkwaliteit, service en sfeer",
   "ai_prompt_helper": "Beschrijf wat voor soort enquête je wilt aanmaken in zoveel mogelijk detail",
   "edit_survey": {
+    "total_responses": "Totaal aantal antwoorden",
     "add_logo": "Een enquêtelogo toevoegen",
     "export": "Enquête Exporteren",
     "close_title": "Enquête Sluiten",
@@ -422,6 +423,7 @@
     "email_changed": "Je e-mail is succesvol bijgewerkt!"
   },
   "tooltips": {
+    "group_quotas": "Quota's beperken hoeveel voltooide reacties een groep kan geven, bijv. 50 mannen en 50 vrouwen.\n\n● Elk quotum heeft een voorwaarde op basis van je vragen en een limiet\n● Respondenten worden gecontroleerd bij elke stap vooruit\n● Is het quotum waar ze bij horen vol, dan gaat de enquête naar het einde en wordt de reactie als gediskwalificeerd gemarkeerd\n● Raakt een quotum vol terwijl iemand bezig is, dan gaat die bij de volgende stap naar het einde",
     "quotas": "Schakel quota's in en stel limieten in voor het aantal reacties. Deze limiet geldt voor zowel online als offline enquête reacties, afhankelijk van hoe vaak offline reacties worden gesynchroniseerd.",
     "export": "Exporteer de enquête gegevens",
     "launch": "Je kunt de enquête instellingen aanpassen en je enquête publiceren",
@@ -639,5 +641,23 @@
     "question_type_text_display": "Tekst Weergave",
     "question_type_image_display": "Afbeelding Weergave",
     "question_type_video_display": "Video Weergave"
+  },
+  "group_quotas": {
+    "title": "Groepsquota",
+    "description": "Beperk hoeveel voltooide reacties elke groep respondenten kan geven. Een respondent die bij een vol quotum hoort, gaat naar het einde en wordt als gediskwalificeerd gemarkeerd.",
+    "empty": "Nog geen quota's.",
+    "add": "Quotum toevoegen",
+    "untitled": "Quotum zonder titel",
+    "no_condition": "Geen voorwaarde ingesteld",
+    "full": "Vol",
+    "no_limit": "geen limiet",
+    "condition_error": "Deze voorwaarde verwijst naar een vraag of optie die niet meer bestaat.",
+    "label": "Label",
+    "limit": "Limiet",
+    "limit_hint": "Toegestane voltooide reacties. Leeg laten voor geen limiet.",
+    "condition": "Telt respondenten waarbij",
+    "and": "en",
+    "or": "of",
+    "unpublished_note": "Wijzigingen in quota's worden van kracht zodra je de enquête publiceert."
   }
 }

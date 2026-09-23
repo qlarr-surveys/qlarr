@@ -45,6 +45,7 @@
   },
   "create_survey_with_ai": "Umfrage mit KI erstellen",
   "edit_survey": {
+    "total_responses": "Antworten insgesamt",
     "add_logo": "Umfrage-Logo hinzufügen",
     "active_mode": "Umfrage ist aktiv",
     "can_lock_survey": "Erlauben Sie Vermessern, die Vermessung zu sperren",
@@ -420,6 +421,7 @@
   "timezone_info": "Wir verwenden Ihre lokale Zeitzone, um die Ablaufzeit der Umfrage zu berechnen.",
   "timezone_tooltip": "Die Umfrage läuft um 00:00 Uhr am ausgewählten Enddatum in Ihrer lokalen Zeitzone ab",
   "tooltips": {
+    "group_quotas": "Quoten begrenzen, wie viele abgeschlossene Antworten eine Gruppe abgeben kann, z. B. 50 männliche und 50 weibliche Teilnehmende.\n\n● Jede Quote hat eine Bedingung aus Ihren Fragen und ein Limit\n● Teilnehmende werden bei jedem Schritt vorwärts geprüft\n● Ist eine Quote, der sie entsprechen, voll, springt die Umfrage zum Ende und die Antwort wird als disqualifiziert markiert\n● Füllt sich eine Quote, während jemand antwortet, wird er beim nächsten Schritt zum Ende geleitet",
     "create_new_survey": "Erstellen Sie eine neue Umfrage von Grund auf mit einer leeren Vorlage",
     "create_survey_with_ai": "Erstellen Sie automatisch eine neue Umfrage mit KI-Unterstützung",
     "export": "Exportieren Sie die Umfragedaten",
@@ -640,5 +642,23 @@
     "question_type_text_display": "Textanzeige",
     "question_type_image_display": "Bildanzeige",
     "question_type_video_display": "Videoanzeige"
+  },
+  "group_quotas": {
+    "title": "Gruppenquoten",
+    "description": "Begrenzen Sie, wie viele abgeschlossene Antworten jede Gruppe von Teilnehmenden abgeben kann. Wer einer vollen Quote entspricht, springt zum Ende und wird als disqualifiziert markiert.",
+    "empty": "Noch keine Quoten.",
+    "add": "Quote hinzufügen",
+    "untitled": "Unbenannte Quote",
+    "no_condition": "Keine Bedingung festgelegt",
+    "full": "Voll",
+    "no_limit": "kein Limit",
+    "condition_error": "Diese Bedingung verweist auf eine Frage oder Option, die nicht mehr existiert.",
+    "label": "Bezeichnung",
+    "limit": "Limit",
+    "limit_hint": "Erlaubte abgeschlossene Antworten. Leer lassen für kein Limit.",
+    "condition": "Zählt Teilnehmende, bei denen",
+    "and": "und",
+    "or": "oder",
+    "unpublished_note": "Änderungen an Quoten werden wirksam, sobald Sie die Umfrage veröffentlichen."
   }
 }

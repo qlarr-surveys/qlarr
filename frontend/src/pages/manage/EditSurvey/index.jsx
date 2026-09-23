@@ -9,6 +9,7 @@ import styles from "./EditSurvey.module.css";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import SurveyQuota from "~/components/manage/SurveyQuota";
+import GroupQuotas from "~/components/manage/GroupQuotas";
 import LaunchPage from "../Launch/launch";
 import ExportSurvey from "~/components/manage/ExportSurvey";
 import { useSelector } from "react-redux";
@@ -16,10 +17,16 @@ import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import NavigationSettings from "~/components/manage/NavigationSettings";
 import SurveyOffline from '../SurveyOffline';
 import SurveyPrivacy from '../SurveyPrivacy';
+import { isSurveyAdmin } from "~/constants/roles";
+import { SURVEY_STATUS } from "~/constants/survey";
 
 function EditSurvey({ onPublish }) {
   const { t } = useTranslation(NAMESPACES.MANAGE);
   const survey = useSelector((state) => state.editState.survey);
+  const designReady = useSelector(
+    (state) =>
+      !!state.designState.designStateReceived && !!state.designState.Survey
+  );
 
   const combinedSections = [
     {
@@ -43,7 +50,23 @@ function EditSurvey({ onPublish }) {
     {
       id: "quotas",
       title: t("edit_survey.quotas"),
-      component: <SurveyQuota />
+      component: (
+        <Box display="flex" flexDirection="column" gap={4}>
+          <Box display="flex" flexDirection="column" gap={2}>
+            <Typography color="#1a2052" fontWeight="600" variant="subtitle1">
+              {t("edit_survey.total_responses")}
+            </Typography>
+            <SurveyQuota />
+          </Box>
+          {designReady && (
+            <GroupQuotas
+              disabled={
+                !isSurveyAdmin() || survey?.status == SURVEY_STATUS.CLOSED
+              }
+            />
+          )}
+        </Box>
+      ),
     },
     {
       id: "export",

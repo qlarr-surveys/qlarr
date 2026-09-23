@@ -530,20 +530,5 @@
   "tour_step9_intro": "Configurez la collecte de données, l'accès à l'enquête, la navigation, les quotas et les règles de réponse avant la publication.",
   "tour_step9_next": "Suivant : Réponses",
   "tour_step10_title": "Réponses",
-  "tour_step10_intro": "Suivez les réponses et les analyses, examinez les résultats et gérez ou exportez vos données.",
-  "quotas": "Quotas",
-  "quotas_description": "Limitez le nombre de réponses complètes que chaque groupe de répondants peut donner. Un répondant correspondant à un quota plein passe à la fin et est marqué comme disqualifié.",
-  "quotas_empty": "Aucun quota pour le moment.",
-  "add_quota": "Ajouter un quota",
-  "quota_untitled": "Quota sans titre",
-  "quota_no_condition": "Aucune condition définie",
-  "quota_full": "Plein",
-  "quota_no_limit": "sans limite",
-  "quota_condition_error": "Cette condition fait référence à une question ou une option qui n'existe plus.",
-  "quota_label": "Libellé",
-  "quota_limit": "Limite",
-  "quota_limit_hint": "Réponses complètes autorisées. Laisser vide pour aucune limite.",
-  "quota_condition": "Compte les répondants lorsque",
-  "quota_and": "et",
-  "quota_or": "ou"
+  "tour_step10_intro": "Suivez les réponses et les analyses, examinez les résultats et gérez ou exportez vos données."
 }

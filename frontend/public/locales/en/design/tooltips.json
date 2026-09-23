@@ -107,6 +107,5 @@
   "allow_previous": "Allow respondents to navigate back to previous pages to review or change their answers.",
   "allow_jump": "Enable a survey index so respondents can jump to any page in the survey.",
   "allow_incomplete": "Let respondents save their progress and return later to complete the survey.",
-  "skip_invalid": "Allow respondents to proceed even if some answers are invalid, enforcing validation only when they submit the survey.",
-  "quotas": "Quotas cap how many completed responses a group can give, e.g. 50 male and 50 female respondents.\n\n● Each quota has a condition built from your questions and a limit\n● Respondents are checked each time they move forward\n● If a quota they match is full, the survey skips to the end and the response is marked disqualified\n● A quota that fills while someone is answering sends them to the end on their next move"
+  "skip_invalid": "Allow respondents to proceed even if some answers are invalid, enforcing validation only when they submit the survey."
 }
