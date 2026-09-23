@@ -1455,18 +1455,31 @@ const wrapIfNested = (nested, text) => {
   return (nested ? "(" : "") + text + (nested ? ")" : "");
 };
 
-const capture = (value, type) => {
+const DATE_TIME_TYPES = ["date", "date_time", "time"];
+const SQL_DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
+
+const toSqlDateTimeLiteral = (value, type) => {
   if (type == "time") {
-    return `QlarrScripts.sqlDateTimeToDate(\"1970-01-01 ${integerToTime(
-      value,
-    )}\")`;
-  } else if (
-    typeof value === "object" &&
-    Object.prototype.toString.call(value) === "[object Date]"
-  ) {
-    return type == "date_time"
-      ? `QlarrScripts.sqlDateTimeToDate(\"${toSqlDateTime(value)}\")`
-      : `QlarrScripts.sqlDateTimeToDate(\"${toSqlDateTimeIgnoreTime(value)}\")`;
+    return `1970-01-01 ${typeof value === "number" ? integerToTime(value) : value}`;
+  }
+  return SQL_DATE_ONLY.test(value) ? `${value} 00:00:00` : value;
+};
+
+const capture = (value, type) => {
+  if (DATE_TIME_TYPES.indexOf(type) > -1) {
+    if (Object.prototype.toString.call(value) === "[object Date]") {
+      return `QlarrScripts.sqlDateTimeToDate(\"${
+        type == "date_time"
+          ? toSqlDateTime(value)
+          : toSqlDateTimeIgnoreTime(value)
+      }\")`;
+    }
+    if (value != null && typeof value !== "object") {
+      return `QlarrScripts.sqlDateTimeToDate(\"${toSqlDateTimeLiteral(
+        value,
+        type,
+      )}\")`;
+    }
   }
   if (typeof value === "object") {
     return value[Object.keys(value)[0]];
