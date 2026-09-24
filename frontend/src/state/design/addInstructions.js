@@ -1359,11 +1359,24 @@ const jsonToJs = (json, nested, getComponentType, getQuestionType) => {
     case "between":
     case "not_between":
       let type = getComponentType(capture(value[0]));
-      let leftOperand =
-        type == "date" || type == "date_time" || type == "time"
-          ? `QlarrScripts.sqlDateTimeToDate(${capture(value[0])}.value)`
-          : `${capture(value[0])}.value`;
+      let isDateType =
+        type == "date" || type == "date_time" || type == "time";
+      let leftOperand = isDateType
+        ? `QlarrScripts.sqlDateTimeToDate(${capture(value[0])}.value)`
+        : `${capture(value[0])}.value`;
       if (["==", "!=", "<", "<=", ">", ">="].includes(key)) {
+        // Date/time operands are Date objects. `==` / `!=` between two
+        // objects compare references (always false / true), so compare their
+        // timestamps instead. Relational operators (< <= > >=) already coerce
+        // Dates to numbers, so they're left unchanged. Skip when the right
+        // operand is a field reference (object), which has no `.getTime()`.
+        if (
+          isDateType &&
+          (key == "==" || key == "!=") &&
+          typeof value[1] !== "object"
+        ) {
+          return `${leftOperand}.getTime()${key}${capture(value[1], type)}.getTime()`;
+        }
         return `${leftOperand}${key}${capture(value[1], type)}`;
       } else if (key == "between") {
         return wrapIfNested(
