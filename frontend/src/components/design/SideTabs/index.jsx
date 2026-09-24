@@ -2,13 +2,7 @@ import { List, ListItem, ListItemButton, ListItemIcon } from "@mui/material";
 import TableRowsIcon from "@mui/icons-material/TableRows";
 import styles from "./SideTabs.module.css";
 import React from "react";
-import {
-  Edit,
-  LowPriority,
-  Palette,
-  Settings,
-  Translate,
-} from "@mui/icons-material";
+import { Edit, Palette, Settings, Translate } from "@mui/icons-material";
 import {
   DESIGN_SURVEY_MODE,
   MANAGE_SURVEY_LANDING_PAGES,
@@ -22,9 +16,7 @@ import {
   setDesignModeToDesign,
   setDesignModeToLang,
   setDesignModeToTheme,
-  setup,
 } from "~/state/design/designState";
-import { surveySetup } from "~/constants/design";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 
 function SideTabs({ selectedPage, onPageChange, availablePages, surveyId }) {
@@ -107,18 +99,6 @@ function SideTabs({ selectedPage, onPageChange, availablePages, surveyId }) {
               onClick={() => {
                 onPageChange(MANAGE_SURVEY_LANDING_PAGES.DESIGN);
                 dispatch(setDesignModeToLang());
-              }}
-            />
-            <SideTab
-              dataTour="side-tab-order-priority"
-              tooltip={t("order_priority")}
-              link={routes.designSurvey.replace(":surveyId", surveyId)}
-              buttonSx={getTabButtonSx(orderPriorityActive)}
-              icon={<LowPriority sx={{ color: "#fff" }} />}
-              onClick={() => {
-                onPageChange(MANAGE_SURVEY_LANDING_PAGES.DESIGN);
-                dispatch(setDesignModeToDesign());
-                dispatch(setup(surveySetup));
               }}
             />
           </>
