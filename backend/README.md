@@ -54,10 +54,10 @@ parts: native queries, JSONB, the response-index trigger).
 
 ## Designer code
 
-Design edits made on the server can run the designer's own Redux slice
-(`frontend/src/state/design/designState.js`), so a text written here gets the
-same format instructions and resources as one typed in the designer
-(`src/modules/design/design-slice.ts`). `frontend-src/loader.mjs` maps `~/` to
+Design edits made on the server run the designer's own Redux actions
+(`frontend/src/state/design/designState.js`) through `applyDesignActions`
+(`src/modules/design/design-slice.ts`), so an edit made here comes out exactly as
+one made in the designer. `frontend-src/loader.mjs` maps `~/` to
 `../frontend/src` and transpiles it; every start script and the Docker `CMD`
 register it with `--import ./frontend-src/register.mjs`. The slice must keep
 importing pure modules only (no React/MUI). Its package imports
