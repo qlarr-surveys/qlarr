@@ -39,3 +39,13 @@ test('writes a text the way the designer does', async () => {
 test('returns no components when nothing changes', async () => {
   assert.deepEqual(await applyContentChanges(await newDesign(), []), {});
 });
+
+test('loads a survey that has no defaultLang', async () => {
+  const design = await newDesign();
+  delete design.designerInput.state.Survey.defaultLang;
+  const code = firstGroup(design);
+
+  const diff = await applyContentChanges(design, [{ code, lang: 'en', key: 'label', value: '<p>Hi</p>' }]);
+
+  assert.equal(diff[code].content.en.label, '<p>Hi</p>');
+});

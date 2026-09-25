@@ -48,6 +48,7 @@ import {
   updatePriorityByRule,
 } from "./addInstructions";
 import { defaultSurveyTheme } from "~/constants/surveyTheme";
+import { LANGUAGE_DEF } from "~/constants/language";
 
 const reservedKeys = [
   "setup",
