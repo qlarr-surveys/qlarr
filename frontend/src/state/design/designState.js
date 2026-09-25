@@ -1,8 +1,10 @@
 import { createSlice, current } from "@reduxjs/toolkit";
-import { firstIndexInArray, isEquivalent, nextId, buildCodeIndex } from "~/utils/design/utils";
-import { createGroup } from "~/components/design/NewComponentsPanel";
+// Pure modules only (no React/MUI): the backend runs this slice in Node through
+// backend/frontend-src/loader.mjs.
+import { firstIndexInArray, isEquivalent, nextId, buildCodeIndex } from "~/utils/design/pureUtils";
+import { createGroup } from "~/components/design/NewComponentsPanel/groupFactory";
 
-import { lastIndexInArray } from "~/utils/design/utils";
+import { lastIndexInArray } from "~/utils/design/pureUtils";
 import cloneDeep from "lodash.clonedeep";
 import {
   buildValidationDefaultData,
@@ -27,7 +29,7 @@ import { convertDateTimeQuestion } from "./convertDateTimeQuestion";
 import {
   createQuestion,
   questionDesignError,
-} from "~/components/Questions/utils";
+} from "~/components/Questions/questionFactory";
 import { DESIGN_SURVEY_MODE } from "~/routes";
 import {
   addAnswerInstructions,
@@ -45,7 +47,7 @@ import {
   updateRandomByRule,
   updatePriorityByRule,
 } from "./addInstructions";
-import { defaultSurveyTheme } from "~/constants/theme";
+import { defaultSurveyTheme } from "~/constants/surveyTheme";
 
 const reservedKeys = [
   "setup",

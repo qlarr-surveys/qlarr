@@ -9,10 +9,12 @@ on:
     branches: [main]
     paths:
       - "backend/**"
+      - "frontend/src/**"
       - ".github/workflows/backend-tests.yaml"
   pull_request:
     paths:
       - "backend/**"
+      - "frontend/src/**"
       - ".github/workflows/backend-tests.yaml"
   workflow_dispatch: {}
 
@@ -43,6 +45,9 @@ jobs:
 
       - name: unit tests
         run: npm run test:unit
+
+      - name: designer slice tests (frontend/src reducer through the loader)
+        run: npm run test:slice
 
       - name: integration tests (Testcontainers → Postgres)
         run: npm run test:int

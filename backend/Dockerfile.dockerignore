@@ -1,0 +1,17 @@
+# The build context is the repo root (see Dockerfile). Send only what the image
+# uses: the backend, and frontend/src for the designer's Redux slice.
+*
+!backend
+!frontend/src
+backend/node_modules
+backend/dist
+backend/coverage
+backend/test
+backend/docs
+backend/**/*.log
+backend/.env
+backend/.env.*
+!backend/.env.example
+backend/Dockerfile
+backend/Dockerfile.dockerignore
+backend/README.md
