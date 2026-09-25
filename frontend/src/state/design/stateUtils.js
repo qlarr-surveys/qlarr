@@ -1,5 +1,3 @@
-import { all } from 'axios';
-
 export const buildValidationDefaultData = (rule) => {
   switch (rule) {
     case "validation_required":

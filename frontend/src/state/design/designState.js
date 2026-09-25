@@ -1,8 +1,6 @@
-import { createSlice, current } from "@reduxjs/toolkit";
-import { firstIndexInArray, isEquivalent, nextId, buildCodeIndex } from "~/utils/design/utils";
-import { createGroup } from "~/components/design/NewComponentsPanel";
-
-import { lastIndexInArray } from "~/utils/design/utils";
+import { createSlice } from "@reduxjs/toolkit";
+import { firstIndexInArray, isEquivalent, nextId, lastIndexInArray, buildCodeIndex } from "~/utils/design/pureUtils";
+import { createGroup } from "~/components/design/NewComponentsPanel/groupFactory";
 import cloneDeep from "lodash.clonedeep";
 import {
   buildValidationDefaultData,
@@ -27,7 +25,7 @@ import { convertDateTimeQuestion } from "./convertDateTimeQuestion";
 import {
   createQuestion,
   questionDesignError,
-} from "~/components/Questions/utils";
+} from "~/components/Questions/questionFactory";
 import { DESIGN_SURVEY_MODE } from "~/routes";
 import {
   addAnswerInstructions,
@@ -45,7 +43,8 @@ import {
   updateRandomByRule,
   updatePriorityByRule,
 } from "./addInstructions";
-import { defaultSurveyTheme } from "~/constants/theme";
+import { defaultSurveyTheme } from '~/constants/surveyTheme';
+import { LANGUAGE_DEF } from "~/constants/language";
 
 const reservedKeys = [
   "setup",

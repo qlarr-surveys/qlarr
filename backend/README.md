@@ -45,11 +45,25 @@ curl http://localhost:8080/health
 npm run test:unit    # fast, no Docker
 npm run test:int     # integration — spins up real Postgres via Testcontainers (needs Docker)
 npm run test:e2e     # end-to-end app boot
+npm run test:slice   # the designer's Redux slice through the loader (after npm run build)
 ```
 
 `test:int` / `test:e2e` require a running Docker daemon (Testcontainers throws
 away a real Postgres per run — the only faithful coverage for the SQL-level
 parts: native queries, JSONB, the response-index trigger).
+
+## Designer code
+
+Design edits made on the server run the designer's own Redux actions
+(`frontend/src/state/design/designState.js`) through `applyDesignActions`
+(`src/modules/design/design-slice.ts`), so an edit made here comes out exactly as
+one made in the designer. `frontend-src/loader.mjs` maps `~/` to
+`../frontend/src` and transpiles it; every start script and the Docker `CMD`
+register it with `--import ./frontend-src/register.mjs`. The slice must keep
+importing pure modules only (no React/MUI). Its package imports
+(`@reduxjs/toolkit`, `lodash.clonedeep`) resolve from the backend's
+`node_modules`, so they are backend dependencies too. The Docker image is built
+from the repo root so it can carry `frontend/src`: `docker build -f backend/Dockerfile .`
 
 ## Storage
 

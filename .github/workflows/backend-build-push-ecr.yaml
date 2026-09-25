@@ -10,6 +10,8 @@ on:
     branches: [main]
     paths:
       - "backend/**"
+      # The image ships frontend/src for the designer slice the backend runs.
+      - "frontend/src/**"
       - ".github/workflows/backend-build-push-ecr.yaml"
   workflow_dispatch: {}
 
@@ -48,8 +50,8 @@ jobs:
         id: build-amd64
         uses: docker/build-push-action@v6
         with:
-          # The backend now lives in a subfolder of this repo.
-          context: backend
+          # Repo root: the image also carries frontend/src (see backend/Dockerfile).
+          context: .
           file: backend/Dockerfile
           push: true
           platforms: amd64
@@ -61,7 +63,7 @@ jobs:
         id: build-arm64
         uses: docker/build-push-action@v6
         with:
-          context: backend
+          context: .
           file: backend/Dockerfile
           push: true
           platforms: arm64

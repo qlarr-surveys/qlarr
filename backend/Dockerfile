@@ -7,16 +7,22 @@
 # of the box and would break on musl/alpine. No native compilation happens
 # (sharp/ffmpeg use prebuilds; bcryptjs/pg/yauzl/yazl are pure JS), so the slim
 # image with no build-essential is sufficient.
+#
+# Build context is the repo ROOT (docker build -f backend/Dockerfile .): the
+# backend runs the designer's Redux slice from ../frontend/src through
+# frontend-src/loader.mjs, so the image keeps frontend/src next to backend/, as
+# in the repo. Only the source is copied; its imports resolve from the backend's
+# node_modules. Dockerfile.dockerignore keeps the rest of the repo out.
 
 # ---- Builder: install all deps and compile TS -> dist/ ----
 FROM node:20-bookworm-slim AS builder
-WORKDIR /app
+WORKDIR /app/backend
 
 # package-lock.json is committed, so use the reproducible `npm ci`.
-COPY package*.json ./
+COPY backend/package*.json ./
 RUN npm ci
 
-COPY . .
+COPY backend/ ./
 RUN npm run build
 
 # ---- Runner: prod deps only + compiled output ----
@@ -26,12 +32,14 @@ ENV NODE_ENV=production
 # pin the process zone so pg builds/reads Dates in UTC and no DST gap can drift a
 # value. Set here (before node starts) so it can't be missed at runtime.
 ENV TZ=UTC
-WORKDIR /app
+WORKDIR /app/backend
 
-COPY package*.json ./
+COPY backend/package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/backend/dist ./dist
+COPY backend/frontend-src ./frontend-src
+COPY frontend/src /app/frontend/src
 
 # Default port (overridable at runtime via PORT).
 EXPOSE 8080
@@ -39,4 +47,4 @@ EXPOSE 8080
 # Drop root.
 USER node
 
-CMD ["node", "dist/main.js"]
+CMD ["node", "--import", "./frontend-src/register.mjs", "dist/main.js"]
