@@ -19,7 +19,7 @@ export interface DesignAction {
  */
 export interface DesignActions {
   changeContent(change: ContentChange): DesignAction;
-  [name: string]: (payload?: unknown) => DesignAction;
+  designStateReceived(design: DesignDto): DesignAction;
 }
 
 type ReduxDesignState = Record<string, unknown>;
