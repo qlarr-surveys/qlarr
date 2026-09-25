@@ -60,8 +60,10 @@ same format instructions and resources as one typed in the designer
 (`src/modules/design/design-slice.ts`). `frontend-src/loader.mjs` maps `~/` to
 `../frontend/src` and transpiles it; every start script and the Docker `CMD`
 register it with `--import ./frontend-src/register.mjs`. The slice must keep
-importing pure modules only (no React/MUI). The Docker image is built from the
-repo root so it can carry `frontend/src`: `docker build -f backend/Dockerfile .`
+importing pure modules only (no React/MUI). Its package imports
+(`@reduxjs/toolkit`, `lodash.clonedeep`, `axios`) resolve from the backend's
+`node_modules`, so they are backend dependencies too. The Docker image is built
+from the repo root so it can carry `frontend/src`: `docker build -f backend/Dockerfile .`
 
 ## Storage
 

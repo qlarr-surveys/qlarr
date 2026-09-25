@@ -1,10 +1,6 @@
-import { createSlice, current } from "@reduxjs/toolkit";
-// Pure modules only (no React/MUI): the backend runs this slice in Node through
-// backend/frontend-src/loader.mjs.
-import { firstIndexInArray, isEquivalent, nextId, buildCodeIndex } from "~/utils/design/pureUtils";
+import { createSlice } from "@reduxjs/toolkit";
+import { firstIndexInArray, isEquivalent, nextId, lastIndexInArray, buildCodeIndex } from "~/utils/design/pureUtils";
 import { createGroup } from "~/components/design/NewComponentsPanel/groupFactory";
-
-import { lastIndexInArray } from "~/utils/design/pureUtils";
 import cloneDeep from "lodash.clonedeep";
 import {
   buildValidationDefaultData,
@@ -47,7 +43,7 @@ import {
   updateRandomByRule,
   updatePriorityByRule,
 } from "./addInstructions";
-import { defaultSurveyTheme } from "~/constants/surveyTheme";
+import { defaultSurveyTheme } from '~/constants/surveyTheme';
 import { LANGUAGE_DEF } from "~/constants/language";
 
 const reservedKeys = [
