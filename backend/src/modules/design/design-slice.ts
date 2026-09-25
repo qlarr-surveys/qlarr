@@ -14,8 +14,8 @@ export interface DesignAction {
 }
 
 /**
- * The designer's action creators (`designState.actions`), by reducer name:
- * `changeContent`, `changeAttribute`, … Payloads are typed where known.
+ * The designer's action creators (`designState.actions`) the backend runs, by
+ * reducer name. To run another action, add it here with its payload type.
  */
 export interface DesignActions {
   changeContent(change: ContentChange): DesignAction;
