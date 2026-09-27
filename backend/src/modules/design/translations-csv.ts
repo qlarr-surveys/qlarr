@@ -24,8 +24,25 @@ export interface ContentChange {
 const FIXED = ['code', 'key'];
 const BOM = String.fromCharCode(0xfeff);
 
+/** How the editor saves a paragraph of text. */
+const P_OPEN = '<p style="margin: 0px;">';
+const P_CLOSE = '</p>';
+
+const inEditorParagraph = (v: string) => v.startsWith(P_OPEN) && v.endsWith(P_CLOSE);
+
+/**
+ * The text inside the editor's paragraph, so translators see `Yes` instead of
+ * `<p style="margin: 0px;">Yes</p>`. Several paragraphs stay HTML, and so does
+ * a text Excel would read as a formula (`=`, `+`, `-`, `@`).
+ */
+function unwrap(v: string): string {
+  if (!inEditorParagraph(v)) return v;
+  const inner = v.slice(P_OPEN.length, -P_CLOSE.length);
+  return inner.includes(P_CLOSE) || /^[=+\-@]/.test(inner) ? v : inner;
+}
+
 const isText = (v: unknown): v is string =>
-  typeof v === 'string' && v.trim() !== '';
+  typeof v === 'string' && unwrap(v).trim() !== '';
 
 /** Base language first, then the additional ones (the designer's `languagesList`). */
 function surveyLangs(state: DesignState): { mainLang: string; langs: string[] } {
@@ -53,7 +70,7 @@ export function toCsvRows(state: DesignState): string[][] {
   walk(state, 'Survey', (code, comp) => {
     for (const [key, value] of Object.entries(comp.content?.[mainLang] ?? {})) {
       if (!isText(value)) continue;
-      const values = langs.map((l) => String(comp.content?.[l]?.[key] ?? ''));
+      const values = langs.map((l) => unwrap(String(comp.content?.[l]?.[key] ?? '')));
       rows.push([code, key, ...values]);
     }
   });
@@ -115,11 +132,16 @@ export function csvChanges(
 
   for (const [code, key, ...values] of body) {
     const content = state[code]?.content;
-    if (!isText(content?.[mainLang]?.[key])) continue;
+    const base = content?.[mainLang]?.[key];
+    if (!isText(base)) continue;
+    const wrap = inEditorParagraph(base);
     columns.forEach((lang, i) => {
-      const value = values[i];
-      if (!value || !allowed.has(lang)) return;
-      if (value === content?.[lang]?.[key]) return;
+      const cell = values[i];
+      if (!cell || !allowed.has(lang)) return;
+      // The export took the editor's paragraph off, so put it back.
+      const value = wrap && !cell.startsWith('<p') ? P_OPEN + cell + P_CLOSE : cell;
+      const saved = String(content?.[lang]?.[key] ?? '');
+      if (unwrap(value) === unwrap(saved)) return;
       changes.push({ code, lang, key, value });
     });
   }

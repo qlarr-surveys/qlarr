@@ -131,3 +131,59 @@ describe('csvChanges', () => {
     ]);
   });
 });
+
+describe("the editor's paragraph", () => {
+  const p = (text: string) => `<p style="margin: 0px;">${text}</p>`;
+
+  const edited = (): DesignState => ({
+    Survey: {
+      defaultLang: { code: 'en' },
+      additionalLang: [{ code: 'ar' }],
+      children: [{ code: 'Q1', qualifiedCode: 'Q1' }],
+    },
+    Q1: {
+      content: {
+        en: { label: p('Rate <strong>us</strong> &amp; win'), description: p('One') + p('Two') },
+        ar: { label: p('قيّمنا') },
+      },
+      children: ['A1', 'A2', 'A3'].map((code) => ({ code, qualifiedCode: `Q1${code}` })),
+    },
+    Q1A1: { content: { en: { label: p('-5 or less') } } },
+    Q1A2: { content: { en: { label: p('') } } },
+    // ar saved without the paragraph
+    Q1A3: { content: { en: { label: p('Yes') }, ar: { label: 'نعم' } } },
+  });
+
+  it('exports the text inside a single paragraph', () => {
+    expect(toCsvRows(edited())).toEqual([
+      ['code', 'key', 'en', 'ar'],
+      ['Q1', 'label', 'Rate <strong>us</strong> &amp; win', 'قيّمنا'],
+      // several paragraphs stay HTML
+      ['Q1', 'description', p('One') + p('Two'), ''],
+      // Excel would read a leading - as a formula
+      ['Q1A1', 'label', p('-5 or less'), ''],
+      // Q1A2 is empty inside its paragraph, so it has no row
+      ['Q1A3', 'label', 'Yes', 'نعم'],
+    ]);
+  });
+
+  it('puts the paragraph back on import, unless the cell has its own', () => {
+    const rows = [
+      ['code', 'key', 'ar'],
+      ['Q1', 'label', 'قيّمنا الآن'],
+      ['Q1', 'description', 'واحد'],
+      ['Q1A1', 'label', '<p>-٥ أو أقل</p>'],
+      ['Q1A3', 'label', 'نعم'],
+    ];
+    expect(csvChanges(rows, edited(), false)).toEqual([
+      { code: 'Q1', lang: 'ar', key: 'label', value: p('قيّمنا الآن') },
+      { code: 'Q1', lang: 'ar', key: 'description', value: p('واحد') },
+      { code: 'Q1A1', lang: 'ar', key: 'label', value: '<p>-٥ أو أقل</p>' },
+    ]);
+  });
+
+  it('finds nothing to change in a file exported from the same survey', () => {
+    const s = edited();
+    expect(csvChanges(parseCsv(toCsv(toCsvRows(s))), s, true)).toEqual([]);
+  });
+});
