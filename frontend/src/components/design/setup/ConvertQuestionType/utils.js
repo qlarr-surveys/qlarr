@@ -1,4 +1,4 @@
-import { isSingleSelect, mediaGroup, ARRAY_MIN_WIDTH_KEYS, setupOptions } from "~/constants/design";
+import { isSingleSelect, mediaGroup, ARRAY_MIN_WIDTH_KEYS, setupOptions } from "@qlarr/design-core/constants/design";
 
 const getValidationRules = (type) => {
   const sections = setupOptions(type);

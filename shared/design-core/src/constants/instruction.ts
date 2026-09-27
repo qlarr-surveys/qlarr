@@ -1,3 +1,4 @@
+// @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
 export const INSTRUCTION_SYNTAX_PATTERN = /\{\{[^}]*\}\}/g;
 
 export const DISPLAY_INDEX_PATTERN = /^Q\d+$/;

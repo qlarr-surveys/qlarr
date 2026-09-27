@@ -13,8 +13,8 @@ import { useDrag, useDrop } from "react-dnd";
 
 import ActionToolbar from "~/components/design/ActionToolbar";
 import QuestionDesignBody from "./QuestionDesignBody";
-import { setupOptions } from "~/constants/design";
-import { DESIGN_SURVEY_MODE } from "~/routes";
+import { setupOptions } from "@qlarr/design-core/constants/design";
+import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
 
 function QuestionDesign({
   code,

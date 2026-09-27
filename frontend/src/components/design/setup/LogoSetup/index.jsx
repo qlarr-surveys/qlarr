@@ -21,7 +21,7 @@ import {
   LOGO_ALIGNMENT_DEFAULT,
   LOGO_SIZE_DEFAULT,
   LOGO_SPACING_DEFAULT,
-} from "~/constants/design";
+} from "@qlarr/design-core/constants/design";
 import styles from "./LogoSetup.module.css";
 
 function LogoSetup({ t }) {

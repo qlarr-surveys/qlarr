@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { changeAttribute, updatePriority } from "~/state/design/designState";
 import styles from "./PrioritySetup.module.css";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
-import { instructionByCode } from "~/state/design/addInstructions";
+import { instructionByCode } from "@qlarr/design-core/state/addInstructions";
 import { stripTags } from "~/utils/design/utils";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";

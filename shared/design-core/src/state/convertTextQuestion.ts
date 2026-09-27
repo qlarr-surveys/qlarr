@@ -1,4 +1,5 @@
-import { setupOptions } from "~/constants/design";
+// @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
+import { setupOptions } from "../constants/design";
 import { removeInstruction } from "./addInstructions";
 
 export function convertTextQuestion(currentQuestion, newType) {

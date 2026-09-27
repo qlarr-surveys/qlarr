@@ -23,7 +23,7 @@ import { useService } from "~/hooks/use-service";
 import { buildResourceUrl } from "~/networking/common";
 import DynamicSvg from "~/components/DynamicSvg";
 import { contentEditable, inDesign } from "~/routes";
-import { setupOptions } from "~/constants/design";
+import { setupOptions } from "@qlarr/design-core/constants/design";
 import { Build } from "@mui/icons-material";
 import ContentEditor from "~/components/design/ContentEditor";
 import InlineCodeEditor from "~/components/design/InlineCodeEditor";

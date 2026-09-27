@@ -10,8 +10,8 @@ export {
   isGroup,
   buildCodeIndex,
   stripTags,
-} from "./pureUtils";
-import { isEquivalent } from "./pureUtils";
+} from "@qlarr/design-core/utils/pureUtils";
+import { isEquivalent } from "@qlarr/design-core/utils/pureUtils";
 
 export const diff = (obj1, obj2) => {
   if (!obj2 || Object.prototype.toString.call(obj2) !== "[object Object]") {

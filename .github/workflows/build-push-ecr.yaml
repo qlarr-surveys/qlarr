@@ -40,7 +40,7 @@ jobs:
         id: build-amd64
         uses: docker/build-push-action@v6
         with:
-          context: frontend
+          context: .
           file: frontend/Dockerfile
           push: true
           platforms: amd64
@@ -52,7 +52,7 @@ jobs:
         id: build-arm64
         uses: docker/build-push-action@v6
         with:
-          context: frontend
+          context: .
           file: frontend/Dockerfile
           push: true
           platforms: arm64

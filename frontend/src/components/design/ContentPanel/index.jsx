@@ -17,7 +17,7 @@ import {
   changeResources,
   setup,
 } from "~/state/design/designState";
-import { DESIGN_SURVEY_MODE } from "~/routes";
+import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
 import { buildResourceUrl } from "~/networking/common";
 import { useLogoUpload } from "~/hooks/useLogoUpload";
 import {
@@ -26,7 +26,7 @@ import {
   LOGO_SIZE_DEFAULT,
   LOGO_SIZE_DIMENSIONS,
   LOGO_SPACING_DEFAULT,
-} from "~/constants/design";
+} from "@qlarr/design-core/constants/design";
 import { qlarrCssVars } from "~/components/Questions/qlarrVars";
 
 const ALIGNMENT_TO_FLEX = {

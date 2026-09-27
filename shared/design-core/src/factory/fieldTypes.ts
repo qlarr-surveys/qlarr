@@ -1,3 +1,4 @@
+// @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
 /**
  * Maps survey question types to logic builder field types
  * This replaces the massive switch statement in buildFields.jsx

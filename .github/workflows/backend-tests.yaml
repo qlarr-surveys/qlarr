@@ -9,10 +9,12 @@ on:
     branches: [main]
     paths:
       - "backend/**"
+      - "shared/**"
       - ".github/workflows/backend-tests.yaml"
   pull_request:
     paths:
       - "backend/**"
+      - "shared/**"
       - ".github/workflows/backend-tests.yaml"
   workflow_dispatch: {}
 

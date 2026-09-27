@@ -1,4 +1,4 @@
-import { all } from 'axios';
+// @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
 
 export const buildValidationDefaultData = (rule) => {
   switch (rule) {

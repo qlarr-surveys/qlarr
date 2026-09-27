@@ -4,11 +4,9 @@ export const MANAGE_SURVEY_LANDING_PAGES = {
   SETTINGS: "edit-survey"
 };
 
-export const DESIGN_SURVEY_MODE = {
-  DESIGN: "design",
-  THEME: "theme",
-  LANGUAGES: "languages",
-};
+// DESIGN_SURVEY_MODE lives in @qlarr/design-core (so the shared module never
+// imports routing); used here by the mode helpers below.
+import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
 
 export const inDesign = (mode) => {
   return DESIGN_SURVEY_MODE.DESIGN == mode;

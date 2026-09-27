@@ -1,3 +1,4 @@
+// @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
 export const cleanupDefaultValue = (component) => {
   // Check if this is a single choice question type that supports default values
   if (

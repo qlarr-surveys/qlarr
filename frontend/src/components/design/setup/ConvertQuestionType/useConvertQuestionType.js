@@ -9,7 +9,7 @@ import {
   isArrayType,
   isTextType,
   isDateTimeType,
-} from "~/constants/design";
+} from "@qlarr/design-core/constants/design";
 import {
   computeChoiceLostAttributes,
   computeArrayLostAttributes,

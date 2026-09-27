@@ -27,7 +27,7 @@ import {
   removeAnswer,
   setup,
 } from "~/state/design/designState";
-import { setupOptions } from "~/constants/design";
+import { setupOptions } from "@qlarr/design-core/constants/design";
 import { useDispatch } from "react-redux";
 import { useDrag, useDrop } from "react-dnd";
 import { rtlLanguage } from "~/utils/common";

@@ -1,8 +1,9 @@
+// @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
 import {
   QUESTION_CODE_PATTERN,
   GROUP_CODE_PATTERN,
   STRIP_TAGS_PATTERN,
-} from "~/constants/instruction";
+} from "../constants/instruction";
 
 export const isQuestion = (code) => QUESTION_CODE_PATTERN.test(code);
 export const isGroup = (code) => GROUP_CODE_PATTERN.test(code);

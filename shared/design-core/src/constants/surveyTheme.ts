@@ -1,3 +1,4 @@
+// @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
 export const BG_COLOR = "#dfe2ef";
 export const TEXT_COLOR = "#091133";
 export const PRIMARY_COLOR = "#2d3cb1";
