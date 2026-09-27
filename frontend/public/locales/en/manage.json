@@ -234,7 +234,8 @@
     "design_out_of_sync": "Someone else is editing the survey design",
     "wrong_reset_token": "This Reset Token is incorrect.",
     "wrong_confirmation_token": "This Confirmation Token is incorrect, Please Register Once more",
-    "survey_quota": "Sorry, this survey is no longer accepting responses."
+    "survey_quota": "Sorry, this survey is no longer accepting responses.",
+    "invalid_translations_csv": "Not a translations CSV."
   },
   "processed_successes": {
     "copied": "Copied to clipboard",
@@ -440,7 +441,12 @@
     "title": "Translations",
     "translate_to": "Translate Survey To:",
     "language": "Language",
-    "design_language": "Design Language"
+    "design_language": "Design Language",
+    "export_csv": "Export CSV",
+    "import_csv": "Import CSV",
+    "import_csv_override_main": "Overwrite Base Language text",
+    "import_csv_done_one": "Updated {{count}} field.",
+    "import_csv_done_other": "Updated {{count}} fields."
   },
   "responses_export": {
     "format_csv": "CSV",

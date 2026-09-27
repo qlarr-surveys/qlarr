@@ -234,7 +234,8 @@
     "design_out_of_sync": "يقوم شخص آخر بتحرير تصميم الاستطلاع",
     "wrong_reset_token": "رمز إعادة التعيين هذا غير صحيح.",
     "wrong_confirmation_token": "رمز التأكيد هذا غير صحيح، يرجى التسجيل مرة أخرى",
-    "survey_quota": "عذرًا، لم يعد هذا الاستبيان يقبل الردود."
+    "survey_quota": "عذرًا، لم يعد هذا الاستبيان يقبل الردود.",
+    "invalid_translations_csv": "هذا ليس ملف ترجمات CSV."
   },
   "processed_successes": {
     "copied": "نسخ إلى الحافظة",
@@ -440,7 +441,16 @@
     "title": "الترجمات",
     "translate_to": "ترجمة الاستطلاع إلى:",
     "language": "اللغة",
-    "design_language": "لغة التصميم"
+    "design_language": "لغة التصميم",
+    "export_csv": "تصدير CSV",
+    "import_csv": "استيراد CSV",
+    "import_csv_override_main": "استبدال نص لغة الأساس",
+    "import_csv_done_zero": "لم يتم تحديث أي حقل.",
+    "import_csv_done_one": "تم تحديث حقل واحد.",
+    "import_csv_done_two": "تم تحديث حقلين.",
+    "import_csv_done_few": "تم تحديث {{count}} حقول.",
+    "import_csv_done_many": "تم تحديث {{count}} حقلًا.",
+    "import_csv_done_other": "تم تحديث {{count}} حقل."
   },
   "responses_export": {
     "format_csv": "CSV",

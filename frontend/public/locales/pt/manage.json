@@ -234,7 +234,8 @@
     "design_out_of_sync": "Alguém mais está editando o design da pesquisa",
     "wrong_reset_token": "Este Token de Redefinição está incorreto.",
     "wrong_confirmation_token": "Este Token de Confirmação está incorreto, Por favor Registre-se Mais Uma Vez",
-    "survey_quota": "Desculpe, esta pesquisa não está mais aceitando respostas."
+    "survey_quota": "Desculpe, esta pesquisa não está mais aceitando respostas.",
+    "invalid_translations_csv": "Não é um CSV de traduções."
   },
   "processed_successes": {
     "copied": "Copiado para a área de transferência",
@@ -440,7 +441,12 @@
     "title": "Traduções",
     "translate_to": "Traduzir Pesquisa Para:",
     "language": "Idioma",
-    "design_language": "Idioma do Design"
+    "design_language": "Idioma do Design",
+    "export_csv": "Exportar CSV",
+    "import_csv": "Importar CSV",
+    "import_csv_override_main": "Substituir o texto do Idioma Base",
+    "import_csv_done_one": "{{count}} campo atualizado.",
+    "import_csv_done_other": "{{count}} campos atualizados."
   },
   "responses_export": {
     "format_csv": "CSV",

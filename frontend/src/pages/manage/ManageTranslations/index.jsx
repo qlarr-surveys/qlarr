@@ -25,6 +25,7 @@ import {
   onBaseLangChanged,
 } from "~/state/design/designState";
 import { LANGUAGE_DEF } from "@qlarr/design-core/constants/language";
+import { TranslationsCsv } from "./TranslationsCsv";
 
 function ManageTranslations({ onManageTranslationsClose, onStartTranslation }) {
   const { t } = useTranslation(NAMESPACES.MANAGE);
@@ -94,6 +95,7 @@ export function ManageLanguages() {
 
   return (
     <Box sx={{ paddingTop: "8px" }} className={styles.blockItem}>
+      <TranslationsCsv />
       <BaseLanguage
         onBaseLanguageChanged={onBaseLanguageChanged}
         baseLanguage={langInfo.mainLang}
