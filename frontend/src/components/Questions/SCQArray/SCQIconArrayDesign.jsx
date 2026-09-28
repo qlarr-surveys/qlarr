@@ -9,7 +9,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   useTheme,
 } from "@mui/material";
 import { useSelector, shallowEqual } from "react-redux";
@@ -19,7 +18,6 @@ import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import {
   addNewAnswer,
   addNewAnswers,
-  changeContent,
   changeResources,
   onDrag,
   onNewLine,
@@ -35,7 +33,6 @@ import { useService } from "~/hooks/use-service";
 import { useReleaseGuard } from "~/hooks/useReleaseGuard";
 import { contentEditable, DESIGN_SURVEY_MODE } from "~/routes";
 import { useColumnMinWidth } from "~/utils/design/utils";
-import { sanitizePastedText } from "~/components/design/ContentEditor/sanitizePastedText";
 import ContentEditor from "~/components/design/ContentEditor";
 
 function SCQIconArrayDesign(props) {
@@ -114,6 +111,25 @@ function SCQIconArrayDesign(props) {
                 <SCQArrayRowDesign
                   parentQualifiedCode={props.code}
                   langInfo={langInfo}
+                  onMoreLines={(data) => {
+                    dispatch(
+                      addNewAnswers({
+                        questionCode: props.code,
+                        index,
+                        data,
+                        type: "row",
+                      })
+                    );
+                  }}
+                  onNewLine={() => {
+                    dispatch(
+                      onNewLine({
+                        questionCode: props.code,
+                        index,
+                        type: "row",
+                      })
+                    );
+                  }}
                   t={props.t}
                   key={item.qualifiedCode}
                   item={item}
@@ -156,6 +172,8 @@ function SCQArrayRowDesign({
   width,
   inDesign,
   t,
+  onNewLine,
+  onMoreLines,
   langInfo,
   parentQualifiedCode,
 }) {
@@ -270,6 +288,8 @@ function SCQArrayRowDesign({
             showToolbar={false}
             editable={contentEditable(designMode)}
             extended={false}
+            onNewLine={onNewLine}
+            onMoreLines={onMoreLines}
             placeholder={
               onMainLang
                 ? t("content_editor_placeholder_option", {
