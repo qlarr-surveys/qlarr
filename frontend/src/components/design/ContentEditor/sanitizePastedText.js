@@ -9,25 +9,24 @@ export function sanitizePastedText(text) {
 
   // Process each line to remove bullet points and dashes
   const sanitizedLines = lines.map((line) => {
-    // Remove leading/trailing whitespace
-    let cleanLine = line;
-
     // Remove common bullet point patterns
-    cleanLine = cleanLine
+    const cleanLine = line
+      // Remove spaces/tabs at the beginning, so indented items lose their marker too
+      .replace(/^\s+/, "")
       // Remove bullet points: •, ◦, ▪, ▫, ‣
       .replace(/^[•◦▪▫‣]\s*/, "")
+      // Markers below need a space after them, so "-5", "+18", "1.5" and
+      // "e.g." keep their first character.
       // Remove dashes: -, –, —
-      .replace(/^[-–—]\s*/, "")
+      .replace(/^[-–—]\s+/, "")
       // Remove asterisks: *
-      .replace(/^\*\s*/, "")
+      .replace(/^\*\s+/, "")
       // Remove plus signs: +
-      .replace(/^\+\s*/, "")
+      .replace(/^\+\s+/, "")
       // Remove numbered lists: 1., 2), a), (1), etc.
-      .replace(/^(\d+|[a-zA-Z])[.)]\s*/, "")
+      .replace(/^(\d+|[a-zA-Z])[.)]\s+/, "")
       .replace(/^\(\d+\)\s*/, "")
-      .replace(/^\([a-zA-Z]\)\s*/, "")
-      // Remove multiple spaces/tabs at the beginning
-      .replace(/^\s+/, "");
+      .replace(/^\([a-zA-Z]\)\s*/, "");
 
     return cleanLine;
   });
