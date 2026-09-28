@@ -62,9 +62,10 @@ export const mapInstructionError = (instruction, t, currentLang) => {
           .filter(Boolean)
       ),
     ].join(", ");
+    const detail = t("err_carry_forward_source_detail");
     return {
       label: t("err_carry_forward_source"),
-      message: codes || rawMessage || t("err_carry_forward_source_detail"),
+      message: codes ? `${detail} (${codes})` : detail,
     };
   } else if (instruction.code === "conditional_relevance") {
     return { label: t("err_relevance"), message: rawMessage };

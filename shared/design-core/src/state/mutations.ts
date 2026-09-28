@@ -1226,9 +1226,6 @@ export function onDrag(state, payload) {
       reorderAnswersByType(state, payload);
       resyncCarryForwardTargets(state, payload.id);
       break;
-    case "reorder_answers_by_type":
-      reorderAnswersByType(state, payload);
-      break;
     case "new_question":
       newQuestion(state, payload);
       state.index = buildCodeIndex(state);
