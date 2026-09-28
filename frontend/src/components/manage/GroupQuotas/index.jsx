@@ -1,6 +1,12 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   Box,
   Button,
@@ -20,7 +26,11 @@ import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import { useService } from "~/hooks/use-service";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import { addQuota, removeQuota, updateQuota } from "~/state/design/designState";
-import { QUOTA_MESSAGE_PARAM, quotaMessageKey } from "~/constants/design";
+import {
+  QUOTA_MESSAGE_PARAM,
+  QUOTA_PARAM,
+  quotaMessageKey,
+} from "~/constants/design";
 import { routes } from "~/routes";
 import { isNotEmptyHtml } from "~/utils/design/utils";
 import { QlarrLogicBuilderInlineWrapper } from "~/components/design/setup/logic/QlarrLogicBuilder";
@@ -106,6 +116,35 @@ function GroupQuotas({ disabled }) {
       `${routes.designSurvey.replace(":surveyId", surveyId)}?${QUOTA_MESSAGE_PARAM}=${encodeURIComponent(quotaCode)}`,
     );
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const containerRef = useRef(null);
+
+  // Opened from the END page in the designer: bring the quotas into view,
+  // opening the quota whose message was selected there.
+  useEffect(() => {
+    if (!searchParams.has(QUOTA_PARAM)) {
+      return;
+    }
+    const code = searchParams.get(QUOTA_PARAM);
+    if (code && !disabled) {
+      setExpanded(code);
+    }
+    searchParams.delete(QUOTA_PARAM);
+    setSearchParams(searchParams, { replace: true });
+    // Not cleared on re-run: removing the param re-runs this effect.
+    setTimeout(() => {
+      const card =
+        code &&
+        containerRef.current?.querySelector(
+          `[data-quota="${CSS.escape(code)}"]`,
+        );
+      (card || containerRef.current)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 100);
+  }, [searchParams]);
+
   const toggle = (quota) =>
     setExpanded(expanded === quota.code ? null : quota.code);
 
@@ -121,7 +160,7 @@ function GroupQuotas({ disabled }) {
   );
 
   return (
-    <Box className={styles.container}>
+    <Box className={styles.container} ref={containerRef}>
       <Box className={styles.header}>
         <Box className={styles.headerTitle}>
           <CustomTooltip body={t("tooltips.group_quotas")} />
@@ -228,6 +267,7 @@ function QuotaCard({
 
   return (
     <Box
+      data-quota={quota.code}
       className={`${styles.card} ${full ? styles.cardFull : ""} ${
         expanded ? styles.cardExpanded : ""
       }`}

@@ -5,7 +5,7 @@ import { Box, Button, Chip, Tooltip, css } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import ContentEditor from "~/components/design/ContentEditor";
-import { quotaMessageKey } from "~/constants/design";
+import { QUOTA_PARAM, quotaMessageKey } from "~/constants/design";
 import { DESIGN_SURVEY_MODE, routes } from "~/routes";
 import { showQuotaMessage } from "~/state/design/designState";
 import { isNotEmptyHtml } from "~/utils/design/utils";
@@ -88,7 +88,9 @@ export const QuotaMessageSwitcher = React.memo(function QuotaMessageSwitcher({
           sx={{ marginInlineStart: "auto", textTransform: "none" }}
           startIcon={<SettingsOutlinedIcon fontSize="small" />}
           onClick={() =>
-            navigate(routes.editSurvey.replace(":surveyId", surveyId))
+            navigate(
+              `${routes.editSurvey.replace(":surveyId", surveyId)}?${QUOTA_PARAM}=${encodeURIComponent(selected || "")}`,
+            )
           }
         >
           {t("manage_quotas")}
