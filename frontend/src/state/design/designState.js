@@ -17,6 +17,7 @@ import {
   CONVERTIBLE_TEXT_TYPES,
   CONVERTIBLE_DATE_TIME_TYPES,
   languageSetup,
+  quotaMessageKey,
   setupOptions,
   themeSetup,
 } from "~/constants/design";
@@ -63,6 +64,7 @@ const reservedKeys = [
   "index",
   "skipScroll",
   "advancedByCode",
+  "quotaMessageView",
 ];
 
 export const designState = createSlice({
@@ -212,7 +214,29 @@ export const designState = createSlice({
       survey.quotas = (survey.quotas || []).filter(
         (quota) => quota.code !== action.payload,
       );
+      const messageKey = quotaMessageKey(action.payload);
+      Object.keys(survey.content || {}).forEach((lang) => {
+        if (survey.content[lang][messageKey] === undefined) {
+          return;
+        }
+        // clears the message's reference instructions and resources too
+        designState.caseReducers.changeContent(state, {
+          payload: { code: "Survey", key: messageKey, lang, value: "" },
+        });
+        delete survey.content[lang][messageKey];
+      });
       refreshQuotaInstructions(state);
+    },
+    // Which quota's end message the END page shows in the designer (null for
+    // the default end page); `reveal` scrolls the END page into view once.
+    showQuotaMessage: (state, action) => {
+      const { code = null, reveal = false } = action.payload;
+      state.quotaMessageView = { code, reveal };
+    },
+    quotaMessageRevealed: (state) => {
+      if (state.quotaMessageView) {
+        state.quotaMessageView.reveal = false;
+      }
     },
     changeAttribute: (state, action) => {
       let payload = action.payload;
@@ -1004,6 +1028,8 @@ export const {
   addQuota,
   updateQuota,
   removeQuota,
+  showQuotaMessage,
+  quotaMessageRevealed,
   removeAnswer,
   setup,
   clearHighlighted,

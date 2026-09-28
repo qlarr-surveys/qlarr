@@ -225,7 +225,7 @@
   "show_always": "Show Always",
   "disabled": "Disabled",
   "question_type": "Question Type",
-"scq": "Single Choice",
+  "scq": "Single Choice",
   "mcq": "Multiple Choice",
   "icon_scq": "Single Icon Choice",
   "icon_mcq": "Multiple Icon Choice",
@@ -519,7 +519,7 @@
   "tour_step9_next": "Next: Responses",
   "tour_step10_title": "Responses",
   "tour_step10_intro": "Track responses and analytics, review results, and manage or export your data.",
-"tooltips": {
+  "tooltips": {
     "allow_previous": "Allow respondents to go back to previous pages during the survey.",
     "allow_incomplete": "Allow respondents to save their progress and resume the survey later.",
     "allow_jump": "Allow respondents to jump to any page using a survey index/table of contents.",
@@ -530,5 +530,9 @@
     "code_changed_after_publish": "Cannot change component code after it was published",
     "duplicate_to_code": "This code belongs to another group or question",
     "code_invalid": "Invalid code. Please try again."
-  }
+  },
+  "default_end_page": "Default end page",
+  "quota_message_placeholder": "Empty: these respondents see the default end page",
+  "quota_message_missing": "No message in this language",
+  "manage_quotas": "Manage quotas"
 }

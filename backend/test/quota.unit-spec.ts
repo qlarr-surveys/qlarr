@@ -3,6 +3,7 @@ import { runChangeCode, runValidate } from '../src/engine/engine-runtime';
 import {
   fullQuotaCodes,
   quotaDefinitions,
+  screenedOutQuota,
   stripQuotaKeys,
 } from '../src/modules/design/quota.helpers';
 import { NavigationService } from '../src/modules/run/navigation.service';
@@ -53,6 +54,21 @@ describe('quota helpers', () => {
     ).toEqual({ 'Q1.value': 'male', 'Survey.lang': 'en' });
   });
 
+  it('names the first full quota the respondent belongs to when screened out', () => {
+    const end = { name: 'end' };
+    const toSave = {
+      'Survey.disqualified': true,
+      'Survey.quota_QT1': false,
+      'Survey.quota_QT2': true,
+      'Survey.quota_QT3': true,
+    };
+    expect(screenedOutQuota(['QT1', 'QT2', 'QT3'], end, toSave)).toBe('QT2');
+    expect(screenedOutQuota(['QT1'], end, toSave)).toBeNull();
+    expect(
+      screenedOutQuota(['QT2'], end, { ...toSave, 'Survey.disqualified': false }),
+    ).toBeNull();
+    expect(screenedOutQuota(['QT2'], { name: 'group' }, toSave)).toBeNull();
+  });
 });
 
 describe('quota engine binding', () => {
@@ -97,6 +113,7 @@ describe('quota engine binding', () => {
     expect(out.navigationIndex.name).toBe('end');
     expect(out.toSave['Survey.disqualified']).toBe(true);
     expect(out.toSave['Survey.quota_QT1']).toBe(true);
+    expect(screenedOutQuota(['QT1'], out.navigationIndex, out.toSave)).toBe('QT1');
   });
 
   it('lets a respondent matching an open quota through, saving membership', async () => {
@@ -144,7 +161,10 @@ describe('navigation quota enforcement', () => {
   };
 
   const setup = () => {
-    const engineNavigate = jest.fn().mockResolvedValue({ navigationIndex: { name: 'end' }, toSave: {} });
+    const engineNavigate = jest.fn().mockResolvedValue({
+      navigationIndex: { name: 'end' },
+      toSave: { 'Survey.disqualified': true, 'Survey.quota_QT1': true },
+    });
     const fullQuotas = jest.fn().mockResolvedValue(['QT1']);
     const svc = new NavigationService(
       { completedCount: jest.fn().mockResolvedValue(0) } as any,
@@ -156,7 +176,7 @@ describe('navigation quota enforcement', () => {
 
   it('passes full quotas to the engine and ignores quota keys sent by the client', async () => {
     const { svc, engineNavigate } = setup();
-    await svc.navigate({
+    const result = await svc.navigate({
       surveyId: 's',
       response: {
         values: { 'Q1.value': 'female' },
@@ -174,6 +194,7 @@ describe('navigation quota enforcement', () => {
     const params = engineNavigate.mock.calls[0][0];
     expect(params.fullQuotas).toEqual(['QT1']);
     expect(JSON.parse(params.values)).toEqual({ 'Q1.value': 'male' });
+    expect(result.screenedOutQuota).toBe('QT1');
   });
 
   it('does not enforce quotas in preview', async () => {

@@ -221,7 +221,7 @@
   "show_always": "العرض دائمًا",
   "disabled": "معطل",
   "question_type": "نوع السؤال",
-"scq": "اختيار واحد",
+  "scq": "اختيار واحد",
   "mcq": "اختيار متعدد",
   "icon_scq": "اختيار واحد بأيقونات",
   "icon_mcq": "اختيار متعدد بأيقونات",
@@ -519,7 +519,7 @@
   "tour_step9_next": "التالي: الاستجابات",
   "tour_step10_title": "الاستجابات",
   "tour_step10_intro": "تتبّع الاستجابات والتحليلات وراجع النتائج وأدِر بياناتك أو صدّرها.",
-"tooltips": {
+  "tooltips": {
     "allow_previous": "Allow respondents to go back to previous pages during the survey.",
     "allow_incomplete": "Allow respondents to save their progress and resume the survey later.",
     "allow_jump": "Allow respondents to jump to any page using a survey index/table of contents.",
@@ -530,5 +530,9 @@
     "code_changed_after_publish": "لا يمكن تغيير رمز المكون بعد نشره",
     "duplicate_to_code": "هذا الرمز ينتمي إلى مجموعة أو سؤال آخر",
     "code_invalid": "الرمز غير صالح. يرجى المحاولة مرة أخرى."
-  }
+  },
+  "default_end_page": "صفحة النهاية الافتراضية",
+  "quota_message_placeholder": "فارغ: يرى هؤلاء المشاركون صفحة النهاية الافتراضية",
+  "quota_message_missing": "لا توجد رسالة بهذه اللغة",
+  "manage_quotas": "إدارة الحصص"
 }

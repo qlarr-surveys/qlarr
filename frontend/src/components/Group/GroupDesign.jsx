@@ -5,6 +5,11 @@ import { useSelector } from "react-redux";
 import { QuestionDropArea } from "../design/DropArea/DropArea";
 import GroupHeader from "./GroupHeader";
 import {
+  QuotaMessageEditor,
+  QuotaMessageSwitcher,
+  useSelectedQuotaMessage,
+} from "./QuotaMessages";
+import {
   Box,
   Divider,
   alpha,
@@ -37,6 +42,8 @@ function GroupDesign({
   });
 
   const [hovered, setHovered] = useState(false);
+
+  const selectedQuota = useSelectedQuotaMessage();
 
   const inDesign = designMode == DESIGN_SURVEY_MODE.DESIGN;
 
@@ -118,6 +125,9 @@ function GroupDesign({
 
   const children = group?.children;
 
+  // A quota's end message replaces the whole END page, as it does at runtime.
+  const quotaMessage = type === "end" ? selectedQuota : null;
+
   const getStyles = (isDragging) => {
     const styles = {
       transition: "all 500ms",
@@ -191,67 +201,85 @@ function GroupDesign({
         ${group.customCss || ""}
       `}
     >
-      <GroupHeader
-        t={t}
-        code={code}
-        index={index}
-        langInfo={langInfo}
-        designMode={designMode}
-        children={children}
-      />
-
-      <>
-        {children && children.length > 0 && (
-          <QuestionDropArea
-            index={0}
-            parentCode={code}
-            parentType={type}
-            parentIndex={index}
+      {type === "end" && (
+        <QuotaMessageSwitcher
+          t={t}
+          designMode={designMode}
+          selected={quotaMessage}
+        />
+      )}
+      {quotaMessage ? (
+        <QuotaMessageEditor
+          t={t}
+          quotaCode={quotaMessage}
+          designMode={designMode}
+          mainLang={langInfo.mainLang}
+        />
+      ) : (
+        <>
+          <GroupHeader
             t={t}
+            code={code}
+            index={index}
+            langInfo={langInfo}
+            designMode={designMode}
+            children={children}
           />
-        )}
-        {children?.map((quest, childIndex) => {
-          return (
-            <React.Fragment key={quest.code}>
-              <QuestionDesign
-                t={t}
-                key={quest.code}
-                parentCode={code}
-                parentIndex={index}
-                index={childIndex}
-                langInfo={langInfo}
-                isLast={children.length == childIndex + 1}
-                type={quest.type}
-                code={quest.code}
-                designMode={designMode}
-                onMainLang={inDesign}
-                lastAddedComponent={lastAddedComponent}
-              />
+
+          <>
+            {children && children.length > 0 && (
               <QuestionDropArea
-                isLast={children.length == childIndex + 1}
-                index={childIndex + 1}
-                parentIndex={index}
+                index={0}
                 parentCode={code}
                 parentType={type}
+                parentIndex={index}
                 t={t}
               />
-              {childIndex < children.length - 1 && (
-                <Divider className="separator" />
-              )}
-            </React.Fragment>
-          );
-        })}
-        {(!children || !children.length) && (
-          <QuestionDropArea
-            t={t}
-            index={0}
-            parentCode={code}
-            parentType={type}
-            emptyGroup={true}
-            isLastGroup={isLastGroup}
-          />
-        )}
-      </>
+            )}
+            {children?.map((quest, childIndex) => {
+              return (
+                <React.Fragment key={quest.code}>
+                  <QuestionDesign
+                    t={t}
+                    key={quest.code}
+                    parentCode={code}
+                    parentIndex={index}
+                    index={childIndex}
+                    langInfo={langInfo}
+                    isLast={children.length == childIndex + 1}
+                    type={quest.type}
+                    code={quest.code}
+                    designMode={designMode}
+                    onMainLang={inDesign}
+                    lastAddedComponent={lastAddedComponent}
+                  />
+                  <QuestionDropArea
+                    isLast={children.length == childIndex + 1}
+                    index={childIndex + 1}
+                    parentIndex={index}
+                    parentCode={code}
+                    parentType={type}
+                    t={t}
+                  />
+                  {childIndex < children.length - 1 && (
+                    <Divider className="separator" />
+                  )}
+                </React.Fragment>
+              );
+            })}
+            {(!children || !children.length) && (
+              <QuestionDropArea
+                t={t}
+                index={0}
+                parentCode={code}
+                parentType={type}
+                emptyGroup={true}
+                isLastGroup={isLastGroup}
+              />
+            )}
+          </>
+        </>
+      )}
     </Box>
   );
 }

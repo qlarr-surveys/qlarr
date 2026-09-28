@@ -659,6 +659,10 @@
     "condition": "Zählt Teilnehmende, bei denen",
     "and": "und",
     "or": "oder",
-    "unpublished_note": "Änderungen an Quoten werden wirksam, sobald Sie die Umfrage veröffentlichen."
+    "unpublished_note": "Änderungen an Quoten werden wirksam, sobald Sie die Umfrage veröffentlichen.",
+    "message": "Abschlussnachricht",
+    "message_set": "Eigene Nachricht festgelegt",
+    "message_not_set": "Nicht festgelegt: Befragte sehen die normale Abschlussseite",
+    "edit_message": "Im Designer bearbeiten"
   }
 }

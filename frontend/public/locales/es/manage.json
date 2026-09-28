@@ -658,6 +658,10 @@
     "condition": "Cuenta a los encuestados cuando",
     "and": "y",
     "or": "o",
-    "unpublished_note": "Los cambios en las cuotas se aplican cuando publicas la encuesta."
+    "unpublished_note": "Los cambios en las cuotas se aplican cuando publicas la encuesta.",
+    "message": "Mensaje final",
+    "message_set": "Mensaje personalizado configurado",
+    "message_not_set": "Sin configurar: se muestra la página final normal",
+    "edit_message": "Editar en el diseñador"
   }
 }

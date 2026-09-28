@@ -658,6 +658,10 @@
     "condition": "Conta respondentes quando",
     "and": "e",
     "or": "ou",
-    "unpublished_note": "As alterações nas cotas entram em vigor quando você publicar a pesquisa."
+    "unpublished_note": "As alterações nas cotas entram em vigor quando você publicar a pesquisa.",
+    "message": "Mensagem final",
+    "message_set": "Mensagem personalizada definida",
+    "message_not_set": "Não definida: é exibida a página final normal",
+    "edit_message": "Editar no designer"
   }
 }

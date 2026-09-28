@@ -658,6 +658,10 @@
     "condition": "Compte les répondants lorsque",
     "and": "et",
     "or": "ou",
-    "unpublished_note": "Les modifications des quotas prennent effet dès que vous publiez le sondage."
+    "unpublished_note": "Les modifications des quotas prennent effet dès que vous publiez le sondage.",
+    "message": "Message de fin",
+    "message_set": "Message personnalisé défini",
+    "message_not_set": "Non défini : la page de fin normale est affichée",
+    "edit_message": "Modifier dans l'éditeur"
   }
 }

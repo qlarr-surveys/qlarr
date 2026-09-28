@@ -530,5 +530,9 @@
   "tour_step9_intro": "Configure coleta de dados, acesso à pesquisa, navegação, cotas e regras de resposta antes de publicar.",
   "tour_step9_next": "Próximo: Respostas",
   "tour_step10_title": "Respostas",
-  "tour_step10_intro": "Acompanhe respostas e análises, revise resultados e gerencie ou exporte seus dados."
+  "tour_step10_intro": "Acompanhe respostas e análises, revise resultados e gerencie ou exporte seus dados.",
+  "default_end_page": "Página final padrão",
+  "quota_message_placeholder": "Vazio: estes respondentes veem a página final padrão",
+  "quota_message_missing": "Sem mensagem neste idioma",
+  "manage_quotas": "Gerenciar cotas"
 }

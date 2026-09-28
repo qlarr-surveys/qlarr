@@ -530,5 +530,9 @@
   "tour_step9_intro": "Configurez la collecte de données, l'accès à l'enquête, la navigation, les quotas et les règles de réponse avant la publication.",
   "tour_step9_next": "Suivant : Réponses",
   "tour_step10_title": "Réponses",
-  "tour_step10_intro": "Suivez les réponses et les analyses, examinez les résultats et gérez ou exportez vos données."
+  "tour_step10_intro": "Suivez les réponses et les analyses, examinez les résultats et gérez ou exportez vos données.",
+  "default_end_page": "Page de fin par défaut",
+  "quota_message_placeholder": "Vide : ces répondants voient la page de fin par défaut",
+  "quota_message_missing": "Aucun message dans cette langue",
+  "manage_quotas": "Gérer les quotas"
 }

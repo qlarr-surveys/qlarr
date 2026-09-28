@@ -3,7 +3,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useTheme } from "@mui/material";
 import { FORM_ID } from "~/constants/run";
-import Group from "~/components/Group";
+import Group, { QuotaMessage } from "~/components/Group";
 import Navigation from "~/components/run/Navigation";
 import styles from "./Survey.module.css";
 import { shallowEqual, useSelector } from "react-redux";
@@ -15,7 +15,9 @@ import {
   LOGO_SIZE_DEFAULT,
   LOGO_SIZE_DIMENSIONS,
   LOGO_SPACING_DEFAULT,
+  quotaMessageKey,
 } from "~/constants/design";
+import { isNotEmptyHtml } from "~/utils/design/utils";
 
 const ALIGNMENT_TO_FLEX = {
   left: "flex-start",
@@ -47,6 +49,17 @@ function Survey() {
   const logoSpacing = useSelector((state) => {
     const val = state.runState.data?.survey?.resources?.logoSpacing;
     return typeof val === "number" ? val : LOGO_SPACING_DEFAULT;
+  });
+
+  // A full quota ended the survey: its message, if set, replaces the END page.
+  const quotaCode = useSelector(
+    (state) => state.runState.data?.screenedOutQuota,
+  );
+  const quotaMessage = useSelector((state) => {
+    const message =
+      quotaCode &&
+      state.runState.data?.survey?.content?.[quotaMessageKey(quotaCode)];
+    return isNotEmptyHtml(message) ? message : null;
   });
 
   const logoSizePx =
@@ -88,11 +101,18 @@ function Survey() {
           {survey && survey.groups
             ? survey.groups
                 .filter((group) => group.inCurrentNavigation)
-                .map((group, index) => (
-
-                    <Group group={group} groupIndex={index} />
-
-                ))
+                .map((group, index) =>
+                  group.groupType === "END" && quotaMessage ? (
+                    <QuotaMessage
+                      key={group.code}
+                      group={group}
+                      contentKey={quotaMessageKey(quotaCode)}
+                      message={quotaMessage}
+                    />
+                  ) : (
+                    <Group key={group.code} group={group} groupIndex={index} />
+                  ),
+                )
             : ""}
           <Navigation navigationIndex={navigationIndex} />
         </div>

@@ -50,6 +50,23 @@ export function fullQuotaCodes(
 }
 
 /**
+ * The quota that screened the respondent out: when the engine ended the survey
+ * as disqualified, the first full quota (in design order) the respondent belongs
+ * to — the same rule the engine applies. The run page shows that quota's end
+ * message; null for normal endings and for skip-to-end disqualifications.
+ */
+export function screenedOutQuota(
+  fullQuotas: string[],
+  navigationIndex: { name: string },
+  toSave: Record<string, unknown>,
+): string | null {
+  if (navigationIndex.name !== 'end' || toSave['Survey.disqualified'] !== true) {
+    return null;
+  }
+  return fullQuotas.find((code) => toSave[`${QUOTA_VALUE_PREFIX}${code}`] === true) ?? null;
+}
+
+/**
  * Drop engine-owned quota keys from respondent-submitted values: membership is
  * computed by the engine, and a client that could send its own
  * `Survey.quota_<code>` would decide which quotas it belongs to.

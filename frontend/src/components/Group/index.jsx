@@ -91,3 +91,34 @@ function Group(props) {
 }
 
 export default React.memo(Group);
+
+// The END page card showing a quota's end message in place of the page content,
+// for respondents a full quota screened out.
+export const QuotaMessage = React.memo(function QuotaMessage({
+  group,
+  contentKey,
+  message,
+}) {
+  const theme = useTheme();
+  return (
+    <Box
+      data-code={group.code}
+      className={styles.topLevel}
+      style={{
+        '--qlarr-shadow-color': alpha(theme.textStyles.question.color, 0.15),
+        '--qlarr-bg-color': theme.palette.background.paper,
+      }}
+    >
+      <div className={styles.groupHeader}>
+        <Content
+          elementCode="Survey"
+          name={contentKey}
+          customStyle={`
+        font-size: ${theme.textStyles.text.size}px;
+        `}
+          content={message}
+        />
+      </div>
+    </Box>
+  );
+});

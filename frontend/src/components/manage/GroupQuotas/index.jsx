@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Box,
   Button,
@@ -19,6 +20,9 @@ import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import { useService } from "~/hooks/use-service";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import { addQuota, removeQuota, updateQuota } from "~/state/design/designState";
+import { QUOTA_MESSAGE_PARAM, quotaMessageKey } from "~/constants/design";
+import { routes } from "~/routes";
+import { isNotEmptyHtml } from "~/utils/design/utils";
 import { QlarrLogicBuilderInlineWrapper } from "~/components/design/setup/logic/QlarrLogicBuilder";
 import { useFieldConfig } from "~/components/design/setup/logic/QlarrLogicBuilder/hooks/useFieldConfig";
 import { jsonLogicToTree } from "~/components/design/setup/logic/QlarrLogicBuilder/utils/jsonLogic";
@@ -92,6 +96,16 @@ function GroupQuotas({ disabled }) {
     [survey?.instructionList],
   );
 
+  const navigate = useNavigate();
+  const { surveyId } = useParams();
+
+  // Quota messages are survey text, edited (and translated) on the END page in
+  // the designer.
+  const editMessage = (quotaCode) =>
+    navigate(
+      `${routes.designSurvey.replace(":surveyId", surveyId)}?${QUOTA_MESSAGE_PARAM}=${encodeURIComponent(quotaCode)}`,
+    );
+
   const toggle = (quota) =>
     setExpanded(expanded === quota.code ? null : quota.code);
 
@@ -158,6 +172,10 @@ function GroupQuotas({ disabled }) {
               componentIndex={componentIndex}
               mainLang={mainLang}
               langList={langList}
+              hasMessage={isNotEmptyHtml(
+                survey?.content?.[mainLang]?.[quotaMessageKey(quota.code)],
+              )}
+              onEditMessage={() => editMessage(quota.code)}
               t={t}
               tDesign={tDesign}
             />
@@ -180,6 +198,8 @@ function QuotaCard({
   componentIndex,
   mainLang,
   langList,
+  hasMessage,
+  onEditMessage,
   t,
   tDesign,
 }) {
@@ -308,6 +328,21 @@ function QuotaCard({
             langList={langList}
             t={tDesign}
           />
+          <Box className={styles.messageRow}>
+            <Box>
+              <Typography variant="body2" fontWeight={600}>
+                {t("group_quotas.message")}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {hasMessage
+                  ? t("group_quotas.message_set")
+                  : t("group_quotas.message_not_set")}
+              </Typography>
+            </Box>
+            <Button size="small" onClick={onEditMessage}>
+              {t("group_quotas.edit_message")}
+            </Button>
+          </Box>
           <Box className={styles.cardFooter}>
             <Button
               size="small"

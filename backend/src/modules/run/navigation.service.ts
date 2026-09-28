@@ -8,7 +8,7 @@ import {
   NavigationModeName,
 } from '../../engine/engine.types';
 import { ProcessedSurvey } from '../design/design.service';
-import { stripQuotaKeys } from '../design/quota.helpers';
+import { screenedOutQuota, stripQuotaKeys } from '../design/quota.helpers';
 import { QuotaService } from '../design/quota.service';
 import { ResponseRepository } from '../responses/response.repository';
 import { navigationModeFrom } from '../surveys/survey.enums';
@@ -41,6 +41,8 @@ export interface NavigationResult {
   };
   lang: SurveyLang;
   additionalLang: SurveyLang[];
+  /** Code of the quota that ended the survey on this navigation, if any. */
+  screenedOutQuota: string | null;
 }
 
 /**
@@ -130,7 +132,16 @@ export class NavigationService {
       ...additionalLang(processedSurvey.output.survey),
     ].filter((l) => l.code !== lang.code);
 
-    return { navigationJsonOutput, lang, additionalLang: others };
+    return {
+      navigationJsonOutput,
+      lang,
+      additionalLang: others,
+      screenedOutQuota: screenedOutQuota(
+        fullQuotas,
+        navigationJsonOutput.navigationIndex,
+        navigationJsonOutput.toSave,
+      ),
+    };
   }
 
   private validateForNavigation(

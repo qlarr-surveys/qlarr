@@ -658,6 +658,10 @@
     "condition": "Telt respondenten waarbij",
     "and": "en",
     "or": "of",
-    "unpublished_note": "Wijzigingen in quota's worden van kracht zodra je de enquête publiceert."
+    "unpublished_note": "Wijzigingen in quota's worden van kracht zodra je de enquête publiceert.",
+    "message": "Eindbericht",
+    "message_set": "Eigen bericht ingesteld",
+    "message_not_set": "Niet ingesteld: respondenten zien de normale eindpagina",
+    "edit_message": "Bewerken in designer"
   }
 }

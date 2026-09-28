@@ -658,6 +658,10 @@
     "condition": "Counts respondents where",
     "and": "and",
     "or": "or",
-    "unpublished_note": "Quota changes take effect once you publish the survey."
+    "unpublished_note": "Quota changes take effect once you publish the survey.",
+    "message": "End message",
+    "message_set": "Custom message set",
+    "message_not_set": "Not set: respondents see the normal end page",
+    "edit_message": "Edit in designer"
   }
 }

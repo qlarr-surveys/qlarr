@@ -21,8 +21,10 @@ import {
   setDesignModeToLang,
   setDesignModeToTheme,
   refreshDsl,
+  showQuotaMessage,
 } from "~/state/design/designState";
 import { DESIGN_SURVEY_MODE } from "~/routes";
+import { QUOTA_MESSAGE_PARAM } from "~/constants/design";
 
 const ContentPanel = React.lazy(() =>
   import("~/components/design/ContentPanel")
@@ -81,6 +83,22 @@ function DesignSurvey() {
       dispatch(setDesignModeToDesign());
     }
   }, []);
+
+  // Opened from a quota in Settings: show that quota's message on the END page.
+  useEffect(() => {
+    if (!designStateReceived || !searchParams.has(QUOTA_MESSAGE_PARAM)) {
+      return;
+    }
+    dispatch(setDesignModeToDesign());
+    dispatch(
+      showQuotaMessage({
+        code: searchParams.get(QUOTA_MESSAGE_PARAM),
+        reveal: true,
+      }),
+    );
+    searchParams.delete(QUOTA_MESSAGE_PARAM);
+    setSearchParams(searchParams);
+  }, [designStateReceived]);
 
   useEffect(() => {
     if (designStateReceived && searchParams.get("refresh") === "true") {
