@@ -373,7 +373,7 @@ export function replaceAnswers(state, payload) {
   if (state.versionDto?.published || (state.versionDto?.version ?? 0) > 1) {
     return;
   }
-  state[questionCode].children
+  (state[questionCode].children || [])
     .filter((child) => state[child.qualifiedCode].type == type)
     .forEach((child) => removeAnswer(state, child.qualifiedCode));
   addNewAnswers(state, { questionCode, type, index: -1, data });
