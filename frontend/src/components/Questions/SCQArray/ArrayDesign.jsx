@@ -15,7 +15,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { useSelector } from "react-redux";
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import BuildIcon from "@mui/icons-material/Build";
@@ -25,6 +25,7 @@ import {
   onDrag,
   onNewLine,
   removeAnswer,
+  replaceAnswers,
   setup,
 } from "~/state/design/designState";
 import { setupOptions } from "@qlarr/design-core/constants/design";
@@ -33,13 +34,18 @@ import { useDrag, useDrop } from "react-dnd";
 import { rtlLanguage } from "~/utils/common";
 import { contentEditable, inDesign } from "~/routes";
 import { useReleaseGuard } from "~/hooks/useReleaseGuard";
+import { useIsReleased } from "~/hooks/useIsReleased";
 import { useColumnMinWidth } from "~/utils/design/utils";
 import ContentEditor from "~/components/design/ContentEditor";
+import ManualEntryDialog from "~/components/Questions/shared/ManualEntryDialog";
 
 function ArrayDesign(props) {
   const theme = useTheme();
   const dispatch = useDispatch();
   const t = props.t;
+  const released = useIsReleased();
+  // "row" or "column" while the dialog is open
+  const [manualType, setManualType] = useState(null);
 
   const { header, rowLabel } = useColumnMinWidth(props.code);
   const langInfo = props.langInfo;
@@ -56,6 +62,7 @@ function ArrayDesign(props) {
     () => children?.filter((el) => el.type == "column") || [],
     [children]
   );
+  const items = manualType === "row" ? rows : columns;
 
   return (
     <>
@@ -71,6 +78,11 @@ function ArrayDesign(props) {
           >
             {t("add_column")}
           </Button>
+          {langInfo.onMainLang && !released && (
+            <Button size="small" onClick={() => setManualType("column")}>
+              {t("enter_manually")}
+            </Button>
+          )}
         </div>
       )}
 
@@ -159,7 +171,31 @@ function ArrayDesign(props) {
           >
             {t("add_row")}
           </Button>
+          {langInfo.onMainLang && !released && (
+            <Button size="small" onClick={() => setManualType("row")}>
+              {t("enter_manually")}
+            </Button>
+          )}
         </div>
+      )}
+      {manualType && (
+        <ManualEntryDialog
+          title={t(
+            manualType === "row" ? "manual_entry_rows" : "manual_entry_columns"
+          )}
+          t={t}
+          codes={items.map((el) => el.qualifiedCode)}
+          onClose={() => setManualType(null)}
+          onSubmit={(lines) =>
+            dispatch(
+              replaceAnswers({
+                questionCode: props.code,
+                type: manualType,
+                data: lines,
+              })
+            )
+          }
+        />
       )}
     </>
   );

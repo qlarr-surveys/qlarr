@@ -64,6 +64,7 @@ const MUTATING = [
   "designState/deleteGroup",
   "designState/addNewAnswer",
   "designState/addNewAnswers",
+  "designState/replaceAnswers",
   "designState/removeAnswer",
   "designState/changeValidationValue",
   "designState/updateRandom",

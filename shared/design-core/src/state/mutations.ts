@@ -363,6 +363,19 @@ export function addNewAnswers(state, payload) {
   });
 }
 
+/** Replaces the question's answers of one type with one answer per label in `data`.
+ * Does nothing once the survey is published: that would break collected responses. */
+export function replaceAnswers(state, payload) {
+  const { questionCode, type, data } = payload;
+  if (state.versionDto?.published || (state.versionDto?.version ?? 0) > 1) {
+    return;
+  }
+  state[questionCode].children
+    .filter((child) => state[child.qualifiedCode].type == type)
+    .forEach((child) => removeAnswer(state, child.qualifiedCode));
+  addNewAnswers(state, { questionCode, type, index: -1, data });
+}
+
 export function onNewLine(state, payload) {
   const questionCode = payload.questionCode;
   const index = payload.index;
