@@ -5,8 +5,12 @@ import { Box, Button, Chip, Tooltip, css } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import ContentEditor from "~/components/design/ContentEditor";
-import { QUOTA_PARAM, quotaMessageKey } from "~/constants/design";
-import { DESIGN_SURVEY_MODE, routes } from "~/routes";
+import {
+  QUOTA_PARAM,
+  quotaMessageKey,
+} from "@qlarr/design-core/constants/design";
+import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
+import { routes } from "~/routes";
 import { showQuotaMessage } from "~/state/design/designState";
 import { isNotEmptyHtml } from "~/utils/design/utils";
 import styles from "./GroupDesign.module.css";

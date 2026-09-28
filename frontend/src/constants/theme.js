@@ -3,11 +3,11 @@ export {
   BG_COLOR, TEXT_COLOR, PRIMARY_COLOR, SECONDARY_COLOR, ERR_COLOR,
   PAPER_COLOR, GROUP_FONT_SIZE, QUESTION_FONT_SIZE, TEXT_FONT_SIZE, FONT_FAMILY,
   defaultSurveyTheme,
-} from "./surveyTheme";
+} from "@qlarr/design-core/constants/surveyTheme";
 import {
   BG_COLOR, TEXT_COLOR, PRIMARY_COLOR, SECONDARY_COLOR, ERR_COLOR,
   PAPER_COLOR, GROUP_FONT_SIZE, QUESTION_FONT_SIZE, TEXT_FONT_SIZE, FONT_FAMILY,
-} from "./surveyTheme";
+} from "@qlarr/design-core/constants/surveyTheme";
 
 export const defualtTheme = (theme) => {
   return {

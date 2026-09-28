@@ -57,6 +57,10 @@ export default defineConfig(({ mode }) => {
         resolve: {
           alias: {
             "~": path.resolve(__dirname, "src"),
+            "@qlarr/design-core": path.resolve(
+              __dirname,
+              "../shared/design-core/src",
+            ),
           },
         },
         plugins: [
@@ -116,6 +120,10 @@ export default defineConfig(({ mode }) => {
         resolve: {
           alias: {
             "~": path.resolve(__dirname, "src"),
+            "@qlarr/design-core": path.resolve(
+              __dirname,
+              "../shared/design-core/src",
+            ),
           },
         },
         plugins: [
@@ -146,6 +154,10 @@ export default defineConfig(({ mode }) => {
         resolve: {
           alias: {
             "~": path.resolve(__dirname, "src"),
+            "@qlarr/design-core": path.resolve(
+              __dirname,
+              "../shared/design-core/src",
+            ),
           },
         },
         plugins: [
@@ -200,6 +212,10 @@ export default defineConfig(({ mode }) => {
         resolve: {
           alias: {
             "~": path.resolve(__dirname, "src"),
+            "@qlarr/design-core": path.resolve(
+              __dirname,
+              "../shared/design-core/src",
+            ),
           },
         },
         plugins: [

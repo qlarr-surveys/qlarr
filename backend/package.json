@@ -4,6 +4,7 @@
   "private": true,
   "description": "Qlarr backend (NestJS) — single-tenant open-source survey backend.",
   "scripts": {
+    "prebuild": "npm --prefix ../shared/design-core ci && npm --prefix ../shared/design-core run build",
     "build": "nest build",
     "start": "TZ=UTC nest start",
     "start:dev": "TZ=UTC nest start --watch",
@@ -22,6 +23,7 @@
     "@nestjs/platform-express": "^10.4.15",
     "@nestjs/throttler": "^6.5.0",
     "@nestjs/typeorm": "^10.0.2",
+    "@qlarr/design-core": "file:../shared/design-core",
     "@qlarr/survey-engine": "^0.1.8",
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",

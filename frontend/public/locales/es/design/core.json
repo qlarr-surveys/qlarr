@@ -534,5 +534,15 @@
   "default_end_page": "Página final predeterminada",
   "quota_message_placeholder": "Vacío: estos encuestados ven la página final predeterminada",
   "quota_message_missing": "Sin mensaje en este idioma",
-  "manage_quotas": "Gestionar cuotas"
+  "manage_quotas": "Gestionar cuotas",
+  "carry_from": "Traer de",
+  "carry_from_rows": "Filas — traer de",
+  "carry_from_columns": "Columnas — traer de",
+  "carry_source_placeholder": "Ninguna (no se trae)",
+  "carry_mode_selected": "Opciones seleccionadas",
+  "carry_mode_unselected": "Opciones no seleccionadas",
+  "carry_other": "Traer «Otro»",
+  "carry_remove": "Quitar el traspaso",
+  "err_carry_forward_source": "El origen del traspaso no es válido",
+  "err_carry_forward_source_detail": "La pregunta de la que se traen las opciones falta, se movió después de esta o ya no es una pregunta de opción múltiple."
 }

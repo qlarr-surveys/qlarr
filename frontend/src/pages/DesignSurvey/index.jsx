@@ -23,8 +23,8 @@ import {
   refreshDsl,
   showQuotaMessage,
 } from "~/state/design/designState";
-import { DESIGN_SURVEY_MODE } from "~/routes";
-import { QUOTA_MESSAGE_PARAM } from "~/constants/design";
+import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
+import { QUOTA_MESSAGE_PARAM } from "@qlarr/design-core/constants/design";
 
 const ContentPanel = React.lazy(() =>
   import("~/components/design/ContentPanel")

@@ -16,7 +16,7 @@ import {
   LOGO_SIZE_DIMENSIONS,
   LOGO_SPACING_DEFAULT,
   quotaMessageKey,
-} from "~/constants/design";
+} from "@qlarr/design-core/constants/design";
 import { isNotEmptyHtml } from "~/utils/design/utils";
 
 const ALIGNMENT_TO_FLEX = {

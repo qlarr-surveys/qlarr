@@ -8,7 +8,7 @@ import {
   Checkbox,
   FormHelperText,
 } from "@mui/material";
-import { LANGUAGE_DEF } from "~/constants/language";
+import { LANGUAGE_DEF } from "@qlarr/design-core/constants/language";
 
 export const AdditionalLanguages = ({
   baseLanguage,

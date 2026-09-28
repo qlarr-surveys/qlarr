@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import { FormControl, Select, MenuItem, FormHelperText, FormLabel } from "@mui/material";
-import { LANGUAGE_DEF } from '~/constants/language';
+import { LANGUAGE_DEF } from '@qlarr/design-core/constants/language';
 
 export const BaseLanguage = ({
   baseLanguage,

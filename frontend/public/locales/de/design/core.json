@@ -534,5 +534,15 @@
   "default_end_page": "Standard-Endseite",
   "quota_message_placeholder": "Leer: Diese Befragten sehen die Standard-Endseite",
   "quota_message_missing": "Keine Nachricht in dieser Sprache",
-  "manage_quotas": "Quoten verwalten"
+  "manage_quotas": "Quoten verwalten",
+  "carry_from": "Übernehmen aus",
+  "carry_from_rows": "Zeilen — übernehmen aus",
+  "carry_from_columns": "Spalten — übernehmen aus",
+  "carry_source_placeholder": "Keine (nicht übernommen)",
+  "carry_mode_selected": "Ausgewählte Optionen",
+  "carry_mode_unselected": "Nicht ausgewählte Optionen",
+  "carry_other": "„Sonstiges“ übernehmen",
+  "carry_remove": "Übernahme entfernen",
+  "err_carry_forward_source": "Übernahmequelle ist ungültig",
+  "err_carry_forward_source_detail": "Die Frage, aus der die Optionen übernommen werden, fehlt, wurde hinter diese Frage verschoben oder ist keine Multiple-Choice-Frage mehr."
 }

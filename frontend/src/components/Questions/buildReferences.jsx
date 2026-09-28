@@ -1,4 +1,4 @@
-import { accessibleDependencies } from "~/utils/design/access/dependencies";
+import { accessibleDependencies } from "@qlarr/design-core/utils/dependencies";
 import { isQuestion, stripTags } from "~/utils/design/utils";
 
 export const buildReferences = (componentIndices, code, state, mainLang) => {

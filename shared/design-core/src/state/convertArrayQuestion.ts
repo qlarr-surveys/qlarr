@@ -1,4 +1,5 @@
-import { ARRAY_MIN_WIDTH_KEYS } from "~/constants/design";
+// @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
+import { ARRAY_MIN_WIDTH_KEYS } from "../constants/design";
 import {
   addAnswerInstructions,
   changeInstruction,

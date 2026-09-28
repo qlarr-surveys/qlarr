@@ -13,10 +13,11 @@ import {
   removeAnswer,
   setup,
 } from "~/state/design/designState";
-import { setupOptions } from "~/constants/design";
+import { setupOptions } from "@qlarr/design-core/constants/design";
 import { useDrag, useDrop } from "react-dnd";
 import { useEffect, useRef } from "react";
-import { contentEditable, DESIGN_SURVEY_MODE, inDesign } from "~/routes";
+import { contentEditable, inDesign } from "~/routes";
+import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
 import { useTheme } from "@emotion/react";
 import { sanitizePastedText } from "~/components/design/ContentEditor/sanitizePastedText";
 import ContentEditor from "~/components/design/ContentEditor";
@@ -37,6 +38,14 @@ function ChoiceItemDesign(props) {
   const answer = useSelector((state) => {
     return state.designState[props.qualifiedCode];
   });
+
+  // Carried options are mirrored from the source and owned by the carry: no
+  // reorder / recode / edit / delete. The target-local "None" stays editable.
+  const carryOwned = useSelector(
+    (state) =>
+      !!state.designState[props.questionCode]?.carryForward &&
+      state.designState[props.qualifiedCode]?.type !== "none"
+  );
 
   const langInfo = props.langInfo;
 
@@ -199,7 +208,7 @@ function ChoiceItemDesign(props) {
           marginBottom: props.type === "text" ? "8px" : "inherit",
         }}
       >
-        {inDesign(props.designMode) && (
+        {inDesign(props.designMode) && !carryOwned && (
           <div ref={drag} className={styles.answerIcon}>
             <DragIndicatorIcon
               color="action"
@@ -208,7 +217,7 @@ function ChoiceItemDesign(props) {
             />
           </div>
         )}
-        {inDesign(props.designMode) && (
+        {inDesign(props.designMode) && !carryOwned && (
           <InlineCodeEditor
             qualifiedCode={props.qualifiedCode}
             designMode={props.designMode}
@@ -270,8 +279,9 @@ function ChoiceItemDesign(props) {
             showToolbar={false}
             customStyle={props.type == "text" ? `flex: 1` : undefined}
             editable={
-              props.designMode == DESIGN_SURVEY_MODE.DESIGN ||
-              props.designMode == DESIGN_SURVEY_MODE.LANGUAGES
+              !carryOwned &&
+              (props.designMode == DESIGN_SURVEY_MODE.DESIGN ||
+                props.designMode == DESIGN_SURVEY_MODE.LANGUAGES)
             }
             extended={false}
             onNewLine={props.onNewLine}
@@ -296,7 +306,7 @@ function ChoiceItemDesign(props) {
             />
           </>
         )}
-        {inDesign(props.designMode) && (
+        {inDesign(props.designMode) && !carryOwned && (
           <>
             <span style={{ margin: "8px" }} />
             <BuildIcon
@@ -318,7 +328,7 @@ function ChoiceItemDesign(props) {
             />
           </>
         )}
-        {inDesign(props.designMode) && (
+        {inDesign(props.designMode) && !carryOwned && (
           <CloseIcon
             key="close"
             color="action"

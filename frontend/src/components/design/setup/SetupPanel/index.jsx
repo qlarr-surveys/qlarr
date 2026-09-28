@@ -11,6 +11,8 @@ import SelectValue from "../SelectValue";
 import SelectDate from "../SelectDate";
 import Relevance from "../logic/Relevance";
 import SkipLogic from "../SkipLogic";
+import CarryForward from "../CarryForward";
+import { accessibleDependencies } from "@qlarr/design-core";
 import styles from "./SetupPanel.module.css";
 import CloseIcon from "@mui/icons-material/Close";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -57,6 +59,24 @@ function SetupPanel({ t }) {
 
   const { code, highlighted, rules } = useSelector(selectSetupData);
 
+  const showCarryForwardRule = useSelector((state) => {
+    if (!code) return false;
+    if (state.designState[code]?.carryForward) return true;
+    if (!state.designState.componentIndex) return false;
+    const deps = accessibleDependencies(state.designState.componentIndex, code) || [];
+    return deps.some((d) =>
+      ["mcq", "icon_mcq", "image_mcq"].includes(state.designState[d]?.type),
+    );
+  });
+
+  const effectiveRules = React.useMemo(() => {
+    if (showCarryForwardRule) return rules;
+    return (rules || []).map((group) => ({
+      ...group,
+      rules: (group.rules || []).filter((r) => r !== "carry_forward"),
+    }));
+  }, [rules, showCarryForwardRule]);
+
   const type = useSelector((state) => {
     return state.designState[code].type;
   });
@@ -96,7 +116,7 @@ function SetupPanel({ t }) {
 
       <Divider />
       <SetupSection
-        rules={rules || []}
+        rules={effectiveRules || []}
         code={code}
         t={t}
         highlighted={highlighted}
@@ -458,6 +478,8 @@ const SetupComponent = React.memo(({ code, rule, t, isQuickOptions }) => {
       return <SkipLogic t={t} key={code + rule} code={code} />;
     case "relevance":
       return <Relevance t={t} key={code + rule} code={code} />;
+    case "carry_forward":
+      return <CarryForward t={t} key={code + rule} code={code} />;
     case "prefill":
       return (
         <ToggleValue

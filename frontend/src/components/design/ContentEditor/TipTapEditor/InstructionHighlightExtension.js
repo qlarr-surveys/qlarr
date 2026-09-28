@@ -2,7 +2,7 @@ import { Extension } from "@tiptap/core";
 import { Plugin, PluginKey } from "prosemirror-state";
 import { Decoration, DecorationSet } from "prosemirror-view";
 import { INSTRUCTION_EDITOR_CONFIG } from "~/constants/editor";
-import { INSTRUCTION_SYNTAX_PATTERN } from '~/constants/instruction';
+import { INSTRUCTION_SYNTAX_PATTERN } from '@qlarr/design-core/constants/instruction';
 
 const InstructionHighlightExtension = Extension.create({
   name: "instructionHighlight",

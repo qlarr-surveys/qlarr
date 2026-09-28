@@ -1,7 +1,4 @@
-/**
- * Maps survey question types to logic builder field types
- * This replaces the massive switch statement in buildFields.jsx
- */
+// @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
 const QUESTION_TYPE_TO_FIELD_TYPE = {
   // Text-based questions
   text: 'text',
@@ -48,9 +45,7 @@ const QUESTION_TYPE_TO_FIELD_TYPE = {
   multiple_text: 'text',
 };
 
-/**
- * Question types that support "other" text field
- */
+
 const QUESTION_TYPES_WITH_OTHER = [
   'scq',
   'icon_scq',
@@ -60,18 +55,7 @@ const QUESTION_TYPES_WITH_OTHER = [
   'image_mcq',
 ];
 
-/**
- * Question types that are arrays (rows/columns)
- */
-const ARRAY_QUESTION_TYPES = [
-  'scq_array',
-  'mcq_array',
-  'scq_icon_array',
-];
 
-/**
- * Question types that are ranking questions
- */
 const RANKING_QUESTION_TYPES = [
   'ranking',
   'image_ranking',
@@ -84,23 +68,14 @@ export function getFieldType(questionType) {
   return QUESTION_TYPE_TO_FIELD_TYPE[questionType] || 'text';
 }
 
-/**
- * Check if question type supports "other" text field
- */
+
 export function hasOtherOption(questionType) {
   return QUESTION_TYPES_WITH_OTHER.includes(questionType);
 }
 
-/**
- * Check if question type is an array type
- */
-export function isArrayType(questionType) {
-  return ARRAY_QUESTION_TYPES.includes(questionType);
-}
 
-/**
- * Check if question type is a ranking type
- */
+export { isArrayType } from "../constants/design";
+
 export function isRankingType(questionType) {
   return RANKING_QUESTION_TYPES.includes(questionType);
 }

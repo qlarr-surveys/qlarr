@@ -534,5 +534,15 @@
   "default_end_page": "Page de fin par défaut",
   "quota_message_placeholder": "Vide : ces répondants voient la page de fin par défaut",
   "quota_message_missing": "Aucun message dans cette langue",
-  "manage_quotas": "Gérer les quotas"
+  "manage_quotas": "Gérer les quotas",
+  "carry_from": "Reporter depuis",
+  "carry_from_rows": "Lignes — reporter depuis",
+  "carry_from_columns": "Colonnes — reporter depuis",
+  "carry_source_placeholder": "Aucun (non reporté)",
+  "carry_mode_selected": "Options sélectionnées",
+  "carry_mode_unselected": "Options non sélectionnées",
+  "carry_other": "Reporter « Autre »",
+  "carry_remove": "Supprimer le report",
+  "err_carry_forward_source": "La source du report est invalide",
+  "err_carry_forward_source_detail": "La question depuis laquelle les options sont reportées est manquante, a été déplacée après celle-ci, ou n'est plus une question à choix multiple."
 }

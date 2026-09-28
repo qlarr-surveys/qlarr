@@ -6,7 +6,7 @@ import { useTheme } from "@mui/material/styles";
 import ErrorDisplay from "~/components/design/ErrorDisplay";
 import { useSelector } from "react-redux";
 import ActionToolbar from "../design/ActionToolbar";
-import { DESIGN_SURVEY_MODE } from "~/routes";
+import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
 
 function GroupHeader({ t, code, designMode, langInfo }) {
   console.debug("Group Header: " + code);

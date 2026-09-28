@@ -1,4 +1,4 @@
-import { INSTRUCTION_SYNTAX_PATTERN } from "~/constants/instruction";
+import { INSTRUCTION_SYNTAX_PATTERN } from "@qlarr/design-core/constants/instruction";
 
 export const EDITOR_CONSTANTS = {
   BLUR_TIMEOUT_MS: 100,

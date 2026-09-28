@@ -30,7 +30,7 @@ import {
   QUOTA_MESSAGE_PARAM,
   QUOTA_PARAM,
   quotaMessageKey,
-} from "~/constants/design";
+} from "@qlarr/design-core/constants/design";
 import { routes } from "~/routes";
 import { isNotEmptyHtml } from "~/utils/design/utils";
 import { QlarrLogicBuilderInlineWrapper } from "~/components/design/setup/logic/QlarrLogicBuilder";

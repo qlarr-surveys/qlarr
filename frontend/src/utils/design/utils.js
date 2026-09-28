@@ -1,6 +1,5 @@
 import { useSelector } from "react-redux";
 import { useResponsive } from "~/hooks/use-responsive";
-import { STRIP_TAGS_PATTERN } from "~/constants/instruction";
 
 export {
   isEquivalent,
@@ -10,8 +9,9 @@ export {
   isQuestion,
   isGroup,
   buildCodeIndex,
-} from "./pureUtils";
-import { isEquivalent } from "./pureUtils";
+  stripTags,
+} from "@qlarr/design-core/utils/pureUtils";
+import { isEquivalent } from "@qlarr/design-core/utils/pureUtils";
 
 export const diff = (obj1, obj2) => {
   if (!obj2 || Object.prototype.toString.call(obj2) !== "[object Object]") {
@@ -90,13 +90,6 @@ export const diff = (obj1, obj2) => {
   }
 
   return diffs;
-};
-
-export const stripTags = (string) => {
-  if (typeof string !== "string") return string;
-  return string
-    .replace(STRIP_TAGS_PATTERN, "")
-    .replace(/\{\{.*?\}\}/g, "{{ ... }}");
 };
 
 export function truncateWithEllipsis(text, maxLength) {

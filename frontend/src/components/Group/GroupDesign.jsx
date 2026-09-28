@@ -21,8 +21,8 @@ import { useDrag, useDrop } from "react-dnd";
 import { useTheme } from "@emotion/react";
 import { useDispatch } from "react-redux";
 import { onDrag, setup } from "~/state/design/designState";
-import { DESIGN_SURVEY_MODE } from "~/routes";
-import { setupOptions } from "~/constants/design";
+import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
+import { setupOptions } from "@qlarr/design-core/constants/design";
 import { blendColors } from '../Questions/utils';
 function GroupDesign({
   t,

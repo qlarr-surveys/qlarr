@@ -534,5 +534,15 @@
   "default_end_page": "Default end page",
   "quota_message_placeholder": "Empty: these respondents see the default end page",
   "quota_message_missing": "No message in this language",
-  "manage_quotas": "Manage quotas"
+  "manage_quotas": "Manage quotas",
+  "carry_from": "Carry from",
+  "carry_from_rows": "Rows — carry from",
+  "carry_from_columns": "Columns — carry from",
+  "carry_source_placeholder": "None (not carried)",
+  "carry_mode_selected": "Selected options",
+  "carry_mode_unselected": "Unselected options",
+  "carry_other": "Carry 'Other'",
+  "carry_remove": "Remove carry forward",
+  "err_carry_forward_source": "Carry forward source is broken",
+  "err_carry_forward_source_detail": "The question this one carries options from is missing, was moved after it, or is no longer a multiple-choice question."
 }

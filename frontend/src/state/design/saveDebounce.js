@@ -63,6 +63,7 @@ const MUTATING = [
   "designState/cloneQuestion",
   "designState/deleteGroup",
   "designState/addNewAnswer",
+  "designState/addNewAnswers",
   "designState/removeAnswer",
   "designState/changeValidationValue",
   "designState/updateRandom",
@@ -87,6 +88,9 @@ const MUTATING = [
   "designState/addQuota",
   "designState/updateQuota",
   "designState/removeQuota",
+  "designState/enableCarryForward",
+  "designState/updateCarryForward",
+  "designState/disableCarryForward",
 ];
 
 const setState = (store, state) => {

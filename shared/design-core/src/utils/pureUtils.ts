@@ -1,10 +1,19 @@
+// @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
 import {
   QUESTION_CODE_PATTERN,
   GROUP_CODE_PATTERN,
-} from "~/constants/instruction";
+  STRIP_TAGS_PATTERN,
+} from "../constants/instruction";
 
 export const isQuestion = (code) => QUESTION_CODE_PATTERN.test(code);
 export const isGroup = (code) => GROUP_CODE_PATTERN.test(code);
+
+export const stripTags = (string) => {
+  if (typeof string !== "string") return string;
+  return string
+    .replace(STRIP_TAGS_PATTERN, "")
+    .replace(/\{\{.*?\}\}/g, "{{ ... }}");
+};
 
 // Maps every component's actual code to a human-facing numeric code
 // (groups → `P1`, `P2`; questions → `Q1`, `Q2`; answers → `Q1A1`). Pure:

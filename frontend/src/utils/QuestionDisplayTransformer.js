@@ -1,6 +1,6 @@
 import {
   INSTRUCTION_SYNTAX_PATTERN
-} from "~/constants/instruction";
+} from "@qlarr/design-core/constants/instruction";
 
 const HTML_ENTITY_MAP = {
   "&gt;": ">",
