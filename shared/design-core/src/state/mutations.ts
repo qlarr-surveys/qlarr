@@ -25,6 +25,7 @@ import {
   CONVERTIBLE_ARRAY_TYPES,
   CONVERTIBLE_TEXT_TYPES,
   CONVERTIBLE_DATE_TIME_TYPES,
+  isArrayType,
   languageSetup,
   setupOptions,
   themeSetup,
@@ -323,6 +324,7 @@ export function removeAnswer(state, payload) {
   addMaskedValuesInstructions(codes[0], question, state);
   cleanupRandomRules(question);
   addSkipInstructions(state, codes[0]);
+  resyncCarryForwardTargets(state, codes[0]);
 }
 
 export function addNewAnswers(state, payload) {
@@ -361,6 +363,7 @@ export function addNewAnswers(state, payload) {
       index++;
     }
   });
+  resyncCarryForwardTargets(state, questionCode);
 }
 
 export function onNewLine(state, payload) {
@@ -474,7 +477,320 @@ export function addNewAnswer(state, payload) {
       });
       break;
   }
+  resyncCarryForwardTargets(state, questionCode);
 }
+
+let carrySyncing = false;
+
+export function enableCarryForward(state, payload) {
+  const { targetCode, sourceCode } = payload;
+  const target = state[targetCode];
+  if (!target || !state[sourceCode] || targetCode === sourceCode) {
+    return;
+  }
+  const axis = normalizeCarryAxis(state, targetCode, payload.axis);
+  const mode = payload.mode === "unselected" ? "unselected" : "selected";
+  if (!target.carryForward) {
+    target.carryForward = {};
+  }
+  target.carryForward[axis] = {
+    sourceCode,
+    mode,
+    // "Other" can only be carried in selected mode
+    carryOther: mode === "selected" && !!payload.carryOther,
+  };
+  syncCarryForward(state, targetCode, axis);
+  state.index = buildCodeIndex(state);
+}
+
+export function updateCarryForward(state, payload) {
+  const { targetCode } = payload;
+  const target = state[targetCode];
+  const axis = normalizeCarryAxis(state, targetCode, payload.axis);
+  const config = target?.carryForward?.[axis];
+  if (!config) {
+    return;
+  }
+  if (payload.sourceCode !== undefined && state[payload.sourceCode]) {
+    config.sourceCode = payload.sourceCode;
+  }
+  if (payload.mode !== undefined) {
+    config.mode = payload.mode === "unselected" ? "unselected" : "selected";
+  }
+  if (payload.carryOther !== undefined) {
+    config.carryOther = !!payload.carryOther;
+  }
+  if (config.mode === "unselected") {
+    config.carryOther = false;
+  }
+  syncCarryForward(state, targetCode, axis);
+  state.index = buildCodeIndex(state);
+}
+
+export function disableCarryForward(state, payload) {
+  const { targetCode } = payload;
+  const target = state[targetCode];
+  const axis = normalizeCarryAxis(state, targetCode, payload.axis);
+  if (!target?.carryForward?.[axis]) {
+    return;
+  }
+  delete target.carryForward[axis];
+  if (Object.keys(target.carryForward).length === 0) {
+    delete target.carryForward;
+  }
+  // Spec: options remain as an editable copy — we only stop syncing. Strip the
+  // carry-owned relevance so the leftover options are truly plain/editable.
+  (target.children || []).forEach((child) => {
+    if (isCarriedChild(state, targetCode, axis, child)) {
+      removeInstruction(state[child.qualifiedCode], "conditional_relevance");
+    }
+  });
+  // Rebuild (or drop) the question-level hide from whatever axes remain carried.
+  rebuildParentRelevance(state, targetCode);
+  state.index = buildCodeIndex(state);
+}
+
+const CARRY_NON_CARRIED_SOURCE_TYPES = ["all", "none", "other_text", "other"];
+
+// Non-array targets only ever use the "rows" slot.
+const normalizeCarryAxis = (state, targetCode, axis) =>
+  isArrayType(state[targetCode]?.type)
+    ? axis === "columns"
+      ? "columns"
+      : "rows"
+    : "rows";
+
+// The child `type` carried options take on the target: rows/columns for arrays,
+// undefined (plain option) for choice / ranking / text targets.
+const carriedChildType = (state, targetCode, axis) =>
+  isArrayType(state[targetCode]?.type)
+    ? axis === "columns"
+      ? "column"
+      : "row"
+    : undefined;
+
+// Is this target child owned by the carry for the given axis? (Preserves the
+// target's local "None of the above" and, on arrays, the untouched other axis.)
+const isCarriedChild = (state, targetCode, axis, child) => {
+  const t = state[child.qualifiedCode]?.type;
+  if (isArrayType(state[targetCode]?.type)) {
+    return t === carriedChildType(state, targetCode, axis);
+  }
+  return t !== "none"; // choice/ranking/text: everything but local None is carried
+};
+
+// The target's own child codes that are carry-driven for an axis (excludes the
+// local "None", which never counts toward keeping the question visible).
+const carriedCodesForAxis = (state, targetCode, axis) =>
+  (state[targetCode].children || [])
+    .filter((child) => isCarriedChild(state, targetCode, axis, child))
+    .map((child) => child.code);
+
+const rebuildParentRelevance = (state, targetCode) => {
+  const target = state[targetCode];
+  const cf = target?.carryForward;
+  const children = cf
+    ? ["rows", "columns"]
+        .filter((axis) => cf[axis])
+        .map((axis) => carriedCodesForAxis(state, targetCode, axis))
+        .filter((group) => group.length)
+    : [];
+  if (children.length) {
+    changeInstruction(target, { code: "parent_relevance", children });
+  } else {
+    removeInstruction(target, "parent_relevance");
+  }
+};
+
+const sourceOtherOption = (state, sourceCode) =>
+  (state[sourceCode]?.children || []).find(
+    (c) => state[c.qualifiedCode]?.type === "other",
+  );
+
+// Regular (carryable) source options, in source order — excludes All / None /
+// Other / other_text. Other is appended separately when eligible.
+const carriedSourceOptions = (state, sourceCode) =>
+  (state[sourceCode]?.children || []).filter(
+    (c) =>
+      CARRY_NON_CARRIED_SOURCE_TYPES.indexOf(state[c.qualifiedCode]?.type) ===
+      -1,
+  );
+
+const carryRelevanceText = (config, optionCode, isOther) => {
+  const src = config.sourceCode;
+  const picked = (code) => `(${src}.value || []).indexOf('${code}') > -1`;
+  if (isOther) {
+    // carried only when the respondent picked Other in the source
+    return picked("Aother");
+  }
+  return config.mode === "unselected"
+    ? `!(${picked(optionCode)})`
+    : picked(optionCode);
+};
+
+// Materialize one carried option as a target child (reusing the source code),
+// mirroring its label across all languages and attaching the carry relevance.
+// Returns the child entry (not yet placed in `target.children`).
+const materializeCarriedOption = (
+  state,
+  targetCode,
+  config,
+  childType,
+  srcChild,
+  targetChildCode,
+  ctx,
+) => {
+  // `targetChildCode` is the code the option takes on the target (usually the
+  // source code, but remapped to the "Ac*" convention on the column axis — see
+  // syncCarryForward). The runtime relevance keys off the SOURCE code
+  // (srcChild.code), which is independent of the target child code.
+  const code = targetChildCode;
+  const qualifiedCode = targetCode + code;
+  const srcState = state[srcChild.qualifiedCode];
+  state[qualifiedCode] = {};
+  if (childType) {
+    state[qualifiedCode].type = childType;
+  }
+  // Regular options mirror the source label (a static copy, re-copied whenever
+  // the source changes). The carried "Other" is the one exception: its label
+  // pipes the respondent's typed write-in text from the source's Atext value,
+  // rendered as a plain option (no write-in field on the target).
+  const otherPipe = `{{${config.sourceCode}AotherAtext.value}}`;
+  ctx.langs.forEach((lang) => {
+    const label = ctx.isOther ? otherPipe : srcState?.content?.[lang]?.label;
+    if (label !== undefined) {
+      changeContent(state, { code: qualifiedCode, key: "label", value: label, lang });
+    }
+  });
+  addAnswerInstructions(state, state[qualifiedCode], targetCode, targetCode);
+  changeInstruction(state[qualifiedCode], {
+    code: "conditional_relevance",
+    text: carryRelevanceText(config, srcChild.code, ctx.isOther),
+    isActive: true,
+    returnType: "boolean",
+  });
+  return { code, qualifiedCode, ...(childType ? { type: childType } : {}) };
+};
+
+// Rebuild the target's carried options for one axis from the current source.
+// Idempotent: safe to call after any source mutation.
+const syncCarryForward = (state, targetCode, axis) => {
+  const target = state[targetCode];
+  const config = target?.carryForward?.[axis];
+  if (!config) {
+    return;
+  }
+  const source = state[config.sourceCode];
+  const childType = carriedChildType(state, targetCode, axis);
+
+  const wasSyncing = carrySyncing;
+  carrySyncing = true;
+  try {
+    // Broken source (deleted / not yet resolvable): flag, leave options as-is.
+    if (!source || !source.children) {
+      target.designErrors = questionDesignError(target);
+      return;
+    }
+
+    // Preserve the local "None" (choice targets) and the other axis (arrays);
+    // wipe every currently-carried child and its state entry.
+    const preserved = [];
+    (target.children || []).forEach((child) => {
+      if (isCarriedChild(state, targetCode, axis, child)) {
+        delete state[child.qualifiedCode];
+      } else {
+        preserved.push(child);
+      }
+    });
+
+    const ctx = {
+      langs: (state.langInfo?.languagesList || []).map((l) => l.code),
+    };
+
+    // On the column axis, carried options can't keep the source "A*" codes —
+    // they'd collide with the array's row codes (same qualifiedCode). Remap to
+    // the native "Ac*" column convention; every other target keeps source codes
+    // (the Data contract: target option codes = source option codes).
+    const codeFor = (srcChild, ordinal) =>
+      childType === "column" ? `Ac${ordinal + 1}` : srcChild.code;
+
+    const carried = carriedSourceOptions(state, config.sourceCode).map(
+      (srcChild, i) =>
+        materializeCarriedOption(
+          state,
+          targetCode,
+          config,
+          childType,
+          srcChild,
+          codeFor(srcChild, i),
+          { ...ctx, isOther: false },
+        ),
+    );
+
+    // Other, last among carried options, only when eligible.
+    const other = sourceOtherOption(state, config.sourceCode);
+    if (config.carryOther && config.mode === "selected" && other) {
+      carried.push(
+        materializeCarriedOption(
+          state,
+          targetCode,
+          config,
+          childType,
+          other,
+          childType === "column" ? `Ac${carried.length + 1}` : "Aother",
+          { ...ctx, isOther: true },
+        ),
+      );
+    }
+
+    // Canonical order: [preserved non-None] + carried options + [local None last].
+    const noneChildren = preserved.filter(
+      (c) => state[c.qualifiedCode]?.type === "none",
+    );
+    const otherPreserved = preserved.filter(
+      (c) => state[c.qualifiedCode]?.type !== "none",
+    );
+    target.children = [...otherPreserved, ...carried, ...noneChildren];
+    if (isArrayType(target.type)) {
+      // columns must precede rows in the persisted order (see stableSortByAnswerType)
+      target.children = stableSortByAnswerType(target.children);
+    }
+
+    target.designErrors = questionDesignError(target);
+    cleanupValidation(state, targetCode);
+    cleanupDefaultValue(target);
+    refreshEnumForSingleChoice(target, state);
+    refreshListForMultipleChoice(target, state);
+    addMaskedValuesInstructions(targetCode, target, state);
+    rebuildParentRelevance(state, targetCode);
+  } finally {
+    carrySyncing = wasSyncing;
+  }
+};
+
+const resyncCarryForwardTargets = (state, changedCode) => {
+  if (carrySyncing || !changedCode) {
+    return;
+  }
+  const sourceQuestion = splitQuestionCodes(changedCode)[0];
+  let touched = false;
+  Object.keys(state).forEach((key) => {
+    const comp = state[key];
+    if (!comp || typeof comp !== "object" || !comp.carryForward) {
+      return;
+    }
+    ["rows", "columns"].forEach((axis) => {
+      if (comp.carryForward[axis]?.sourceCode === sourceQuestion) {
+        syncCarryForward(state, key, axis);
+        touched = true;
+      }
+    });
+  });
+  if (touched) {
+    state.index = buildCodeIndex(state);
+  }
+};
+
 
 export function deleteGroup(state, payload) {
   const groupCode = payload;
@@ -521,6 +837,7 @@ export function deleteQuestion(state, payload) {
   delete state[questionCode];
   cleanupRandomRules(group);
   cleanupSkipDestinations(state, questionCode);
+  resyncCarryForwardTargets(state, questionCode);
 }
 
 export function convertQuestion(state, payload) {
@@ -585,6 +902,7 @@ export function convertQuestion(state, payload) {
   cleanupValidation(state, questionCode);
   currentQuestion.designErrors = questionDesignError(currentQuestion);
   setup(state, { code: questionCode, rules: setupOptions(newType) });
+  resyncCarryForwardTargets(state, questionCode);
 }
 
 export function changeContent(state, payload) {
@@ -628,6 +946,7 @@ export function changeContent(state, payload) {
   );
 
   state[payload.code].content[payload.lang][payload.key] = payload.value;
+  resyncCarryForwardTargets(state, payload.code);
 }
 
 export function changeCustomCss(state, payload) {
@@ -901,9 +1220,11 @@ export function onDrag(state, payload) {
       break;
     case "reorder_answers":
       reorderAnswers(state, payload);
+      resyncCarryForwardTargets(state, payload.id);
       break;
     case "reorder_answers_by_type":
       reorderAnswersByType(state, payload);
+      resyncCarryForwardTargets(state, payload.id);
       break;
     case "new_question":
       newQuestion(state, payload);

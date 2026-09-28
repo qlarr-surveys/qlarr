@@ -90,6 +90,12 @@ export const designState = createSlice({
     setUpdating: (state, action) => core.setUpdating(state, action.payload),
     onDrag: (state, action) => core.onDrag(state, action.payload),
     addComponent: (state, action) => core.addComponent(state, action.payload),
+    enableCarryForward: (state, action) =>
+      core.enableCarryForward(state, action.payload),
+    updateCarryForward: (state, action) =>
+      core.updateCarryForward(state, action.payload),
+    disableCarryForward: (state, action) =>
+      core.disableCarryForward(state, action.payload),
   },
 });
 
@@ -141,6 +147,9 @@ export const {
   setSaving,
   refreshDsl,
   setUpdating,
+  enableCarryForward,
+  updateCarryForward,
+  disableCarryForward,
 } = designState.actions;
 
 // Re-exported from @qlarr/design-core to preserve the former public export.

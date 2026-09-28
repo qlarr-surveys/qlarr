@@ -221,7 +221,7 @@
   "show_always": "العرض دائمًا",
   "disabled": "معطل",
   "question_type": "نوع السؤال",
-"scq": "اختيار واحد",
+  "scq": "اختيار واحد",
   "mcq": "اختيار متعدد",
   "icon_scq": "اختيار واحد بأيقونات",
   "icon_mcq": "اختيار متعدد بأيقونات",
@@ -519,7 +519,7 @@
   "tour_step9_next": "التالي: الاستجابات",
   "tour_step10_title": "الاستجابات",
   "tour_step10_intro": "تتبّع الاستجابات والتحليلات وراجع النتائج وأدِر بياناتك أو صدّرها.",
-"tooltips": {
+  "tooltips": {
     "allow_previous": "Allow respondents to go back to previous pages during the survey.",
     "allow_incomplete": "Allow respondents to save their progress and resume the survey later.",
     "allow_jump": "Allow respondents to jump to any page using a survey index/table of contents.",
@@ -530,5 +530,15 @@
     "code_changed_after_publish": "لا يمكن تغيير رمز المكون بعد نشره",
     "duplicate_to_code": "هذا الرمز ينتمي إلى مجموعة أو سؤال آخر",
     "code_invalid": "الرمز غير صالح. يرجى المحاولة مرة أخرى."
-  }
+  },
+  "carry_from": "نقل الخيارات من",
+  "carry_from_rows": "الصفوف — النقل من",
+  "carry_from_columns": "الأعمدة — النقل من",
+  "carry_source_placeholder": "بدون (غير منقول)",
+  "carry_mode_selected": "الخيارات المحددة",
+  "carry_mode_unselected": "الخيارات غير المحددة",
+  "carry_other": "نقل خيار «أخرى»",
+  "carry_remove": "إزالة النقل",
+  "err_carry_forward_source": "مصدر النقل غير صالح",
+  "err_carry_forward_source_detail": "السؤال الذي تُنقل منه الخيارات مفقود، أو نُقل إلى ما بعد هذا السؤال، أو لم يعد سؤال اختيار من متعدد."
 }

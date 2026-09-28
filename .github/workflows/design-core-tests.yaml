@@ -1,0 +1,45 @@
+name: design-core tests
+
+# Runs the @qlarr/design-core (shared/design-core) vitest suite. This package is
+# a standalone workspace with its own package-lock.json, consumed by both the
+# frontend and backend, so it is built and tested in isolation here.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "shared/design-core/**"
+      - ".github/workflows/design-core-tests.yaml"
+  pull_request:
+    paths:
+      - "shared/design-core/**"
+      - ".github/workflows/design-core-tests.yaml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: design-core-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: shared/design-core
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: shared/design-core/package-lock.json
+
+      - name: install (reproducible)
+        run: npm ci
+
+      - name: build (type-check)
+        run: npm run build
+
+      - name: unit tests
+        run: npm test

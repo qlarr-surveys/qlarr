@@ -57,9 +57,17 @@ function ArrayDesign(props) {
     [children]
   );
 
+  // Each axis can be carried from its own source; a carried axis is mirrored &
+  // read-only (no add / reorder / edit / delete for that axis).
+  const carryForward = useSelector(
+    (state) => state.designState[props.code]?.carryForward
+  );
+  const carriedRows = !!carryForward?.rows;
+  const carriedColumns = !!carryForward?.columns;
+
   return (
     <>
-      {inDesign(props.designMode) && (
+      {inDesign(props.designMode) && !carriedColumns && (
         <div className={styles.addColumn}>
           <Button
             size="small"
@@ -94,6 +102,7 @@ function ArrayDesign(props) {
                     key={item.qualifiedCode}
                     item={item}
                     index={index}
+                    carried={carriedColumns}
                   />
                 );
               })}
@@ -143,13 +152,14 @@ function ArrayDesign(props) {
                   item={item}
                   colCount={columns.length}
                   index={index}
+                  carried={carriedRows}
                 />
               );
             })}
           </TableBody>
         </Table>
       </TableContainer>
-      {inDesign(props.designMode)  && (
+      {inDesign(props.designMode) && !carriedRows && (
         <div className={styles.addRow}>
           <Button
             size="small"
@@ -178,6 +188,7 @@ function ArrayRowDesign({
   onMoreLines,
   langInfo,
   parentQualifiedCode,
+  carried,
 }) {
   const dispatch = useDispatch();
   const theme = useTheme();
@@ -286,7 +297,7 @@ function ArrayRowDesign({
         className={styles.rowLabelCell}
       >
         <Box display="flex" alignItems="center">
-          {inDesign(designMode) && (
+          {inDesign(designMode) && !carried && (
             <div ref={drag}>
               <DragIndicatorIcon color="action" />
             </div>
@@ -294,7 +305,7 @@ function ArrayRowDesign({
           <ContentEditor
             code={item.qualifiedCode}
             showToolbar={false}
-            editable={contentEditable(designMode)}
+            editable={!carried && contentEditable(designMode)}
             extended={false}
             onNewLine={onNewLine}
             onMoreLines={onMoreLines}
@@ -325,7 +336,7 @@ function ArrayRowDesign({
           </TableCell>
         );
       })}
-      {inDesign(designMode) && (
+      {inDesign(designMode) && !carried && (
         <TableCell
           onClick={(e) => {
             e.stopPropagation();
@@ -342,7 +353,7 @@ function ArrayRowDesign({
           <BuildIcon color="action" />
         </TableCell>
       )}
-      {inDesign(designMode) && (
+      {inDesign(designMode) && !carried && (
         <TableCell
           onClick={(e) => {
             e.stopPropagation();
@@ -369,6 +380,7 @@ function ArrayHeaderDesign({
   langInfo,
   parentQualifiedCode,
   width,
+  carried,
 }) {
   const dispatch = useDispatch();
   const { guard, modal } = useReleaseGuard();
@@ -454,7 +466,7 @@ function ArrayHeaderDesign({
       style={{ '--qlarr-cell-width': width + 'px' }}
       key={item.qualifiedCode}
     >
-      {inDesign(designMode) && (
+      {inDesign(designMode) && !carried && (
         <div className={styles.inlineFlex}>
           <div
             ref={drag}
@@ -479,7 +491,7 @@ function ArrayHeaderDesign({
         <ContentEditor
           code={item.qualifiedCode}
           showToolbar={false}
-          editable={contentEditable(designMode)}
+          editable={!carried && contentEditable(designMode)}
           extended={false}
           centerText
           placeholder={

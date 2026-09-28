@@ -85,6 +85,9 @@ const MUTATING = [
   "designState/onDrag",
   "designState/setDefaultValue",
   "designState/convertQuestion",
+  "designState/enableCarryForward",
+  "designState/updateCarryForward",
+  "designState/disableCarryForward",
 ];
 
 const setState = (store, state) => {

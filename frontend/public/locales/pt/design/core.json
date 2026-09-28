@@ -530,5 +530,15 @@
   "tour_step9_intro": "Configure coleta de dados, acesso à pesquisa, navegação, cotas e regras de resposta antes de publicar.",
   "tour_step9_next": "Próximo: Respostas",
   "tour_step10_title": "Respostas",
-  "tour_step10_intro": "Acompanhe respostas e análises, revise resultados e gerencie ou exporte seus dados."
+  "tour_step10_intro": "Acompanhe respostas e análises, revise resultados e gerencie ou exporte seus dados.",
+  "carry_from": "Trazer de",
+  "carry_from_rows": "Linhas — trazer de",
+  "carry_from_columns": "Colunas — trazer de",
+  "carry_source_placeholder": "Nenhuma (não trazida)",
+  "carry_mode_selected": "Opções selecionadas",
+  "carry_mode_unselected": "Opções não selecionadas",
+  "carry_other": "Trazer «Outro»",
+  "carry_remove": "Remover o encaminhamento",
+  "err_carry_forward_source": "A origem do encaminhamento é inválida",
+  "err_carry_forward_source_detail": "A pergunta de onde as opções são trazidas está ausente, foi movida para depois desta ou já não é uma pergunta de escolha múltipla."
 }
