@@ -15,9 +15,15 @@ const saveDebounce = (store) => {
   }
 
   saveTimer = setTimeout(() => {
-    store.dispatch(setUpdating(true));
     const state = store.getState();
     const diff = getDiff(state.designState, state.designState.latest);
+    // Nothing changed. Saving anyway would open a new version of a published survey.
+    if (Object.keys(diff).length === 0) {
+      rollbackState = null;
+      store.dispatch(setSaving(false));
+      return;
+    }
+    store.dispatch(setUpdating(true));
     SetData(
       diff,
       (state) => {
