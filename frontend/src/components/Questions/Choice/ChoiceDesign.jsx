@@ -32,8 +32,14 @@ function ChoiceQuestion(props) {
 
   // plain options only: Other / None / All have a type and stay
   const options = (children || []).filter((el) => !el.type);
+  // When options are carried from a source they're mirrored & read-only: no
+  // adding regular / other / all. A local "None of the above" is still allowed.
+  const isCarried = useSelector(
+    (state) => !!state.designState[props.code]?.carryForward,
+  );
 
   const canHaveOther =
+    !isCarried &&
     (questionType == "mcq" || questionType == "scq") &&
     (!children || !children.some((el) => el.type === "other"));
 
@@ -42,8 +48,13 @@ function ChoiceQuestion(props) {
     (!children || !children.some((el) => el.type === "none"));
 
   const canHaveAll =
+    !isCarried &&
     questionType == "mcq" &&
     (!children || !children.some((el) => el.type === "all"));
+
+  const showAddBar =
+    inDesign(props.designMode) &&
+    (!isCarried || canHaveOther || canHaveAll || canHaveNone);
 
   return (
     <div className={styles.questionItem}>
@@ -54,6 +65,7 @@ function ChoiceQuestion(props) {
             <ChoiceItemDesign
               designMode={props.designMode}
               code={item.code}
+              questionCode={props.code}
               t={props.t}
               onMoreLines={(data) => {
                 dispatch(
@@ -61,7 +73,7 @@ function ChoiceQuestion(props) {
                     questionCode: props.code,
                     index,
                     data,
-                  })
+                  }),
                 );
               }}
               onNewLine={() => {
@@ -77,14 +89,18 @@ function ChoiceQuestion(props) {
             />
           ))}
       </div>
-      {inDesign(props.designMode) && (
+      {showAddBar && (
         <div className={styles.answerAdd}>
-          <Button
-            size="small"
-            onClick={() => dispatch(addNewAnswer({ questionCode: props.code }))}
-          >
-            {t("add_option")}
-          </Button>
+          {!isCarried && (
+            <Button
+              size="small"
+              onClick={() =>
+                dispatch(addNewAnswer({ questionCode: props.code }))
+              }
+            >
+              {t("add_option")}
+            </Button>
+          )}
           {props.langInfo.onMainLang && !released && (
             <Button size="small" onClick={() => setManualOpen(true)}>
               {t("enter_manually")}
@@ -96,7 +112,7 @@ function ChoiceQuestion(props) {
               className={styles.answerIcon}
               onClick={() =>
                 dispatch(
-                  addNewAnswer({ questionCode: props.code, type: "other" })
+                  addNewAnswer({ questionCode: props.code, type: "other" }),
                 )
               }
             >
@@ -109,7 +125,7 @@ function ChoiceQuestion(props) {
               className={styles.answerIcon}
               onClick={() =>
                 dispatch(
-                  addNewAnswer({ questionCode: props.code, type: "all" })
+                  addNewAnswer({ questionCode: props.code, type: "all" }),
                 )
               }
             >
@@ -122,7 +138,7 @@ function ChoiceQuestion(props) {
               className={styles.answerIcon}
               onClick={() =>
                 dispatch(
-                  addNewAnswer({ questionCode: props.code, type: "none" })
+                  addNewAnswer({ questionCode: props.code, type: "none" }),
                 )
               }
             >

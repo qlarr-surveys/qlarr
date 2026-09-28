@@ -534,5 +534,15 @@
   "tour_step9_intro": "Richten Sie Datenerfassung, Umfragezugang, Navigation, Kontingente und Antwortregeln vor der Veröffentlichung ein.",
   "tour_step9_next": "Weiter: Antworten",
   "tour_step10_title": "Antworten",
-  "tour_step10_intro": "Verfolgen Sie Antworten und Analysen, überprüfen Sie Ergebnisse und verwalten oder exportieren Sie Ihre Daten."
+  "tour_step10_intro": "Verfolgen Sie Antworten und Analysen, überprüfen Sie Ergebnisse und verwalten oder exportieren Sie Ihre Daten.",
+  "carry_from": "Übernehmen aus",
+  "carry_from_rows": "Zeilen — übernehmen aus",
+  "carry_from_columns": "Spalten — übernehmen aus",
+  "carry_source_placeholder": "Keine (nicht übernommen)",
+  "carry_mode_selected": "Ausgewählte Optionen",
+  "carry_mode_unselected": "Nicht ausgewählte Optionen",
+  "carry_other": "„Sonstiges“ übernehmen",
+  "carry_remove": "Übernahme entfernen",
+  "err_carry_forward_source": "Übernahmequelle ist ungültig",
+  "err_carry_forward_source_detail": "Die Frage, aus der die Optionen übernommen werden, fehlt, wurde hinter diese Frage verschoben oder ist keine Multiple-Choice-Frage mehr."
 }

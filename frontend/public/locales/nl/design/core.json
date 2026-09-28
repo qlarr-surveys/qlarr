@@ -534,5 +534,15 @@
   "tour_step9_intro": "Stel gegevensverzameling, enquêtetoegang, navigatie, quota's en antwoordregels in vóór publicatie.",
   "tour_step9_next": "Volgende: Antwoorden",
   "tour_step10_title": "Antwoorden",
-  "tour_step10_intro": "Volg antwoorden en analyses, bekijk resultaten en beheer of exporteer uw gegevens."
+  "tour_step10_intro": "Volg antwoorden en analyses, bekijk resultaten en beheer of exporteer uw gegevens.",
+  "carry_from": "Overnemen uit",
+  "carry_from_rows": "Rijen — overnemen uit",
+  "carry_from_columns": "Kolommen — overnemen uit",
+  "carry_source_placeholder": "Geen (niet overgenomen)",
+  "carry_mode_selected": "Geselecteerde opties",
+  "carry_mode_unselected": "Niet-geselecteerde opties",
+  "carry_other": "'Overig' overnemen",
+  "carry_remove": "Overname verwijderen",
+  "err_carry_forward_source": "Bron voor overname is ongeldig",
+  "err_carry_forward_source_detail": "De vraag waaruit de opties worden overgenomen ontbreekt, is achter deze vraag geplaatst of is geen meerkeuzevraag meer."
 }

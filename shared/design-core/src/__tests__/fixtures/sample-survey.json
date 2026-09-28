@@ -1,0 +1,440 @@
+{
+  "Q298jbb": {
+    "type": "text",
+    "maxChars": 30,
+    "showHint": true,
+    "instructionList": [
+      { "code": "value", "text": "", "returnType": "string", "isActive": false },
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "0", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "0", "returnType": "int", "isActive": false }
+    ],
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">What is your name?</p>" } },
+    "resources": {}
+  },
+  "Q867ezmA1": {
+    "instructionList": [
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "0", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "0", "returnType": "int", "isActive": false }
+    ],
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">Male</p>" } },
+    "resources": {}
+  },
+  "Q867ezmA2": {
+    "instructionList": [
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "1", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "1", "returnType": "int", "isActive": false }
+    ],
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">Female</p>" } },
+    "resources": {}
+  },
+  "Q867ezmA3": {
+    "instructionList": [
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "2", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "2", "returnType": "int", "isActive": false }
+    ],
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">Other</p>" } },
+    "resources": {}
+  },
+  "Q867ezm": {
+    "children": [
+      { "code": "A1", "qualifiedCode": "Q867ezmA1" },
+      { "code": "A2", "qualifiedCode": "Q867ezmA2" },
+      { "code": "A3", "qualifiedCode": "Q867ezmA3" }
+    ],
+    "type": "scq",
+    "instructionList": [
+      { "code": "value", "text": "", "returnType": { "type": "enum", "values": ["A1", "A2", "A3"] }, "isActive": false },
+      { "code": "masked_value", "text": "Q867ezm.value ? QlarrScripts.safeAccess({\"A1\": QlarrScripts.stripTags(Q867ezmA1.label),\"A2\": QlarrScripts.stripTags(Q867ezmA2.label),\"A3\": QlarrScripts.stripTags(Q867ezmA3.label)},Q867ezm.value) : ''", "returnType": "string", "isActive": true },
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "Q867ezm.validation_enum", "returnType": "boolean", "isActive": true },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "1", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "1", "returnType": "int", "isActive": false },
+      { "code": "validation_enum", "text": "QlarrScripts.isVoid(Q867ezm.value) || [\"A1\",\"A2\",\"A3\"].indexOf(Q867ezm.value) > -1", "returnType": "boolean", "isActive": true }
+    ],
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">What is <strong>your</strong> gender?</p>" } },
+    "resources": {}
+  },
+  "Q835lqiAall": {
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">All of the above</p>" } },
+    "type": "all",
+    "instructionList": [
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "0", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "0", "returnType": "int", "isActive": false }
+    ],
+    "resources": {}
+  },
+  "Q835lqiA1": {
+    "instructionList": [
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "1", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "1", "returnType": "int", "isActive": false }
+    ],
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">Toast</p>" } },
+    "resources": {}
+  },
+  "Q835lqiA2": {
+    "instructionList": [
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "2", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "2", "returnType": "int", "isActive": false }
+    ],
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">Milk</p>" } },
+    "resources": {}
+  },
+  "Q835lqiA3": {
+    "instructionList": [
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "3", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "3", "returnType": "int", "isActive": false }
+    ],
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">Cereals</p>" } },
+    "resources": {}
+  },
+  "Q835lqiA4": {
+    "instructionList": [
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "4", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "4", "returnType": "int", "isActive": false }
+    ],
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">Cold cuts</p>" } },
+    "resources": {}
+  },
+  "Q835lqiA5": {
+    "instructionList": [
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "5", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "5", "returnType": "int", "isActive": false }
+    ],
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">Cheese</p>" } },
+    "resources": {}
+  },
+  "Q835lqiA6": {
+    "instructionList": [
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "6", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "6", "returnType": "int", "isActive": false }
+    ],
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">Jam</p>" } },
+    "resources": {}
+  },
+  "Q835lqiA7": {
+    "instructionList": [
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "7", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "7", "returnType": "int", "isActive": false }
+    ],
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">Butter</p>" } },
+    "resources": {}
+  },
+  "Q835lqiAnone": {
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">None of the above</p>" } },
+    "type": "none",
+    "instructionList": [
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "8", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "8", "returnType": "int", "isActive": false }
+    ],
+    "resources": {}
+  },
+  "Q835lqiAotherAtext": {
+    "type": "other_text",
+    "instructionList": [
+      { "code": "value", "text": "", "returnType": "string", "isActive": false },
+      { "code": "conditional_relevance", "text": "(Q835lqi.value || []).indexOf('Aother') > -1", "returnType": "boolean", "isActive": true },
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "Q835lqiAotherAtext.conditional_relevance", "returnType": "boolean", "isActive": true },
+      { "code": "validity", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "0", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "0", "returnType": "int", "isActive": false }
+    ]
+  },
+  "Q835lqiAother": {
+    "children": [
+      { "code": "Atext", "type": "other_text", "qualifiedCode": "Q835lqiAotherAtext" }
+    ],
+    "content": { "en": { "label": "Other" } },
+    "type": "other",
+    "instructionList": [
+      { "code": "value", "text": "", "returnType": "string", "isActive": false },
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "9", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "9", "returnType": "int", "isActive": false }
+    ],
+    "designErrors": []
+  },
+  "Q835lqi": {
+    "children": [
+      { "code": "Aall", "type": "all", "qualifiedCode": "Q835lqiAall" },
+      { "code": "A1", "qualifiedCode": "Q835lqiA1" },
+      { "code": "A2", "qualifiedCode": "Q835lqiA2" },
+      { "code": "A3", "qualifiedCode": "Q835lqiA3" },
+      { "code": "A4", "qualifiedCode": "Q835lqiA4" },
+      { "code": "A5", "qualifiedCode": "Q835lqiA5" },
+      { "code": "A6", "qualifiedCode": "Q835lqiA6" },
+      { "code": "A7", "qualifiedCode": "Q835lqiA7" },
+      { "code": "Anone", "type": "none", "qualifiedCode": "Q835lqiAnone" },
+      { "code": "Aother", "type": "other", "qualifiedCode": "Q835lqiAother" }
+    ],
+    "type": "mcq",
+    "instructionList": [
+      { "code": "value", "text": "", "returnType": { "type": "list", "values": ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "Anone", "Aall", "Aother"] }, "isActive": false },
+      { "code": "masked_value", "text": "QlarrScripts.listStrings((Q835lqi.value || []).map(function(el){return QlarrScripts.safeAccess({\"A1\": QlarrScripts.stripTags(Q835lqiA1.label),\"A2\": QlarrScripts.stripTags(Q835lqiA2.label),\"A3\": QlarrScripts.stripTags(Q835lqiA3.label),\"A4\": QlarrScripts.stripTags(Q835lqiA4.label),\"A5\": QlarrScripts.stripTags(Q835lqiA5.label),\"A6\": QlarrScripts.stripTags(Q835lqiA6.label),\"A7\": QlarrScripts.stripTags(Q835lqiA7.label),\"Anone\": QlarrScripts.stripTags(Q835lqiAnone.label),\"Aall\": QlarrScripts.stripTags(Q835lqiAall.label),\"Aother\": Q835lqiAotherAtext.value},el)}), Survey.lang)", "returnType": "string", "isActive": true },
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "Q835lqi.validation_list", "returnType": "boolean", "isActive": true },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "2", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "2", "returnType": "int", "isActive": false },
+      { "code": "validation_list", "text": "QlarrScripts.isVoid(Q835lqi.value) || Q835lqi.value.every(element => [\"A1\",\"A2\",\"A3\",\"A4\",\"A5\",\"A6\",\"A7\",\"Anone\",\"Aall\",\"Aother\"].includes(element))", "returnType": "boolean", "isActive": true }
+    ],
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">Which of those food do you take at breakfast?</p>" } },
+    "resources": {},
+    "designErrors": []
+  },
+  "G1": {
+    "children": [
+      { "code": "Q298jbb", "type": "text", "qualifiedCode": "Q298jbb" },
+      { "code": "Q867ezm", "type": "scq", "qualifiedCode": "Q867ezm" },
+      { "code": "Q835lqi", "type": "mcq", "qualifiedCode": "Q835lqi" }
+    ],
+    "content": { "en": { "label": "survey sample" } },
+    "groupType": "GROUP",
+    "instructionList": [
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "(!Q298jbb.in_current_navigation || !Q298jbb.relevance || Q298jbb.validity) && (!Q867ezm.in_current_navigation || !Q867ezm.relevance || Q867ezm.validity) && (!Q835lqi.in_current_navigation || !Q835lqi.relevance || Q835lqi.validity)", "returnType": "boolean", "isActive": true },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "0", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "0", "returnType": "int", "isActive": false }
+    ]
+  },
+  "Q976owqAc1": {
+    "type": "column",
+    "instructionList": [
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "0", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "0", "returnType": "int", "isActive": false }
+    ],
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">Bad</p>" } },
+    "resources": {}
+  },
+  "Q976owqAc2": {
+    "type": "column",
+    "instructionList": [
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "1", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "1", "returnType": "int", "isActive": false }
+    ],
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">OK</p>" } },
+    "resources": {}
+  },
+  "Q976owqAc3": {
+    "type": "column",
+    "instructionList": [
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "2", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "2", "returnType": "int", "isActive": false }
+    ],
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">Good</p>" } },
+    "resources": {}
+  },
+  "Q976owqA1": {
+    "type": "row",
+    "instructionList": [
+      { "code": "value", "text": "", "returnType": { "type": "enum", "values": ["Ac1", "Ac2", "Ac3"] }, "isActive": false },
+      { "code": "masked_value", "text": "Q976owqA1.value ? QlarrScripts.safeAccess({\"Ac1\": QlarrScripts.stripTags(Q976owqAc1.label),\"Ac2\": QlarrScripts.stripTags(Q976owqAc2.label),\"Ac3\": QlarrScripts.stripTags(Q976owqAc3.label)},Q976owqA1.value) : ''", "returnType": "string", "isActive": true },
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "Q976owqA1.validation_enum", "returnType": "boolean", "isActive": true },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "3", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "3", "returnType": "int", "isActive": false },
+      { "code": "validation_enum", "text": "QlarrScripts.isVoid(Q976owqA1.value) || [\"Ac1\",\"Ac2\",\"Ac3\"].indexOf(Q976owqA1.value) > -1", "returnType": "boolean", "isActive": true }
+    ],
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">Coffee</p>" } },
+    "resources": {}
+  },
+  "Q976owqA2": {
+    "type": "row",
+    "instructionList": [
+      { "code": "value", "text": "", "returnType": { "type": "enum", "values": ["Ac1", "Ac2", "Ac3"] }, "isActive": false },
+      { "code": "masked_value", "text": "Q976owqA2.value ? QlarrScripts.safeAccess({\"Ac1\": QlarrScripts.stripTags(Q976owqAc1.label),\"Ac2\": QlarrScripts.stripTags(Q976owqAc2.label),\"Ac3\": QlarrScripts.stripTags(Q976owqAc3.label)},Q976owqA2.value) : ''", "returnType": "string", "isActive": true },
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "Q976owqA2.validation_enum", "returnType": "boolean", "isActive": true },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "4", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "4", "returnType": "int", "isActive": false },
+      { "code": "validation_enum", "text": "QlarrScripts.isVoid(Q976owqA2.value) || [\"Ac1\",\"Ac2\",\"Ac3\"].indexOf(Q976owqA2.value) > -1", "returnType": "boolean", "isActive": true }
+    ],
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">Tea</p>" } },
+    "resources": {}
+  },
+  "Q976owqA3": {
+    "type": "row",
+    "instructionList": [
+      { "code": "value", "text": "", "returnType": { "type": "enum", "values": ["Ac1", "Ac2", "Ac3"] }, "isActive": false },
+      { "code": "masked_value", "text": "Q976owqA3.value ? QlarrScripts.safeAccess({\"Ac1\": QlarrScripts.stripTags(Q976owqAc1.label),\"Ac2\": QlarrScripts.stripTags(Q976owqAc2.label),\"Ac3\": QlarrScripts.stripTags(Q976owqAc3.label)},Q976owqA3.value) : ''", "returnType": "string", "isActive": true },
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "Q976owqA3.validation_enum", "returnType": "boolean", "isActive": true },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "5", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "5", "returnType": "int", "isActive": false },
+      { "code": "validation_enum", "text": "QlarrScripts.isVoid(Q976owqA3.value) || [\"Ac1\",\"Ac2\",\"Ac3\"].indexOf(Q976owqA3.value) > -1", "returnType": "boolean", "isActive": true }
+    ],
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">Water</p>" } },
+    "resources": {}
+  },
+  "Q976owqA4": {
+    "instructionList": [
+      { "code": "masked_value", "text": "Q976owqA4.value ? QlarrScripts.safeAccess({\"Ac1\": QlarrScripts.stripTags(Q976owqAc1.label),\"Ac2\": QlarrScripts.stripTags(Q976owqAc2.label),\"Ac3\": QlarrScripts.stripTags(Q976owqAc3.label)},Q976owqA4.value) : ''", "returnType": "string", "isActive": true },
+      { "code": "value", "text": "", "returnType": { "type": "enum", "values": ["Ac1", "Ac2", "Ac3"] }, "isActive": false },
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "Q976owqA4.validation_enum", "returnType": "boolean", "isActive": true },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "6", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "6", "returnType": "int", "isActive": false },
+      { "code": "validation_enum", "text": "QlarrScripts.isVoid(Q976owqA4.value) || [\"Ac1\",\"Ac2\",\"Ac3\"].indexOf(Q976owqA4.value) > -1", "returnType": "boolean", "isActive": true }
+    ],
+    "type": "row",
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">Soft Drinks</p>" } },
+    "resources": {}
+  },
+  "Q976owq": {
+    "children": [
+      { "code": "Ac1", "type": "column", "qualifiedCode": "Q976owqAc1" },
+      { "code": "Ac2", "type": "column", "qualifiedCode": "Q976owqAc2" },
+      { "code": "Ac3", "type": "column", "qualifiedCode": "Q976owqAc3" },
+      { "code": "A1", "type": "row", "qualifiedCode": "Q976owqA1" },
+      { "code": "A2", "type": "row", "qualifiedCode": "Q976owqA2" },
+      { "code": "A3", "type": "row", "qualifiedCode": "Q976owqA3" },
+      { "code": "A4", "type": "row", "qualifiedCode": "Q976owqA4" }
+    ],
+    "type": "scq_array",
+    "instructionList": [
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "(!Q976owqA1.relevance || Q976owqA1.validity) && (!Q976owqA2.relevance || Q976owqA2.validity) && (!Q976owqA3.relevance || Q976owqA3.validity) && (!Q976owqA4.relevance || Q976owqA4.validity)", "returnType": "boolean", "isActive": true },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "0", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "0", "returnType": "int", "isActive": false }
+    ],
+    "designErrors": []
+  },
+  "G948ohe": {
+    "children": [
+      { "code": "Q976owq", "type": "scq_array", "qualifiedCode": "Q976owq" }
+    ],
+    "groupType": "GROUP",
+    "content": { "en": { "label": "<p style=\"margin: 0px;\">How do you find each of those?</p>" } },
+    "resources": {},
+    "instructionList": [
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "(!Q976owq.in_current_navigation || !Q976owq.relevance || Q976owq.validity)", "returnType": "boolean", "isActive": true },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "1", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "1", "returnType": "int", "isActive": false }
+    ]
+  },
+  "G2": {
+    "content": { "en": { "label": "Thank you for taking the time to complete this survey." } },
+    "groupType": "END",
+    "instructionList": [
+      { "code": "label", "text": "", "returnType": "string", "isActive": false },
+      { "code": "relevance", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "validity", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "in_current_navigation", "text": "true", "returnType": "boolean", "isActive": false },
+      { "code": "order", "text": "2", "returnType": "int", "isActive": false },
+      { "code": "priority", "text": "2", "returnType": "int", "isActive": false }
+    ]
+  },
+  "Survey": {
+    "children": [
+      { "code": "G1", "groupType": "GROUP", "qualifiedCode": "G1" },
+      { "code": "G948ohe", "groupType": "GROUP", "qualifiedCode": "G948ohe" },
+      { "code": "G2", "groupType": "END", "qualifiedCode": "G2" }
+    ],
+    "defaultLang": { "code": "en", "name": "English" },
+    "navigationMode": "group_by_group",
+    "allowPrevious": true,
+    "skipInvalid": true,
+    "allowIncomplete": true,
+    "allowJump": true,
+    "instructionList": [
+      { "code": "lang", "text": "en", "returnType": "string", "isActive": false },
+      { "code": "mode", "text": "mixed", "returnType": "string", "isActive": false }
+    ],
+    "theme": {
+      "textStyles": {
+        "group": { "font": "Rubik", "size": 32, "color": "#091133" },
+        "question": { "font": "Rubik", "size": 18, "color": "#091133" },
+        "text": { "font": "Rubik", "size": 14, "color": "#091133" }
+      },
+      "primaryColor": "#2d3cb1",
+      "bgColor": "#dfe2ef",
+      "paperColor": "#ffffff"
+    }
+  }
+}
