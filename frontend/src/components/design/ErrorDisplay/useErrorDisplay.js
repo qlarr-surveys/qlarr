@@ -15,17 +15,34 @@ const useErrorDisplay = (code) => {
     () =>
       createSelector(
         [
-          (state) => state.designState[code] || {},
+          (state) => state.designState,
           (state) => state.designState.langInfo,
         ],
-        (designState, langInfo) => {
+        (fullState, langInfo) => {
+          const designState = fullState[code] || {};
           const onMainLang = langInfo?.onMainLang === true;
 
-          const instructionsWithErrors = designState.instructionList?.filter(
-            (instruction) =>
-              instruction.errors?.length > 0 &&
-              (onMainLang || isLabelInstruction(instruction.code))
-          );
+          const instructionsWithErrors =
+            designState.instructionList?.filter(
+              (instruction) =>
+                instruction.errors?.length > 0 &&
+                (onMainLang || isLabelInstruction(instruction.code))
+            ) || [];
+
+          if (onMainLang && designState.carryForward) {
+            const carryErrors = (designState.children || []).flatMap((child) => {
+              const cr = fullState[child.qualifiedCode]?.instructionList?.find(
+                (i) => i.code === "conditional_relevance"
+              );
+              return cr?.errors?.length ? cr.errors : [];
+            });
+            if (carryErrors.length) {
+              instructionsWithErrors.push({
+                code: "carry_forward",
+                errors: carryErrors,
+              });
+            }
+          }
 
           const errors = onMainLang
             ? isGroupCode
@@ -36,7 +53,7 @@ const useErrorDisplay = (code) => {
           return {
             errors,
             designErrors: onMainLang ? designState.designErrors : undefined,
-            instructions: instructionsWithErrors?.length
+            instructions: instructionsWithErrors.length
               ? instructionsWithErrors
               : undefined,
             currentLang: langInfo?.lang,

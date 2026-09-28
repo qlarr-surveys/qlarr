@@ -7,6 +7,7 @@ export const isLabelInstruction = (code) =>
   !/^format_validation_/.test(code);
 
 export const getHighlighted = (code) => {
+  if (code === "carry_forward") return "carry_forward";
   if (code === "conditional_relevance") return "relevance";
   if (code === "random_group" || code === "priority_groups") return "random";
   if (code.startsWith("skip_to")) return "skip_logic";
@@ -51,6 +52,20 @@ export const mapInstructionError = (instruction, t, currentLang) => {
     instruction.errors[0].name === "InvalidInstructionInEndGroup"
   ) {
     return { label: t("err_value_in_end_group"), message: rawMessage };
+  } else if (instruction.code === "carry_forward") {
+    // Synthetic error aggregated from carried answers whose relevance reference
+    // to the source is broken (source deleted / moved after target / retyped).
+    const codes = [
+      ...new Set(
+        instruction.errors
+          .map((error) => error.dependency?.componentCode)
+          .filter(Boolean)
+      ),
+    ].join(", ");
+    return {
+      label: t("err_carry_forward_source"),
+      message: codes || rawMessage || t("err_carry_forward_source_detail"),
+    };
   } else if (instruction.code === "conditional_relevance") {
     return { label: t("err_relevance"), message: rawMessage };
   } else if (instruction.code === "random_group") {

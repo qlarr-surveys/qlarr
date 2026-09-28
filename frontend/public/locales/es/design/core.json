@@ -530,5 +530,15 @@
   "tour_step9_intro": "Configura la recopilación de datos, acceso, navegación, cuotas y reglas de respuesta antes de publicar.",
   "tour_step9_next": "Siguiente: Respuestas",
   "tour_step10_title": "Respuestas",
-  "tour_step10_intro": "Realiza seguimiento de respuestas y análisis, revisa resultados y gestiona o exporta tus datos."
+  "tour_step10_intro": "Realiza seguimiento de respuestas y análisis, revisa resultados y gestiona o exporta tus datos.",
+  "carry_from": "Traer de",
+  "carry_from_rows": "Filas — traer de",
+  "carry_from_columns": "Columnas — traer de",
+  "carry_source_placeholder": "Ninguna (no se trae)",
+  "carry_mode_selected": "Opciones seleccionadas",
+  "carry_mode_unselected": "Opciones no seleccionadas",
+  "carry_other": "Traer «Otro»",
+  "carry_remove": "Quitar el traspaso",
+  "err_carry_forward_source": "El origen del traspaso no es válido",
+  "err_carry_forward_source_detail": "La pregunta de la que se traen las opciones falta, se movió después de esta o ya no es una pregunta de opción múltiple."
 }

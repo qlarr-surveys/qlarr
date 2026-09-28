@@ -39,6 +39,14 @@ function ChoiceItemDesign(props) {
     return state.designState[props.qualifiedCode];
   });
 
+  // Carried options are mirrored from the source and owned by the carry: no
+  // reorder / recode / edit / delete. The target-local "None" stays editable.
+  const carryOwned = useSelector(
+    (state) =>
+      !!state.designState[props.questionCode]?.carryForward &&
+      state.designState[props.qualifiedCode]?.type !== "none"
+  );
+
   const langInfo = props.langInfo;
 
   const onMainLang = langInfo.lang === langInfo.mainLang;
@@ -200,7 +208,7 @@ function ChoiceItemDesign(props) {
           marginBottom: props.type === "text" ? "8px" : "inherit",
         }}
       >
-        {inDesign(props.designMode) && (
+        {inDesign(props.designMode) && !carryOwned && (
           <div ref={drag} className={styles.answerIcon}>
             <DragIndicatorIcon
               color="action"
@@ -209,7 +217,7 @@ function ChoiceItemDesign(props) {
             />
           </div>
         )}
-        {inDesign(props.designMode) && (
+        {inDesign(props.designMode) && !carryOwned && (
           <InlineCodeEditor
             qualifiedCode={props.qualifiedCode}
             designMode={props.designMode}
@@ -271,8 +279,9 @@ function ChoiceItemDesign(props) {
             showToolbar={false}
             customStyle={props.type == "text" ? `flex: 1` : undefined}
             editable={
-              props.designMode == DESIGN_SURVEY_MODE.DESIGN ||
-              props.designMode == DESIGN_SURVEY_MODE.LANGUAGES
+              !carryOwned &&
+              (props.designMode == DESIGN_SURVEY_MODE.DESIGN ||
+                props.designMode == DESIGN_SURVEY_MODE.LANGUAGES)
             }
             extended={false}
             onNewLine={props.onNewLine}
@@ -297,7 +306,7 @@ function ChoiceItemDesign(props) {
             />
           </>
         )}
-        {inDesign(props.designMode) && (
+        {inDesign(props.designMode) && !carryOwned && (
           <>
             <span style={{ margin: "8px" }} />
             <BuildIcon
@@ -319,7 +328,7 @@ function ChoiceItemDesign(props) {
             />
           </>
         )}
-        {inDesign(props.designMode) && (
+        {inDesign(props.designMode) && !carryOwned && (
           <CloseIcon
             key="close"
             color="action"
