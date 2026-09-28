@@ -63,6 +63,7 @@ const MUTATING = [
   "designState/cloneQuestion",
   "designState/deleteGroup",
   "designState/addNewAnswer",
+  "designState/addNewAnswers",
   "designState/removeAnswer",
   "designState/changeValidationValue",
   "designState/updateRandom",
