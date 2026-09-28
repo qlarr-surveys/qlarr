@@ -22,7 +22,7 @@ import {
   setDesignModeToTheme,
   refreshDsl,
 } from "~/state/design/designState";
-import { DESIGN_SURVEY_MODE } from "~/routes";
+import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
 
 const ContentPanel = React.lazy(() =>
   import("~/components/design/ContentPanel")

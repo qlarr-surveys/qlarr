@@ -347,4 +347,4 @@ export const isDisplay = (type) => {
   return ["text_display", "image_display", "video_display"].indexOf(type) > -1;
 };
 
-export { createQuestion, questionDesignError } from "./questionFactory";
+export { createQuestion, questionDesignError } from "@qlarr/design-core/factory/questionFactory";

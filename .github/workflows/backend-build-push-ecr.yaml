@@ -10,6 +10,7 @@ on:
     branches: [main]
     paths:
       - "backend/**"
+      - "shared/**"
       - ".github/workflows/backend-build-push-ecr.yaml"
   workflow_dispatch: {}
 
@@ -48,8 +49,9 @@ jobs:
         id: build-amd64
         uses: docker/build-push-action@v6
         with:
-          # The backend now lives in a subfolder of this repo.
-          context: backend
+          # Context is the repo root so the local file: dep @qlarr/design-core
+          # (shared/design-core) resolves; the Dockerfile COPYs backend/ + shared/.
+          context: .
           file: backend/Dockerfile
           push: true
           platforms: amd64
@@ -61,7 +63,7 @@ jobs:
         id: build-arm64
         uses: docker/build-push-action@v6
         with:
-          context: backend
+          context: .
           file: backend/Dockerfile
           push: true
           platforms: arm64

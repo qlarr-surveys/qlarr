@@ -3,11 +3,8 @@ import TableRowsIcon from "@mui/icons-material/TableRows";
 import styles from "./SideTabs.module.css";
 import React from "react";
 import { Edit, Palette, Settings, Translate } from "@mui/icons-material";
-import {
-  DESIGN_SURVEY_MODE,
-  MANAGE_SURVEY_LANDING_PAGES,
-  routes,
-} from "~/routes";
+import { MANAGE_SURVEY_LANDING_PAGES, routes } from "~/routes";
+import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import { useDispatch, useSelector } from "react-redux";

@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import LoadingDots from "~/components/common/LoadingDots";
 import { useService } from "~/hooks/use-service";
-import { fileTypesToMimesArray } from "~/state/design/addInstructions";
+import { fileTypesToMimesArray } from "@qlarr/design-core/state/addInstructions";
 
 function FileUpload(props) {
   const runService = useService("run");

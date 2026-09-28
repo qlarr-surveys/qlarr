@@ -15,7 +15,7 @@ import {
   LOGO_SIZE_DEFAULT,
   LOGO_SIZE_DIMENSIONS,
   LOGO_SPACING_DEFAULT,
-} from "~/constants/design";
+} from "@qlarr/design-core/constants/design";
 
 const ALIGNMENT_TO_FLEX = {
   left: "flex-start",

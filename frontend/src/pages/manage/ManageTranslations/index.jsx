@@ -24,7 +24,7 @@ import {
   onAdditionalLangRemoved,
   onBaseLangChanged,
 } from "~/state/design/designState";
-import { LANGUAGE_DEF } from "~/constants/language";
+import { LANGUAGE_DEF } from "@qlarr/design-core/constants/language";
 
 function ManageTranslations({ onManageTranslationsClose, onStartTranslation }) {
   const { t } = useTranslation(NAMESPACES.MANAGE);

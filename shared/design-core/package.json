@@ -1,0 +1,28 @@
+{
+  "name": "@qlarr/design-core",
+  "version": "0.1.0",
+  "description": "Redux-agnostic survey mutation logic shared by the Qlarr frontend, backend and AI module.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.0",
+    "typescript": "^5.4.0"
+  }
+}

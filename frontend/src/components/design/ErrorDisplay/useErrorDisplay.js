@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { createSelector } from "@reduxjs/toolkit";
 import { isGroup } from "~/utils/design/utils";
-import { surveySetup, setupOptions } from "~/constants/design";
+import { surveySetup, setupOptions } from "@qlarr/design-core/constants/design";
 import { setup } from "~/state/design/designState";
 import { getHighlighted, isLabelInstruction } from "~/utils/design/errorDisplay";
 

@@ -1,0 +1,21 @@
+# Build context for backend/Dockerfile is the repo ROOT (needed so the local
+# file: dep @qlarr/design-core in shared/ resolves). Keep the context small and
+# never ship host node_modules / build output (wrong arch, stale).
+**/node_modules
+**/dist
+**/build
+**/coverage
+**/*.log
+
+.git
+.github
+.idea
+.vscode
+
+# Not COPYed by either app image.
+deploy
+
+# Secrets — but keep the checked-in examples.
+**/.env
+**/.env.*
+!**/.env.example

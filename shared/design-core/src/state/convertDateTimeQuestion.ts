@@ -1,3 +1,4 @@
+// @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
 export function convertDateTimeQuestion(currentQuestion, currentType, newType) {
   const hadFullDayFormat = currentType === "time" || currentType === "date_time";
   const hasDateFields = currentType === "date" || currentType === "date_time";

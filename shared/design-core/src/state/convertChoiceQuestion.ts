@@ -1,8 +1,9 @@
+// @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
 import {
   CONVERTIBLE_CHOICE_TYPES,
   isSingleSelect,
   mediaGroup,
-} from "~/constants/design";
+} from "../constants/design";
 import {
   addAnswerInstructions,
   addMaskedValuesInstructions,

@@ -1,3 +1,4 @@
+// @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
 export const createQuestion = (type, qId, lang) => {
   let code = `Q${qId}`;
   let returnObj = {};

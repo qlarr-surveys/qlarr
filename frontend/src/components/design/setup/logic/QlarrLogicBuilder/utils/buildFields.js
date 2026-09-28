@@ -3,14 +3,14 @@ import {
   hasOtherOption,
   isArrayType,
   isRankingType,
-} from '../config/fieldTypes';
-import { accessibleDependencies } from '~/utils/design/access/dependencies';
+} from '@qlarr/design-core/factory/fieldTypes';
+import { accessibleDependencies } from '@qlarr/design-core/utils/dependencies';
 import {
   isGroup,
   isQuestion,
   stripTags,
   buildCodeIndex,
-} from '~/utils/design/pureUtils';
+} from '@qlarr/design-core/utils/pureUtils';
 
 export const DEFAULT_FIELD_LABELS = {
   system: 'System',

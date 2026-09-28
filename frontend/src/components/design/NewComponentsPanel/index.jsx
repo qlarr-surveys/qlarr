@@ -93,4 +93,4 @@ function NewComponentsPanel({ t }) {
 
 export default React.memo(NewComponentsPanel);
 
-export { createGroup } from "./groupFactory";
+export { createGroup } from "@qlarr/design-core/factory/groupFactory";

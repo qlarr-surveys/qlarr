@@ -13,10 +13,11 @@ import {
   removeAnswer,
   setup,
 } from "~/state/design/designState";
-import { setupOptions } from "~/constants/design";
+import { setupOptions } from "@qlarr/design-core/constants/design";
 import { useDrag, useDrop } from "react-dnd";
 import { useEffect, useRef } from "react";
-import { contentEditable, DESIGN_SURVEY_MODE, inDesign } from "~/routes";
+import { contentEditable, inDesign } from "~/routes";
+import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
 import { useTheme } from "@emotion/react";
 import { sanitizePastedText } from "~/components/design/ContentEditor/sanitizePastedText";
 import ContentEditor from "~/components/design/ContentEditor";

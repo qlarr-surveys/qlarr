@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import NewComponentsPanel from "~/components/design/NewComponentsPanel";
 import React from "react";
 import { useSelector } from "react-redux";
-import { DESIGN_SURVEY_MODE } from "~/routes";
+import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
 import SetupPanel from "../setup/SetupPanel";
 function LeftPanel({ t }) {
   const show = useSelector((state) => {

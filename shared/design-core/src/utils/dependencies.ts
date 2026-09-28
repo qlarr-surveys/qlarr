@@ -1,4 +1,5 @@
-import { isGroup, isQuestion } from "~/utils/design/pureUtils";
+// @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
+import { isGroup, isQuestion } from "./pureUtils";
 
 export const accessibleDependencies = (componentIndices, code) => {
   let dependencies = [];

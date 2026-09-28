@@ -7,7 +7,7 @@ import LowPriorityIcon from "@mui/icons-material/LowPriority";
 import MoveDownIcon from "@mui/icons-material/MoveDown";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import { setupOptions } from "~/constants/design";
+import { setupOptions } from "@qlarr/design-core/constants/design";
 import { setup, cloneQuestion, deleteQuestion, deleteGroup, resetSetup } from "~/state/design/designState";
 import { useTheme } from "@emotion/react";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";

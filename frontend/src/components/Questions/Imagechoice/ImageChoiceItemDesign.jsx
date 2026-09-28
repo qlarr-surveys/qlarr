@@ -23,7 +23,7 @@ import LoadingDots from "~/components/common/LoadingDots";
 import { useService } from "~/hooks/use-service";
 import { contentEditable, inDesign } from "~/routes";
 import { Build } from "@mui/icons-material";
-import { setupOptions } from "~/constants/design";
+import { setupOptions } from "@qlarr/design-core/constants/design";
 import ContentEditor from "~/components/design/ContentEditor";
 import InlineCodeEditor from "~/components/design/InlineCodeEditor";
 import { useReleaseGuard } from "~/hooks/useReleaseGuard";

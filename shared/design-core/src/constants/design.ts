@@ -1,3 +1,4 @@
+// @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
 export const CONVERTIBLE_CHOICE_TYPES = [
   "scq",
   "mcq",
