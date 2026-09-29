@@ -109,6 +109,18 @@ describe("quotas", () => {
     expect(state.Survey.quotas[0].condition.logic).toEqual(stale);
   });
 
+  it("keeps another message's images when one message key prefixes it", () => {
+    // Older sequential codes: QT1's key is a prefix of QT10's.
+    const image = (name) => `<p><img data-resource-name="${name}"></p>`;
+    const key1 = quotaMessageKey("QT1");
+    const key10 = quotaMessageKey("QT10");
+    changeContent(state, { code: "Survey", key: key10, lang: "en", value: image("ten.png") });
+    changeContent(state, { code: "Survey", key: key1, lang: "en", value: image("one.png") });
+    changeContent(state, { code: "Survey", key: key1, lang: "en", value: "<p>No image</p>" });
+
+    expect(state.Survey.resources).toEqual({ [`content_en_${key10}_1`]: "ten.png" });
+  });
+
   it("removes a quota's end message in every language and its instruction", () => {
     const [first, second] = addQuotas(2);
     updateQuota(state, { code: first, changes: { condition } });

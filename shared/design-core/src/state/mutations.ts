@@ -1495,7 +1495,7 @@ const saveContentResources = (
   // Remove existing items with matching keys
   const prefix = `content_${contentLang}_${contentKey}`;
   Object.keys(component.resources).forEach((key) => {
-    if (key.startsWith(prefix)) {
+    if (key.startsWith(`${prefix}_`)) {
       delete component.resources[key];
     }
   });
