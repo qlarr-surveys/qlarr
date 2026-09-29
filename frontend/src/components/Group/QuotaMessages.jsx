@@ -63,7 +63,7 @@ export const QuotaMessageSwitcher = React.memo(function QuotaMessageSwitcher({
         variant={selected ? "outlined" : "filled"}
         onClick={() => select(null)}
       />
-      {quotas.map((quota) => (
+      {quotas.map((quota, index) => (
         <Chip
           key={quota.code}
           size="small"
@@ -72,7 +72,7 @@ export const QuotaMessageSwitcher = React.memo(function QuotaMessageSwitcher({
           onClick={() => select(quota.code)}
           label={
             <span className={styles.quotaChipLabel}>
-              {quota.label || quota.code}
+              {quota.label || `QT${index + 1}`}
               {!isNotEmptyHtml(content?.[quotaMessageKey(quota.code)]) && (
                 <Tooltip title={t("quota_message_missing")}>
                   <Box

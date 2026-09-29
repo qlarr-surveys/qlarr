@@ -17,6 +17,7 @@ import {
   buildValidationDefaultData,
   nextGroupId,
   nextQuestionId,
+  nextQuotaCode,
   reorder,
   buildFormatInstruction,
 } from "./stateUtils";
@@ -253,14 +254,6 @@ export function quotaMessageRevealed(state) {
     state.quotaMessageView.reveal = false;
   }
 }
-
-const nextQuotaCode = (quotas) => {
-  const max = quotas.reduce((acc, quota) => {
-    const match = /^QT(\d+)$/.exec(quota.code);
-    return match ? Math.max(acc, parseInt(match[1], 10)) : acc;
-  }, 0);
-  return `QT${max + 1}`;
-};
 
 const refreshQuotaInstructions = (state) => {
   const survey = state.Survey;

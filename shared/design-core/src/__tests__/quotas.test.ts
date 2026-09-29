@@ -40,92 +40,93 @@ describe("quotas", () => {
     state = freshState();
   });
 
-  it("numbers new quotas QT1, QT2… without reusing a removed code", () => {
-    addQuota(state);
-    addQuota(state);
-    addQuota(state);
-    expect(quotaCodes(state)).toEqual(["QT1", "QT2", "QT3"]);
+  // Adds `count` quotas and returns their generated codes.
+  const addQuotas = (count) => {
+    for (let i = 0; i < count; i++) addQuota(state);
+    return quotaCodes(state);
+  };
+
+  it("gives each new quota a random code, like question codes", () => {
+    const [code] = addQuotas(1);
+    expect(code).toMatch(/^QT\d{3}[a-z]{3}$/);
     expect(state.Survey.quotas[0]).toEqual({
-      code: "QT1",
+      code,
       label: "",
       limit: 0,
       condition: { logic: null },
     });
+  });
 
-    removeQuota(state, "QT2");
-    addQuota(state);
-    expect(quotaCodes(state)).toEqual(["QT1", "QT3", "QT4"]);
+  it("never reuses a removed quota's code, even the last one", () => {
+    const [first, last] = addQuotas(2);
+    removeQuota(state, last);
+    const [, added] = addQuotas(1);
+    expect(added).not.toBe(last);
+    expect(new Set(quotaCodes(state)).size).toBe(2);
+    expect(quotaCodes(state)[0]).toBe(first);
   });
 
   it("compiles a quota's condition into a boolean Survey instruction", () => {
-    addQuota(state);
-    updateQuota(state, { code: "QT1", changes: { label: "Men", limit: 5 } });
+    const [code] = addQuotas(1);
+    updateQuota(state, { code, changes: { label: "Men", limit: 5 } });
     expect(state.Survey.quotas[0]).toMatchObject({ label: "Men", limit: 5 });
     expect(quotaInstructions(state)).toEqual([]);
 
-    updateQuota(state, { code: "QT1", changes: { condition } });
+    updateQuota(state, { code, changes: { condition } });
     const [instruction] = quotaInstructions(state);
     expect(instruction).toMatchObject({
-      code: "quota_QT1",
+      code: `quota_${code}`,
       isActive: true,
       returnType: "boolean",
     });
     expect(instruction.text).toContain(QUESTION);
 
-    updateQuota(state, { code: "QT1", changes: { condition: { logic: null } } });
+    updateQuota(state, { code, changes: { condition: { logic: null } } });
     expect(quotaInstructions(state)).toEqual([]);
   });
 
   it("ignores updates to a quota that does not exist", () => {
-    addQuota(state);
+    addQuotas(1);
     const before = structuredClone(state.Survey);
-    updateQuota(state, { code: "QT9", changes: { condition } });
+    updateQuota(state, { code: "QTmissing", changes: { condition } });
     expect(state.Survey).toEqual(before);
   });
 
   it("keeps working after a question a quota refers to is deleted", () => {
     const CHOICE = "Q867ezm"; // scq
-    addQuota(state);
-    addQuota(state);
-    updateQuota(state, {
-      code: "QT1",
-      changes: {
-        condition: { logic: { in: [{ var: `${CHOICE}.value` }, ["A1"]] } },
-      },
-    });
+    const stale = { in: [{ var: `${CHOICE}.value` }, ["A1"]] };
+    const [first, second] = addQuotas(2);
+    updateQuota(state, { code: first, changes: { condition: { logic: stale } } });
     deleteQuestion(state, CHOICE);
 
-    // Every quota edit recompiles all quota conditions, including QT1's stale one.
+    // Every quota edit recompiles all quota conditions, including the stale one.
     expect(() =>
-      updateQuota(state, { code: "QT2", changes: { condition } }),
+      updateQuota(state, { code: second, changes: { condition } }),
     ).not.toThrow();
-    expect(() => removeQuota(state, "QT2")).not.toThrow();
-    // QT1 keeps its condition (the backend flags it) rather than being dropped.
-    expect(quotaCodes(state)).toEqual(["QT1"]);
-    expect(state.Survey.quotas[0].condition.logic).toEqual({
-      in: [{ var: `${CHOICE}.value` }, ["A1"]],
-    });
+    expect(() => removeQuota(state, second)).not.toThrow();
+    // The stale quota keeps its condition (the backend flags it) rather than being dropped.
+    expect(quotaCodes(state)).toEqual([first]);
+    expect(state.Survey.quotas[0].condition.logic).toEqual(stale);
   });
 
   it("removes a quota's end message in every language and its instruction", () => {
-    addQuota(state);
-    addQuota(state);
-    updateQuota(state, { code: "QT1", changes: { condition } });
-    updateQuota(state, { code: "QT2", changes: { condition } });
-    const key1 = quotaMessageKey("QT1");
-    const key2 = quotaMessageKey("QT2");
+    const [first, second] = addQuotas(2);
+    updateQuota(state, { code: first, changes: { condition } });
+    updateQuota(state, { code: second, changes: { condition } });
+    const key1 = quotaMessageKey(first);
+    const key2 = quotaMessageKey(second);
     changeContent(state, { code: "Survey", key: key1, lang: "en", value: "<p>Full</p>" });
     changeContent(state, { code: "Survey", key: key1, lang: "de", value: "<p>Voll</p>" });
     changeContent(state, { code: "Survey", key: key2, lang: "en", value: "<p>Other</p>" });
 
-    removeQuota(state, "QT1");
+    removeQuota(state, first);
 
-    expect(quotaCodes(state)).toEqual(["QT2"]);
+    expect(quotaCodes(state)).toEqual([second]);
     expect(state.Survey.content.en[key1]).toBeUndefined();
     expect(state.Survey.content.de[key1]).toBeUndefined();
     expect(state.Survey.content.en[key2]).toBe("<p>Other</p>");
     expect(quotaInstructions(state).map((instruction) => instruction.code)).toEqual([
-      "quota_QT2",
+      `quota_${second}`,
     ]);
   });
 });
