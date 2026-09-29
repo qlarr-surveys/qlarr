@@ -42,6 +42,8 @@ export const designState = createSlice({
     removeAnswer: (state, action) => core.removeAnswer(state, action.payload),
     addNewAnswers: (state, action) =>
       core.addNewAnswers(state, action.payload),
+    replaceAnswers: (state, action) =>
+      core.replaceAnswers(state, action.payload),
     onNewLine: (state, action) => core.onNewLine(state, action.payload),
     addNewAnswer: (state, action) => core.addNewAnswer(state, action.payload),
     deleteGroup: (state, action) => core.deleteGroup(state, action.payload),
@@ -118,6 +120,7 @@ export const {
   resetFocus,
   addNewAnswer,
   addNewAnswers,
+  replaceAnswers,
   setDesignModeToDesign,
   setDesignModeToLang,
   setDesignModeToTheme,

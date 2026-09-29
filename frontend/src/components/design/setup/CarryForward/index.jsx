@@ -12,16 +12,17 @@ import {
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
-import { accessibleDependencies, isArrayType } from "@qlarr/design-core";
+import {
+  accessibleDependencies,
+  isArrayType,
+  CARRY_FORWARD_SOURCE_TYPES,
+} from "@qlarr/design-core";
 import { stripTags } from "~/utils/design/utils";
 import {
   enableCarryForward,
   updateCarryForward,
   disableCarryForward,
 } from "~/state/design/designState";
-
-// A source for carry forward must be an earlier multiple-choice question.
-const SOURCE_TYPES = ["mcq", "icon_mcq", "image_mcq"];
 
 // Config editor for one axis of a target ("rows" for choice/ranking/text
 // targets; "rows" and "columns" for arrays). Dispatches the design-core carry
@@ -143,7 +144,7 @@ function CarryForward({ code, t }) {
   const sources = useMemo(() => {
     const deps = accessibleDependencies(designState.componentIndex, code) || [];
     return deps
-      .filter((dep) => SOURCE_TYPES.includes(designState[dep]?.type))
+      .filter((dep) => CARRY_FORWARD_SOURCE_TYPES.includes(designState[dep]?.type))
       .map((dep) => ({
         code: dep,
         label: `${index[dep] || ""}. ${stripTags(

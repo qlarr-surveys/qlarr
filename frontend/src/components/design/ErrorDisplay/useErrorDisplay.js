@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { createSelector } from "@reduxjs/toolkit";
 import { isGroup } from "~/utils/design/utils";
 import { surveySetup, setupOptions } from "@qlarr/design-core/constants/design";
-import { setup } from "~/state/design/designState";
+import { setup, disableCarryForward } from "~/state/design/designState";
 import { getHighlighted, isLabelInstruction } from "~/utils/design/errorDisplay";
 
 const useErrorDisplay = (code) => {
@@ -78,6 +78,18 @@ const useErrorDisplay = (code) => {
       : state.designState[code].type;
   });
 
+  // A broken carry forward can't be fixed from the setup panel (it filters out
+  // the now-invalid source), so let the user drop it straight from the error.
+  const carryForward = useSelector(
+    (state) => state.designState[code]?.carryForward
+  );
+  const onRemoveCarryForward = () => {
+    if (!carryForward) return;
+    Object.keys(carryForward).forEach((axis) =>
+      dispatch(disableCarryForward({ targetCode: code, axis }))
+    );
+  };
+
   const onErrClick = (instruction) => {
     const highlighted = getHighlighted(instruction.code);
     if (!highlighted) return;
@@ -94,7 +106,15 @@ const useErrorDisplay = (code) => {
     );
   };
 
-  return { errors, designErrors, instructions, hasErrors, onErrClick, currentLang };
+  return {
+    errors,
+    designErrors,
+    instructions,
+    hasErrors,
+    onErrClick,
+    onRemoveCarryForward,
+    currentLang,
+  };
 };
 
 export default useErrorDisplay;

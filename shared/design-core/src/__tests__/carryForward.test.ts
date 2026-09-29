@@ -8,6 +8,7 @@ import {
   changeContent,
   addNewAnswer,
   removeAnswer,
+  convertQuestion,
 } from "../state/mutations";
 import { createQuestion } from "../factory/questionFactory";
 import { buildCodeIndex } from "../utils/pureUtils";
@@ -359,5 +360,49 @@ describe("updateCarryForward / disableCarryForward", () => {
       lang: "en",
     });
     expect(state[`${target}A1`].content.en.label).not.toBe("<p>Changed</p>");
+  });
+});
+
+describe("converting the source type", () => {
+  let state;
+  let target;
+  beforeEach(() => {
+    state = freshState();
+    target = addChoiceTarget(state);
+    enableCarryForward(state, { targetCode: target, sourceCode: SOURCE });
+  });
+
+  it("severs the link when the source becomes an ineligible type (mcq -> scq)", () => {
+    convertQuestion(state, { questionCode: SOURCE, newType: "scq" });
+
+    // the carry config is gone...
+    expect(state[target].carryForward).toBeUndefined();
+    // ...options survive as a plain editable copy, without carry relevance...
+    expect(childCodes(state, target)).toContain("A1");
+    expect(relevanceOf(state, `${target}A1`)).toBeUndefined();
+    // ...and further source edits no longer propagate
+    changeContent(state, {
+      code: "Q835lqiA1",
+      key: "label",
+      value: "<p>Changed</p>",
+      lang: "en",
+    });
+    expect(state[`${target}A1`].content.en.label).not.toBe("<p>Changed</p>");
+  });
+
+  it("keeps the link when the source stays an eligible type (mcq -> icon_mcq)", () => {
+    convertQuestion(state, { questionCode: SOURCE, newType: "icon_mcq" });
+
+    expect(state[target].carryForward).toEqual({
+      rows: { sourceCode: SOURCE, mode: "selected", carryOther: false },
+    });
+    // still syncing: a source label rename propagates to the target
+    changeContent(state, {
+      code: "Q835lqiA1",
+      key: "label",
+      value: "<p>Renamed</p>",
+      lang: "en",
+    });
+    expect(state[`${target}A1`].content.en.label).toBe("<p>Renamed</p>");
   });
 });
