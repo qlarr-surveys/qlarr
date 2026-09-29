@@ -11,6 +11,10 @@ export { instructionByCode } from "./state/addInstructions";
 export { isQuestion, isGroup, buildCodeIndex } from "./utils/pureUtils";
 export { accessibleDependencies } from "./utils/dependencies";
 export { getFieldType, hasOtherOption, isRankingType } from "./factory/fieldTypes";
-export { isArrayType, setupOptions } from "./constants/design";
+export {
+  isArrayType,
+  setupOptions,
+  CARRY_FORWARD_SOURCE_TYPES,
+} from "./constants/design";
 export { STRIP_TAGS_PATTERN } from "./constants/instruction";
 export { DESIGN_SURVEY_MODE } from "./constants/designMode";
