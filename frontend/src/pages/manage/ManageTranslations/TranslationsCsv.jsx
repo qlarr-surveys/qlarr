@@ -51,7 +51,7 @@ export function TranslationsCsv() {
   };
 
   return (
-    <Box sx={{ mb: 3 }}>
+    <Box sx={{ my: 3 }}>
       <Box sx={{ display: "flex", gap: 1 }}>
         <Button variant="outlined" onClick={onExport} disabled={isSaving}>
           {t("translations.export_csv", "Export CSV")}
@@ -84,7 +84,12 @@ export function TranslationsCsv() {
           {result.error}
         </Alert>
       )}
-      {result && !result.error && (
+      {result && !result.error && result.updated === 0 && (
+        <Alert severity="info" sx={{ mt: 2 }}>
+          {t("translations.import_csv_no_changes", "No changes to import.")}
+        </Alert>
+      )}
+      {result && !result.error && result.updated > 0 && (
         <Alert severity="success" sx={{ mt: 2 }}>
           {t("translations.import_csv_done", "Updated {{count}} field(s).", {
             count: result.updated,

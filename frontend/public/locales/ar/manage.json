@@ -445,6 +445,7 @@
     "export_csv": "تصدير CSV",
     "import_csv": "استيراد CSV",
     "import_csv_override_main": "استبدال نص لغة الأساس",
+    "import_csv_no_changes": "لا توجد تغييرات للاستيراد.",
     "import_csv_done_zero": "لم يتم تحديث أي حقل.",
     "import_csv_done_one": "تم تحديث حقل واحد.",
     "import_csv_done_two": "تم تحديث حقلين.",

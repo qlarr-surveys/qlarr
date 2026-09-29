@@ -445,6 +445,7 @@
     "export_csv": "Exportar CSV",
     "import_csv": "Importar CSV",
     "import_csv_override_main": "Sobrescribir el texto del Idioma Base",
+    "import_csv_no_changes": "No hay cambios para importar.",
     "import_csv_done_one": "Se actualizó {{count}} campo.",
     "import_csv_done_other": "Se actualizaron {{count}} campos."
   },

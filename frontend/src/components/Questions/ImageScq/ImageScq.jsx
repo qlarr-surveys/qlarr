@@ -6,7 +6,7 @@ import { useTheme } from "@emotion/react";
 import { Box, Card, Grid, Radio } from "@mui/material";
 import { buildResourceUrl } from "~/networking/common";
 import { rtlLanguage } from "~/utils/common";
-import Content from '~/components/run/Content';
+import Content from "~/components/run/Content";
 
 function ImageScq(props) {
   const theme = useTheme();
@@ -35,13 +35,13 @@ function ImageScq(props) {
 
   return (
     <Box
-      className={`${styles.imageFlexContainer} ${isRtl ? styles.rtl : ''}`}
-      style={{ '--qlarr-spacing': `${props.component.spacing}px` }}
+      className={`${styles.imageFlexContainer} ${isRtl ? styles.rtl : ""}`}
+      style={{ "--qlarr-spacing": `${props.component.spacing}px` }}
     >
       {props.component.answers.map((option) => {
         const imageSrc = option.resources?.image
           ? buildResourceUrl(option.resources?.image)
-          : '/placeholder-image.jpg';
+          : "/placeholder-image.jpg";
 
         const relevance = runValues[option.qualifiedCode]?.relevance ?? true;
         if (!relevance) return null;
@@ -50,14 +50,18 @@ function ImageScq(props) {
             data-code={option.code}
             key={option.code}
             className={styles.choiceItem}
-            style={{ '--qlarr-item-flex': `0 1 calc(${100 / props.component.columns}% - ${props.component.spacing}px)` }}
+            style={{
+              "--qlarr-item-flex": `0 1 calc(${100 / props.component.columns}% - ${props.component.spacing}px)`,
+            }}
             onClick={() =>
               handleChange(props.component.qualifiedCode, option.code)
             }
           >
             <Box
-              className={`${styles.imageContainer} ${state.value === option.code ? styles.imageContainerSelected : ''}`}
-              style={{ paddingTop: `${100 / props.component.imageAspectRatio}%` }}
+              className={`${styles.imageContainer} ${state.value === option.code ? styles.imageContainerSelected : ""}`}
+              style={{
+                paddingTop: `${100 / props.component.imageAspectRatio}%`,
+              }}
             >
               <img className={styles.image} src={imageSrc} alt="" />
               <div className={styles.selection}>
@@ -80,6 +84,8 @@ function ImageScq(props) {
                   margin-top: 8px;
                 `}
                 content={option.content?.label}
+                elementCode={option.qualifiedCode}
+                name="label"
               />
             )}
           </Box>

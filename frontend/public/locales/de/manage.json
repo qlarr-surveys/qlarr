@@ -443,6 +443,7 @@
     "export_csv": "CSV exportieren",
     "import_csv": "CSV importieren",
     "import_csv_override_main": "Text der Basissprache überschreiben",
+    "import_csv_no_changes": "Keine Änderungen zum Importieren.",
     "import_csv_done_one": "{{count}} Feld aktualisiert.",
     "import_csv_done_other": "{{count}} Felder aktualisiert."
   },

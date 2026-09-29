@@ -445,6 +445,7 @@
     "export_csv": "Exporter en CSV",
     "import_csv": "Importer un CSV",
     "import_csv_override_main": "Remplacer le texte de la Langue de Base",
+    "import_csv_no_changes": "Aucune modification à importer.",
     "import_csv_done_one": "{{count}} champ mis à jour.",
     "import_csv_done_other": "{{count}} champs mis à jour."
   },

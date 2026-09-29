@@ -445,6 +445,7 @@
     "export_csv": "CSV exporteren",
     "import_csv": "CSV importeren",
     "import_csv_override_main": "Tekst van de Basis Taal overschrijven",
+    "import_csv_no_changes": "Geen wijzigingen om te importeren.",
     "import_csv_done_one": "{{count}} veld bijgewerkt.",
     "import_csv_done_other": "{{count}} velden bijgewerkt."
   },

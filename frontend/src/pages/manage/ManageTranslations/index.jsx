@@ -95,7 +95,6 @@ export function ManageLanguages() {
 
   return (
     <Box sx={{ paddingTop: "8px" }} className={styles.blockItem}>
-      <TranslationsCsv />
       <BaseLanguage
         onBaseLanguageChanged={onBaseLanguageChanged}
         baseLanguage={langInfo.mainLang}
@@ -132,6 +131,7 @@ export function ManageLanguages() {
           </ToggleButtonGroup>
         </FormControl>
       )}
+      <TranslationsCsv />
     </Box>
   );
 }

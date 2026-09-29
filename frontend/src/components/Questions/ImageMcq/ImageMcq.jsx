@@ -7,7 +7,7 @@ import { buildResourceUrl } from "~/networking/common";
 import styles from "./ImageMcq.module.css";
 import { setDirty } from "~/state/templateState";
 import { rtlLanguage } from "~/utils/common";
-import Content from '~/components/run/Content';
+import Content from "~/components/run/Content";
 
 function ImageMcq(props) {
   const lang = useSelector((state) => {
@@ -23,8 +23,8 @@ function ImageMcq(props) {
 
   return (
     <Box
-      className={`${styles.imageFlexContainer} ${isRtl ? styles.rtl : ''}`}
-      style={{ '--qlarr-spacing': `${props.component.spacing}px` }}
+      className={`${styles.imageFlexContainer} ${isRtl ? styles.rtl : ""}`}
+      style={{ "--qlarr-spacing": `${props.component.spacing}px` }}
     >
       {props.component.answers.map((option) => {
         const relevance = runValues[option.qualifiedCode]?.relevance ?? true;
@@ -71,17 +71,19 @@ function ImageMcqItem(props) {
   };
   const imageSrc = props.option.resources?.image
     ? buildResourceUrl(props.option.resources?.image)
-    : '/placeholder-image.jpg';
+    : "/placeholder-image.jpg";
 
   return (
     <Box
       key={props.option.code}
       data-code={props.option.code}
       className={styles.choiceItem}
-      style={{ '--qlarr-item-flex': `0 1 calc(${100 / props.columns}% - ${props.spacing}px)` }}
+      style={{
+        "--qlarr-item-flex": `0 1 calc(${100 / props.columns}% - ${props.spacing}px)`,
+      }}
     >
       <Box
-        className={`${styles.imageContainer} ${checked ? styles.imageContainerSelected : ''}`}
+        className={`${styles.imageContainer} ${checked ? styles.imageContainerSelected : ""}`}
         onClick={handleChange}
         style={{ paddingTop: 100 / props.aspectRatio + "%" }}
       >
@@ -102,6 +104,8 @@ function ImageMcqItem(props) {
                         margin-top: 8px;
                       `}
           content={props.option.content?.label}
+          elementCode={props.option.qualifiedCode}
+          name="label"
         />
       )}
     </Box>

@@ -77,7 +77,10 @@ function IconScq(props) {
                                 },
                               `}
                 content={option.content?.label}
+                elementCode={option.qualifiedCode}
+                name="label"
               />
+              
             )}
           </Box>
         );

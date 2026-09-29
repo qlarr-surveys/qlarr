@@ -484,7 +484,7 @@ function RankingOption({
           {!mobile && <DragIndicatorIcon className={styles.dragHandle} />}
           <div className={styles.itemContent}>
             <Content
-              elementCode={option.code}
+              elementCode={option.qualifiedCode}
               customStyle={`font-size: ${theme.textStyles.text.size}px;`}
               name="label"
               content={option.content?.label}
