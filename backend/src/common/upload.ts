@@ -24,6 +24,9 @@ export const MAX_UPLOAD_BYTES = 100 * MB;
  */
 export const MAX_RESPONSE_UPLOAD_BYTES = 30 * MB;
 
+/** Cap for a translations CSV: even a large survey in every language is well under 5MB. */
+export const MAX_TRANSLATIONS_UPLOAD_BYTES = 5 * MB;
+
 /** Per-endpoint multer options overriding the global cap for a single route. */
 export const uploadLimits = (maxBytes: number) => ({
   limits: { fileSize: maxBytes, files: 1 },

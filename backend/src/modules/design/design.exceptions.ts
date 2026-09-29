@@ -45,3 +45,13 @@ export class NoPublishedVersionException extends HttpException {
     );
   }
 }
+
+/** The uploaded file isn't a translations CSV (header must start `code,key`). 400. */
+export class InvalidTranslationsCsvException extends HttpException {
+  constructor() {
+    super(
+      { message: 'Not a translations CSV', error: 'InvalidTranslationsCsvException' },
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+}

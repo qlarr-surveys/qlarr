@@ -234,7 +234,8 @@
     "design_out_of_sync": "Alguien más está editando el diseño de la encuesta",
     "wrong_reset_token": "Este Token de Restablecimiento es incorrecto.",
     "wrong_confirmation_token": "Este Token de Confirmación es incorrecto, Por favor Regístrate Una Vez Más",
-    "survey_quota": "Lo sentimos, esta encuesta ya no está aceptando respuestas."
+    "survey_quota": "Lo sentimos, esta encuesta ya no está aceptando respuestas.",
+    "invalid_translations_csv": "No es un CSV de traducciones."
   },
   "processed_successes": {
     "copied": "Copiado al portapapeles",
@@ -440,7 +441,13 @@
     "title": "Traducciones",
     "translate_to": "Traducir Encuesta A:",
     "language": "Idioma",
-    "design_language": "Idioma del Diseño"
+    "design_language": "Idioma del Diseño",
+    "export_csv": "Exportar CSV",
+    "import_csv": "Importar CSV",
+    "import_csv_override_main": "Sobrescribir el texto del Idioma Base",
+    "import_csv_no_changes": "No hay cambios para importar.",
+    "import_csv_done_one": "Se actualizó {{count}} campo.",
+    "import_csv_done_other": "Se actualizaron {{count}} campos."
   },
   "responses_export": {
     "format_csv": "CSV",

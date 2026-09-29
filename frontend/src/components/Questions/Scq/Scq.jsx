@@ -68,7 +68,7 @@ function ScqChoice(props) {
       control={<Radio />}
       label={
         <Content
-          elementCode={props.Choice.code}
+          elementCode={props.Choice.qualifiedCode}
           customStyle={`
         font-size: ${theme.textStyles.text.size}px;
         `}

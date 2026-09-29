@@ -62,7 +62,7 @@ function McqAnswer(props) {
       }
       label={
         <Content
-          elementCode={props.Answer.code}
+          elementCode={props.Answer.qualifiedCode}
           customStyle={`
         opacity: ${disabled ? 0.5 : 1};
         font-size: ${theme.textStyles.text.size}px;

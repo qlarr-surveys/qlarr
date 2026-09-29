@@ -255,4 +255,102 @@ describe('Survey design (get + set)', () => {
         .send({ version: 1, subVersion: 1, lastModified: '2024-01-01 00:00:00' })
         .expect(400));
   });
+
+  describe('translations CSV', () => {
+    // The same new survey, with Arabic added under Additional Languages.
+    const DESIGN_AR_JSON = JSON.stringify(
+      runValidate(
+        JSON.stringify({
+          ...JSON.parse(new EngineService().newSurvey('Feedback')),
+          additionalLang: [{ code: 'ar', name: 'العربية' }],
+        }),
+      ),
+    );
+    const THANKS = 'Thank you for taking the time to complete this survey.';
+    const csv = (...rows: string[]) => Buffer.from(rows.join('\n'));
+    const importCsv = (surveyId: string, file: Buffer, query = '', auth = SUPER) =>
+      request(server())
+        .post(`/survey/${surveyId}/translations/import${query}`)
+        .set('Authorization', auth)
+        .attach('file', file, 'translations.csv');
+
+    beforeEach(() => {
+      files.getText.mockResolvedValue(DESIGN_AR_JSON);
+    });
+
+    it('exports one row per text and one column per survey language', async () => {
+      const res = await request(server())
+        .get(`/survey/${SURVEY}/translations/export`)
+        .set('Authorization', SUPER)
+        .expect(200)
+        .expect('Content-Type', /^text\/csv/)
+        .expect('Content-Disposition', 'attachment; filename="translations.csv"');
+      expect(res.text.charCodeAt(0)).toBe(0xfeff);
+      expect(res.text.slice(1).split('\n')).toEqual([
+        '"code","key","en","ar"',
+        '"G1","label","Feedback",""',
+        `"G2","label","${THANKS}",""`,
+      ]);
+    });
+
+    it('writes each text with changeContent, as one design save', async () => {
+      const res = await importCsv(
+        SURVEY,
+        csv('code,key,en,ar', 'G1,label,Feedback,<p>ملاحظات {{1 + 1}}</p>', 'G2,label,Changed,'),
+      ).expect(200);
+
+      expect(res.body.updated).toBe(1);
+      expect(files.uploadText).toHaveBeenCalledTimes(1);
+      const { G1, G2 } = res.body.design.designerInput.state;
+      expect(G1.content.ar.label).toBe('<p>ملاحظات {{1 + 1}}</p>');
+      expect(G1.instructionList).toContainEqual(
+        expect.objectContaining({ code: 'format_label_ar_1', text: '1 + 1' }),
+      );
+      // the base language needs override_main_lang
+      expect(G2.content.en.label).toBe(THANKS);
+    });
+
+    it('changes the base language with override_main_lang=true', async () => {
+      const res = await importCsv(
+        SURVEY,
+        csv('code,key,en,ar', 'G2,label,Thanks!,'),
+        '?override_main_lang=true',
+      ).expect(200);
+      expect(res.body.updated).toBe(1);
+      expect(res.body.design.designerInput.state.G2.content.en.label).toBe('Thanks!');
+    });
+
+    it('saves nothing when the file changes nothing', async () => {
+      const res = await importCsv(SURVEY, csv('code,key,en,ar', 'G1,label,Feedback,')).expect(200);
+      expect(res.body.updated).toBe(0);
+      expect(files.uploadText).not.toHaveBeenCalled();
+    });
+
+    it('400 InvalidTranslationsCsvException for another kind of CSV', async () => {
+      const res = await importCsv(SURVEY, csv('Question,Yes,No', 'Q1,3,4')).expect(400);
+      expect(res.body.error).toBe('InvalidTranslationsCsvException');
+    });
+
+    it('400 without a file', () =>
+      request(server())
+        .post(`/survey/${SURVEY}/translations/import`)
+        .set('Authorization', SUPER)
+        .expect(400));
+
+    it('400 when the survey is closed', async () => {
+      const res = await importCsv(
+        SURVEY_CLOSED,
+        csv('code,key,en,ar', 'G1,label,Feedback,مرحبا'),
+      ).expect(400);
+      expect(res.body.error).toBe('SurveyIsClosedException');
+    });
+
+    it('403 for a non-admin role', async () => {
+      await request(server())
+        .get(`/survey/${SURVEY}/translations/export`)
+        .set('Authorization', SURVEYOR)
+        .expect(403);
+      await importCsv(SURVEY, csv('code,key,en,ar'), '', SURVEYOR).expect(403);
+    });
+  });
 });

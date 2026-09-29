@@ -234,7 +234,8 @@
     "design_out_of_sync": "Iemand anders bewerkt het enquête ontwerp",
     "wrong_reset_token": "Deze Reset Token is onjuist.",
     "wrong_confirmation_token": "Deze Bevestiging Token is onjuist, Registreer Opnieuw",
-    "survey_quota": "Sorry, deze enquête accepteert geen reacties meer."
+    "survey_quota": "Sorry, deze enquête accepteert geen reacties meer.",
+    "invalid_translations_csv": "Geen CSV met vertalingen."
   },
   "processed_successes": {
     "copied": "Gekopieerd naar klembord",
@@ -440,7 +441,13 @@
     "title": "Vertalingen",
     "translate_to": "Enquête vertalen naar:",
     "language": "Taal",
-    "design_language": "Ontwerptaal"
+    "design_language": "Ontwerptaal",
+    "export_csv": "CSV exporteren",
+    "import_csv": "CSV importeren",
+    "import_csv_override_main": "Tekst van de Basis Taal overschrijven",
+    "import_csv_no_changes": "Geen wijzigingen om te importeren.",
+    "import_csv_done_one": "{{count}} veld bijgewerkt.",
+    "import_csv_done_other": "{{count}} velden bijgewerkt."
   },
   "responses_export": {
     "format_csv": "CSV",

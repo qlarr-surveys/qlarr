@@ -68,7 +68,7 @@ function MultipleTextItem({ item }) {
         style={{ '--qlarr-text-size': `${theme.textStyles.text.size}px` }}
       >
         <Content
-          elementCode={item.code}
+          elementCode={item.qualifiedCode}
           name="label"
           content={item.content?.label}
         />
