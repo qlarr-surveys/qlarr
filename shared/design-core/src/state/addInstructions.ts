@@ -1239,7 +1239,8 @@ const getQuestionType = (state, code) => {
   const match = code.match(/^Q[a-z0-9_]+/);
   const captured = match ? match[0] : null;
   if (captured) {
-    return state[captured].type;
+    // The question may have been deleted while logic still refers to it.
+    return state[captured]?.type;
   } else {
     return null;
   }

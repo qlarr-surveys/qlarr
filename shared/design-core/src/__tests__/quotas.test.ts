@@ -6,6 +6,7 @@ import {
   updateQuota,
   removeQuota,
   changeContent,
+  deleteQuestion,
 } from "../state/mutations";
 import { quotaMessageKey } from "../constants/design";
 import sample from "./fixtures/sample-survey.json";
@@ -80,6 +81,30 @@ describe("quotas", () => {
     const before = structuredClone(state.Survey);
     updateQuota(state, { code: "QT9", changes: { condition } });
     expect(state.Survey).toEqual(before);
+  });
+
+  it("keeps working after a question a quota refers to is deleted", () => {
+    const CHOICE = "Q867ezm"; // scq
+    addQuota(state);
+    addQuota(state);
+    updateQuota(state, {
+      code: "QT1",
+      changes: {
+        condition: { logic: { in: [{ var: `${CHOICE}.value` }, ["A1"]] } },
+      },
+    });
+    deleteQuestion(state, CHOICE);
+
+    // Every quota edit recompiles all quota conditions, including QT1's stale one.
+    expect(() =>
+      updateQuota(state, { code: "QT2", changes: { condition } }),
+    ).not.toThrow();
+    expect(() => removeQuota(state, "QT2")).not.toThrow();
+    // QT1 keeps its condition (the backend flags it) rather than being dropped.
+    expect(quotaCodes(state)).toEqual(["QT1"]);
+    expect(state.Survey.quotas[0].condition.logic).toEqual({
+      in: [{ var: `${CHOICE}.value` }, ["A1"]],
+    });
   });
 
   it("removes a quota's end message in every language and its instruction", () => {
