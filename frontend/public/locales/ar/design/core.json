@@ -317,7 +317,7 @@
   "upload_file": "رفع ملف",
   "manual_entry_placeholder": "أدخل قيمة واحدة في كل سطر",
   "submit_values": "إرسال",
-  "enter_manually": "إدخال يدوي",
+  "add_in_bulk": "إضافة بالجملة",
   "manual_entry_rows": "إدخال الصفوف يدويًا",
   "manual_entry_columns": "إدخال الأعمدة يدويًا",
   "manual_entry_replace_warning": "يؤدي الإرسال إلى استبدال القائمة الحالية. تُحذف ترجمات هذه العناصر وإعداداتها.",

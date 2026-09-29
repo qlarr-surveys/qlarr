@@ -103,7 +103,7 @@ function ChoiceQuestion(props) {
           )}
           {!isCarried && props.langInfo.onMainLang && !released && (
             <Button size="small" onClick={() => setManualOpen(true)}>
-              {t("enter_manually")}
+              {t("add_in_bulk")}
             </Button>
           )}
           {canHaveOther && (

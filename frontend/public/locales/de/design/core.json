@@ -317,7 +317,7 @@
   "upload_file": "Datei hochladen",
   "manual_entry_placeholder": "Einen Wert pro Zeile eingeben",
   "submit_values": "Absenden",
-  "enter_manually": "Manuell eingeben",
+  "add_in_bulk": "Mehrere hinzufügen",
   "manual_entry_rows": "Zeilen manuell eingeben",
   "manual_entry_columns": "Spalten manuell eingeben",
   "manual_entry_replace_warning": "Absenden ersetzt die aktuelle Liste. Die Übersetzungen und Einstellungen dieser Einträge werden entfernt.",

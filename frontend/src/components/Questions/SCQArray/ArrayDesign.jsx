@@ -88,7 +88,7 @@ function ArrayDesign(props) {
           </Button>
           {langInfo.onMainLang && !released && (
             <Button size="small" onClick={() => setManualType("column")}>
-              {t("enter_manually")}
+              {t("add_in_bulk")}
             </Button>
           )}
         </div>
@@ -183,7 +183,7 @@ function ArrayDesign(props) {
           </Button>
           {langInfo.onMainLang && !released && (
             <Button size="small" onClick={() => setManualType("row")}>
-              {t("enter_manually")}
+              {t("add_in_bulk")}
             </Button>
           )}
         </div>
