@@ -37,11 +37,20 @@ export const useReferenceTooltips = ({
           const fullMatch = match[0]; // e.g., "Q1.value"
           const prefix = match[1]; // e.g., "Q1"
           const suffix = match[2]; // e.g., "value"
-          const toReplace = index[prefix];
+          // Carry-forward "other" pipes in as a compound code like
+          // "Q1AotherAtext.value". There's no index entry for the compound, so
+          // resolve it to the source question and show a friendly "Q1.other".
+          const OTHER_SUFFIX = "AotherAtext";
+          const isOther = prefix.endsWith(OTHER_SUFFIX);
+          const basePrefix = isOther
+            ? prefix.slice(0, -OTHER_SUFFIX.length)
+            : prefix;
+          const toReplace = index[basePrefix];
           if (toReplace) {
+            const display = isOther ? `${toReplace}.other` : `${toReplace}.${suffix}`;
             newElement = newElement.replace(
               fullMatch,
-              `<span class="reference-tooltip" data-original="${prefix}">${toReplace}.${suffix}</span>`,
+              `<span class="reference-tooltip" data-original="${basePrefix}">${display}</span>`,
             );
           }
         });
