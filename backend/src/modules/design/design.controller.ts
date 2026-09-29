@@ -1,13 +1,21 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
+  HttpCode,
   Param,
   Post,
   Query,
+  Res,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
 import { Role } from '../../auth/role.enum';
 import { Roles } from '../../auth/roles.decorator';
+import { MAX_TRANSLATIONS_UPLOAD_BYTES, uploadLimits } from '../../common/upload';
 import {
   DesignDiffDto,
   DesignDto,
@@ -75,5 +83,34 @@ export class DesignController {
     @Query('sub_version') subVersion: string,
   ): Promise<VersionDto> {
     return this.design.publish(surveyId, parseInt(version, 10), parseInt(subVersion, 10));
+  }
+
+  @Get(':surveyId/translations/export')
+  @Roles(Role.SUPER_ADMIN, Role.SURVEY_ADMIN)
+  async exportTranslations(
+    @Param('surveyId') surveyId: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    const csv = await this.design.exportTranslations(surveyId);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="translations.csv"');
+    res.send(csv);
+  }
+
+  @Post(':surveyId/translations/import')
+  @Roles(Role.SUPER_ADMIN, Role.SURVEY_ADMIN)
+  @HttpCode(200)
+  @UseInterceptors(FileInterceptor('file', uploadLimits(MAX_TRANSLATIONS_UPLOAD_BYTES)))
+  importTranslations(
+    @Param('surveyId') surveyId: string,
+    @UploadedFile() file: { buffer: Buffer } | undefined,
+    @Query('override_main_lang') overrideMainLang: string,
+  ): Promise<{ updated: number; design: DesignDto }> {
+    if (!file) throw new BadRequestException('file is required');
+    return this.design.importTranslations(
+      surveyId,
+      file.buffer.toString('utf8'),
+      overrideMainLang === 'true',
+    );
   }
 }

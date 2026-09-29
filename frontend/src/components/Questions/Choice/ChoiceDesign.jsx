@@ -1,21 +1,26 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "./ChoiceDesign.module.css";
 import { Button } from "@mui/material";
 import ChoiceItemDesign from "~/components/Questions/Choice/ChoiceItemDesign";
+import ManualEntryDialog from "~/components/Questions/shared/ManualEntryDialog";
 
 import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
 import { inDesign } from "~/routes";
+import { useIsReleased } from "~/hooks/useIsReleased";
 import {
   addNewAnswer,
   addNewAnswers,
   onNewLine,
+  replaceAnswers,
 } from "~/state/design/designState";
 
 function ChoiceQuestion(props) {
   const theme = useTheme();
   const t = props.t;
   const dispatch = useDispatch();
+  const released = useIsReleased();
+  const [manualOpen, setManualOpen] = useState(false);
 
   const children = useSelector((state) => {
     return state.designState[props.code].children;
@@ -25,10 +30,12 @@ function ChoiceQuestion(props) {
     return state.designState[props.code].type;
   });
 
+  // plain options only: Other / None / All have a type and stay
+  const options = (children || []).filter((el) => !el.type);
   // When options are carried from a source they're mirrored & read-only: no
   // adding regular / other / all. A local "None of the above" is still allowed.
   const isCarried = useSelector(
-    (state) => !!state.designState[props.code]?.carryForward
+    (state) => !!state.designState[props.code]?.carryForward,
   );
 
   const canHaveOther =
@@ -66,7 +73,7 @@ function ChoiceQuestion(props) {
                     questionCode: props.code,
                     index,
                     data,
-                  })
+                  }),
                 );
               }}
               onNewLine={() => {
@@ -94,13 +101,18 @@ function ChoiceQuestion(props) {
               {t("add_option")}
             </Button>
           )}
+          {!isCarried && props.langInfo.onMainLang && !released && (
+            <Button size="small" onClick={() => setManualOpen(true)}>
+              {t("add_in_bulk")}
+            </Button>
+          )}
           {canHaveOther && (
             <Button
               size="small"
               className={styles.answerIcon}
               onClick={() =>
                 dispatch(
-                  addNewAnswer({ questionCode: props.code, type: "other" })
+                  addNewAnswer({ questionCode: props.code, type: "other" }),
                 )
               }
             >
@@ -113,7 +125,7 @@ function ChoiceQuestion(props) {
               className={styles.answerIcon}
               onClick={() =>
                 dispatch(
-                  addNewAnswer({ questionCode: props.code, type: "all" })
+                  addNewAnswer({ questionCode: props.code, type: "all" }),
                 )
               }
             >
@@ -126,7 +138,7 @@ function ChoiceQuestion(props) {
               className={styles.answerIcon}
               onClick={() =>
                 dispatch(
-                  addNewAnswer({ questionCode: props.code, type: "none" })
+                  addNewAnswer({ questionCode: props.code, type: "none" }),
                 )
               }
             >
@@ -134,6 +146,17 @@ function ChoiceQuestion(props) {
             </Button>
           )}
         </div>
+      )}
+      {manualOpen && (
+        <ManualEntryDialog
+          title={t("manual_entry")}
+          t={t}
+          codes={options.map((el) => el.qualifiedCode)}
+          onClose={() => setManualOpen(false)}
+          onSubmit={(lines) =>
+            dispatch(replaceAnswers({ questionCode: props.code, data: lines }))
+          }
+        />
       )}
     </div>
   );

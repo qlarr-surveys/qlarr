@@ -6,7 +6,7 @@ import { useTheme } from "@emotion/react";
 import { Box } from "@mui/material";
 import DynamicSvg from "~/components/DynamicSvg";
 import { buildResourceUrl } from "~/networking/common";
-import Content from '~/components/run/Content';
+import Content from "~/components/run/Content";
 
 function IconMcq(props) {
   const theme = useTheme();
@@ -22,7 +22,7 @@ function IconMcq(props) {
   return (
     <Box
       className={styles.iconFlexContainer}
-      style={{ '--qlarr-spacing': `${props.component.spacing || 8}px` }}
+      style={{ "--qlarr-spacing": `${props.component.spacing || 8}px` }}
     >
       {props.component.answers.map((option) => {
         const relevance = runValues[option.qualifiedCode]?.relevance ?? true;
@@ -64,11 +64,11 @@ function IconMcqChoice({
       data-code={component.code}
       key={component.code}
       className={styles.choiceItem}
-      style={{ '--qlarr-item-flex': `0 1 calc(${100 / columns}% - ${spacing || 8}px)` }}
+      style={{
+        "--qlarr-item-flex": `0 1 calc(${100 / columns}% - ${spacing || 8}px)`,
+      }}
     >
-      <div
-        className={styles.iconCenter}
-      >
+      <div className={styles.iconCenter}>
         <DynamicSvg
           onIconClick={() => {
             let parentValue2 = [...parentValue];
@@ -78,7 +78,7 @@ function IconMcqChoice({
               parentValue2.push(component.code);
             }
             dispatch(
-              valueChange({ componentCode: parentCode, value: parentValue2 })
+              valueChange({ componentCode: parentCode, value: parentValue2 }),
             );
           }}
           imageHeight="100%"
@@ -105,6 +105,8 @@ function IconMcqChoice({
                                 },
                               `}
           content={component.content?.label}
+          elementCode={component.qualifiedCode}
+          name="label"
         />
       )}
     </Box>

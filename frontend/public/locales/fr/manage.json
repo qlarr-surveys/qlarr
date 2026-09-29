@@ -235,7 +235,8 @@
     "design_out_of_sync": "Quelqu'un d'autre modifie la conception du sondage",
     "wrong_reset_token": "Ce Jeton de Réinitialisation est incorrect.",
     "wrong_confirmation_token": "Ce Jeton de Confirmation est incorrect, Veuillez Vous Inscrire à Nouveau",
-    "survey_quota": "Désolé, ce sondage n'accepte plus de réponses."
+    "survey_quota": "Désolé, ce sondage n'accepte plus de réponses.",
+    "invalid_translations_csv": "Ce n'est pas un CSV de traductions."
   },
   "processed_successes": {
     "copied": "Copié dans le presse-papiers",
@@ -442,7 +443,13 @@
     "title": "Traductions",
     "translate_to": "Traduire le sondage vers:",
     "language": "Langue",
-    "design_language": "Langue du design"
+    "design_language": "Langue du design",
+    "export_csv": "Exporter en CSV",
+    "import_csv": "Importer un CSV",
+    "import_csv_override_main": "Remplacer le texte de la Langue de Base",
+    "import_csv_no_changes": "Aucune modification à importer.",
+    "import_csv_done_one": "{{count}} champ mis à jour.",
+    "import_csv_done_other": "{{count}} champs mis à jour."
   },
   "responses_export": {
     "format_csv": "CSV",

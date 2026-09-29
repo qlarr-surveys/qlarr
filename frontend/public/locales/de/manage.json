@@ -264,7 +264,8 @@
     "wrong_confirmation_token": "Dieses Bestätigungs-Token ist falsch, bitte registrieren Sie sich noch einmal",
     "wrong_credentials": "Falsche E-Mail oder Passwort",
     "wrong_password": "Falsches Passwort",
-    "wrong_reset_token": "Dieses Reset-Token ist falsch."
+    "wrong_reset_token": "Dieses Reset-Token ist falsch.",
+    "invalid_translations_csv": "Keine Übersetzungs-CSV."
   },
   "processed_successes": {
     "copied": "In die Zwischenablage kopiert",
@@ -440,7 +441,13 @@
     "design_language": "Design-Sprache",
     "language": "Sprache",
     "title": "Übersetzungen",
-    "translate_to": "Umfrage übersetzen nach:"
+    "translate_to": "Umfrage übersetzen nach:",
+    "export_csv": "CSV exportieren",
+    "import_csv": "CSV importieren",
+    "import_csv_override_main": "Text der Basissprache überschreiben",
+    "import_csv_no_changes": "Keine Änderungen zum Importieren.",
+    "import_csv_done_one": "{{count}} Feld aktualisiert.",
+    "import_csv_done_other": "{{count}} Felder aktualisiert."
   },
   "upload_zip_folder": "ZIP-Ordner hochladen",
   "users_manage": {

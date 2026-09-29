@@ -25,6 +25,7 @@ import {
   CONVERTIBLE_ARRAY_TYPES,
   CONVERTIBLE_TEXT_TYPES,
   CONVERTIBLE_DATE_TIME_TYPES,
+  CARRY_FORWARD_SOURCE_TYPES,
   isArrayType,
   languageSetup,
   quotaMessageKey,
@@ -445,6 +446,19 @@ export function addNewAnswers(state, payload) {
   resyncCarryForwardTargets(state, questionCode);
 }
 
+/** Replaces the question's answers of one type with one answer per label in `data`.
+ * Does nothing once the survey is published: that would break collected responses. */
+export function replaceAnswers(state, payload) {
+  const { questionCode, type, data } = payload;
+  if (state.versionDto?.published || (state.versionDto?.version ?? 0) > 1) {
+    return;
+  }
+  (state[questionCode].children || [])
+    .filter((child) => state[child.qualifiedCode].type == type)
+    .forEach((child) => removeAnswer(state, child.qualifiedCode));
+  addNewAnswers(state, { questionCode, type, index: -1, data });
+}
+
 export function onNewLine(state, payload) {
   const questionCode = payload.questionCode;
   const index = payload.index;
@@ -765,8 +779,11 @@ const syncCarryForward = (state, targetCode, axis) => {
   const wasSyncing = carrySyncing;
   carrySyncing = true;
   try {
-    // Broken source (deleted / not yet resolvable): flag, leave options as-is.
-    if (!source || !source.children) {
+    if (
+      !source ||
+      !source.children ||
+      !CARRY_FORWARD_SOURCE_TYPES.includes(source.type)
+    ) {
       target.designErrors = questionDesignError(target);
       return;
     }
@@ -868,6 +885,27 @@ const resyncCarryForwardTargets = (state, changedCode) => {
   if (touched) {
     state.index = buildCodeIndex(state);
   }
+};
+
+// Severs every carry-forward link that pointed at `sourceCode`, turning each
+// target's mirrored options into a plain, editable copy (via disableCarryForward).
+// Used when the source can no longer be a carry source (e.g. its type changed to
+// a non-multiple-choice type): the setup panel already hides such a source, so a
+// surviving config would be an invisible, unmanageable link that keeps mirroring.
+const severCarryForwardTargets = (state, sourceCode) => {
+  Object.keys(state).forEach((key) => {
+    const comp = state[key];
+    if (!comp || typeof comp !== "object" || !comp.carryForward) {
+      return;
+    }
+    // disableCarryForward may delete comp.carryForward once its last axis goes,
+    // so re-check it each iteration.
+    ["rows", "columns"].forEach((axis) => {
+      if (comp.carryForward?.[axis]?.sourceCode === sourceCode) {
+        disableCarryForward(state, { targetCode: key, axis });
+      }
+    });
+  });
 };
 
 
@@ -981,6 +1019,12 @@ export function convertQuestion(state, payload) {
   cleanupValidation(state, questionCode);
   currentQuestion.designErrors = questionDesignError(currentQuestion);
   setup(state, { code: questionCode, rules: setupOptions(newType) });
+  // A source converted to a type that can't feed carry forward must not keep
+  // silently mirroring into its targets; sever the links so their options stay
+  // as a plain editable copy. Otherwise resync every still-valid target.
+  if (!CARRY_FORWARD_SOURCE_TYPES.includes(newType)) {
+    severCarryForwardTargets(state, questionCode);
+  }
   resyncCarryForwardTargets(state, questionCode);
 }
 
@@ -1805,7 +1849,11 @@ const creatNewState = (
   oldQuestionCode,
   newQuestionCode,
 ) => {
-  const newState = structuredClone(toBeCopied);
+  // NB: `toBeCopied` is an immer draft (a Proxy) on the frontend, and
+  // structuredClone throws DataCloneError on proxies. A JSON round-trip reads
+  // through the proxy and matches the JSON-only survey DSL (backend / AI pass a
+  // plain object, so it works there too).
+  const newState = JSON.parse(JSON.stringify(toBeCopied));
   if (newState.relevance) {
     delete newState.relevance;
     const index = newState.instructionList?.findIndex(

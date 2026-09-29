@@ -48,6 +48,32 @@ class DesignService extends BaseService {
     return response.data;
   }
 
+  async exportTranslations() {
+    const surveyId = sessionStorage.getItem("surveyId");
+    const response = await this.handleRequest(() =>
+      authenticatedApi.get(`/survey/${surveyId}/translations/export`, {
+        responseType: "blob",
+      })
+    );
+    return response.data;
+  }
+
+  async importTranslations(file, overrideMainLang) {
+    const surveyId = sessionStorage.getItem("surveyId");
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await this.handleRequest(() =>
+      authenticatedApi.post(
+        `/survey/${surveyId}/translations/import`,
+        formData,
+        {
+          params: { override_main_lang: overrideMainLang },
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      )
+    );
+    return response.data;
+  }
   async uploadResource(file, surveyId = null) {
     if (!surveyId) {
       surveyId = sessionStorage.getItem("surveyId");

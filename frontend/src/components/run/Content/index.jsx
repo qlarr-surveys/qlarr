@@ -15,6 +15,8 @@ function Content(props) {
   const name = props.name;
   const elementCode = props.elementCode;
   const customStyle = props.customStyle;
+  console.log("elementCode", elementCode)
+  console.log("isComplex", isComplex)
   const state = useSelector((state) => {
     if (
       !content ||
@@ -73,13 +75,18 @@ function Content(props) {
 export default React.memo(Content);
 
 export function replaceFormatInstructions(html, state, postFix) {
-  if(!html){
-    return html
+      console.log("state",state)
+    console.log("html", html)
+    console.log("postFix", postFix)
+  if (!html || !state) {
+    return html;
   }
   const allMatches = getAllFormatInstructions(html);
-  console.log(allMatches);
   allMatches.forEach((match, index) => {
-    html = html.replace(match, state[`format_${postFix}_${index + 1}`]);
+    const replacement = state[`format_${postFix}_${index + 1}`];
+    if (replacement !== undefined) {
+      html = html.replace(match, replacement);
+    }
   });
   return html;
 }

@@ -25,6 +25,7 @@ import {
   onBaseLangChanged,
 } from "~/state/design/designState";
 import { LANGUAGE_DEF } from "@qlarr/design-core/constants/language";
+import { TranslationsCsv } from "./TranslationsCsv";
 
 function ManageTranslations({ onManageTranslationsClose, onStartTranslation }) {
   const { t } = useTranslation(NAMESPACES.MANAGE);
@@ -130,6 +131,7 @@ export function ManageLanguages() {
           </ToggleButtonGroup>
         </FormControl>
       )}
+      <TranslationsCsv />
     </Box>
   );
 }

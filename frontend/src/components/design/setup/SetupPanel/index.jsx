@@ -498,8 +498,9 @@ const SetupComponent = React.memo(({ code, rule, t, isQuickOptions }) => {
 const SetupSection = React.memo(({ highlighted, rules, code, t, theme }) => {
   const dispatch = useDispatch();
   const [highlightedEl, setHighlightedEl] = React.useState(highlighted);
-  const advancedByCode = useSelector((state) => state.designState.advancedByCode ?? {});
-  const showAdvanced = advancedByCode[code] ?? false;
+  const showAdvanced = useSelector(
+    (state) => state.designState.advancedByCode?.[code] ?? false
+  );
 
   const handleShowAdvanced = React.useCallback(
     (value) => {

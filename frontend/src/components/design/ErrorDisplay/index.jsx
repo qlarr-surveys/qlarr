@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import { memo } from "react";
 import styles from "./ErrorDisplay.module.css";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
@@ -10,8 +10,15 @@ import useErrorDisplay from "./useErrorDisplay";
 
 function ErrorDisplay(props) {
   const { t } = useTranslation(NAMESPACES.DESIGN_CORE);
-  const { errors, designErrors, instructions, hasErrors, onErrClick, currentLang } =
-    useErrorDisplay(props.code);
+  const {
+    errors,
+    designErrors,
+    instructions,
+    hasErrors,
+    onErrClick,
+    onRemoveCarryForward,
+    currentLang,
+  } = useErrorDisplay(props.code);
 
   return hasErrors ? (
     <Box className={styles.errorDisplay}>
@@ -46,6 +53,18 @@ function ErrorDisplay(props) {
               <ErrorOutlineIcon style={{ verticalAlign: "middle" }} />
               <span className={styles.errorCode}>{label}</span>
               {message && <span className={styles.errorMessage}>{message}</span>}
+              {el.code === "carry_forward" && (
+                <Button
+                  size="small"
+                  color="error"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemoveCarryForward();
+                  }}
+                >
+                  {t("carry_remove")}
+                </Button>
+              )}
             </div>
           );
         })}

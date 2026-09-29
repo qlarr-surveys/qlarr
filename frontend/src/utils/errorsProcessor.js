@@ -55,6 +55,10 @@ export const PROCESSED_ERRORS = {
   INVALID_SURVEY_DATES: { name: "invalid_survey_dates", handleGlobally: false },
   SURVEY_QUOTA: { name: "survey_quota", handleGlobally: false },
   DUPLICATE_TO_CODE: { name: "duplicate_to_code", handleGlobally: false },
+  INVALID_TRANSLATIONS_CSV: {
+    name: "invalid_translations_csv",
+    handleGlobally: false,
+  },
 };
 
 export const onApiError = ({
@@ -163,6 +167,8 @@ export const processError = (e) => {
         return PROCESSED_ERRORS.SURVEY_QUOTA;
       case "DuplicateToCodeException":
         return PROCESSED_ERRORS.DUPLICATE_TO_CODE;
+      case "InvalidTranslationsCsvException":
+        return PROCESSED_ERRORS.INVALID_TRANSLATIONS_CSV;
       default:
         return PROCESSED_ERRORS.UNIDENTIFIED_ERROR;
     }

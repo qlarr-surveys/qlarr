@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { buildDesignState, changeContent } from '@qlarr/design-core';
 import { nowUtcString } from '../../common/datetime';
 import { EngineService } from '../../engine/engine.service';
 import { ValidationJsonOutput } from '../../engine/engine.types';
@@ -19,8 +20,10 @@ import {
   DesignException,
   DesignOutOfSyncException,
   InvalidDesignException,
+  InvalidTranslationsCsvException,
   NoPublishedVersionException,
 } from './design.exceptions';
+import { csvChanges, DesignState, parseCsv, toCsv, toCsvRows } from './translations-csv';
 
 export interface ProcessedSurvey {
   survey: SurveyEntity;
@@ -115,6 +118,38 @@ export class DesignService {
     return {
       designerInput: this.engine.toDesignerInput(output),
       versionDto: this.toVersionDto(entity, survey.status),
+    };
+  }
+
+  /** The survey's texts as CSV, one column per survey language. */
+  async exportTranslations(surveyId: string): Promise<string> {
+    const { designerInput } = await this.getDesign(surveyId);
+    return toCsv(toCsvRows(designerInput.state as DesignState));
+  }
+
+  /** Applies a translations CSV with the designer's own `changeContent`, as one design save. */
+  async importTranslations(
+    surveyId: string,
+    csv: string,
+    overrideMainLang: boolean,
+  ): Promise<{ updated: number; design: DesignDto }> {
+    const design = await this.getDesign(surveyId);
+    const saved = design.designerInput.state as DesignState;
+    const changes = csvChanges(parseCsv(csv), saved, overrideMainLang);
+    if (!changes) throw new InvalidTranslationsCsvException();
+    if (!changes.length) return { updated: 0, design };
+
+    // The functions the designer's reducers call, so each text also gets its
+    // `{{…}}` format instructions and embedded resources.
+    const state = buildDesignState({}, design);
+    changes.forEach((change) => changeContent(state, change));
+
+    // changeContent only touches state[code], so the diff is those components.
+    const codes = [...new Set(changes.map((change) => change.code))];
+    const diff = Object.fromEntries(codes.map((code) => [code, state[code]]));
+    return {
+      updated: changes.length,
+      design: await this.setDesign(surveyId, diff, design.versionDto.version),
     };
   }
 

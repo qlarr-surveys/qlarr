@@ -11,6 +11,9 @@ export const CONVERTIBLE_TEXT_TYPES = ["text", "number", "email", "paragraph", "
 export const CONVERTIBLE_ARRAY_TYPES = ["scq_array", "mcq_array", "scq_icon_array"];
 export const CONVERTIBLE_DATE_TIME_TYPES = ["date", "date_time", "time"];
 
+// A carry-forward source must be a multiple-choice question.
+export const CARRY_FORWARD_SOURCE_TYPES = ["mcq", "icon_mcq", "image_mcq"];
+
 export const isSingleSelect = (type) =>
   ["scq", "icon_scq", "image_scq"].includes(type);
 
