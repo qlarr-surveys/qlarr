@@ -157,17 +157,6 @@ export const stripRepeatedCopies = (state) => {
   });
 };
 
-// Defensive full rebuild — run on ingestion so a persisted `repeatSource` always
-// yields a current `repeatInfo` (covers source edits that happened out of band,
-// e.g. a source recode on a prior session).
-export const resyncAllRepeatables = (state) => {
-  Object.keys(state).forEach((key) => {
-    const comp = state[key];
-    if (comp && typeof comp === "object" && comp.repeatSource) {
-      applyRepeatInfo(state, key);
-    }
-  });
-};
 
 // The survey tree is shallow (Survey > group > question > answer, no group
 // nesting) and only groups/questions can be repeatable — so a component's only
