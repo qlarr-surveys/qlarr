@@ -60,7 +60,10 @@ import {
 import { defaultSurveyTheme } from "../constants/surveyTheme";
 import { LANGUAGE_DEF } from "../constants/language";
 
-const reservedKeys = [
+// Top-level design-state keys holding designer UI state, not survey data: a
+// save never sends them (`designChanges`) and a load keeps them as they are
+// (`buildDesignState`). Add any new UI-only key here.
+export const UI_STATE_KEYS = [
   "setup",
   "advancedByCode",
   "langInfo",
@@ -74,9 +77,25 @@ const reservedKeys = [
   "lastAddedComponent",
   "index",
   "skipScroll",
-  "advancedByCode",
+  "focus",
+  "componentIndex",
+  "designStateReceived",
+  "versionDto",
   "quotaMessageView",
 ];
+
+// The survey data that differs from the last saved design (`latest`): what a
+// save sends. Empty when nothing changed.
+export function designChanges(state, latest) {
+  const changes = {};
+  const keys = new Set([...Object.keys(state), ...Object.keys(latest)]);
+  keys.forEach((key) => {
+    if (!UI_STATE_KEYS.includes(key) && !isEquivalent(state[key], latest[key])) {
+      changes[key] = state[key];
+    }
+  });
+  return changes;
+}
 
 // Formerly the `designStateReceived` reducer. Mutates `state` in place and also
 // returns it, so a frontend delegator can `return core.buildDesignState(...)`
@@ -90,10 +109,10 @@ export function buildDesignState(state, payload) {
   }
 
   const newKeys = Object.keys(newState).filter(
-    (el) => !reservedKeys.includes(el),
+    (el) => !UI_STATE_KEYS.includes(el),
   );
   const toBeRemoved = Object.keys(state).filter(
-    (el) => !reservedKeys.includes(el) && !newKeys.includes(el),
+    (el) => !UI_STATE_KEYS.includes(el) && !newKeys.includes(el),
   );
 
   if (!state.langInfo || response.overWriteLang) {
@@ -114,6 +133,8 @@ export function buildDesignState(state, payload) {
   toBeRemoved.forEach((key) => {
     delete state[key];
   });
+  // A load ends any pending edit focus.
+  delete state.focus;
   const inCurrentSetup = state["setup"]?.code;
   if (!newKeys.includes(inCurrentSetup)) {
     delete state["setup"];
