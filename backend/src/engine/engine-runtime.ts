@@ -161,7 +161,32 @@ function toNavigationDirection(direction: NavigationDirectionJson) {
   }
 }
 
-/** Replace every `from`→`to` inside a node's JSON object field (relevance / skip_logic). */
+const escapeRegExp = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * Rename `from`→`to` wherever it appears as a whole component code in a JSON
+ * value's strings and object keys. Codes are `[SGQA][a-z0-9_]+` segments, so a
+ * match must not be preceded by a letter/digit/`_` nor followed by a lowercase
+ * letter/digit/`_`: `Q1.value` and `Q1A2` (Q1's answer A2) are renamed, `Q10`
+ * and `Q1_x` are not.
+ */
+export function renameCodeRefs(value: unknown, from: string, to: string): unknown {
+  const pattern = new RegExp(`(?<![A-Za-z0-9_])${escapeRegExp(from)}(?![a-z0-9_])`, 'g');
+  const rename = (s: string): string => s.replace(pattern, () => to);
+  const walk = (v: unknown): unknown => {
+    if (typeof v === 'string') return rename(v);
+    if (Array.isArray(v)) return v.map(walk);
+    if (v && typeof v === 'object') {
+      return Object.fromEntries(
+        Object.entries(v).map(([k, child]) => [rename(k), walk(child)]),
+      );
+    }
+    return v;
+  };
+  return walk(value);
+}
+
+/** Rename `from`→`to` inside a node's JSON object field (relevance / skip_logic). */
 function replaceInField(
   node: Record<string, unknown>,
   field: string,
@@ -170,7 +195,7 @@ function replaceInField(
 ): void {
   const obj = node[field];
   if (obj && typeof obj === 'object') {
-    node[field] = JSON.parse(JSON.stringify(obj).split(from).join(to));
+    node[field] = renameCodeRefs(obj, from, to);
   }
 }
 
