@@ -21,14 +21,19 @@ export interface QuotaDefinition {
   limit: number;
 }
 
-/** The quotas declared on a design's Survey node, skipping malformed entries. */
+/**
+ * The quotas declared on a design's Survey node, skipping malformed entries and
+ * repeated codes (the first wins: a code has one membership value per response).
+ */
 export function quotaDefinitions(survey: Record<string, unknown>): QuotaDefinition[] {
   const raw = survey['quotas'];
   if (!Array.isArray(raw)) return [];
+  const seen = new Set<string>();
   return raw.flatMap((quota) => {
     if (!quota || typeof quota !== 'object') return [];
     const { code, label, limit } = quota as Record<string, unknown>;
-    if (typeof code !== 'string' || !QUOTA_CODE_RE.test(code)) return [];
+    if (typeof code !== 'string' || !QUOTA_CODE_RE.test(code) || seen.has(code)) return [];
+    seen.add(code);
     return [
       {
         code,

@@ -35,6 +35,21 @@ describe('quota helpers', () => {
     expect(quotaDefinitions({})).toEqual([]);
   });
 
+  it('keeps only the first quota of a repeated code', () => {
+    expect(
+      quotaDefinitions({
+        quotas: [
+          { code: 'QT1', label: 'Men', limit: 50 },
+          { code: 'QT1', label: 'Women', limit: 10 },
+          { code: 'QT2', label: 'Other', limit: 5 },
+        ],
+      }),
+    ).toEqual([
+      { code: 'QT1', label: 'Men', limit: 50 },
+      { code: 'QT2', label: 'Other', limit: 5 },
+    ]);
+  });
+
   it('only reports enforced quotas that reached their limit', () => {
     const definitions = [
       { code: 'QT1', label: 'a', limit: 2 },

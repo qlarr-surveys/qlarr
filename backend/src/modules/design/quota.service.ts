@@ -4,7 +4,6 @@ import { DbContext } from '../../database/db-context';
 import { ValidationJsonOutput } from '../../engine/engine.types';
 import { SurveyEntity } from '../surveys/survey.entity';
 import {
-  QUOTA_VALUE_PREFIX,
   QuotaDefinition,
   fullQuotaCodes,
   quotaDefinitions,
@@ -17,7 +16,8 @@ export interface QuotaStatusDto {
 /**
  * Segment quota counts and the enforcement input. A response counts towards a
  * quota when it is complete, not preview, not disqualified, and the engine
- * saved `Survey.quota_<code> = true` on it.
+ * saved `Survey.quota_<code> = true` on it. A database trigger mirrors the last
+ * two into `responses.quota_codes` (migration 2-ResponseQuotaCodes).
  *
  * Membership is only ever written while a respondent navigates, so a quota
  * added to a survey that is already collecting starts from zero: responses
@@ -34,22 +34,18 @@ export class QuotaService {
     manager: EntityManager = this.db.manager,
   ): Promise<Record<string, number>> {
     if (codes.length === 0) return {};
-    const rows: { key: string; count: number }[] = await manager.query(
-      `SELECT kv.key, COUNT(*)::int AS count
+    const rows: { code: string; count: number }[] = await manager.query(
+      `SELECT code, COUNT(*)::int AS count
          FROM responses r
-         CROSS JOIN LATERAL jsonb_each_text(r."values") AS kv(key, value)
+         CROSS JOIN unnest(r.quota_codes) AS code
         WHERE r.survey_id = $1
           AND r.submit_date IS NOT NULL
           AND r.preview = false
-          AND COALESCE(r."values" ->> 'Survey.disqualified', 'false') <> 'true'
-          AND kv.key = ANY($2::text[])
-          AND kv.value = 'true'
-        GROUP BY kv.key`,
-      [surveyId, codes.map((code) => QUOTA_VALUE_PREFIX + code)],
+          AND code = ANY($2::text[])
+        GROUP BY code`,
+      [surveyId, codes],
     );
-    return Object.fromEntries(
-      rows.map((row) => [row.key.slice(QUOTA_VALUE_PREFIX.length), Number(row.count)]),
-    );
+    return Object.fromEntries(rows.map((row) => [row.code, Number(row.count)]));
   }
 
   /** The quotas a respondent may no longer enter. */
