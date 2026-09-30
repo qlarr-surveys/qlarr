@@ -68,6 +68,11 @@
   cursor: pointer;
 }
 
+.cardHeader:focus-visible {
+  outline: 2px solid #2d3cb1;
+  outline-offset: -2px;
+}
+
 .cardHeaderStatic {
   cursor: default;
 }

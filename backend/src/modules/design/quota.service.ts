@@ -56,15 +56,26 @@ export class QuotaService {
     return fullQuotaCodes(definitions, counts);
   }
 
-  /** Fill levels for the designer / manage views. */
-  async status(survey: SurveyEntity, output: ValidationJsonOutput): Promise<QuotaStatusDto> {
-    const definitions = quotaDefinitions(output.survey);
+  /**
+   * Fill levels for the designer / manage views: the draft's quotas, `full` by
+   * the published limits (the ones navigation enforces; none before publishing).
+   */
+  async status(
+    survey: SurveyEntity,
+    draft: ValidationJsonOutput,
+    published: ValidationJsonOutput | null,
+  ): Promise<QuotaStatusDto> {
+    const definitions = quotaDefinitions(draft.survey);
     const counts = await this.counts(survey.id, definitions.map((quota) => quota.code));
+    const full = new Set(
+      published ? fullQuotaCodes(quotaDefinitions(published.survey), counts) : [],
+    );
     return {
-      quotas: definitions.map((quota) => {
-        const count = counts[quota.code] ?? 0;
-        return { ...quota, count, full: quota.limit > 0 && count >= quota.limit };
-      }),
+      quotas: definitions.map((quota) => ({
+        ...quota,
+        count: counts[quota.code] ?? 0,
+        full: full.has(quota.code),
+      })),
     };
   }
 }

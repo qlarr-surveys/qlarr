@@ -97,7 +97,8 @@ function DesignSurvey() {
       }),
     );
     searchParams.delete(QUOTA_MESSAGE_PARAM);
-    setSearchParams(searchParams);
+    // Replace, so Back returns to Settings instead of this same page.
+    setSearchParams(searchParams, { replace: true });
   }, [designStateReceived]);
 
   useEffect(() => {

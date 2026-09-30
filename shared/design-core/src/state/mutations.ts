@@ -276,16 +276,23 @@ export function quotaMessageRevealed(state) {
   }
 }
 
+// Recompiles every quota condition. An instruction whose text is unchanged is
+// kept as is, so it keeps the errors the backend reported on it.
 const refreshQuotaInstructions = (state) => {
   const survey = state.Survey;
-  survey.instructionList = (survey.instructionList || []).filter(
-    (instruction) => !instruction.code.startsWith("quota_"),
-  );
+  const previous = new Map();
+  survey.instructionList = (survey.instructionList || []).filter((instruction) => {
+    const isQuota = instruction.code.startsWith("quota_");
+    if (isQuota) previous.set(instruction.code, instruction);
+    return !isQuota;
+  });
   (survey.quotas || []).forEach((quota) => {
     const instruction = quotaInstruction(quota, state);
-    if (!instruction.remove) {
-      survey.instructionList.push(instruction);
+    if (instruction.remove) {
+      return;
     }
+    const kept = previous.get(instruction.code);
+    survey.instructionList.push(kept?.text === instruction.text ? kept : instruction);
   });
 };
 
@@ -1040,6 +1047,8 @@ export function convertQuestion(state, payload) {
     severCarryForwardTargets(state, questionCode);
   }
   resyncCarryForwardTargets(state, questionCode);
+  // Quota conditions compile differently per question type (e.g. "in").
+  refreshQuotaInstructions(state);
 }
 
 export function changeContent(state, payload) {
@@ -1331,6 +1340,7 @@ export function refreshDsl(state) {
       addMaskedValuesInstructions(questionCode, question, state);
     });
   });
+  refreshQuotaInstructions(state);
 }
 
 export function setUpdating(state, payload) {

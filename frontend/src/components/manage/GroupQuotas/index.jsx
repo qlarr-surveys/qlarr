@@ -85,11 +85,10 @@ function GroupQuotas({ disabled }) {
     };
   }, [isSaving]);
 
-  const countsByCode = useMemo(
+  // `full` follows the published limits, the ones respondents are held to.
+  const statusByCode = useMemo(
     () =>
-      Object.fromEntries(
-        (status?.quotas || []).map((quota) => [quota.code, quota.count]),
-      ),
+      Object.fromEntries((status?.quotas || []).map((quota) => [quota.code, quota])),
     [status],
   );
 
@@ -201,7 +200,8 @@ function GroupQuotas({ disabled }) {
             <QuotaCard
               key={quota.code}
               quota={quota}
-              count={countsByCode[quota.code] ?? 0}
+              count={statusByCode[quota.code]?.count ?? 0}
+              full={statusByCode[quota.code]?.full ?? false}
               errors={errorsByCode[quota.code] || []}
               expanded={!disabled && expanded === quota.code}
               onToggle={() => toggle(quota)}
@@ -228,6 +228,7 @@ function GroupQuotas({ disabled }) {
 function QuotaCard({
   quota,
   count,
+  full,
   errors,
   expanded,
   onToggle,
@@ -244,7 +245,6 @@ function QuotaCard({
 }) {
   const dispatch = useDispatch();
   const limit = quota.limit > 0 ? quota.limit : 0;
-  const full = limit > 0 && count >= limit;
   const description = describeCondition(
     quota.condition?.logic,
     fields,
@@ -275,6 +275,19 @@ function QuotaCard({
       <Box
         className={`${styles.cardHeader} ${disabled ? styles.cardHeaderStatic : ""}`}
         onClick={disabled ? undefined : onToggle}
+        role={disabled ? undefined : "button"}
+        tabIndex={disabled ? undefined : 0}
+        aria-expanded={disabled ? undefined : expanded}
+        onKeyDown={
+          disabled
+            ? undefined
+            : (event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onToggle();
+                }
+              }
+        }
       >
         <Box className={styles.cardTitle}>
           <Typography fontWeight={600} noWrap>

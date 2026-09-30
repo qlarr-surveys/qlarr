@@ -7,12 +7,14 @@ import {
   removeQuota,
   changeContent,
   deleteQuestion,
+  convertQuestion,
+  refreshDsl,
 } from "../state/mutations";
 import { quotaMessageKey } from "../constants/design";
 import sample from "./fixtures/sample-survey.json";
 
 const QUESTION = "Q298jbb";
-const condition = { logic: { "==": [{ var: `${QUESTION}.value` }, "yes"] } };
+const condition = { logic: { "==": [{ var: QUESTION }, "yes"] } };
 
 // Fresh, fully-initialised design state from the fixture (sets langInfo + index).
 const freshState = () =>
@@ -94,7 +96,7 @@ describe("quotas", () => {
 
   it("keeps working after a question a quota refers to is deleted", () => {
     const CHOICE = "Q867ezm"; // scq
-    const stale = { in: [{ var: `${CHOICE}.value` }, ["A1"]] };
+    const stale = { in: [{ var: CHOICE }, ["A1"]] };
     const [first, second] = addQuotas(2);
     updateQuota(state, { code: first, changes: { condition: { logic: stale } } });
     deleteQuestion(state, CHOICE);
@@ -119,6 +121,45 @@ describe("quotas", () => {
     changeContent(state, { code: "Survey", key: key1, lang: "en", value: "<p>No image</p>" });
 
     expect(state.Survey.resources).toEqual({ [`content_en_${key10}_1`]: "ten.png" });
+  });
+
+  it("keeps an unchanged quota instruction, with its errors, when another quota changes", () => {
+    const [first, second] = addQuotas(2);
+    updateQuota(state, { code: first, changes: { condition } });
+    const firstInstruction = quotaInstructions(state)[0];
+    firstInstruction.errors = ["SOME_ERROR"];
+
+    updateQuota(state, { code: second, changes: { condition } });
+
+    const kept = quotaInstructions(state).find((i) => i.code === `quota_${first}`);
+    expect(kept).toBe(firstInstruction);
+    expect(kept.errors).toEqual(["SOME_ERROR"]);
+  });
+
+  it("recompiles quota conditions when their question changes type", () => {
+    const CHOICE = "Q867ezm"; // scq
+    const [code] = addQuotas(1);
+    updateQuota(state, {
+      code,
+      changes: { condition: { logic: { in: [{ var: CHOICE }, ["A1"]] } } },
+    });
+    expect(quotaInstructions(state)[0].text).not.toContain("filter");
+
+    convertQuestion(state, { questionCode: CHOICE, newType: "mcq" });
+
+    // A multiple-choice value is a list, so "in" checks it element by element.
+    expect(quotaInstructions(state)[0].text).toContain("filter");
+  });
+
+  it("restores quota instructions on refreshDsl", () => {
+    const [code] = addQuotas(1);
+    updateQuota(state, { code, changes: { condition } });
+    const compiled = quotaInstructions(state)[0].text;
+    quotaInstructions(state)[0].text = "stale";
+
+    refreshDsl(state);
+
+    expect(quotaInstructions(state)[0].text).toBe(compiled);
   });
 
   it("removes a quota's end message in every language and its instruction", () => {

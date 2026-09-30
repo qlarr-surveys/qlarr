@@ -283,9 +283,11 @@ function ContentPanel({ designMode }, ref) {
     );
     const timeoutId = setTimeout(() => {
       if (itemIndex !== -1) {
+        // An instant jump: Virtuoso's smooth scroll does nothing when the END
+        // page can't reach the top (a short survey), while this stops at the bottom.
         virtuosoRef.current?.scrollToIndex({
           index: itemIndex,
-          behavior: "smooth",
+          behavior: "auto",
           align: "start",
         });
       }

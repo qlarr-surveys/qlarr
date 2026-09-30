@@ -1,5 +1,7 @@
 import { DataSource } from 'typeorm';
+import { ValidationJsonOutput } from '../src/engine/engine.types';
 import { QuotaService } from '../src/modules/design/quota.service';
+import { SurveyEntity } from '../src/modules/surveys/survey.entity';
 import { startTestApp, TestApp } from './harness';
 
 const SURVEY = '30000000-0000-0000-0000-000000000001';
@@ -116,5 +118,30 @@ describe('Quota counts (responses.quota_codes)', () => {
     expect(await quotas.counts(SURVEY, ['QTa', 'QTb', 'QTnone'])).toEqual({ QTa: 3, QTb: 2 });
     expect(await quotas.counts(SURVEY, ['QTb'])).toEqual({ QTb: 2 });
     expect(await quotas.counts(SURVEY, [])).toEqual({});
+  });
+
+  it('reports the draft quotas, full by the published limits', async () => {
+    // Counts from the previous test: QTa 3, QTb 2.
+    const design = (quotaList: object[]) =>
+      ({ survey: { quotas: quotaList } }) as unknown as ValidationJsonOutput;
+    const survey = { id: SURVEY } as SurveyEntity;
+    const draft = design([
+      { code: 'QTa', label: 'A', limit: 10 },
+      { code: 'QTb', label: 'B', limit: 2 },
+      { code: 'QTnew', label: 'New', limit: 1 },
+    ]);
+    const published = design([
+      { code: 'QTa', label: 'A', limit: 3 },
+      { code: 'QTb', label: 'B', limit: 5 },
+    ]);
+
+    expect((await quotas.status(survey, draft, published)).quotas).toEqual([
+      { code: 'QTa', label: 'A', limit: 10, count: 3, full: true },
+      { code: 'QTb', label: 'B', limit: 2, count: 2, full: false },
+      { code: 'QTnew', label: 'New', limit: 1, count: 0, full: false },
+    ]);
+    expect(
+      (await quotas.status(survey, draft, null)).quotas.map((quota) => quota.full),
+    ).toEqual([false, false, false]);
   });
 });

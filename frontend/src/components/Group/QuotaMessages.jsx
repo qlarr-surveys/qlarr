@@ -119,6 +119,8 @@ export const QuotaMessageEditor = React.memo(function QuotaMessageEditor({
       css={css`
         font-size: ${theme.textStyles.text.size}px;
       `}
+      // The END page's setup options don't apply to a quota message.
+      onClick={(event) => event.stopPropagation()}
     >
       <ContentEditor
         editable={
