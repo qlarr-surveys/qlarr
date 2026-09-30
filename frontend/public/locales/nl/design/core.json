@@ -544,5 +544,21 @@
   "carry_other": "'Overig' overnemen",
   "carry_remove": "Overname verwijderen",
   "err_carry_forward_source": "Bron voor overname is ongeldig",
-  "err_carry_forward_source_detail": "De vraag waaruit de opties worden overgenomen ontbreekt, is achter deze vraag geplaatst of is geen meerkeuzevraag meer."
+  "err_carry_forward_source_detail": "De vraag waaruit de opties worden overgenomen ontbreekt, is achter deze vraag geplaatst of is geen meerkeuzevraag meer.",
+  "repeat_enable": "Herhaalbaar maken",
+  "repeat_kind": "Herhalen",
+  "repeat_kind_option": "Eén keer per geselecteerde optie",
+  "repeat_kind_count": "Eén keer per ingevoerd aantal",
+  "repeat_source_placeholder": "Kies een bronvraag",
+  "repeat_max": "Max. herhalingen",
+  "repeat_include_other": "'Overig' opnemen",
+  "repeat_summary_count": "Herhaalt tot {{count}} keer op basis van het ingevoerde getal.",
+  "repeat_summary_option": "Herhaalt eenmaal voor elk van de {{count}} opties, alleen getoond wanneer geselecteerd.",
+  "err_empty_repeat_range": "Dit herhaalbare element heeft geen items om over te herhalen — kies een bron met ten minste één optie (of een aantal van 1 of meer).",
+  "err_missing_repeat_token": "De herhaalvoorwaarde moet naar het herhaalde item verwijzen — het mist zijn token per kopie.",
+  "err_invalid_repeat_token": "Een herhaalitem heeft een ongeldige code. Items mogen alleen kleine letters, cijfers en onderstrepingstekens gebruiken.",
+  "err_nested_repeatable": "Een herhaalbaar element kan niet in een ander herhaalbaar element worden geplaatst. Verwijder de herhaling van dit element of de bijbehorende container.",
+  "err_repeatable_with_relevance": "Een herhaalbaar element kan niet ook een eigen relevantievoorwaarde hebben — de weergavelogica is de herhaalvoorwaarde.",
+  "err_repeat_relevance": "Fout in herhaalvoorwaarde",
+  "err_skip_inside_repeatable": "Overslaanlogica is niet toegestaan binnen een herhaalbaar element."
 }

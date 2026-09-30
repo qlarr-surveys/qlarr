@@ -98,6 +98,12 @@ export const designState = createSlice({
       core.updateCarryForward(state, action.payload),
     disableCarryForward: (state, action) =>
       core.disableCarryForward(state, action.payload),
+    enableRepetition: (state, action) =>
+      core.enableRepetition(state, action.payload),
+    updateRepetitionSource: (state, action) =>
+      core.updateRepetitionSource(state, action.payload),
+    disableRepetition: (state, action) =>
+      core.disableRepetition(state, action.payload),
   },
 });
 
@@ -153,6 +159,9 @@ export const {
   enableCarryForward,
   updateCarryForward,
   disableCarryForward,
+  enableRepetition,
+  updateRepetitionSource,
+  disableRepetition,
 } = designState.actions;
 
 // Re-exported from @qlarr/design-core to preserve the former public export.

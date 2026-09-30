@@ -544,5 +544,21 @@
   "carry_other": "Carry 'Other'",
   "carry_remove": "Remove carry forward",
   "err_carry_forward_source": "Carry forward source is broken",
-  "err_carry_forward_source_detail": "The question this one carries options from is missing, was moved after it, or is no longer a multiple-choice question."
+  "err_carry_forward_source_detail": "The question this one carries options from is missing, was moved after it, or is no longer a multiple-choice question.",
+  "repeat_enable": "Make repeatable",
+  "repeat_kind": "Repeat",
+  "repeat_kind_option": "Once per selected option",
+  "repeat_kind_count": "Once per entered count",
+  "repeat_source_placeholder": "Choose a source question",
+  "repeat_max": "Max repeats",
+  "repeat_include_other": "Include 'Other'",
+  "repeat_summary_count": "Repeats up to {{count}} times based on the entered number.",
+  "repeat_summary_option": "Repeats once for each of {{count}} options, shown only when selected.",
+  "err_empty_repeat_range": "This repeatable has no items to repeat over — pick a source with at least one option (or a count of 1 or more).",
+  "err_missing_repeat_token": "The repeat condition must reference the repeated item — it's missing its per-copy token.",
+  "err_invalid_repeat_token": "A repeat item has an invalid code. Items may only use lowercase letters, digits and underscores.",
+  "err_nested_repeatable": "A repeatable can't be placed inside another repeatable. Remove the repeat from this item or its container.",
+  "err_repeatable_with_relevance": "A repeatable can't also have its own relevance condition — its show logic is the repeat condition.",
+  "err_repeat_relevance": "Repeat condition error",
+  "err_skip_inside_repeatable": "Skip logic isn't allowed inside a repeatable."
 }

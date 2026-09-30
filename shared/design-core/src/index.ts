@@ -6,6 +6,9 @@
 // All mutation functions + buildDesignState + mapCodeToUserFriendlyOrder.
 export * from "./state/mutations";
 
+// Repetition authoring: enable/disable/updateRepetitionSource + pure derivation.
+export * from "./state/repetition";
+
 // Pure helpers consumed by the frontend and AI directly.
 export { instructionByCode } from "./state/addInstructions";
 export { isQuestion, isGroup, buildCodeIndex } from "./utils/pureUtils";

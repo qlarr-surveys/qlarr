@@ -3,6 +3,12 @@ import { useStore } from "react-redux";
 import { stripTags } from "~/utils/design/utils";
 import ReferenceTooltipManager from "./ReferenceTooltipManager";
 
+// A repeat-label reference is a {{...}} instruction containing $repeat_token — the
+// only marker that distinguishes it. Match those braces directly so the display
+// shows a chip instead of the long raw expression.
+const REPEAT_LABEL_INSTRUCTION_PATTERN = /\{\{[^}]*\$repeat_token[^}]*\}\}/g;
+const REPEAT_LABEL_TEXT = "Repeat label";
+
 export const useReferenceTooltips = ({
   rawInstructionList,
   contentKey,
@@ -28,6 +34,10 @@ export const useReferenceTooltips = ({
   // Process value and replace references with tooltips
   const fixedValue = useMemo(() => {
     let returnValue = value;
+    returnValue = returnValue.replace(
+      REPEAT_LABEL_INSTRUCTION_PATTERN,
+      () => `<span class="repeat-token-chip">${REPEAT_LABEL_TEXT}</span>`,
+    );
     instructionList.forEach((element) => {
       let newElement = element;
       const pattern = /([QGS][a-zA-Z0-9_]*)\.([a-z0-9_]+)/g;

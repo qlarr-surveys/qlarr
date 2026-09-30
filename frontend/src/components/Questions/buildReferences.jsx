@@ -1,9 +1,17 @@
 import { accessibleDependencies } from "@qlarr/design-core/utils/dependencies";
+import { REPEAT_TOKEN_PLACEHOLDER } from "@qlarr/design-core/state/repetition";
 import { isQuestion, stripTags } from "~/utils/design/utils";
 
 export const buildReferences = (componentIndices, code, state, mainLang) => {
   let dependencies = accessibleDependencies(componentIndices, code);
   let returnResult = [];
+  // Inside a repeatable: offer the "repeat label" (this copy's identity) first.
+  const repeatLabel = buildRepeatLabelReference(
+    enclosingRepeatSource(componentIndices, code, state)
+  );
+  if (repeatLabel) {
+    returnResult.push(repeatLabel);
+  }
   dependencies.forEach((el) => {
     if (isQuestion(el)) {
       const reference = buildReference(el, state[el], state, mainLang);
@@ -13,6 +21,57 @@ export const buildReferences = (componentIndices, code, state, mainLang) => {
     }
   });
   return returnResult;
+};
+
+// repeatSource of the enclosing repeatable — self, owning question (answers embed
+// it, e.g. Q1A2 -> Q1), or an ancestor group — else null.
+const enclosingRepeatSource = (componentIndices, code, state) => {
+  const candidates = [code];
+  const owningQuestion = String(code).match(/Q[a-z0-9_]+/)?.[0];
+  if (owningQuestion && owningQuestion !== code) candidates.push(owningQuestion);
+
+  const indexMap = new Map((componentIndices || []).map((c) => [c.code, c]));
+  const seen = new Set();
+  let cur = owningQuestion || code;
+  while (cur && !seen.has(cur)) {
+    seen.add(cur);
+    const parent = indexMap.get(cur)?.parent;
+    if (parent) candidates.push(parent);
+    cur = parent;
+  }
+
+  for (const candidate of candidates) {
+    if (state[candidate]?.repeatSource) return state[candidate].repeatSource;
+  }
+  return null;
+};
+
+// "Repeat label" reference; engine substitutes $repeat_token per copy.
+//   number -> iteration number; mcq -> picked option's label
+//   (carryOther: the "other" copy shows the write-in, hence the branch).
+const buildRepeatLabelReference = (repeatSource) => {
+  if (!repeatSource || !repeatSource.kind) return null;
+  const { kind, sourceCode } = repeatSource;
+
+  let instruction;
+  if (kind === "number") {
+    instruction = REPEAT_TOKEN_PLACEHOLDER;
+  } else if (kind === "mcq") {
+    if (!sourceCode) return null;
+    const optionLabel = `${sourceCode}A${REPEAT_TOKEN_PLACEHOLDER}.label`;
+    instruction = repeatSource.carryOther
+      ? `("${REPEAT_TOKEN_PLACEHOLDER}" == "other") ? ${sourceCode}AotherAtext.value : ${optionLabel}`
+      : optionLabel;
+  } else {
+    return null;
+  }
+
+  return {
+    id: "repeat_label",
+    instruction,
+    value: "Repeat label",
+    type: "Repetition",
+  };
 };
 
 const buildReference = (code, component, state, mainLang) => {
