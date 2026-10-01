@@ -116,8 +116,9 @@ export const QuotaMessageEditor = React.memo(function QuotaMessageEditor({
   return (
     <Box
       className={styles.groupHeader}
+      // Styled like the END page's title, as respondents will see it.
       css={css`
-        font-size: ${theme.textStyles.text.size}px;
+        font-size: ${theme.textStyles.group.size}px;
       `}
       // The END page's setup options don't apply to a quota message.
       onClick={(event) => event.stopPropagation()}

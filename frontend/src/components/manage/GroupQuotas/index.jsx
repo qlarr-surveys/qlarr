@@ -71,6 +71,15 @@ function GroupQuotas({ disabled }) {
 
   const [status, setStatus] = useState(null);
   const [expanded, setExpanded] = useState(null);
+  // Set by "Add quota": the quota it creates (appended, with a generated code)
+  // opens once it is in the list.
+  const expandAdded = useRef(false);
+  useEffect(() => {
+    if (expandAdded.current && quotas.length) {
+      expandAdded.current = false;
+      setExpanded(quotas[quotas.length - 1].code);
+    }
+  }, [quotas]);
 
   // Fill levels come from the server; refresh them whenever a save settles.
   useEffect(() => {
@@ -152,7 +161,10 @@ function GroupQuotas({ disabled }) {
       variant="outlined"
       size="small"
       startIcon={<Add />}
-      onClick={() => dispatch(addQuota())}
+      onClick={() => {
+        expandAdded.current = true;
+        dispatch(addQuota());
+      }}
     >
       {t("group_quotas.add")}
     </Button>

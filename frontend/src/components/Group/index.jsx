@@ -113,8 +113,9 @@ export const QuotaMessage = React.memo(function QuotaMessage({
         <Content
           elementCode="Survey"
           name={contentKey}
+          // Styled like the END page's title, which it stands in for.
           customStyle={`
-        font-size: ${theme.textStyles.text.size}px;
+        font-size: ${theme.textStyles.group.size}px;
         `}
           content={message}
         />
