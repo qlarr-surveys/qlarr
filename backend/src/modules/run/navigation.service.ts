@@ -127,6 +127,13 @@ export class NavigationService {
       fullQuotas,
     });
 
+    // Disqualification is final. The engine doesn't apply quotas when resuming
+    // (e.g. a reload of the end page), so it would clear a screen-out and the
+    // response would start counting towards the quota it was screened out of.
+    if (response?.values?.['Survey.disqualified'] === true) {
+      navigationJsonOutput.toSave['Survey.disqualified'] = true;
+    }
+
     const others = [
       defaultSurveyLang(processedSurvey.output.survey),
       ...additionalLang(processedSurvey.output.survey),

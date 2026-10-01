@@ -231,6 +231,32 @@ describe('navigation quota enforcement', () => {
     expect(result.screenedOutQuota).toBe('QT1');
   });
 
+  it('keeps a screened-out response disqualified when it is resumed', async () => {
+    const { svc, engineNavigate } = setup();
+    // Resuming re-runs the engine without quota checks: it reports not disqualified.
+    engineNavigate.mockResolvedValue({
+      navigationIndex: { name: 'end' },
+      toSave: { 'Survey.disqualified': false, 'Survey.quota_QT1': true },
+    });
+    const result = await svc.navigate({
+      surveyId: 's',
+      response: {
+        values: { 'Q1.value': 'male', 'Survey.disqualified': true, 'Survey.quota_QT1': true },
+        navigationIndex: { name: 'end' },
+        lang: 'en',
+        startDate: nowUtcString(),
+      },
+      processedSurvey: processed,
+      navigationDirection: { name: 'RESUME' },
+      values: { 'Survey.disqualified': false },
+      preview: false,
+      surveyMode: 'ONLINE',
+    } as any);
+
+    expect(result.navigationJsonOutput.toSave['Survey.disqualified']).toBe(true);
+    expect(result.screenedOutQuota).toBe('QT1');
+  });
+
   it('does not enforce quotas in preview', async () => {
     const { svc, engineNavigate, fullQuotas } = setup();
     await svc.navigate({
