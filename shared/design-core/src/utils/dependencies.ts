@@ -25,7 +25,20 @@ export const accessibleDependencies = (componentIndices, code) => {
       accessibleSiblings(componentIndices, componentIndex)
     );
   }
-  return dependencies;
+  return filterByRepetitionScope(componentIndices, componentIndex, dependencies);
+};
+
+// Closed-scope rule (repetition): a reference from `source` to `target` is allowed
+// iff the target is global (`repetitionScope == null`) or shares the source's
+// scope. So: inside -> out is fine; outside -> in is not; and a copy in one scope
+// can't reach another scope. A no-op for non-repeating surveys (all scopes null).
+const filterByRepetitionScope = (componentIndices, source, dependencies) => {
+  const sourceScope = source.repetitionScope ?? null;
+  return dependencies.filter((depCode) => {
+    const target = componentIndices.find((el) => el.code === depCode);
+    const targetScope = target?.repetitionScope ?? null;
+    return targetScope === null || targetScope === sourceScope;
+  });
 };
 
 const parents = (componentIndices, componentIndex) => {

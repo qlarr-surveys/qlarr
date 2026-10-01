@@ -80,6 +80,16 @@ export const LOGO_SIZE_DIMENSIONS = {
 };
 
 export const setupOptions = (type) => {
+  const result = baseSetupOptions(type);
+  if (!result) return result;
+  return result.map((section) =>
+    section.key === "logic"
+      ? { ...section, rules: [...(section.rules || []), "repetition"] }
+      : section,
+  );
+};
+
+const baseSetupOptions = (type) => {
   switch (type) {
     case "group":
     case "welcome":

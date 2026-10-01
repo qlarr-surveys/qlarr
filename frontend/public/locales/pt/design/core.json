@@ -548,5 +548,21 @@
   "carry_other": "Trazer «Outro»",
   "carry_remove": "Remover o encaminhamento",
   "err_carry_forward_source": "A origem do encaminhamento é inválida",
-  "err_carry_forward_source_detail": "A pergunta de onde as opções são trazidas está ausente, foi movida para depois desta ou já não é uma pergunta de escolha múltipla."
+  "err_carry_forward_source_detail": "A pergunta de onde as opções são trazidas está ausente, foi movida para depois desta ou já não é uma pergunta de escolha múltipla.",
+  "repeat_enable": "Tornar repetível",
+  "repeat_kind": "Repetir",
+  "repeat_kind_option": "Uma vez por opção selecionada",
+  "repeat_kind_count": "Uma vez por contagem inserida",
+  "repeat_source_placeholder": "Escolha uma pergunta de origem",
+  "repeat_max": "Máximo de repetições",
+  "repeat_include_other": "Incluir 'Outro'",
+  "repeat_summary_count": "Repete até {{count}} vezes com base no número inserido.",
+  "repeat_summary_option": "Repete uma vez para cada uma das {{count}} opções, mostrado apenas quando selecionado.",
+  "err_empty_repeat_range": "Este item repetível não tem elementos para repetir — escolha uma origem com pelo menos uma opção (ou uma contagem de 1 ou mais).",
+  "err_missing_repeat_token": "A condição de repetição deve referenciar o item repetido — está sem o seu token por cópia.",
+  "err_invalid_repeat_token": "Um item de repetição tem um código inválido. Os itens só podem usar letras minúsculas, dígitos e sublinhados.",
+  "err_nested_repeatable": "Um item repetível não pode ser colocado dentro de outro repetível. Remova a repetição deste item ou do seu contêiner.",
+  "err_repeatable_with_relevance": "Um item repetível não pode ter também a sua própria condição de relevância — a sua lógica de exibição é a condição de repetição.",
+  "err_repeat_relevance": "Erro na condição de repetição",
+  "err_skip_inside_repeatable": "A lógica de salto não é permitida dentro de um item repetível."
 }

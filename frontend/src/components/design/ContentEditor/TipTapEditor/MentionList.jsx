@@ -4,6 +4,7 @@ import React, {
   useState,
   useCallback,
   useEffect,
+  useRef,
 } from "react";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
@@ -12,10 +13,15 @@ import "./MentionList.css";
 const MentionList = forwardRef(({ items, command }, ref) => {
   const { t } = useTranslation(NAMESPACES.DESIGN_CORE);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const itemRefs = useRef([]);
 
   useEffect(() => {
     setSelectedIndex(0);
   }, [items]);
+
+  useEffect(() => {
+    itemRefs.current[selectedIndex]?.scrollIntoView({ block: "nearest" });
+  }, [selectedIndex]);
 
   const selectItem = useCallback(
     (index) => {
@@ -55,6 +61,7 @@ const MentionList = forwardRef(({ items, command }, ref) => {
       {items.length ? (
         items.map((item, index) => (
           <div
+            ref={(el) => (itemRefs.current[index] = el)}
             className={`mention-item ${
               index === selectedIndex ? "is-selected" : ""
             }`}

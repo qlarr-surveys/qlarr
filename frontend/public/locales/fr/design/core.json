@@ -548,5 +548,21 @@
   "carry_other": "Reporter « Autre »",
   "carry_remove": "Supprimer le report",
   "err_carry_forward_source": "La source du report est invalide",
-  "err_carry_forward_source_detail": "La question depuis laquelle les options sont reportées est manquante, a été déplacée après celle-ci, ou n'est plus une question à choix multiple."
+  "err_carry_forward_source_detail": "La question depuis laquelle les options sont reportées est manquante, a été déplacée après celle-ci, ou n'est plus une question à choix multiple.",
+  "repeat_enable": "Rendre répétable",
+  "repeat_kind": "Répéter",
+  "repeat_kind_option": "Une fois par option sélectionnée",
+  "repeat_kind_count": "Une fois par nombre saisi",
+  "repeat_source_placeholder": "Choisir une question source",
+  "repeat_max": "Répétitions maximales",
+  "repeat_include_other": "Inclure « Autre »",
+  "repeat_summary_count": "Se répète jusqu'à {{count}} fois selon le nombre saisi.",
+  "repeat_summary_option": "Se répète une fois pour chacune des {{count}} options, affichée uniquement lorsqu'elle est sélectionnée.",
+  "err_empty_repeat_range": "Cet élément répétable n'a aucun élément à répéter — choisissez une source avec au moins une option (ou un nombre de 1 ou plus).",
+  "err_missing_repeat_token": "La condition de répétition doit référencer l'élément répété — son jeton par copie est manquant.",
+  "err_invalid_repeat_token": "Un élément de répétition a un code non valide. Les éléments ne peuvent utiliser que des lettres minuscules, des chiffres et des tirets bas.",
+  "err_nested_repeatable": "Un élément répétable ne peut pas être placé dans un autre élément répétable. Supprimez la répétition de cet élément ou de son conteneur.",
+  "err_repeatable_with_relevance": "Un élément répétable ne peut pas avoir en plus sa propre condition de pertinence — sa logique d'affichage est la condition de répétition.",
+  "err_repeat_relevance": "Erreur de condition de répétition",
+  "err_skip_inside_repeatable": "La logique de saut n'est pas autorisée à l'intérieur d'un élément répétable."
 }

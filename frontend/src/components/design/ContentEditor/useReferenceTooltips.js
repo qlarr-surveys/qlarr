@@ -3,6 +3,12 @@ import { useStore } from "react-redux";
 import { stripTags } from "~/utils/design/utils";
 import ReferenceTooltipManager from "./ReferenceTooltipManager";
 
+// A repeat-label reference is a {{...}} instruction containing $repeat_token — the
+// only marker that distinguishes it. Match those braces directly so the display
+// shows a chip instead of the long raw expression.
+const REPEAT_LABEL_INSTRUCTION_PATTERN = /\{\{[^}]*\$repeat_token[^}]*\}\}/g;
+const REPEAT_LABEL_TEXT = "Repeat label";
+
 export const useReferenceTooltips = ({
   rawInstructionList,
   contentKey,
@@ -28,6 +34,10 @@ export const useReferenceTooltips = ({
   // Process value and replace references with tooltips
   const fixedValue = useMemo(() => {
     let returnValue = value;
+    returnValue = returnValue.replace(
+      REPEAT_LABEL_INSTRUCTION_PATTERN,
+      () => `<span class="repeat-token-chip">${REPEAT_LABEL_TEXT}</span>`,
+    );
     instructionList.forEach((element) => {
       let newElement = element;
       const pattern = /([QGS][a-zA-Z0-9_]*)\.([a-z0-9_]+)/g;
@@ -37,11 +47,20 @@ export const useReferenceTooltips = ({
           const fullMatch = match[0]; // e.g., "Q1.value"
           const prefix = match[1]; // e.g., "Q1"
           const suffix = match[2]; // e.g., "value"
-          const toReplace = index[prefix];
+          // Carry-forward "other" pipes in as a compound code like
+          // "Q1AotherAtext.value". There's no index entry for the compound, so
+          // resolve it to the source question and show a friendly "Q1.other".
+          const OTHER_SUFFIX = "AotherAtext";
+          const isOther = prefix.endsWith(OTHER_SUFFIX);
+          const basePrefix = isOther
+            ? prefix.slice(0, -OTHER_SUFFIX.length)
+            : prefix;
+          const toReplace = index[basePrefix];
           if (toReplace) {
+            const display = isOther ? `${toReplace}.other` : `${toReplace}.${suffix}`;
             newElement = newElement.replace(
               fullMatch,
-              `<span class="reference-tooltip" data-original="${prefix}">${toReplace}.${suffix}</span>`,
+              `<span class="reference-tooltip" data-original="${basePrefix}">${display}</span>`,
             );
           }
         });

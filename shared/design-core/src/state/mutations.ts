@@ -59,6 +59,10 @@ import {
 } from "./addInstructions";
 import { defaultSurveyTheme } from "../constants/surveyTheme";
 import { LANGUAGE_DEF } from "../constants/language";
+import {
+  resyncRepeatablesForSource,
+  stripRepeatedCopies,
+} from "./repetition";
 
 // Top-level design-state keys holding designer UI state, not survey data: a
 // save never sends them (`designChanges`) and a load keeps them as they are
@@ -108,6 +112,11 @@ export function buildDesignState(state, payload) {
     newState.Survey.theme = defaultSurveyTheme;
   }
 
+  // Drop the engine's `repeated` copies from the survey: the builder owns only the
+  // template. `latest`/diff below then never round-trip a copy back to the engine —
+  // copies are transient validation output. (componentIndexList is left untouched.)
+  stripRepeatedCopies(newState);
+
   const newKeys = Object.keys(newState).filter(
     (el) => !UI_STATE_KEYS.includes(el),
   );
@@ -145,6 +154,10 @@ export function buildDesignState(state, payload) {
   });
   state.versionDto = response.versionDto;
   state.componentIndex = response.designerInput.componentIndexList;
+  // Keep the engine's `repeatInfo` verbatim — it carries the up-to-date derived
+  // range AND `relevanceInstructionErrors` (repeat-condition validation), which a
+  // re-derive from `repeatSource` would drop. In-session source edits keep the
+  // range current via resyncRepeatablesForSource / updateRepetitionSource.
   state["latest"] = structuredClone(newState);
   state.lastAddedComponent = null;
   state.index = buildCodeIndex(state);
@@ -425,7 +438,7 @@ export function removeAnswer(state, payload) {
   addMaskedValuesInstructions(codes[0], question, state);
   cleanupRandomRules(question);
   addSkipInstructions(state, codes[0]);
-  resyncCarryForwardTargets(state, codes[0]);
+  resyncSourceDependents(state, codes[0]);
 }
 
 export function addNewAnswers(state, payload) {
@@ -464,7 +477,7 @@ export function addNewAnswers(state, payload) {
       index++;
     }
   });
-  resyncCarryForwardTargets(state, questionCode);
+  resyncSourceDependents(state, questionCode);
 }
 
 /** Replaces the question's answers of one type with one answer per label in `data`.
@@ -591,7 +604,7 @@ export function addNewAnswer(state, payload) {
       });
       break;
   }
-  resyncCarryForwardTargets(state, questionCode);
+  resyncSourceDependents(state, questionCode);
 }
 
 let carrySyncing = false;
@@ -908,6 +921,11 @@ const resyncCarryForwardTargets = (state, changedCode) => {
   }
 };
 
+const resyncSourceDependents = (state, changedCode) => {
+  resyncCarryForwardTargets(state, changedCode);
+  resyncRepeatablesForSource(state, changedCode);
+};
+
 // Severs every carry-forward link that pointed at `sourceCode`, turning each
 // target's mirrored options into a plain, editable copy (via disableCarryForward).
 // Used when the source can no longer be a carry source (e.g. its type changed to
@@ -975,7 +993,7 @@ export function deleteQuestion(state, payload) {
   delete state[questionCode];
   cleanupRandomRules(group);
   cleanupSkipDestinations(state, questionCode);
-  resyncCarryForwardTargets(state, questionCode);
+  resyncSourceDependents(state, questionCode);
 }
 
 export function convertQuestion(state, payload) {
@@ -1046,7 +1064,7 @@ export function convertQuestion(state, payload) {
   if (!CARRY_FORWARD_SOURCE_TYPES.includes(newType)) {
     severCarryForwardTargets(state, questionCode);
   }
-  resyncCarryForwardTargets(state, questionCode);
+  resyncSourceDependents(state, questionCode);
   // Quota conditions compile differently per question type (e.g. "in").
   refreshQuotaInstructions(state);
 }
@@ -1092,7 +1110,7 @@ export function changeContent(state, payload) {
   );
 
   state[payload.code].content[payload.lang][payload.key] = payload.value;
-  resyncCarryForwardTargets(state, payload.code);
+  resyncSourceDependents(state, payload.code);
 }
 
 export function changeCustomCss(state, payload) {
@@ -1367,11 +1385,11 @@ export function onDrag(state, payload) {
       break;
     case "reorder_answers":
       reorderAnswers(state, payload);
-      resyncCarryForwardTargets(state, payload.id);
+      resyncSourceDependents(state, payload.id);
       break;
     case "reorder_answers_by_type":
       reorderAnswersByType(state, payload);
-      resyncCarryForwardTargets(state, payload.id);
+      resyncSourceDependents(state, payload.id);
       break;
     case "new_question":
       newQuestion(state, payload);
