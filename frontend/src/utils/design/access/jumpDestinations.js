@@ -2,6 +2,10 @@ import { isGroup, isQuestion, stripTags } from "~/utils/design/utils";
 
 const buildField = (code, state, mainLang) => {
   const component = state[code];
+  // Repeated copies stay in componentIndexList but are stripped from the design
+  // state (they aren't builder-addressable — the author targets the template).
+  // Any index entry with no state entry is skipped rather than dereferenced.
+  if (!component) return null;
   const label = state.index[code] + ". " + stripTags(component.content?.[mainLang]?.label);
   return { code: code, label: label };
 };
@@ -57,12 +61,14 @@ const accessibleSiblings = (
     return (
       elem.parent == componentIndex.parent &&
       elem.minIndex > componentIndex.maxIndex &&
+      !elem.repetitionScope &&
       (!componentIndex.prioritisedSiblings ||
         componentIndex.prioritisedSiblings.indexOf(elem.code) === -1)
     );
   });
   accessibleSiblings.forEach((sibling) => {
-    result = result.concat(buildField(sibling.code, state, mainLang));
+    const field = buildField(sibling.code, state, mainLang);
+    if (field) result = result.concat(field);
     result = result.concat(
       childrenDependencies(componentIndices, sibling, state, mainLang)
     );
@@ -84,7 +90,9 @@ const childrenDependencies = (
       let child = componentIndices.find(
         (element) => element.code === childCode
       );
-      result = result.concat(buildField(child.code, state, mainLang));
+      if (!child || child.repetitionScope) return;
+      const field = buildField(child.code, state, mainLang);
+      if (field) result = result.concat(field);
       result = result.concat(
         childrenDependencies(componentIndices, child, state, mainLang)
       );

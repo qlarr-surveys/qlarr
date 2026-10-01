@@ -44,6 +44,17 @@ const useErrorDisplay = (code) => {
             }
           }
 
+          // The repeat condition's errors ride on repeatInfo (they can't attach to
+          // a normal instruction — the injected relevance only exists on copies).
+          const repeatRelevanceErrors =
+            designState.repeatInfo?.relevanceInstructionErrors;
+          if (onMainLang && repeatRelevanceErrors?.length) {
+            instructionsWithErrors.push({
+              code: "repeat_relevance",
+              errors: repeatRelevanceErrors,
+            });
+          }
+
           const errors = onMainLang
             ? isGroupCode
               ? designState.errors?.filter((e) => e !== "EMPTY_PARENT")

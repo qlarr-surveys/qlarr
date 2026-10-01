@@ -336,6 +336,12 @@
   padding: 0.125rem 0.25rem;
 }
 
+.repeat-token-chip {
+  background-color: #6ec0f96f;
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+}
+
 .tippy-box[data-theme~="instruction"] {
   background-color: #1a2052;
   color: #ffffff;

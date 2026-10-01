@@ -1,7 +1,6 @@
 import FieldSize from "~/components/design/setup/FieldSize";
 import ShowHint, { SetupTextInput } from "~/components/design/setup/ShowHint";
 import ValidationSetupItem from "~/components/design/setup/validation/ValidationSetupItem";
-import CustomValidationRules from "../validation/CustomValidationRules";
 import ValidationRulesPanel from "../validation/ValidationRulesPanel";
 import OrderInstructions from "../advanced/OrderInstructions";
 import ConditionalRelevance from "../advanced/ConditionalRelevance";
@@ -12,7 +11,14 @@ import SelectDate from "../SelectDate";
 import Relevance from "../logic/Relevance";
 import SkipLogic from "../SkipLogic";
 import CarryForward from "../CarryForward";
-import { accessibleDependencies } from "@qlarr/design-core";
+import RepeatSettings from "../RepeatSettings";
+import {
+  accessibleDependencies,
+  isInsideRepeatable,
+  hasRepeatableAncestor,
+  isGroup,
+  isQuestion,
+} from "@qlarr/design-core";
 import styles from "./SetupPanel.module.css";
 import CloseIcon from "@mui/icons-material/Close";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -69,13 +75,41 @@ function SetupPanel({ t }) {
     );
   });
 
+  const showRepetitionRule = useSelector((state) => {
+    if (!code) return false;
+    const ds = state.designState;
+    if (ds[code]?.repeatSource) return true;
+    if (!isGroup(code) && !isQuestion(code)) return false;
+    if (ds[code]?.type === "end") return false;
+    // Can't nest a repeatable inside a repeatable (NESTED_REPEATABLE).
+    if (hasRepeatableAncestor(ds, code)) return false;
+    if (!ds.componentIndex) return false;
+    const deps = accessibleDependencies(ds.componentIndex, code) || [];
+    return deps.some((d) =>
+      ["mcq", "icon_mcq", "image_mcq", "number"].includes(ds[d]?.type),
+    );
+  });
+
+  // The repeatable itself: its show-logic is the repeat condition, and a disabled
+  // repeatable is contradictory — hide relevance + disable.
+  const selfRepeatable = useSelector((state) => !!state.designState[code]?.repeatSource);
+  // Skip logic is illegal anywhere inside a repeatable (self + descendants).
+  const insideRepeatable = useSelector((state) =>
+    isInsideRepeatable(state.designState, code),
+  );
+
   const effectiveRules = React.useMemo(() => {
-    if (showCarryForwardRule) return rules;
+    const hidden = [];
+    if (!showCarryForwardRule) hidden.push("carry_forward");
+    if (!showRepetitionRule) hidden.push("repetition");
+    if (selfRepeatable) hidden.push("relevance", "conditional_relevance", "disabled");
+    if (insideRepeatable) hidden.push("skip_logic");
+    if (hidden.length === 0) return rules;
     return (rules || []).map((group) => ({
       ...group,
-      rules: (group.rules || []).filter((r) => r !== "carry_forward"),
+      rules: (group.rules || []).filter((r) => !hidden.includes(r)),
     }));
-  }, [rules, showCarryForwardRule]);
+  }, [rules, showCarryForwardRule, showRepetitionRule, selfRepeatable, insideRepeatable]);
 
   const type = useSelector((state) => {
     return state.designState[code].type;
@@ -480,6 +514,8 @@ const SetupComponent = React.memo(({ code, rule, t, isQuickOptions }) => {
       return <Relevance t={t} key={code + rule} code={code} />;
     case "carry_forward":
       return <CarryForward t={t} key={code + rule} code={code} />;
+    case "repetition":
+      return <RepeatSettings t={t} key={code + rule} code={code} />;
     case "prefill":
       return (
         <ToggleValue

@@ -544,5 +544,21 @@
   "carry_other": "Traer «Otro»",
   "carry_remove": "Quitar el traspaso",
   "err_carry_forward_source": "El origen del traspaso no es válido",
-  "err_carry_forward_source_detail": "La pregunta de la que se traen las opciones falta, se movió después de esta o ya no es una pregunta de opción múltiple."
+  "err_carry_forward_source_detail": "La pregunta de la que se traen las opciones falta, se movió después de esta o ya no es una pregunta de opción múltiple.",
+  "repeat_enable": "Hacer repetible",
+  "repeat_kind": "Repetir",
+  "repeat_kind_option": "Una vez por cada opción seleccionada",
+  "repeat_kind_count": "Una vez por cada número introducido",
+  "repeat_source_placeholder": "Elige una pregunta de origen",
+  "repeat_max": "Máximo de repeticiones",
+  "repeat_include_other": "Incluir 'Otro'",
+  "repeat_summary_count": "Se repite hasta {{count}} veces según el número introducido.",
+  "repeat_summary_option": "Se repite una vez por cada una de las {{count}} opciones, y se muestra solo cuando se selecciona.",
+  "err_empty_repeat_range": "Este elemento repetible no tiene elementos que repetir: elige un origen con al menos una opción (o un número de 1 o más).",
+  "err_missing_repeat_token": "La condición de repetición debe hacer referencia al elemento repetido: le falta su token por copia.",
+  "err_invalid_repeat_token": "Un elemento de repetición tiene un código no válido. Los elementos solo pueden usar letras minúsculas, dígitos y guiones bajos.",
+  "err_nested_repeatable": "Un elemento repetible no se puede colocar dentro de otro repetible. Quita la repetición de este elemento o de su contenedor.",
+  "err_repeatable_with_relevance": "Un elemento repetible no puede tener también su propia condición de relevancia: su lógica de visualización es la condición de repetición.",
+  "err_repeat_relevance": "Error en la condición de repetición",
+  "err_skip_inside_repeatable": "La lógica de salto no está permitida dentro de un elemento repetible."
 }

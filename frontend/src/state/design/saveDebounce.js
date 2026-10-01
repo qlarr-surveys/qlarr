@@ -95,6 +95,9 @@ const MUTATING = [
   "designState/enableCarryForward",
   "designState/updateCarryForward",
   "designState/disableCarryForward",
+  "designState/enableRepetition",
+  "designState/updateRepetitionSource",
+  "designState/disableRepetition",
 ];
 
 const setState = (store, state) => {

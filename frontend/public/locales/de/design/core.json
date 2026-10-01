@@ -544,5 +544,21 @@
   "carry_other": "„Sonstiges“ übernehmen",
   "carry_remove": "Übernahme entfernen",
   "err_carry_forward_source": "Übernahmequelle ist ungültig",
-  "err_carry_forward_source_detail": "Die Frage, aus der die Optionen übernommen werden, fehlt, wurde hinter diese Frage verschoben oder ist keine Multiple-Choice-Frage mehr."
+  "err_carry_forward_source_detail": "Die Frage, aus der die Optionen übernommen werden, fehlt, wurde hinter diese Frage verschoben oder ist keine Multiple-Choice-Frage mehr.",
+  "repeat_enable": "Wiederholbar machen",
+  "repeat_kind": "Wiederholen",
+  "repeat_kind_option": "Einmal pro ausgewählter Option",
+  "repeat_kind_count": "Einmal pro eingegebener Anzahl",
+  "repeat_source_placeholder": "Ausgangsfrage auswählen",
+  "repeat_max": "Maximale Wiederholungen",
+  "repeat_include_other": "„Sonstiges“ einbeziehen",
+  "repeat_summary_count": "Wird bis zu {{count}}-mal wiederholt, basierend auf der eingegebenen Zahl.",
+  "repeat_summary_option": "Wird einmal für jede der {{count}} Optionen wiederholt und nur bei Auswahl angezeigt.",
+  "err_empty_repeat_range": "Dieses wiederholbare Element hat keine Einträge zum Wiederholen – wählen Sie eine Quelle mit mindestens einer Option (oder einer Anzahl von 1 oder mehr).",
+  "err_missing_repeat_token": "Die Wiederholungsbedingung muss auf das wiederholte Element verweisen – der kopiespezifische Token fehlt.",
+  "err_invalid_repeat_token": "Ein Wiederholungselement hat einen ungültigen Code. Elemente dürfen nur Kleinbuchstaben, Ziffern und Unterstriche verwenden.",
+  "err_nested_repeatable": "Ein wiederholbares Element kann nicht in einem anderen wiederholbaren Element platziert werden. Entfernen Sie die Wiederholung von diesem Element oder seinem Container.",
+  "err_repeatable_with_relevance": "Ein wiederholbares Element kann nicht zusätzlich eine eigene Relevanzbedingung haben – seine Anzeigelogik ist die Wiederholungsbedingung.",
+  "err_repeat_relevance": "Fehler in der Wiederholungsbedingung",
+  "err_skip_inside_repeatable": "Sprunglogik ist innerhalb eines wiederholbaren Elements nicht zulässig."
 }

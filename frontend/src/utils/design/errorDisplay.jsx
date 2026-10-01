@@ -8,6 +8,7 @@ export const isLabelInstruction = (code) =>
 
 export const getHighlighted = (code) => {
   if (code === "carry_forward") return "carry_forward";
+  if (code === "repeat_relevance") return "repetition";
   if (code === "conditional_relevance") return "relevance";
   if (code === "random_group" || code === "priority_groups") return "random";
   if (code.startsWith("skip_to")) return "skip_logic";
@@ -41,6 +42,16 @@ export const mapComponentError = (code, error, t) => {
     return { label: error, message: t("err_misplaced_end_group") };
   } else if (error === "MISPLACED_WELCOME_GROUP") {
     return { label: error, message: t("err_misplaced_welcome_group") };
+  } else if (error === "EMPTY_REPEAT_RANGE") {
+    return { label: error, message: t("err_empty_repeat_range") };
+  } else if (error === "MISSING_REPEAT_TOKEN") {
+    return { label: error, message: t("err_missing_repeat_token") };
+  } else if (error === "INVALID_REPEAT_TOKEN") {
+    return { label: error, message: t("err_invalid_repeat_token") };
+  } else if (error === "NESTED_REPEATABLE") {
+    return { label: error, message: t("err_nested_repeatable") };
+  } else if (error === "REPEATABLE_WITH_RELEVANCE") {
+    return { label: error, message: t("err_repeatable_with_relevance") };
   }
   return { label: error, message: null };
 };
@@ -69,6 +80,10 @@ export const mapInstructionError = (instruction, t, currentLang) => {
     };
   } else if (instruction.code === "conditional_relevance") {
     return { label: t("err_relevance"), message: rawMessage };
+  } else if (instruction.code === "repeat_relevance") {
+    // Synthetic: the repeatable's `relevanceInstruction` (the repeat condition)
+    // can't attach to a normal instruction, so it rides on repeatInfo.
+    return { label: t("err_repeat_relevance"), message: rawMessage };
   } else if (instruction.code === "random_group") {
     return { label: t("err_random"), message: rawMessage };
   } else if (instruction.code === "priority_groups") {
@@ -90,6 +105,9 @@ export const mapInstructionError = (instruction, t, currentLang) => {
       message: rawMessage,
     };
   } else if (instruction.code.startsWith("skip_to")) {
+    if (instruction.errors[0]?.name === "SkipInsideRepeatable") {
+      return { label: t("err_skip_inside_repeatable"), message: null };
+    }
     return { label: t("err_skip"), message: rawMessage };
   } else if (instruction.code === "order") {
     return { label: t("order_priority"), message: rawMessage };
