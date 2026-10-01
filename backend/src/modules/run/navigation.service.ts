@@ -41,7 +41,6 @@ export interface NavigationResult {
   };
   lang: SurveyLang;
   additionalLang: SurveyLang[];
-  /** Code of the quota that ended the survey on this navigation, if any. */
   screenedOutQuota: string | null;
 }
 
@@ -109,7 +108,6 @@ export class NavigationService {
       navModeFromIndex(response?.navigationIndex) ??
       navData.navigationMode;
 
-    // Quota keys are engine-owned: only the stored response may carry them.
     const values = stripQuotaKeys(params.values);
     const fullQuotas = preview
       ? []
@@ -127,9 +125,7 @@ export class NavigationService {
       fullQuotas,
     });
 
-    // Disqualification is final. The engine doesn't apply quotas when resuming
-    // (e.g. a reload of the end page), so it would clear a screen-out and the
-    // response would start counting towards the quota it was screened out of.
+    // Disqualification is final: the engine clears it when resuming (e.g. reloading the end page).
     if (response?.values?.['Survey.disqualified'] === true) {
       navigationJsonOutput.toSave['Survey.disqualified'] = true;
     }

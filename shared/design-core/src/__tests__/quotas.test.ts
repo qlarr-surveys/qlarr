@@ -16,7 +16,6 @@ import sample from "./fixtures/sample-survey.json";
 const QUESTION = "Q298jbb";
 const condition = { logic: { "==": [{ var: QUESTION }, "yes"] } };
 
-// Fresh, fully-initialised design state from the fixture (sets langInfo + index).
 const freshState = () =>
   buildDesignState(
     {},
@@ -42,7 +41,6 @@ describe("quotas", () => {
     state = freshState();
   });
 
-  // Adds `count` quotas and returns their generated codes.
   const addQuotas = (count) => {
     for (let i = 0; i < count; i++) addQuota(state);
     return quotaCodes(state);
@@ -95,24 +93,21 @@ describe("quotas", () => {
   });
 
   it("keeps working after a question a quota refers to is deleted", () => {
-    const CHOICE = "Q867ezm"; // scq
+    const CHOICE = "Q867ezm";
     const stale = { in: [{ var: CHOICE }, ["A1"]] };
     const [first, second] = addQuotas(2);
     updateQuota(state, { code: first, changes: { condition: { logic: stale } } });
     deleteQuestion(state, CHOICE);
 
-    // Every quota edit recompiles all quota conditions, including the stale one.
     expect(() =>
       updateQuota(state, { code: second, changes: { condition } }),
     ).not.toThrow();
     expect(() => removeQuota(state, second)).not.toThrow();
-    // The stale quota keeps its condition (the backend flags it) rather than being dropped.
     expect(quotaCodes(state)).toEqual([first]);
     expect(state.Survey.quotas[0].condition.logic).toEqual(stale);
   });
 
   it("keeps another message's images when one message key prefixes it", () => {
-    // Older sequential codes: QT1's key is a prefix of QT10's.
     const image = (name) => `<p><img data-resource-name="${name}"></p>`;
     const key1 = quotaMessageKey("QT1");
     const key10 = quotaMessageKey("QT10");
@@ -137,7 +132,7 @@ describe("quotas", () => {
   });
 
   it("recompiles quota conditions when their question changes type", () => {
-    const CHOICE = "Q867ezm"; // scq
+    const CHOICE = "Q867ezm";
     const [code] = addQuotas(1);
     updateQuota(state, {
       code,
@@ -147,7 +142,6 @@ describe("quotas", () => {
 
     convertQuestion(state, { questionCode: CHOICE, newType: "mcq" });
 
-    // A multiple-choice value is a list, so "in" checks it element by element.
     expect(quotaInstructions(state)[0].text).toContain("filter");
   });
 

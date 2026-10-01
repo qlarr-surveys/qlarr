@@ -379,7 +379,6 @@ export class DesignService {
     }
   }
 
-  /** Quota fill levels for the working design (the designer edits its quotas). */
   async quotaStatus(surveyId: string): Promise<QuotaStatusDto> {
     const draft = await this.getProcessedSurvey(surveyId, false);
     const published = (await this.versions.findLatestPublished(surveyId))

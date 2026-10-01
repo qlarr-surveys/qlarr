@@ -39,13 +39,10 @@ import { jsonLogicToTree } from "~/components/design/setup/logic/QlarrLogicBuild
 import { OPERATORS } from "~/components/design/setup/logic/QlarrLogicBuilder/config/operators";
 import styles from "./GroupQuotas.module.css";
 
-// Per-group quotas live in the survey design (Survey.quotas), so edits here
-// auto-save as a design change and only apply to respondents once published.
 function GroupQuotas({ disabled }) {
   const dispatch = useDispatch();
   const designService = useService("design");
   const { t } = useTranslation(NAMESPACES.MANAGE);
-  // the logic builder and operator labels read from the designer namespace
   const { t: tDesign } = useTranslation(NAMESPACES.DESIGN_CORE);
 
   const designState = useSelector((state) => state.designState);
@@ -71,8 +68,6 @@ function GroupQuotas({ disabled }) {
 
   const [status, setStatus] = useState(null);
   const [expanded, setExpanded] = useState(null);
-  // Set by "Add quota": the quota it creates (appended, with a generated code)
-  // opens once it is in the list.
   const expandAdded = useRef(false);
   useEffect(() => {
     if (expandAdded.current && quotas.length) {
@@ -81,7 +76,6 @@ function GroupQuotas({ disabled }) {
     }
   }, [quotas]);
 
-  // Fill levels come from the server; refresh them whenever a save settles.
   useEffect(() => {
     if (isSaving) return;
     let cancelled = false;
@@ -94,7 +88,6 @@ function GroupQuotas({ disabled }) {
     };
   }, [isSaving]);
 
-  // `full` follows the published limits, the ones respondents are held to.
   const statusByCode = useMemo(
     () =>
       Object.fromEntries((status?.quotas || []).map((quota) => [quota.code, quota])),
@@ -117,8 +110,6 @@ function GroupQuotas({ disabled }) {
   const navigate = useNavigate();
   const { surveyId } = useParams();
 
-  // Quota messages are survey text, edited (and translated) on the END page in
-  // the designer.
   const editMessage = (quotaCode) =>
     navigate(
       `${routes.designSurvey.replace(":surveyId", surveyId)}?${QUOTA_MESSAGE_PARAM}=${encodeURIComponent(quotaCode)}`,
@@ -127,8 +118,6 @@ function GroupQuotas({ disabled }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const containerRef = useRef(null);
 
-  // Opened from the END page in the designer: bring the quotas into view,
-  // opening the quota whose message was selected there.
   useEffect(() => {
     if (!searchParams.has(QUOTA_PARAM)) {
       return;
@@ -424,7 +413,6 @@ function QuotaCard({
   );
 }
 
-/** "Gender includes Male and Age more than 18" from the quota's JSON Logic. */
 function describeCondition(logic, fields, t, tDesign) {
   if (!logic) return "";
   const tree = jsonLogicToTree(logic, fields);

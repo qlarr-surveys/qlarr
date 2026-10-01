@@ -55,14 +55,8 @@ export const languageSetup = {
   rules: [{ title: "", rules: ["language"] }],
 };
 
-// Survey content key holding the end message shown to respondents a full quota
-// screened out.
 export const quotaMessageKey = (quotaCode) => `quota_message_${quotaCode}`;
-// Designer URL param (a quota code) that opens the END page on that quota's
-// message.
 export const QUOTA_MESSAGE_PARAM = "quota_message";
-// Settings URL param (a quota code, or empty) that scrolls to the quotas and
-// opens that quota.
 export const QUOTA_PARAM = "quota";
 export const logoSetup = {
   code: "Survey",

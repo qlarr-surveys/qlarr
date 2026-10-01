@@ -307,8 +307,6 @@ export function runChangeCode(
     }
   }
 
-  // Rewrite quota conditions (designer rules on the Survey node) when renaming a
-  // group/question; the compiled `quota_*` instructions are renamed by the engine.
   if (ext.isGroupCode(from) || ext.isQuestionCode(from)) {
     const quotas = result.survey['quotas'];
     if (Array.isArray(quotas)) {

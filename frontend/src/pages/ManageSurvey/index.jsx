@@ -79,7 +79,6 @@ function ManageSurvey({ landingPage }) {
       .catch((err) => {});
   };
 
-  // In-app links between tabs (e.g. Settings → designer) only change the route.
   useEffect(() => {
     setSelectedTab(landingTab(landingPage, user));
   }, [landingPage]);

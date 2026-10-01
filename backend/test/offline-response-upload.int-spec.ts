@@ -41,7 +41,6 @@ const validPayload = () => ({
   events: [],
 });
 
-// A survey with one text question and a quota on it ("male").
 const quotaDesign = JSON.parse(engine.newSurvey('Offline quota'));
 quotaDesign.groups[0].questions = [
   {
@@ -170,7 +169,6 @@ describe('Offline survey response upload', () => {
     };
     const male = { 'Q1.value': 'male', 'Survey.disqualified': false };
 
-    // A tampered device claims it's not in the quota.
     const faked = await upload('30000000-0000-0000-0000-0000000000a1', {
       ...male,
       'Survey.quota_QT1': false,
@@ -178,11 +176,9 @@ describe('Offline survey response upload', () => {
     expect(faked.values['Survey.quota_QT1']).toBe(true);
     expect(faked.quota_codes).toEqual(['QT1']);
 
-    // An older app doesn't send quota membership at all.
     const old = await upload('30000000-0000-0000-0000-0000000000a2', male);
     expect(old.values['Survey.quota_QT1']).toBe(true);
 
-    // Not a member, whatever the device says.
     const female = await upload('30000000-0000-0000-0000-0000000000a3', {
       'Q1.value': 'female',
       'Survey.quota_QT1': true,
@@ -191,7 +187,6 @@ describe('Offline survey response upload', () => {
     expect(female.values['Survey.quota_QT1']).toBe(false);
     expect(female.quota_codes).toEqual([]);
 
-    // The device screened the respondent out: that stays, so it doesn't count.
     const screenedOut = await upload('30000000-0000-0000-0000-0000000000a4', {
       ...male,
       'Survey.disqualified': true,

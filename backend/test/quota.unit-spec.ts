@@ -233,7 +233,6 @@ describe('navigation quota enforcement', () => {
 
   it('keeps a screened-out response disqualified when it is resumed', async () => {
     const { svc, engineNavigate } = setup();
-    // Resuming re-runs the engine without quota checks: it reports not disqualified.
     engineNavigate.mockResolvedValue({
       navigationIndex: { name: 'end' },
       toSave: { 'Survey.disqualified': false, 'Survey.quota_QT1': true },

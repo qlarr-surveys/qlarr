@@ -49,8 +49,6 @@ export function buildLogicFields({
   const numericCodes =
     designState.index ?? (designState.Survey ? buildCodeIndex(designState) : {});
 
-  // Survey-level logic (quotas) may reference every page and question;
-  // everything else only what comes before it.
   const dependencies =
     currentCode === 'Survey'
       ? (componentIndices || [])

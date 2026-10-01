@@ -92,8 +92,6 @@ function Group(props) {
 
 export default React.memo(Group);
 
-// The END page card showing a quota's end message in place of the page content,
-// for respondents a full quota screened out.
 export const QuotaMessage = React.memo(function QuotaMessage({
   group,
   contentKey,
@@ -113,7 +111,6 @@ export const QuotaMessage = React.memo(function QuotaMessage({
         <Content
           elementCode="Survey"
           name={contentKey}
-          // Styled like the END page's title, which it stands in for.
           customStyle={`
         font-size: ${theme.textStyles.group.size}px;
         `}

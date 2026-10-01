@@ -51,7 +51,6 @@ function Survey() {
     return typeof val === "number" ? val : LOGO_SPACING_DEFAULT;
   });
 
-  // A full quota ended the survey: its message, if set, replaces the END page.
   const quotaCode = useSelector(
     (state) => state.runState.data?.screenedOutQuota,
   );

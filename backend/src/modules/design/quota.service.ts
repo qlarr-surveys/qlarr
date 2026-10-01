@@ -13,21 +13,10 @@ export interface QuotaStatusDto {
   quotas: (QuotaDefinition & { count: number; full: boolean })[];
 }
 
-/**
- * Segment quota counts and the enforcement input. A response counts towards a
- * quota when it is complete, not preview, not disqualified, and the engine
- * saved `Survey.quota_<code> = true` on it. A database trigger mirrors the last
- * two into `responses.quota_codes` (migration 2-ResponseQuotaCodes).
- *
- * Membership is only ever written while a respondent navigates, so a quota
- * added to a survey that is already collecting starts from zero: responses
- * finished before it existed were never evaluated against it.
- */
 @Injectable()
 export class QuotaService {
   constructor(private readonly db: DbContext) {}
 
-  /** Completed, non-preview, non-disqualified responses per quota code. */
   async counts(
     surveyId: string,
     codes: string[],
@@ -48,7 +37,6 @@ export class QuotaService {
     return Object.fromEntries(rows.map((row) => [row.code, Number(row.count)]));
   }
 
-  /** The quotas a respondent may no longer enter. */
   async fullQuotas(survey: SurveyEntity, output: ValidationJsonOutput): Promise<string[]> {
     const definitions = quotaDefinitions(output.survey).filter((quota) => quota.limit > 0);
     if (definitions.length === 0) return [];
@@ -56,10 +44,6 @@ export class QuotaService {
     return fullQuotaCodes(definitions, counts);
   }
 
-  /**
-   * Fill levels for the designer / manage views: the draft's quotas, `full` by
-   * the published limits (the ones navigation enforces; none before publishing).
-   */
   async status(
     survey: SurveyEntity,
     draft: ValidationJsonOutput,

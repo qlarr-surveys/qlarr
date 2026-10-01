@@ -1,19 +1,11 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-/**
- * `responses.quota_codes`: the group quotas a response counts towards, kept by a
- * trigger from its `values` (every `Survey.quota_<code>` that is true, none when
- * the response is disqualified). Quota counting reads this small column instead
- * of every response's answers JSON (see QuotaService.counts).
- *
- * Adding a column with a constant default doesn't rewrite the table. The
- * backfill only touches responses that hold quota values.
- */
 export class ResponseQuotaCodes0000000000002 implements MigrationInterface {
   name = 'ResponseQuotaCodes0000000000002';
 
   async up(q: QueryRunner): Promise<void> {
     await q.query(`
+      -- Quotas a response counts towards (none if disqualified), kept in sync from "values" by the trigger below.
       ALTER TABLE responses ADD COLUMN quota_codes text[] NOT NULL DEFAULT '{}';
 
       CREATE FUNCTION set_response_quota_codes() RETURNS trigger

@@ -271,7 +271,6 @@ function ContentPanel({ designMode }, ref) {
     }
   }, [lastAddedComponent]);
 
-  // Opened on a quota's end message (from Settings): bring the END page into view.
   useEffect(() => {
     if (!revealQuotaMessage || !virtuosoRef.current) {
       return;
@@ -283,8 +282,7 @@ function ContentPanel({ designMode }, ref) {
     );
     const timeoutId = setTimeout(() => {
       if (itemIndex !== -1) {
-        // An instant jump: Virtuoso's smooth scroll does nothing when the END
-        // page can't reach the top (a short survey), while this stops at the bottom.
+        // Instant: Virtuoso's smooth scroll does nothing when the END page can't reach the top.
         virtuosoRef.current?.scrollToIndex({
           index: itemIndex,
           behavior: "auto",

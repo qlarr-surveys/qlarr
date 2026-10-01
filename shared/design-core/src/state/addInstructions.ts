@@ -1246,8 +1246,6 @@ const getQuestionType = (state, code) => {
   }
 };
 
-// A quota's condition compiles to a `quota_<code>` boolean instruction on the Survey node;
-// the engine saves its result per response as `Survey.quota_<code>`.
 export const quotaInstruction = (quota, state) => {
   const code = `quota_${quota.code}`;
   const text = jsonToJs(

@@ -15,8 +15,6 @@ import { showQuotaMessage } from "~/state/design/designState";
 import { isNotEmptyHtml } from "~/utils/design/utils";
 import styles from "./GroupDesign.module.css";
 
-// The quota whose end message the END page shows in the designer, or null for
-// the default end page (also when the selected quota was removed).
 export function useSelectedQuotaMessage() {
   return useSelector((state) => {
     const code = state.designState.quotaMessageView?.code;
@@ -27,9 +25,6 @@ export function useSelectedQuotaMessage() {
   });
 }
 
-// Chips on the END page switching between the default end page and the end
-// message of each quota, shown instead of the END page to respondents a full
-// quota screened out. Quotas themselves are managed in Settings.
 export const QuotaMessageSwitcher = React.memo(function QuotaMessageSwitcher({
   t,
   designMode,
@@ -104,8 +99,6 @@ export const QuotaMessageSwitcher = React.memo(function QuotaMessageSwitcher({
   );
 });
 
-// A quota's end message, edited (and translated) in place of the END page.
-// Stored in Survey content so it is translated like any other survey text.
 export const QuotaMessageEditor = React.memo(function QuotaMessageEditor({
   t,
   quotaCode,
@@ -116,11 +109,9 @@ export const QuotaMessageEditor = React.memo(function QuotaMessageEditor({
   return (
     <Box
       className={styles.groupHeader}
-      // Styled like the END page's title, as respondents will see it.
       css={css`
         font-size: ${theme.textStyles.group.size}px;
       `}
-      // The END page's setup options don't apply to a quota message.
       onClick={(event) => event.stopPropagation()}
     >
       <ContentEditor

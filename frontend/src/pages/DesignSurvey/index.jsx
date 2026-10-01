@@ -84,7 +84,6 @@ function DesignSurvey() {
     }
   }, []);
 
-  // Opened from a quota in Settings: show that quota's message on the END page.
   useEffect(() => {
     if (!designStateReceived || !searchParams.has(QUOTA_MESSAGE_PARAM)) {
       return;
@@ -97,7 +96,6 @@ function DesignSurvey() {
       }),
     );
     searchParams.delete(QUOTA_MESSAGE_PARAM);
-    // Replace, so Back returns to Settings instead of this same page.
     setSearchParams(searchParams, { replace: true });
   }, [designStateReceived]);
 

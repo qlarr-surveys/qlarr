@@ -39,6 +39,5 @@ export interface RunSurveyDto {
   lang: SurveyLang;
   additionalLang: SurveyLang[];
   saveTimings: boolean;
-  /** Set when a full quota ended the survey: its code, for the quota end message. */
   screenedOutQuota: string | null;
 }

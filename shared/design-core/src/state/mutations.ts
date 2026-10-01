@@ -64,9 +64,7 @@ import {
   stripRepeatedCopies,
 } from "./repetition";
 
-// Top-level design-state keys holding designer UI state, not survey data: a
-// save never sends them (`designChanges`) and a load keeps them as they are
-// (`buildDesignState`). Add any new UI-only key here.
+// Designer-only state: never saved, kept on reload. Add any new UI-only key here.
 export const UI_STATE_KEYS = [
   "setup",
   "advancedByCode",
@@ -88,8 +86,6 @@ export const UI_STATE_KEYS = [
   "quotaMessageView",
 ];
 
-// The survey data that differs from the last saved design (`latest`): what a
-// save sends. Empty when nothing changed.
 export function designChanges(state, latest) {
   const changes = {};
   const keys = new Set([...Object.keys(state), ...Object.keys(latest)]);
@@ -142,7 +138,7 @@ export function buildDesignState(state, payload) {
   toBeRemoved.forEach((key) => {
     delete state[key];
   });
-  // A load ends any pending edit focus.
+  // A load ends any pending edit focus (it was never kept across loads).
   delete state.focus;
   const inCurrentSetup = state["setup"]?.code;
   if (!newKeys.includes(inCurrentSetup)) {
@@ -245,7 +241,6 @@ export function addQuota(state) {
   });
 }
 
-// payload: { code, changes: { label?, limit?, condition? } }
 export function updateQuota(state, payload) {
   const { code, changes } = payload;
   const quota = state.Survey.quotas?.find((quota) => quota.code === code);
@@ -258,7 +253,6 @@ export function updateQuota(state, payload) {
   }
 }
 
-// payload: the quota code
 export function removeQuota(state, payload) {
   const survey = state.Survey;
   survey.quotas = (survey.quotas || []).filter(
@@ -269,15 +263,12 @@ export function removeQuota(state, payload) {
     if (survey.content[lang][messageKey] === undefined) {
       return;
     }
-    // clears the message's reference instructions and resources too
     changeContent(state, { code: "Survey", key: messageKey, lang, value: "" });
     delete survey.content[lang][messageKey];
   });
   refreshQuotaInstructions(state);
 }
 
-// Which quota's end message the END page shows in the designer (null for the
-// default end page); `reveal` scrolls the END page into view once.
 export function showQuotaMessage(state, payload) {
   const { code = null, reveal = false } = payload;
   state.quotaMessageView = { code, reveal };
@@ -289,8 +280,6 @@ export function quotaMessageRevealed(state) {
   }
 }
 
-// Recompiles every quota condition. An instruction whose text is unchanged is
-// kept as is, so it keeps the errors the backend reported on it.
 const refreshQuotaInstructions = (state) => {
   const survey = state.Survey;
   const previous = new Map();
@@ -305,6 +294,7 @@ const refreshQuotaInstructions = (state) => {
       return;
     }
     const kept = previous.get(instruction.code);
+    // An unchanged instruction is kept so it keeps the errors the backend reported on it.
     survey.instructionList.push(kept?.text === instruction.text ? kept : instruction);
   });
 };
@@ -1065,7 +1055,6 @@ export function convertQuestion(state, payload) {
     severCarryForwardTargets(state, questionCode);
   }
   resyncSourceDependents(state, questionCode);
-  // Quota conditions compile differently per question type (e.g. "in").
   refreshQuotaInstructions(state);
 }
 

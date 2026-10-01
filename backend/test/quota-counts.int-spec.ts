@@ -121,7 +121,6 @@ describe('Quota counts (responses.quota_codes)', () => {
   });
 
   it('reports the draft quotas, full by the published limits', async () => {
-    // Counts from the previous test: QTa 3, QTb 2.
     const design = (quotaList: object[]) =>
       ({ survey: { quotas: quotaList } }) as unknown as ValidationJsonOutput;
     const survey = { id: SURVEY } as SurveyEntity;

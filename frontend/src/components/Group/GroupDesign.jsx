@@ -125,7 +125,6 @@ function GroupDesign({
 
   const children = group?.children;
 
-  // A quota's end message replaces the whole END page, as it does at runtime.
   const quotaMessage = type === "end" ? selectedQuota : null;
 
   const getStyles = (isDragging) => {

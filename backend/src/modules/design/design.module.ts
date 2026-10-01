@@ -17,7 +17,6 @@ import { VersionRepository } from './version.repository';
   providers: [DesignService, QuotaService, VersionRepository],
   // VersionRepository is exported so SurveysService (SurveysModule imports
   // DesignModule) shares the single home for `versions` table access.
-  // QuotaService: RunModule's navigation needs the full-quota check.
   exports: [DesignService, QuotaService, VersionRepository],
 })
 export class DesignModule {}
