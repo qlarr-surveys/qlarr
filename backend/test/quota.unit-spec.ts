@@ -5,6 +5,7 @@ import {
   quotaDefinitions,
   screenedOutQuota,
   stripQuotaKeys,
+  withComputedQuotaKeys,
 } from '../src/modules/design/quota.helpers';
 import { NavigationService } from '../src/modules/run/navigation.service';
 import { nowUtcString } from '../src/common/datetime';
@@ -67,6 +68,24 @@ describe('quota helpers', () => {
         'Survey.lang': 'en',
       }),
     ).toEqual({ 'Q1.value': 'male', 'Survey.lang': 'en' });
+  });
+
+  it('takes quota membership from the engine and keeps everything else', () => {
+    expect(
+      withComputedQuotaKeys(
+        {
+          'Q1.value': 'male',
+          'Survey.quota_QT1': false,
+          'Survey.quota_FAKE': true,
+          'Survey.disqualified': true,
+        },
+        { 'Q1.value': 'ignored', 'Survey.quota_QT1': true, 'Survey.disqualified': false },
+      ),
+    ).toEqual({
+      'Q1.value': 'male',
+      'Survey.disqualified': true,
+      'Survey.quota_QT1': true,
+    });
   });
 
   it('names the first full quota the respondent belongs to when screened out', () => {

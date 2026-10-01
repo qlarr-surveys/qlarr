@@ -81,3 +81,19 @@ export function stripQuotaKeys(values: Record<string, unknown>): Record<string, 
     Object.entries(values).filter(([key]) => !key.startsWith(QUOTA_VALUE_PREFIX)),
   );
 }
+
+/**
+ * `values` with its quota membership replaced by the engine's (`computed`).
+ * Everything else, `Survey.disqualified` included, stays as it was.
+ */
+export function withComputedQuotaKeys(
+  values: Record<string, unknown>,
+  computed: Record<string, unknown>,
+): Record<string, unknown> {
+  return {
+    ...stripQuotaKeys(values),
+    ...Object.fromEntries(
+      Object.entries(computed).filter(([key]) => key.startsWith(QUOTA_VALUE_PREFIX)),
+    ),
+  };
+}
