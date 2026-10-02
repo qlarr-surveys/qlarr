@@ -27,11 +27,11 @@ const DESIGN_JSON = JSON.stringify(runValidate(design));
 const files = { getText: jest.fn().mockResolvedValue(DESIGN_JSON) };
 
 // R1: Q303fhu.order=2, Q699dtx.order=1 → sortChildren reorders G1's children so
-// Q699dtx comes before Q303fhu; Q303fhu has a mask, Q699dtx does not.
+// Q699dtx comes before Q303fhu. Both are non-choice questions, so their values
+// pass through as the raw stored value.
 const R1_VALUES = {
   'Survey.disqualified': false,
   'Q303fhu.value': 'raw7',
-  'Q303fhu.masked_value': 'Seven',
   'Q303fhu.order': 2,
   'Q699dtx.value': 'plain',
   'Q699dtx.order': 1,
@@ -108,7 +108,7 @@ describe('Single-response read', () => {
   const server = () => app.getHttpServer();
 
   describe('GET /response/:responseId', () => {
-    it('resolves values (masked + ordered by the respondent), and metadata', async () => {
+    it('resolves values (ordered by the respondent), and metadata', async () => {
       const res = await request(server())
         .get(`/response/${R1}`)
         .set('Authorization', SUPER)
@@ -136,8 +136,8 @@ describe('Single-response read', () => {
       const byCode = Object.fromEntries(
         res.body.values.map((v: { code: string }) => [v.code, v]),
       );
-      expect(byCode['Q699dtx'].value).toBe('plain'); // no mask → raw value
-      expect(byCode['Q303fhu'].value).toBe('Seven (raw7)'); // masked (raw)
+      expect(byCode['Q699dtx'].value).toBe('plain'); // non-choice → raw value
+      expect(byCode['Q303fhu'].value).toBe('raw7'); // non-choice → raw value
       expect(byCode['Q303fhu'].key).toMatch(/^\(Q\d+\)/); // "(<index>) <label>"
     });
 

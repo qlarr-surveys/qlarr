@@ -605,7 +605,7 @@ function buildResponseValue(
 }
 
 
-function resolveListAndEnumValues(
+export function resolveListAndEnumValues(
   raw: unknown,
   questionCode: string,
   dataType: unknown,
@@ -622,7 +622,7 @@ function resolveListAndEnumValues(
  * componentCode → `dataType` for every `VALUE` field in the response schema, so
  * cells/response values can resolve choice answer codes to their labels.
  */
-function valueDataTypes(
+export function valueDataTypes(
   schema: ResponseField[],
 ): Record<string, unknown> {
   const byCode: Record<string, unknown> = {};
