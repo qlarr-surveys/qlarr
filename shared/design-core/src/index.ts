@@ -11,6 +11,10 @@ export * from "./state/repetition";
 
 // Pure helpers consumed by the frontend and AI directly.
 export { instructionByCode } from "./state/addInstructions";
+export {
+  replaceFormatInstructions,
+  getAllFormatInstructions,
+} from "./utils/formatInstructions";
 export { isQuestion, isGroup, buildCodeIndex } from "./utils/pureUtils";
 export { accessibleDependencies } from "./utils/dependencies";
 export { getFieldType, hasOtherOption, isRankingType } from "./factory/fieldTypes";

@@ -157,21 +157,6 @@ export class EngineService {
     return scriptengine.getEngineScript();
   }
 
-  /**
-   * Pull the `*.masked_value` entries that correspond to stored `*.value`
-   * answers (≈ `SurveyProcessor.maskedValues`). Pure data shaping — no engine.
-   */
-  maskedValues(values: Record<string, unknown>): Record<string, unknown> {
-    const out: Record<string, unknown> = {};
-    for (const key of Object.keys(values)) {
-      if (!key.endsWith(VALUE_SUFFIX)) continue;
-      const maskedKey = key.slice(0, -VALUE_SUFFIX.length) + MASKED_SUFFIX;
-      if (Object.prototype.hasOwnProperty.call(values, maskedKey)) {
-        out[maskedKey] = values[maskedKey];
-      }
-    }
-    return out;
-  }
 
   /**
    * Reorder a DFS-flattened component index by a respondent's stored child order
