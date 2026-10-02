@@ -53,6 +53,21 @@ describe('toCsvRows', () => {
     delete s.Survey.additionalLang;
     expect(toCsvRows(s)[0]).toEqual(['code', 'key', 'en']);
   });
+
+  it('skips a repeated copy root and its whole subtree', () => {
+    const s = state();
+    // The engine expands the G1 repeatable into a `G1_x` copy whose subtree hangs
+    // beneath it. Only the copy root carries repeatInfo.type "repeated".
+    s.Survey.children!.push({ code: 'G1_x', qualifiedCode: 'G1_x' });
+    s.G1_x = {
+      repeatInfo: { type: 'repeated' },
+      content: { en: { label: 'Page one copy' } },
+      children: [{ code: 'Q1_x', qualifiedCode: 'Q1_x' }],
+    } as any;
+    // A descendant of the copy carries no repeated flag, yet must still be excluded.
+    s.Q1_x = { content: { en: { label: '<p>Copied question</p>' } } };
+    expect(toCsvRows(s)).toEqual(exported);
+  });
 });
 
 describe('toCsv and parseCsv', () => {
