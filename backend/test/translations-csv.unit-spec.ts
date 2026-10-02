@@ -130,6 +130,20 @@ describe('csvChanges', () => {
       { code: 'G1', lang: 'ar', key: 'label', value: 'الصفحة' },
     ]);
   });
+
+  it('skips a row for a repeated copy, which is absent from the template state', () => {
+    // importTranslations validates against the template-only state (copies stripped),
+    // so a copy code like `G1_x` is a component that does not exist: editing its text
+    // is a no-op, exactly like the unknown `Q404` code, while real rows still apply.
+    const rows = [
+      ['code', 'key', 'en', 'ar'],
+      ['G1_x', 'label', 'Changed copy', 'نسخة'],
+      ['G1', 'label', 'Page one', 'الصفحة'],
+    ];
+    expect(csvChanges(rows, state(), false)).toEqual([
+      { code: 'G1', lang: 'ar', key: 'label', value: 'الصفحة' },
+    ]);
+  });
 });
 
 describe("the editor's paragraph", () => {
