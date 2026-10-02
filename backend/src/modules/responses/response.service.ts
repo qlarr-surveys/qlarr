@@ -179,7 +179,7 @@ export class ResponseService {
               questionCode,
               dataTypeByCode[componentCode],
               labels,
-            ) || ""
+            ) ?? ""
           );
         }),
       ];
