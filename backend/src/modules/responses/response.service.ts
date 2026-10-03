@@ -388,7 +388,9 @@ export class ResponseService {
       .map((e) => eventComponentCode(e))
       .filter((c): c is string => c != null);
     const valueCodes = Object.keys(row.values)
-      .filter((k) => k.split(".").pop() === "value")
+      .filter(
+        (k) => k.split(".").pop() === "value" && !isEmptyValue(row.values[k]),
+      )
       .map((k) => k.split(".")[0]);
 
     const values = sorted
@@ -407,12 +409,7 @@ export class ResponseService {
       )
       // Drop entries with no answer (empty string, empty array, or null — e.g.
       // event-only codes that carry no `.value`).
-      .filter(
-        (rv) =>
-          rv.value != null &&
-          rv.value !== "" &&
-          !(Array.isArray(rv.value) && rv.value.length === 0),
-      );
+      .filter((rv) => !isEmptyValue(rv.value));
 
     return {
       id: row.id,
@@ -566,6 +563,19 @@ function pickFormatLang(
     : (langs.values().next().value ?? preferred);
 }
 
+/**
+ * Whether a stored or resolved answer counts as "no answer": null/undefined,
+ * an empty string, or an empty array. Used both to decide which codes are worth
+ * rendering and as the final drop filter.
+ */
+function isEmptyValue(value: unknown): boolean {
+  return (
+    value == null ||
+    value === "" ||
+    (Array.isArray(value) && value.length === 0)
+  );
+}
+
 function buildResponseValue(
   code: string,
   values: Record<string, unknown>,
@@ -613,7 +623,11 @@ export function resolveListAndEnumValues(
 ): unknown {
   const toLabel = (code: unknown) => labels[questionCode + String(code)] ?? code;
   const type = dataTypeName(dataType);
-  if (type === "enum" && typeof raw === "string") return toLabel(raw);
+  // An unanswered enum stores an empty string; resolving it would land on
+  // `labels[questionCode]` (the question's own label) instead of an answer, so
+  // leave it empty for the caller's empty-value filter to drop.
+  if (type === "enum" && typeof raw === "string" && raw !== "")
+    return toLabel(raw);
   if (type === "list" && Array.isArray(raw)) return raw.map(toLabel).join(", ");
   return raw;
 }
