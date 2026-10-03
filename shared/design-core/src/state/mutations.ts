@@ -968,6 +968,7 @@ export function convertQuestion(state, payload) {
 }
 
 export function changeContent(state, payload) {
+  if (!state[payload.code]) return;
   if (!state[payload.code].content) {
     state[payload.code].content = {};
     state[payload.code].content[payload.lang] = {};
