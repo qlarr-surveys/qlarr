@@ -16,6 +16,7 @@ import {
   resetSetup,
   changeResources,
   setup,
+  quotaMessageRevealed,
 } from "~/state/design/designState";
 import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
 import { buildResourceUrl } from "~/networking/common";
@@ -162,6 +163,9 @@ function ContentPanel({ designMode }, ref) {
     (state) => state.designState.lastAddedComponent
   );
   const skipScroll = useSelector((state) => state.designState.skipScroll);
+  const revealQuotaMessage = useSelector(
+    (state) => state.designState.quotaMessageView?.reveal,
+  );
   const dispatch = useDispatch();
   const { isUploading, handleFileInput: handleLogoFileInput } = useLogoUpload();
 
@@ -266,6 +270,29 @@ function ContentPanel({ designMode }, ref) {
       return () => clearTimeout(timeoutId);
     }
   }, [lastAddedComponent]);
+
+  useEffect(() => {
+    if (!revealQuotaMessage || !virtuosoRef.current) {
+      return;
+    }
+    const itemIndex = items.findIndex(
+      (it) =>
+        it.name === ELEMENTS.GROUP &&
+        (it.group.type || it.group.groupType || "").toLowerCase() === "end",
+    );
+    const timeoutId = setTimeout(() => {
+      if (itemIndex !== -1) {
+        // Instant: Virtuoso's smooth scroll does nothing when the END page can't reach the top.
+        virtuosoRef.current?.scrollToIndex({
+          index: itemIndex,
+          behavior: "auto",
+          align: "start",
+        });
+      }
+      dispatch(quotaMessageRevealed());
+    }, 100);
+    return () => clearTimeout(timeoutId);
+  }, [revealQuotaMessage, items]);
 
   return (
     <Box

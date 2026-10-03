@@ -43,6 +43,7 @@
   "ai_prompt_placeholder": "ej., Crear una encuesta de satisfacción del cliente para un restaurante con preguntas sobre calidad de comida, servicio y ambiente",
   "ai_prompt_helper": "Describe qué tipo de encuesta quieres crear con el mayor detalle posible",
   "edit_survey": {
+    "total_responses": "Total de respuestas",
     "add_logo": "Añadir un logo a la encuesta",
     "export": "Exportar Encuesta",
     "close_title": "Cerrar Encuesta",
@@ -147,7 +148,6 @@
     "additional_languages": "Idiomas Adicionales",
     "additional_languages_description": "Elija en qué idiomas los encuestados pueden realizar la encuesta.",
     "analyst": "Analista",
-    "apply_quota": "Aplicar Cuota",
     "base_language": "Idioma Base",
     "base_language_description": "El idioma principal en el que está escrita su encuesta.",
     "code": "Código",
@@ -174,7 +174,7 @@
     "surveyor": "Encuestador",
     "surveyor_admin": "Administrador de Encuestador",
     "to": "A",
-    "total_responses_limit": "Límite Total de Respuestas: ",
+    "total_responses_limit": "Límite Total de Respuestas",
     "sort_by": "Ordenar Por",
     "unpublished_changes": "Tiene Cambios No Publicados",
     "responses": "Respuestas Completas : {{count}}",
@@ -423,6 +423,7 @@
     "email_changed": "¡Tu correo electrónico ha sido actualizado exitosamente!"
   },
   "tooltips": {
+    "group_quotas": "Las cuotas limitan cuántas respuestas completas puede dar un grupo, p. ej. 50 hombres y 50 mujeres.\n\n● Cada cuota tiene una condición basada en tus preguntas y un límite\n● Los encuestados se comprueban cada vez que avanzan\n● Si la cuota que cumplen está llena, la encuesta salta al final y la respuesta se marca como descalificada\n● Si una cuota se llena mientras alguien responde, pasa al final en su siguiente avance",
     "quotas": "Habilitar cuotas y establecer límites para el número de respuestas. Este límite se aplica tanto a respuestas de encuestas en línea como sin conexión, dependiendo de la frecuencia con la que se sincronicen las respuestas sin conexión.",
     "export": "Exportar los datos de la encuesta",
     "launch": "Puedes ajustar la configuración de la encuesta y publicar tu encuesta",
@@ -646,5 +647,27 @@
     "question_type_text_display": "Visualización de Texto",
     "question_type_image_display": "Visualización de Imagen",
     "question_type_video_display": "Visualización de Video"
+  },
+  "group_quotas": {
+    "title": "Cuotas por grupo",
+    "description": "Limita cuántas respuestas completas puede dar cada grupo de encuestados. Quien coincida con una cuota llena salta al final y se marca como descalificado.",
+    "empty": "Aún no hay cuotas.",
+    "add": "Añadir cuota",
+    "untitled": "Cuota sin título",
+    "no_condition": "Sin condición",
+    "full": "Llena",
+    "no_limit": "sin límite",
+    "condition_error": "Esta condición hace referencia a una pregunta u opción que ya no existe.",
+    "label": "Etiqueta",
+    "limit": "Límite",
+    "limit_hint": "Respuestas completas permitidas. Déjalo vacío para no poner límite.",
+    "condition": "Cuenta a los encuestados cuando",
+    "and": "y",
+    "or": "o",
+    "unpublished_note": "Los cambios en las cuotas se aplican cuando publicas la encuesta.",
+    "message": "Mensaje final",
+    "message_set": "Mensaje personalizado configurado",
+    "message_not_set": "Sin configurar: se muestra la página final normal",
+    "edit_message": "Editar en el diseñador"
   }
 }

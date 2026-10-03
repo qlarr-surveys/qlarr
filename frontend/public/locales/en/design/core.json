@@ -535,6 +535,10 @@
     "duplicate_to_code": "This code belongs to another group or question",
     "code_invalid": "Invalid code. Please try again."
   },
+  "default_end_page": "Default end page",
+  "quota_message_placeholder": "Empty: these respondents see the default end page",
+  "quota_message_missing": "No message in this language",
+  "manage_quotas": "Manage quotas",
   "carry_from": "Carry from",
   "carry_from_rows": "Rows — carry from",
   "carry_from_columns": "Columns — carry from",

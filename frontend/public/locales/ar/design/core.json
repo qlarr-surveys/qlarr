@@ -535,6 +535,10 @@
     "duplicate_to_code": "هذا الرمز ينتمي إلى مجموعة أو سؤال آخر",
     "code_invalid": "الرمز غير صالح. يرجى المحاولة مرة أخرى."
   },
+  "default_end_page": "صفحة النهاية الافتراضية",
+  "quota_message_placeholder": "فارغ: يرى هؤلاء المشاركون صفحة النهاية الافتراضية",
+  "quota_message_missing": "لا توجد رسالة بهذه اللغة",
+  "manage_quotas": "إدارة الحصص",
   "carry_from": "نقل الخيارات من",
   "carry_from_rows": "الصفوف — النقل من",
   "carry_from_columns": "الأعمدة — النقل من",

@@ -43,6 +43,7 @@
   "ai_prompt_placeholder": "ex., Créer un sondage de satisfaction client pour un restaurant avec des questions sur la qualité de la nourriture, le service et l'ambiance",
   "ai_prompt_helper": "Décrivez quel type de sondage vous souhaitez créer avec le plus de détails possible",
   "edit_survey": {
+    "total_responses": "Total des réponses",
     "add_logo": "Ajouter un logo au sondage",
     "export": "Exporter le Sondage",
     "close_title": "Fermer le Sondage",
@@ -147,7 +148,6 @@
     "additional_languages": "Langues Supplémentaires",
     "additional_languages_description": "Choisissez dans quelles langues les répondants peuvent répondre à l'enquête.",
     "analyst": "Analyste",
-    "apply_quota": "Appliquer le Quota",
     "base_language": "Langue de Base",
     "base_language_description": "La langue principale dans laquelle votre enquête est rédigée.",
     "code": "Code",
@@ -174,7 +174,7 @@
     "surveyor": "Sondeur",
     "surveyor_admin": "Administrateur de Sondeur",
     "to": "À",
-    "total_responses_limit": "Limite Totale de Réponses : ",
+    "total_responses_limit": "Limite Totale de Réponses",
     "sort_by": "Trier Par",
     "unpublished_changes": "A des Modifications Non Publiées",
     "responses": "Réponses Complètes : {{count}}",
@@ -423,6 +423,7 @@
     "email_changed": "Votre e-mail a été mis à jour avec succès !"
   },
   "tooltips": {
+    "group_quotas": "Les quotas limitent le nombre de réponses complètes qu'un groupe peut donner, par ex. 50 hommes et 50 femmes.\n\n● Chaque quota a une condition basée sur vos questions et une limite\n● Les répondants sont vérifiés à chaque passage à l'étape suivante\n● Si le quota auquel ils correspondent est plein, l'enquête passe à la fin et la réponse est marquée comme disqualifiée\n● Si un quota se remplit pendant qu'une personne répond, elle est envoyée à la fin au passage suivant",
     "quotas": "Activer les quotas et définir des limites pour le nombre de réponses. Cette limite s'applique aux réponses de sondages en ligne et hors ligne, selon la fréquence de synchronisation des réponses hors ligne.",
     "export": "Exporter les données du sondage",
     "launch": "Vous pouvez ajuster les paramètres du sondage et publier votre sondage",
@@ -646,5 +647,27 @@
     "question_type_text_display": "Affichage de Texte",
     "question_type_image_display": "Affichage d'Image",
     "question_type_video_display": "Affichage de Vidéo"
+  },
+  "group_quotas": {
+    "title": "Quotas par groupe",
+    "description": "Limitez le nombre de réponses complètes que chaque groupe de répondants peut donner. Un répondant correspondant à un quota plein passe à la fin et est marqué comme disqualifié.",
+    "empty": "Aucun quota pour le moment.",
+    "add": "Ajouter un quota",
+    "untitled": "Quota sans titre",
+    "no_condition": "Aucune condition définie",
+    "full": "Plein",
+    "no_limit": "sans limite",
+    "condition_error": "Cette condition fait référence à une question ou une option qui n'existe plus.",
+    "label": "Libellé",
+    "limit": "Limite",
+    "limit_hint": "Réponses complètes autorisées. Laisser vide pour aucune limite.",
+    "condition": "Compte les répondants lorsque",
+    "and": "et",
+    "or": "ou",
+    "unpublished_note": "Les modifications des quotas prennent effet dès que vous publiez le sondage.",
+    "message": "Message de fin",
+    "message_set": "Message personnalisé défini",
+    "message_not_set": "Non défini : la page de fin normale est affichée",
+    "edit_message": "Modifier dans l'éditeur"
   }
 }

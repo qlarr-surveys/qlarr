@@ -1234,10 +1234,25 @@ const getQuestionType = (state, code) => {
   const match = code.match(/^Q[a-z0-9_]+/);
   const captured = match ? match[0] : null;
   if (captured) {
-    return state[captured].type;
+    // The question may have been deleted while logic still refers to it.
+    return state[captured]?.type;
   } else {
     return null;
   }
+};
+
+export const quotaInstruction = (quota, state) => {
+  const code = `quota_${quota.code}`;
+  const text = jsonToJs(
+    quota.condition?.logic,
+    false,
+    (componentCode) => state[componentCode]?.type,
+    (componentCode) => getQuestionType(state, componentCode),
+  );
+  if (!text) {
+    return { code, remove: true };
+  }
+  return { code, text, isActive: true, returnType: "boolean" };
 };
 
 export const conditionalRelevanceEquation = (logic, rule, state) => {

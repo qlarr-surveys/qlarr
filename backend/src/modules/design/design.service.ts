@@ -14,6 +14,7 @@ import {
 } from '../surveys/survey.exceptions';
 import { VersionEntity } from '../surveys/version.entity';
 import { VersionRepository } from './version.repository';
+import { QuotaService, QuotaStatusDto } from './quota.service';
 import { DesignDiffDto, DesignDto, PublishInfo, VersionDto } from './design.dto';
 import {
   DesignException,
@@ -46,6 +47,7 @@ export class DesignService {
     private readonly versions: VersionRepository,
     @Inject(FILE_HELPER) private readonly files: FileHelper,
     private readonly engine: EngineService,
+    private readonly quotas: QuotaService,
   ) {}
 
   private surveys() {
@@ -375,6 +377,14 @@ export class DesignService {
         }
       }
     }
+  }
+
+  async quotaStatus(surveyId: string): Promise<QuotaStatusDto> {
+    const draft = await this.getProcessedSurvey(surveyId, false);
+    const published = (await this.versions.findLatestPublished(surveyId))
+      ? await this.getProcessedSurvey(surveyId, true)
+      : null;
+    return this.quotas.status(draft.survey, draft.output, published?.output ?? null);
   }
 
   /** Load a survey's processed design (from S3) for the latest or published version. */

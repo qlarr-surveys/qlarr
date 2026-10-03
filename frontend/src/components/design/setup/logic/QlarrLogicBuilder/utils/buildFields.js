@@ -49,7 +49,12 @@ export function buildLogicFields({
   const numericCodes =
     designState.index ?? (designState.Survey ? buildCodeIndex(designState) : {});
 
-  const dependencies = accessibleDependencies(componentIndices, currentCode);
+  const dependencies =
+    currentCode === 'Survey'
+      ? (componentIndices || [])
+          .map((el) => el.code)
+          .filter((code) => isGroup(code) || isQuestion(code))
+      : accessibleDependencies(componentIndices, currentCode);
   const indexMap = new Map((componentIndices || []).map((el) => [el.code, el]));
 
   const sortedDependencies = [...dependencies].sort((a, b) => {

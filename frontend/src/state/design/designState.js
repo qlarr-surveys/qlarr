@@ -29,6 +29,12 @@ export const designState = createSlice({
     setDesignModeToDesign: (state) => core.setDesignModeToDesign(state),
     setDesignModeToLang: (state) => core.setDesignModeToLang(state),
     setDesignModeToTheme: (state) => core.setDesignModeToTheme(state),
+    addQuota: (state) => core.addQuota(state),
+    updateQuota: (state, action) => core.updateQuota(state, action.payload),
+    removeQuota: (state, action) => core.removeQuota(state, action.payload),
+    showQuotaMessage: (state, action) =>
+      core.showQuotaMessage(state, action.payload),
+    quotaMessageRevealed: (state) => core.quotaMessageRevealed(state),
     changeAttribute: (state, action) =>
       core.changeAttribute(state, action.payload),
     changeRelevance: (state, action) =>
@@ -130,6 +136,11 @@ export const {
   setDesignModeToDesign,
   setDesignModeToLang,
   setDesignModeToTheme,
+  addQuota,
+  updateQuota,
+  removeQuota,
+  showQuotaMessage,
+  quotaMessageRevealed,
   removeAnswer,
   setup,
   clearHighlighted,

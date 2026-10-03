@@ -43,6 +43,7 @@
   "ai_prompt_placeholder": "ex., Criar uma pesquisa de satisfação do cliente para um restaurante com perguntas sobre qualidade da comida, serviço e ambiente",
   "ai_prompt_helper": "Descreva que tipo de pesquisa você deseja criar com o maior detalhe possível",
   "edit_survey": {
+    "total_responses": "Total de respostas",
     "add_logo": "Adicionar um logótipo ao inquérito",
     "export": "Exportar Pesquisa",
     "close_title": "Fechar Pesquisa",
@@ -147,7 +148,6 @@
     "additional_languages": "Idiomas Adicionais",
     "additional_languages_description": "Escolha em quais idiomas os entrevistados podem fazer a pesquisa.",
     "analyst": "Analista",
-    "apply_quota": "Aplicar Cota",
     "base_language": "Idioma Base",
     "base_language_description": "O idioma principal em que sua pesquisa está escrita.",
     "code": "Código",
@@ -174,7 +174,7 @@
     "surveyor": "Pesquisador",
     "surveyor_admin": "Administrador de Pesquisador",
     "to": "A",
-    "total_responses_limit": "Limite Total de Respostas: ",
+    "total_responses_limit": "Limite Total de Respostas",
     "sort_by": "Ordenar Por",
     "unpublished_changes": "Tem Alterações Não Publicadas",
     "responses": "Respostas Completas : {{count}}",
@@ -423,6 +423,7 @@
     "email_changed": "Seu e-mail foi atualizado com sucesso!"
   },
   "tooltips": {
+    "group_quotas": "As cotas limitam quantas respostas completas um grupo pode dar, ex.: 50 homens e 50 mulheres.\n\n● Cada cota tem uma condição baseada nas suas perguntas e um limite\n● Os respondentes são verificados sempre que avançam\n● Se a cota que corresponde estiver cheia, a pesquisa pula para o final e a resposta é marcada como desqualificada\n● Se uma cota encher enquanto alguém responde, ele vai para o final no próximo avanço",
     "quotas": "Habilitar cotas e definir limites para o número de respostas. Este limite se aplica tanto a respostas de pesquisas online quanto offline, dependendo da frequência com que as respostas offline são sincronizadas.",
     "export": "Exportar os dados da pesquisa",
     "launch": "Você pode ajustar as configurações da pesquisa e publicar sua pesquisa",
@@ -646,5 +647,27 @@
     "question_type_text_display": "Exibição de Texto",
     "question_type_image_display": "Exibição de Imagem",
     "question_type_video_display": "Exibição de Vídeo"
+  },
+  "group_quotas": {
+    "title": "Cotas por grupo",
+    "description": "Limite quantas respostas completas cada grupo de respondentes pode dar. Quem corresponder a uma cota cheia pula para o final e é marcado como desqualificado.",
+    "empty": "Ainda não há cotas.",
+    "add": "Adicionar cota",
+    "untitled": "Cota sem título",
+    "no_condition": "Nenhuma condição definida",
+    "full": "Cheia",
+    "no_limit": "sem limite",
+    "condition_error": "Esta condição faz referência a uma pergunta ou opção que não existe mais.",
+    "label": "Rótulo",
+    "limit": "Limite",
+    "limit_hint": "Respostas completas permitidas. Deixe vazio para não ter limite.",
+    "condition": "Conta respondentes quando",
+    "and": "e",
+    "or": "ou",
+    "unpublished_note": "As alterações nas cotas entram em vigor quando você publicar a pesquisa.",
+    "message": "Mensagem final",
+    "message_set": "Mensagem personalizada definida",
+    "message_not_set": "Não definida: é exibida a página final normal",
+    "edit_message": "Editar no designer"
   }
 }

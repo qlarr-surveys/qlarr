@@ -9,6 +9,7 @@ import { bearer, startTestApp, TestApp } from './harness';
 const SURVEYOR_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const SURVEY = '10000000-0000-0000-0000-000000000001';
 const SURVEY_DRAFT = '10000000-0000-0000-0000-000000000002';
+const SURVEY_QUOTA = '10000000-0000-0000-0000-000000000003';
 
 const token = (roles: string[]) =>
   bearer({ userId: SURVEYOR_ID, authorities: roles });
@@ -40,8 +41,42 @@ const validPayload = () => ({
   events: [],
 });
 
+const quotaDesign = JSON.parse(engine.newSurvey('Offline quota'));
+quotaDesign.groups[0].questions = [
+  {
+    code: 'Q1',
+    type: 'text',
+    instructionList: [{ code: 'value', text: '', returnType: 'string', isActive: false }],
+  },
+];
+quotaDesign.quotas = [
+  { code: 'QT1', label: 'Male', limit: 1, condition: { logic: { '==': [{ var: 'Q1' }, 'male'] } } },
+];
+quotaDesign.instructionList = [
+  { code: 'quota_QT1', text: 'Q1.value == "male"', returnType: 'boolean', isActive: true },
+];
+const QUOTA_DESIGN_JSON = JSON.stringify(runValidate(JSON.stringify(quotaDesign)));
+const navigateQuota = (values: object, navigationIndex: unknown, direction: string) =>
+  runNavigate({
+    values: JSON.stringify(values),
+    processedSurvey: QUOTA_DESIGN_JSON,
+    navigationDirection: { name: direction },
+    navigationIndex,
+    lang: 'en',
+    navigationMode: 'GROUP_BY_GROUP',
+    skipInvalid: false,
+    surveyMode: 'OFFLINE',
+  } as Parameters<typeof runNavigate>[0]);
+const quotaEnd = navigateQuota(
+  { 'Q1.value': 'male' },
+  navigateQuota({}, null, 'START').navigationIndex,
+  'NEXT',
+);
+
 const files = {
-  getText: jest.fn().mockResolvedValue(DESIGN_JSON),
+  getText: jest.fn((surveyId: string) =>
+    Promise.resolve(surveyId === SURVEY_QUOTA ? QUOTA_DESIGN_JSON : DESIGN_JSON),
+  ),
   deleteUnusedResponseFiles: jest.fn().mockResolvedValue(undefined),
 };
 
@@ -83,6 +118,7 @@ describe('Offline survey response upload', () => {
     );
     await addSurvey(SURVEY, 'ACTIVE');
     await addSurvey(SURVEY_DRAFT, 'DRAFT');
+    await addSurvey(SURVEY_QUOTA, 'ACTIVE');
   }, 180_000);
 
   afterAll(async () => {
@@ -115,6 +151,49 @@ describe('Offline survey response upload', () => {
     expect(JSON.parse(row.nav_index).name).toBe('end');
     // Unused response files are pruned on sync.
     expect(files.deleteUnusedResponseFiles).toHaveBeenCalledTimes(1);
+  });
+
+  it('saves quota membership from the backend engine, keeping the device disqualified flag', async () => {
+    expect(quotaEnd.navigationIndex.name).toBe('end');
+    const upload = async (responseId: string, values: object) => {
+      await request(server())
+        .post(`/survey/${SURVEY_QUOTA}/response/${responseId}/upload`)
+        .set('Authorization', SURVEYOR)
+        .send({ ...validPayload(), values, navigationIndex: quotaEnd.navigationIndex })
+        .expect(200);
+      const [row] = await root.query(
+        `SELECT "values", quota_codes FROM responses WHERE id = $1`,
+        [responseId],
+      );
+      return row;
+    };
+    const male = { 'Q1.value': 'male', 'Survey.disqualified': false };
+
+    const faked = await upload('30000000-0000-0000-0000-0000000000a1', {
+      ...male,
+      'Survey.quota_QT1': false,
+    });
+    expect(faked.values['Survey.quota_QT1']).toBe(true);
+    expect(faked.quota_codes).toEqual(['QT1']);
+
+    const old = await upload('30000000-0000-0000-0000-0000000000a2', male);
+    expect(old.values['Survey.quota_QT1']).toBe(true);
+
+    const female = await upload('30000000-0000-0000-0000-0000000000a3', {
+      'Q1.value': 'female',
+      'Survey.quota_QT1': true,
+      'Survey.disqualified': false,
+    });
+    expect(female.values['Survey.quota_QT1']).toBe(false);
+    expect(female.quota_codes).toEqual([]);
+
+    const screenedOut = await upload('30000000-0000-0000-0000-0000000000a4', {
+      ...male,
+      'Survey.disqualified': true,
+    });
+    expect(screenedOut.values['Survey.disqualified']).toBe(true);
+    expect(screenedOut.values['Survey.quota_QT1']).toBe(true);
+    expect(screenedOut.quota_codes).toEqual([]);
   });
 
   it('accepts Kotlin/Jackson LocalDateTime arrays for start/submit dates', async () => {

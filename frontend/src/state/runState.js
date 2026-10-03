@@ -30,6 +30,7 @@ export const runState = createSlice({
         additionalLang: response.additionalLang,
         lang: response.lang,
         responseId: response.responseId,
+        screenedOutQuota: response.screenedOutQuota,
       };
       state.saveTimings = response.saveTimings
       state.values = response.state.qlarrVariables;
