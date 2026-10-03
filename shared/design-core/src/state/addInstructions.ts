@@ -644,11 +644,6 @@ export const addAnswerInstructions = (
     case "row":
       changeInstruction(answer, valueInstruction);
       break;
-    case "other":
-      if (questionType !== "scq") {
-        changeInstruction(answer, valueInstruction);
-      }
-      break;
     case "other_text":
       changeInstruction(answer, {
         code: "value",

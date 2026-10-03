@@ -80,8 +80,9 @@ export interface ResponseCountDto {
 
 /**
  * One resolved answer in a single-response read. `key` is the human-readable
- * `(<index>) <label>` heading; `value` is the masked
- * value with the raw value in brackets when a mask exists, else the raw value.
+ * `(<index>) <label>` heading; `value` resolves choice answers to their labels
+ * (enum → one label, list → comma-joined labels) and leaves every other data
+ * type as its raw stored value.
  */
 export interface ResponseValue {
   key: string;

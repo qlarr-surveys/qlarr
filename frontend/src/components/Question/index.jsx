@@ -356,7 +356,7 @@ const QuestionWrapper = React.memo((props) => {
     <Box
       data-code={props.qualifiedCode}
       css={css`
-        ${replaceFormatInstructions(props.customCss, formatState, "custom_css")}
+        ${replaceFormatInstructions(props.customCss, formatState, "custom", "css")}
       `}
       sx={{
         borderColor: invalid ? "error.main" : "grey.500",

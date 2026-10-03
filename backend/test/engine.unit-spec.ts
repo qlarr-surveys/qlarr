@@ -115,22 +115,6 @@ describe('EngineService (survey-engine binding)', () => {
     expect(engine.commonScript()).toBe(engine.commonScript());
   });
 
-  describe('maskedValues', () => {
-    it('keeps only masked values that have a matching answer value', () => {
-      expect(
-        engine.maskedValues({
-          'Q1.value': 1,
-          'Q1.masked_value': 'one',
-          'Q2.value': 2, // no masked_value → dropped
-          'Q3.masked_value': 'orphan', // no .value → dropped
-        }),
-      ).toEqual({ 'Q1.masked_value': 'one' });
-    });
-
-    it('returns empty when there are no answer values', () => {
-      expect(engine.maskedValues({ 'Survey.mode': 'online' })).toEqual({});
-    });
-  });
 
   describe('sortChildren', () => {
     // A DFS-flattened index: Survey → [G1 → [Q1, Q2], G2].
