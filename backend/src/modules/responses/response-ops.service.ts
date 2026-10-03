@@ -7,6 +7,7 @@ import { FILE_HELPER, FileHelper } from '../../integrations/filesystem/file-help
 import { SurveyFolder } from '../../integrations/filesystem/survey-folder';
 import { DesignService } from '../design/design.service';
 import { stripQuotaKeys, withComputedQuotaKeys } from '../design/quota.helpers';
+import { QuotaService } from '../design/quota.service';
 import { ResponseRepository } from './response.repository';
 import { SurveyDesignWithErrorException } from '../run/run.exceptions';
 import {
@@ -67,6 +68,7 @@ export class ResponseOpsService {
     @Inject(FILE_HELPER) private readonly files: FileHelper,
     private readonly design: DesignService,
     private readonly engine: EngineService,
+    private readonly quotas: QuotaService,
   ) {}
 
   /**
@@ -147,9 +149,11 @@ export class ResponseOpsService {
     userId: string,
   ): Promise<ResponseCountDto> {
     const counts = await this.responses.counts(surveyId, userId);
+    const quotaCounts = await this.quotas.memberCounts([surveyId]);
     return {
       completeResponseCount: counts.completeResponseCount,
       userResponsesCount: counts.userResponseCount,
+      quotaCounts: quotaCounts[surveyId],
     };
   }
 

@@ -7,6 +7,7 @@ import {
   parseSurveySort,
 } from './survey.dto';
 import { DashboardRepository } from './dashboard.repository';
+import { QuotaService } from '../design/quota.service';
 import {
   RawVersion,
   offlineSurveyFromRow,
@@ -22,7 +23,10 @@ const DEFAULT_PER_PAGE = 5;
  */
 @Injectable()
 export class SurveyDashboardService {
-  constructor(private readonly dashboard: DashboardRepository) {}
+  constructor(
+    private readonly dashboard: DashboardRepository,
+    private readonly quotas: QuotaService,
+  ) {}
 
   async getAllSurveys(
     page: number | undefined,
@@ -61,15 +65,16 @@ export class SurveyDashboardService {
 
     // An ACTIVE survey always has a published version, but guard the LEFT JOIN
     // null defensively rather than 500 on the (shouldn't-happen) row.
-    return rows
-      .filter((row) => row.version != null)
-      .map((row) =>
-        offlineSurveyFromRow(
-          row.survey,
-          row.version as RawVersion,
-          Number(row.complete_count ?? 0),
-          Number(row.user_response_count ?? 0),
-        ),
-      );
+    const published = rows.filter((row) => row.version != null);
+    const quotaCounts = await this.quotas.memberCounts(published.map((row) => row.survey.id));
+    return published.map((row) =>
+      offlineSurveyFromRow(
+        row.survey,
+        row.version as RawVersion,
+        Number(row.complete_count ?? 0),
+        Number(row.user_response_count ?? 0),
+        quotaCounts[row.survey.id],
+      ),
+    );
   }
 }

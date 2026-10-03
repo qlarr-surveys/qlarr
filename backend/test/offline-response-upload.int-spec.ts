@@ -138,7 +138,11 @@ describe('Offline survey response upload', () => {
       .send(validPayload())
       .expect(200);
 
-    expect(res.body).toEqual({ completeResponseCount: 1, userResponsesCount: 1 });
+    expect(res.body).toEqual({
+      completeResponseCount: 1,
+      userResponsesCount: 1,
+      quotaCounts: {},
+    });
 
     const [row] = await root.query(
       `SELECT surveyor, submit_date, preview, nav_index, "values"
@@ -155,12 +159,14 @@ describe('Offline survey response upload', () => {
 
   it('saves quota membership from the backend engine, keeping the device disqualified flag', async () => {
     expect(quotaEnd.navigationIndex.name).toBe('end');
+    let lastBody: { quotaCounts?: Record<string, number> } = {};
     const upload = async (responseId: string, values: object) => {
-      await request(server())
+      const res = await request(server())
         .post(`/survey/${SURVEY_QUOTA}/response/${responseId}/upload`)
         .set('Authorization', SURVEYOR)
         .send({ ...validPayload(), values, navigationIndex: quotaEnd.navigationIndex })
         .expect(200);
+      lastBody = res.body;
       const [row] = await root.query(
         `SELECT "values", quota_codes FROM responses WHERE id = $1`,
         [responseId],
@@ -194,6 +200,8 @@ describe('Offline survey response upload', () => {
     expect(screenedOut.values['Survey.disqualified']).toBe(true);
     expect(screenedOut.values['Survey.quota_QT1']).toBe(true);
     expect(screenedOut.quota_codes).toEqual([]);
+
+    expect(lastBody.quotaCounts).toEqual({ QT1: 2 });
   });
 
   it('accepts Kotlin/Jackson LocalDateTime arrays for start/submit dates', async () => {

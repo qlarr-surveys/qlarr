@@ -152,6 +152,7 @@ export function offlineSurveyFromRow(
   version: RawVersion,
   completeResponseCount: number,
   userResponsesCount: number,
+  quotaCounts: Record<string, number>,
 ): OfflineSurveyDto {
   const status = statusFromDb(survey.status);
   return {
@@ -168,6 +169,7 @@ export function offlineSurveyFromRow(
     surveyQuota: survey.quota,
     userResponsesCount,
     completeResponseCount,
+    quotaCounts,
     latestVersion: versionFromRow(version, status),
     navigationData: parseNavigationData(survey.navigation_data),
     saveTimings: survey.save_timings,
