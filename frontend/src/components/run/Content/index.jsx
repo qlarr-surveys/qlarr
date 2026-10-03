@@ -7,6 +7,11 @@ import {
   ensureCollapsiblesClosed,
 } from "~/hooks/useCollapsibleHandler";
 import { css } from "@emotion/react";
+import { replaceFormatInstructions } from "@qlarr/design-core";
+
+// Re-exported so existing callers can keep importing it from here; the
+// implementation now lives in @qlarr/design-core.
+export { replaceFormatInstructions };
 
 function Content(props) {
   const contentRef = useRef(null);
@@ -64,7 +69,7 @@ function Content(props) {
         className={`${isRtl ? "rtl" : "ltr"} ql-editor no-padding`}
         dangerouslySetInnerHTML={{
           __html: ensureCollapsiblesClosed(
-            replaceFormatInstructions(content, state, name + "_" + surveyLang),
+            replaceFormatInstructions(content, state, name  , surveyLang),
           ),
         }}
       />
@@ -73,25 +78,3 @@ function Content(props) {
 }
 
 export default React.memo(Content);
-
-export function replaceFormatInstructions(html, state, postFix) {
-      console.log("state",state)
-    console.log("html", html)
-    console.log("postFix", postFix)
-  if (!html || !state) {
-    return html;
-  }
-  const allMatches = getAllFormatInstructions(html);
-  allMatches.forEach((match, index) => {
-    const replacement = state[`format_${postFix}_${index + 1}`];
-    if (replacement !== undefined) {
-      html = html.replace(match, replacement);
-    }
-  });
-  return html;
-}
-
-const getAllFormatInstructions = (inputString) => {
-  const regex = /\{\{(.*?)\}\}/g;
-  return Array.from(inputString.matchAll(regex), (m) => m[0]);
-};

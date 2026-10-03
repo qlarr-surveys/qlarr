@@ -1,37 +1,37 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { PassThrough, Readable } from 'node:stream';
-import { ZipFile } from 'yazl';
-import { stripTags } from '../../common/strip-tags';
-import { EngineService } from '../../engine/engine.service';
-import { ComponentIndex } from '../../engine/engine.types';
-import { FILE_HELPER, FileHelper } from '../../integrations/filesystem/file-helper';
-import { SurveyFolder } from '../../integrations/filesystem/survey-folder';
-import { DesignService } from '../design/design.service';
-import { ResponseDetailRow, ResponseRepository } from './response.repository';
+import { Inject, Injectable, Logger } from "@nestjs/common";
+import { replaceFormatInstructions } from "@qlarr/design-core";
+import { PassThrough, Readable } from "node:stream";
+import { ZipFile } from "yazl";
+import { stripTags } from "../../common/strip-tags";
+import { EngineService } from "../../engine/engine.service";
+import { ComponentIndex, ResponseField } from "../../engine/engine.types";
+import {
+  FILE_HELPER,
+  FileHelper,
+} from "../../integrations/filesystem/file-helper";
+import { SurveyFolder } from "../../integrations/filesystem/survey-folder";
+import { DesignService } from "../design/design.service";
+import { ResponseDetailRow, ResponseRepository } from "./response.repository";
 import {
   ResponseDto,
   ResponseEventDto,
   ResponseStatus,
   ResponsesSummaryDto,
   ResponseValue,
-} from './response.dto';
-import {
-  exportCsv,
-  exportXlsx,
-  ResponseFormat,
-} from './response-export';
+} from "./response.dto";
+import { exportCsv, exportXlsx, ResponseFormat } from "./response-export";
 import {
   ResponseNotFoundException,
   SizeLimitExceededException,
-} from './response.exceptions';
+} from "./response.exceptions";
 
 const ADDITIONAL_COL_NAMES = [
-  'index',
-  'id',
-  'start_date',
-  'submit_date',
-  'Lang',
-  'disqualified',
+  "index",
+  "id",
+  "start_date",
+  "submit_date",
+  "Lang",
+  "disqualified",
 ];
 
 const PER_PAGE = 10;
@@ -77,10 +77,15 @@ export class ResponseService {
     from: number,
     to: number,
   ): Promise<Buffer | null> {
-    const responses = await this.responses.findInIndexRange(surveyId, complete, from, to);
+    const responses = await this.responses.findInIndexRange(
+      surveyId,
+      complete,
+      from,
+      to,
+    );
     if (!responses.length) return null;
 
-    const processed = await this.design.getProcessedSurvey(surveyId, false);
+    const processed = await this.design.getProcessedSurvey(surveyId, true);
     const colNames = processed.output.schema.map(
       (f) => `${f.componentCode}.${String(f.columnName).toLowerCase()}`,
     );
@@ -91,19 +96,14 @@ export class ResponseService {
       r.startDate,
       r.submitDate,
       r.lang,
-      r.values['Survey.disqualified'] ?? false,
+      r.values["Survey.disqualified"] ?? false,
       ...colNames.map((c) => r.values[c] ?? null),
     ]);
-    return format === 'XLSX' ? exportXlsx(rows, finalCols) : exportCsv(rows, finalCols);
+    return format === "XLSX"
+      ? exportXlsx(rows, finalCols)
+      : exportCsv(rows, finalCols);
   }
 
-  /**
-   * Export responses in an index range as CSV/XLSX using human-readable
-   * labels + masked values — the `db_values=false` export. Column headers
-   * become `(<index>) <question label>` (answer
-   * columns append ` - <answer label>`), and each cell is the masked value with
-   * the raw DB value in brackets when a mask exists. Returns null when empty.
-   */
   async exportTextResponses(
     surveyId: string,
     complete: boolean | undefined,
@@ -111,58 +111,83 @@ export class ResponseService {
     from: number,
     to: number,
   ): Promise<Buffer | null> {
-    const responses = await this.responses.findInIndexRange(surveyId, complete, from, to);
+    const responses = await this.responses.findInIndexRange(
+      surveyId,
+      complete,
+      from,
+      to,
+    );
     if (!responses.length) return null;
 
-    const processed = await this.design.getProcessedSurvey(surveyId, false);
+    const processed = await this.design.getProcessedSurvey(surveyId, true);
     const survey = processed.output.survey;
-    const lang = (survey.defaultLang as { code?: string } | undefined)?.code ?? 'en';
+    const lang =
+      (survey.defaultLang as { code?: string } | undefined)?.code ?? "en";
     const indexList = buildCodeIndex(processed.output.componentIndexList);
     const labels: Record<string, string> = {};
-    for (const [code, value] of Object.entries(this.engine.labels(survey, lang))) {
-      if (value !== '') labels[code] = stripTags(value); // non-empty, then strip HTML
+    for (const [code, value] of Object.entries(
+      this.engine.labels(survey, lang),
+    )) {
+      // non-empty, then strip HTML, then collapse `{{ pipe refs }}` to a literal `{{...}}`
+      if (value !== "")
+        labels[code] = stripTags(value).replace(/\{\{.*?\}\}/g, "{{...}}");
     }
 
-    // Distinct `<component>.value` keys across all responses, ordered by the
-    // component's position in the design's component index.
+    // `<component>.value` columns from the design schema (the source of truth),
+    // ordered by the component's position in the design's component index. Driving
+    // this from the schema rather than the responses in range keeps the column set
+    // stable and complete across export chunks.
     const order = processed.output.componentIndexList.map((c) => c.code);
-    const valueNames = [...new Set(responses.flatMap((r) => Object.keys(r.values)))]
-      .filter((k) => k.split('.')[1] === 'value')
-      .sort((a, b) => order.indexOf(a.split('.')[0]) - order.indexOf(b.split('.')[0]));
+    const valueFields = processed.output.schema.filter(
+      (f) => String(f.columnName) === "VALUE",
+    );
+    const valueNames = valueFields
+      .map((f) => `${f.componentCode}.value`)
+      .sort(
+        (a, b) =>
+          order.indexOf(a.split(".")[0]) - order.indexOf(b.split(".")[0]),
+      );
+    const dataTypeByCode = valueDataTypes(processed.output.schema);
 
     const colNames = valueNames.map((valueKey) => {
-      const [componentCode, instructionCode] = valueKey.split('.');
-      const componentCodes = this.engine.splitToComponentCodes(componentCode);
-      // >1 code means this is an answer column — prefix it with the question.
-      const base =
-        componentCodes.length > 1
-          ? `(${indexList[componentCodes[0]]}) ${labels[componentCodes[0]] ?? ''}` +
-            ` - ${labels[componentCode] ?? componentCode}`
-          : `(${indexList[componentCode]}) ${labels[componentCode] ?? ''}`;
-      // Value columns carry no suffix; anything else would be tagged.
-      return instructionCode === 'value' ? base : `${base}[${instructionCode}]`;
+      const componentCode = valueKey.split(".")[0];
+      const componentCodes = this.engine
+        .splitToComponentCodes(componentCode)
+        .map((_, i, arr) => arr.slice(0, i + 1).join(""));
+      const componentLabels = componentCodes
+        .map((e) => labels[e])
+        .filter((e) => e);
+      return indexList[componentCodes[0]] + " " + componentLabels.join(" - ");
     });
 
     const finalCols = [...ADDITIONAL_COL_NAMES, ...colNames];
     const rows = responses.map((r) => {
-      const masked = this.engine.maskedValues(r.values);
       return [
         r.index,
         r.id,
         r.startDate,
         r.submitDate,
         r.lang,
-        r.values['Survey.disqualified'] ?? false,
+        r.values["Survey.disqualified"] ?? false,
         ...valueNames.map((valueKey) => {
-          const componentCode = valueKey.split('.')[0];
-          const maskedValue = masked[`${componentCode}.masked_value`];
-          return maskedValue != null
-            ? `${maskedValue} [${r.values[valueKey]}]`
-            : (r.values[valueKey] ?? null);
+          const componentCode = valueKey.split(".")[0];
+          const questionCode =
+            this.engine.splitToComponentCodes(componentCode)[0];
+          return (
+            resolveListAndEnumValues(
+              r.values[valueKey],
+              questionCode,
+              dataTypeByCode[componentCode],
+              labels,
+            ) ?? ""
+          );
         }),
       ];
     });
-    return format === 'XLSX' ? exportXlsx(rows, finalCols) : exportCsv(rows, finalCols);
+
+    return format === "XLSX"
+      ? exportXlsx(rows, finalCols)
+      : exportCsv(rows, finalCols);
   }
 
   async getSummary(
@@ -177,7 +202,11 @@ export class ResponseService {
     const pageIndex = (page ?? PAGE) - 1;
     const offset = pageIndex * size;
 
-    const totalCount = await this.responses.countForSummary(surveyId, status, surveyor);
+    const totalCount = await this.responses.countForSummary(
+      surveyId,
+      status,
+      surveyor,
+    );
     const rows = await this.responses.summaryPage(
       surveyId,
       status,
@@ -192,7 +221,9 @@ export class ResponseService {
     let canExportFiles = false;
     if (confirmFilesExport) {
       const processed = await this.design.getProcessedSurvey(surveyId, false);
-      canExportFiles = processed.output.schema.some((f) => f.dataType === 'file');
+      canExportFiles = processed.output.schema.some(
+        (f) => f.dataType === "file",
+      );
     }
 
     return {
@@ -229,10 +260,10 @@ export class ResponseService {
     for (const row of rows) {
       for (const [questionId, value] of Object.entries(row.values ?? {})) {
         const v = value as Record<string, unknown>;
-        if (!v || typeof v !== 'object' || !('stored_filename' in v)) continue;
+        if (!v || typeof v !== "object" || !("stored_filename" in v)) continue;
         const storedFilename = v.stored_filename as string | undefined;
         const originalFilename = v.filename as string | undefined;
-        const size = typeof v.size === 'number' ? v.size : undefined;
+        const size = typeof v.size === "number" ? v.size : undefined;
         if (storedFilename && originalFilename && size != null) {
           filesToDownload.push({
             responseId: row.id,
@@ -267,15 +298,15 @@ export class ResponseService {
       currentBody?.destroy();
       currentPass?.destroy();
     };
-    output.once('close', abort);
-    output.once('error', abort);
+    output.once("close", abort);
+    output.once("error", abort);
 
     // yazl re-emits any error from an added read stream as 'error' on the
     // ZipFile; an EventEmitter emitting 'error' with no listener throws and
     // takes the process down. Guard it (the consumer also handles output
     // errors on the returned stream).
-    zip.on('error', (err) => {
-      this.logger.error('Error while building bulk-download zip', err as Error);
+    zip.on("error", (err) => {
+      this.logger.error("Error while building bulk-download zip", err as Error);
     });
     // Feed entries sequentially; yazl serializes them into the output stream.
     void (async () => {
@@ -303,7 +334,7 @@ export class ResponseService {
             pass,
             `${file.index}-${file.questionId}-${file.originalFilename}`,
           );
-          dl.body.on('error', (err) => {
+          dl.body.on("error", (err) => {
             this.logger.error(
               `Error streaming ${file.storedFilename} for response ${file.responseId}`,
               err as Error,
@@ -315,8 +346,8 @@ export class ResponseService {
           // so at most one S3 stream is in flight (bounded memory). 'close'
           // also covers the abort path, where the pass is destroyed.
           await new Promise<void>((resolve) => {
-            pass.once('end', resolve);
-            pass.once('close', resolve);
+            pass.once("end", resolve);
+            pass.once("close", resolve);
           });
         } catch (err) {
           this.logger.error(
@@ -336,8 +367,8 @@ export class ResponseService {
   }
 
   /**
-   * Read one response with its answers resolved to human-readable, labelled,
-   * masked values. Tenant-scoped from the token — NOT survey-scoped. Values are
+   * Read one response with its answers resolved to human-readable, labelled
+   * values. Tenant-scoped from the token — NOT survey-scoped. Values are
    * ordered by the respondent's own child ordering
    * (`sortChildren`), and cover every component that has a stored value or an
    * associated timeline event.
@@ -347,7 +378,7 @@ export class ResponseService {
     const processed = await this.design.getProcessedSurvey(row.surveyId, false);
     const indexList = buildCodeIndex(processed.output.componentIndexList);
     const labels = this.resolveLabels(processed.output.survey);
-    const masked = this.engine.maskedValues(row.values);
+    const dataTypeByCode = valueDataTypes(processed.output.schema);
     const sorted = this.engine.sortChildren(
       processed.output.componentIndexList,
       row.values,
@@ -357,15 +388,28 @@ export class ResponseService {
       .map((e) => eventComponentCode(e))
       .filter((c): c is string => c != null);
     const valueCodes = Object.keys(row.values)
-      .filter((k) => k.split('.').pop() === 'value')
-      .map((k) => k.split('.')[0]);
+      .filter(
+        (k) => k.split(".").pop() === "value" && !isEmptyValue(row.values[k]),
+      )
+      .map((k) => k.split(".")[0]);
 
     const values = sorted
       .map((c) => c.code)
       .filter((code) => valueCodes.includes(code) || eventCodes.includes(code))
       .map((code) =>
-        buildResponseValue(code, row.values, indexList, labels, masked, this.engine),
-      );
+        buildResponseValue(
+          code,
+          row.values,
+          indexList,
+          labels,
+          dataTypeByCode,
+          this.engine,
+          row.lang,
+        ),
+      )
+      // Drop entries with no answer (empty string, empty array, or null — e.g.
+      // event-only codes that carry no `.value`).
+      .filter((rv) => !isEmptyValue(rv.value));
 
     return {
       id: row.id,
@@ -374,7 +418,7 @@ export class ResponseService {
       submitDate: row.submitDate,
       lang: row.lang,
       preview: row.preview,
-      disqualified: (row.values['Survey.disqualified'] as boolean) ?? false,
+      disqualified: (row.values["Survey.disqualified"] as boolean) ?? false,
       values,
       surveyorName: row.surveyor ? `${row.firstName} ${row.lastName}` : null,
       surveyorID: row.surveyor,
@@ -383,7 +427,7 @@ export class ResponseService {
       // view keeps only the user-facing ones (voice recordings, locations).
       events: row.events.filter((e) => {
         const name = (e as { name?: string }).name;
-        return name !== 'ValueTiming' && name !== 'Navigation';
+        return name !== "ValueTiming" && name !== "Navigation";
       }),
       ipAddress: row.ipAddress,
     };
@@ -398,10 +442,10 @@ export class ResponseService {
     const processed = await this.design.getProcessedSurvey(row.surveyId, false);
     const indexList = buildCodeIndex(processed.output.componentIndexList);
     const labels = this.resolveLabels(processed.output.survey);
-    const masked = this.engine.maskedValues(row.values);
+    const dataTypeByCode = valueDataTypes(processed.output.schema);
 
     return row.events.map((event) => {
-      if ((event as { name?: string }).name === 'ValueTiming') {
+      if ((event as { name?: string }).name === "ValueTiming") {
         const code = (event as { code: string }).code;
         return {
           event,
@@ -410,8 +454,9 @@ export class ResponseService {
             row.values,
             indexList,
             labels,
-            masked,
+            dataTypeByCode,
             this.engine,
+            row.lang,
           ),
         };
       }
@@ -430,11 +475,16 @@ export class ResponseService {
   }
 
   /** Component code → plain-text label for the survey's default language. */
-  private resolveLabels(survey: Record<string, unknown>): Record<string, string> {
-    const lang = (survey.defaultLang as { code?: string } | undefined)?.code ?? 'en';
+  private resolveLabels(
+    survey: Record<string, unknown>,
+  ): Record<string, string> {
+    const lang =
+      (survey.defaultLang as { code?: string } | undefined)?.code ?? "en";
     const labels: Record<string, string> = {};
-    for (const [code, value] of Object.entries(this.engine.labels(survey, lang))) {
-      if (value !== '') labels[code] = stripTags(value); // non-empty, then strip HTML
+    for (const [code, value] of Object.entries(
+      this.engine.labels(survey, lang),
+    )) {
+      if (value !== "") labels[code] = stripTags(value); // non-empty, then strip HTML
     }
     return labels;
   }
@@ -466,51 +516,148 @@ export class ResponseService {
  * target; everything else has none.
  */
 function eventComponentCode(event: unknown): string | null {
-  if (!event || typeof event !== 'object') return null;
+  if (!event || typeof event !== "object") return null;
   const e = event as { name?: string; code?: string; to?: string };
-  if (e.name === 'ValueTiming') return e.code ?? null;
-  if (e.name === 'Navigation') return e.to ?? null;
+  if (e.name === "ValueTiming") return e.code ?? null;
+  if (e.name === "Navigation") return e.to ?? null;
   return null;
 }
 
 /**
- * Build a labelled, masked `ResponseValue` for one component code. Answer codes
- * (more than one component code) prefix their question's index + label; the
- * value is the masked value with the raw value in brackets when a mask exists.
+ * The per-component slice of the flat response values, with the `<code>.` prefix
+ * stripped — the shape `replaceFormatInstructions` expects as its `state` (keys
+ * like `format_label_en_1`).
  */
+function formatState(
+  values: Record<string, unknown>,
+  code: string,
+): Record<string, unknown> {
+  const prefix = `${code}.`;
+  const state: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(values)) {
+    if (k.startsWith(prefix)) state[k.slice(prefix.length)] = v;
+  }
+  return state;
+}
+
+/**
+ * Which language's `format_<name>_<lang>_<n>` results to use. Prefers the
+ * response's language, but falls back to whatever language the stored
+ * instructions actually carry — the survey's languages may have changed after
+ * this response was collected.
+ */
+function pickFormatLang(
+  state: Record<string, unknown>,
+  name: string,
+  preferred: string,
+): string {
+  const prefix = `format_${name}_`;
+  const langs = new Set<string>();
+  for (const k of Object.keys(state)) {
+    if (!k.startsWith(prefix)) continue;
+    const match = k.slice(prefix.length).match(/^(.+)_\d+$/);
+    if (match) langs.add(match[1]);
+  }
+  return langs.has(preferred)
+    ? preferred
+    : (langs.values().next().value ?? preferred);
+}
+
+/**
+ * Whether a stored or resolved answer counts as "no answer": null/undefined,
+ * an empty string, or an empty array. Used both to decide which codes are worth
+ * rendering and as the final drop filter.
+ */
+function isEmptyValue(value: unknown): boolean {
+  return (
+    value == null ||
+    value === "" ||
+    (Array.isArray(value) && value.length === 0)
+  );
+}
+
 function buildResponseValue(
   code: string,
   values: Record<string, unknown>,
   indexList: Record<string, string>,
   labels: Record<string, string>,
-  masked: Record<string, unknown>,
+  dataTypeByCode: Record<string, unknown>,
   engine: EngineService,
+  lang: string,
 ): ResponseValue {
   const componentCodes = engine.splitToComponentCodes(code);
+  const resolveLabel = (c: string, text: string) => {
+    const state = formatState(values, c);
+    return replaceFormatInstructions(
+      text,
+      state,
+      "label",
+      pickFormatLang(state, "label", lang),
+    );
+  };
   const key =
     componentCodes.length > 1
-      ? `(${indexList[componentCodes[0]]}) ${labels[componentCodes[0]] ?? ''}` +
-        ` - ${labels[code] ?? code}`
-      : `(${indexList[code]}) ${labels[code] ?? ''}`;
+      ? `(${indexList[componentCodes[0]]}) ${resolveLabel(
+          componentCodes[0],
+          labels[componentCodes[0]] ?? "",
+        )} - ${resolveLabel(code, labels[code] ?? code)}`
+      : `(${indexList[code]}) ${resolveLabel(code, labels[code] ?? "")}`;
   let value: unknown = null;
   if (Object.prototype.hasOwnProperty.call(values, `${code}.value`)) {
-    const raw = values[`${code}.value`];
-    const maskedValue = masked[`${code}.masked_value`];
-    value = maskedValue != null ? `${maskedValue} (${raw})` : raw;
+    value = resolveListAndEnumValues(
+      values[`${code}.value`],
+      componentCodes[0],
+      dataTypeByCode[code],
+      labels,
+    );
   }
   return { key, code, value };
 }
 
-function buildCodeIndex(componentIndexList: ComponentIndex[]): Record<string, string> {
+
+export function resolveListAndEnumValues(
+  raw: unknown,
+  questionCode: string,
+  dataType: unknown,
+  labels: Record<string, string>,
+): unknown {
+  const toLabel = (code: unknown) => labels[questionCode + String(code)] ?? code;
+  const type = dataTypeName(dataType);
+  // An unanswered enum stores an empty string; resolving it would land on
+  // `labels[questionCode]` (the question's own label) instead of an answer, so
+  // leave it empty for the caller's empty-value filter to drop.
+  if (type === "enum" && typeof raw === "string" && raw !== "")
+    return toLabel(raw);
+  if (type === "list" && Array.isArray(raw)) return raw.map(toLabel).join(", ");
+  return raw;
+}
+
+/**
+ * componentCode → `dataType` for every `VALUE` field in the response schema, so
+ * cells/response values can resolve choice answer codes to their labels.
+ */
+export function valueDataTypes(
+  schema: ResponseField[],
+): Record<string, unknown> {
+  const byCode: Record<string, unknown> = {};
+  for (const f of schema) {
+    if (String(f.columnName) === "VALUE") byCode[f.componentCode] = f.dataType;
+  }
+  return byCode;
+}
+
+function buildCodeIndex(
+  componentIndexList: ComponentIndex[],
+): Record<string, string> {
   const index: Record<string, string> = {};
   let groupIndex = 0;
   let questionIndex = 0;
-  let currentQuestion = '';
+  let currentQuestion = "";
   for (const { code } of componentIndexList.slice(1)) {
-    if (code.startsWith('G')) {
+    if (code.startsWith("G")) {
       groupIndex += 1;
       index[code] = `P${groupIndex}`;
-    } else if (code.startsWith('Q') && !code.includes('A')) {
+    } else if (code.startsWith("Q") && !code.includes("A")) {
       currentQuestion = code;
       questionIndex += 1;
       index[code] = `Q${questionIndex}`;
@@ -519,4 +666,21 @@ function buildCodeIndex(componentIndexList: ComponentIndex[]): Record<string, st
     }
   }
   return index;
+}
+
+/**
+ * Schema `dataType` is either a bare string (`"string"`, `"double"`, …) or an
+ * object with a `type` discriminator (`{type:"enum",…}` / `{type:"list",…}`).
+ * Normalize both to the lowercase type name.
+ */
+function dataTypeName(dataType: unknown): string | undefined {
+  if (typeof dataType === "string") return dataType.toLowerCase();
+  if (
+    dataType &&
+    typeof dataType === "object" &&
+    typeof (dataType as { type?: unknown }).type === "string"
+  ) {
+    return (dataType as { type: string }).type.toLowerCase();
+  }
+  return undefined;
 }

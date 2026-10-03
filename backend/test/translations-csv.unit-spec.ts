@@ -53,6 +53,21 @@ describe('toCsvRows', () => {
     delete s.Survey.additionalLang;
     expect(toCsvRows(s)[0]).toEqual(['code', 'key', 'en']);
   });
+
+  it('skips a repeated copy root and its whole subtree', () => {
+    const s = state();
+    // The engine expands the G1 repeatable into a `G1_x` copy whose subtree hangs
+    // beneath it. Only the copy root carries repeatInfo.type "repeated".
+    s.Survey.children!.push({ code: 'G1_x', qualifiedCode: 'G1_x' });
+    s.G1_x = {
+      repeatInfo: { type: 'repeated' },
+      content: { en: { label: 'Page one copy' } },
+      children: [{ code: 'Q1_x', qualifiedCode: 'Q1_x' }],
+    } as any;
+    // A descendant of the copy carries no repeated flag, yet must still be excluded.
+    s.Q1_x = { content: { en: { label: '<p>Copied question</p>' } } };
+    expect(toCsvRows(s)).toEqual(exported);
+  });
 });
 
 describe('toCsv and parseCsv', () => {
@@ -127,6 +142,20 @@ describe('csvChanges', () => {
   it('reads the changes from a semicolon file', () => {
     const csv = 'code;key;en;ar\nG1;label;Page one;الصفحة\n';
     expect(csvChanges(parseCsv(csv), state(), false)).toEqual([
+      { code: 'G1', lang: 'ar', key: 'label', value: 'الصفحة' },
+    ]);
+  });
+
+  it('skips a row for a repeated copy, which is absent from the template state', () => {
+    // importTranslations validates against the template-only state (copies stripped),
+    // so a copy code like `G1_x` is a component that does not exist: editing its text
+    // is a no-op, exactly like the unknown `Q404` code, while real rows still apply.
+    const rows = [
+      ['code', 'key', 'en', 'ar'],
+      ['G1_x', 'label', 'Changed copy', 'نسخة'],
+      ['G1', 'label', 'Page one', 'الصفحة'],
+    ];
+    expect(csvChanges(rows, state(), false)).toEqual([
       { code: 'G1', lang: 'ar', key: 'label', value: 'الصفحة' },
     ]);
   });

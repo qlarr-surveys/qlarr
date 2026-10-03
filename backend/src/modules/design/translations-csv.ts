@@ -9,6 +9,9 @@ export interface DesignComponent {
   children?: { code: string; qualifiedCode?: string }[];
   defaultLang?: { code: string };
   additionalLang?: { code: string }[];
+  // Only a `repeated` copy ROOT carries this; the engine expands repeatables into
+  // copies we must never list for translation (they're transient runtime output).
+  repeatInfo?: { type?: string };
 }
 
 export type DesignState = Record<string, DesignComponent>;
@@ -58,6 +61,9 @@ function walk(
 ): void {
   const comp = state[code];
   if (!comp) return;
+  // A copy root and its whole subtree are unreachable except through the root, so
+  // stopping here excludes every repeated copy without a separate descendant check.
+  if (comp.repeatInfo?.type === 'repeated') return;
   visit(code, comp);
   for (const child of comp.children ?? []) {
     walk(state, child.qualifiedCode ?? child.code, visit);

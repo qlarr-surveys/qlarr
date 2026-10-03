@@ -42,7 +42,7 @@ function Group(props) {
           '--qlarr-bg-color': theme.palette.background.paper,
         }}
         css={css`
-          ${replaceFormatInstructions(props.group.customCss, formatState, "custom_css")}
+          ${replaceFormatInstructions(props.group.customCss, formatState, "custom", "css")}
         `}
       >
         <div className={styles.groupHeader}>
