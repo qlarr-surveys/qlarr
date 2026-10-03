@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { getAllFormatInstructions } from '@qlarr/design-core';
 import { stripTags } from '../../common/strip-tags';
 import { EngineService } from '../../engine/engine.service';
 import { ResponseField } from '../../engine/engine.types';
@@ -246,6 +247,8 @@ export async function buildAnalyticsContext(
     responses = rows.map((r) => JSON.parse(r.values) as Record<string, unknown>);
   }
 
+  resolveFormatInstructionLabels(labels, responses, lang);
+
   return {
     labels,
     schemaMap,
@@ -256,6 +259,95 @@ export async function buildAnalyticsContext(
     surveyId,
     responses,
   };
+}
+
+// --- format instruction resolution ---
+
+// A `{{ ... }}` whose sole content is an "other" free-text reference
+// (`<questionCode>AotherAtext.value`). There's no meaningful aggregate value for
+// it, so it renders as the literal "Other".
+const OTHER_TEXT_REF = /^\s*\w+AotherAtext\.value\s*$/;
+const FORMAT_LABEL_NAME = 'label';
+
+/**
+ * Resolve the `{{ ... }}` format instructions that survive in analytics labels,
+ * in place. Format instructions are per-response string substitutions: the
+ * engine computes each placeholder's result when it renders a component and
+ * stores it under `<code>.format_label_<lang>_<n>` in that response's values
+ * (see @qlarr/design-core formatInstructions). Analytics has no single response,
+ * so for each placeholder (indexed in document order, matching the engine's `n`):
+ *   1. a standalone "other" free-text ref → the literal "Other";
+ *   2. otherwise, substitute the stored value ONLY when every response that
+ *      carries it agrees — a design-stable value (e.g. a repeat instance's brand
+ *      label) rather than a per-respondent free-text answer;
+ *   3. anything still unresolved collapses to a literal `{{...}}`.
+ * The consistency check is pinned to `defaultLang` (falling back to another
+ * single language only when the default carries none) so a multi-language
+ * response set doesn't read as inconsistent.
+ */
+export function resolveFormatInstructionLabels(
+  labels: Record<string, string>,
+  responses: Array<Record<string, unknown>>,
+  defaultLang: string,
+): void {
+  for (const [code, label] of Object.entries(labels)) {
+    if (!label.includes('{{')) continue;
+    let text = label;
+    getAllFormatInstructions(label).forEach((match: string, i: number) => {
+      const inner = match.slice(2, -2);
+      const replacement = OTHER_TEXT_REF.test(inner)
+        ? 'Other'
+        : consistentFormatValue(responses, code, i + 1, defaultLang);
+      if (replacement !== undefined) text = text.replace(match, () => replacement);
+    });
+    labels[code] = text.replace(/\{\{.*?\}\}/g, '{{...}}');
+  }
+}
+
+/**
+ * The stored `format_label_<lang>_<n>` value for component `code`'s n-th
+ * placeholder, but only when it's consistent across the response set. Prefers
+ * the default language; falls back to another language only when the default
+ * carries no value at all. Returns undefined when absent or inconsistent — the
+ * caller then leaves the placeholder to be collapsed.
+ */
+function consistentFormatValue(
+  responses: Array<Record<string, unknown>>,
+  code: string,
+  n: number,
+  defaultLang: string,
+): string | undefined {
+  const collect = (lang: string): Set<string> => {
+    const key = `${code}.format_${FORMAT_LABEL_NAME}_${lang}_${n}`;
+    const values = new Set<string>();
+    for (const response of responses) {
+      const v = response[key];
+      if (v != null && v !== '') values.add(String(v));
+    }
+    return values;
+  };
+
+  const preferred = collect(defaultLang);
+  if (preferred.size === 1) return preferred.values().next().value;
+  if (preferred.size > 1) return undefined; // inconsistent in the default language
+
+  // Default language carries nothing — fall back to any other single language
+  // that is itself consistent.
+  const prefix = `${code}.format_${FORMAT_LABEL_NAME}_`;
+  const suffix = `_${n}`;
+  const otherLangs = new Set<string>();
+  for (const response of responses) {
+    for (const k of Object.keys(response)) {
+      if (!k.startsWith(prefix) || !k.endsWith(suffix)) continue;
+      const lang = k.slice(prefix.length, k.length - suffix.length);
+      if (lang && lang !== defaultLang) otherLangs.add(lang);
+    }
+  }
+  for (const lang of otherLangs) {
+    const values = collect(lang);
+    if (values.size === 1) return values.values().next().value;
+  }
+  return undefined;
 }
 
 // --- tree traversal ---
