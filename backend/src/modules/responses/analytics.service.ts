@@ -358,6 +358,9 @@ function traverseSurveyTree(
   engine: EngineService,
   visit: (n: Record<string, unknown>, code: string | null, parentQuestionCode: string | null) => void,
 ): void {
+  // Skip repeatable copies, since they are design only and never carry values
+  const repeatInfo = node.repeatInfo as { type?: string } | undefined;
+  if (repeatInfo?.type === 'repeatable') return;
   const code = (node.code as string | undefined) ?? null;
   visit(node, code, parentQuestionCode);
   const currentQuestion = code && engine.isQuestionCode(code) ? code : parentQuestionCode;
