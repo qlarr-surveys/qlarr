@@ -31,6 +31,7 @@ import {
   QUOTA_PARAM,
   quotaMessageKey,
 } from "@qlarr/design-core/constants/design";
+import { brokenQuotaCodes } from "@qlarr/design-core";
 import { routes } from "~/routes";
 import { isNotEmptyHtml } from "~/utils/design/utils";
 import { QlarrLogicBuilderInlineWrapper } from "~/components/design/setup/logic/QlarrLogicBuilder";
@@ -94,16 +95,8 @@ function GroupQuotas({ disabled }) {
     [status],
   );
 
-  const errorsByCode = useMemo(
-    () =>
-      Object.fromEntries(
-        (survey?.instructionList || [])
-          .filter((instruction) => instruction.code.startsWith("quota_"))
-          .map((instruction) => [
-            instruction.code.slice("quota_".length),
-            instruction.errors || [],
-          ]),
-      ),
+  const brokenCodes = useMemo(
+    () => brokenQuotaCodes(survey),
     [survey?.instructionList],
   );
 
@@ -202,8 +195,11 @@ function GroupQuotas({ disabled }) {
               key={quota.code}
               quota={quota}
               count={statusByCode[quota.code]?.count ?? 0}
-              full={statusByCode[quota.code]?.full ?? false}
-              errors={errorsByCode[quota.code] || []}
+              full={
+                !brokenCodes.has(quota.code) &&
+                (statusByCode[quota.code]?.full ?? false)
+              }
+              broken={brokenCodes.has(quota.code)}
               expanded={!disabled && expanded === quota.code}
               onToggle={() => toggle(quota)}
               disabled={disabled}
@@ -230,7 +226,7 @@ function QuotaCard({
   quota,
   count,
   full,
-  errors,
+  broken,
   expanded,
   onToggle,
   disabled,
@@ -299,7 +295,9 @@ function QuotaCard({
           </Typography>
         </Box>
         <Box className={styles.cardMeta}>
-          {full ? (
+          {broken ? (
+            <Chip size="small" label={t("group_quotas.inactive")} />
+          ) : full ? (
             <Chip size="small" color="error" label={t("group_quotas.full")} />
           ) : null}
           <Box className={styles.fill}>
@@ -332,7 +330,7 @@ function QuotaCard({
         </Box>
       </Box>
 
-      {errors.length > 0 && (
+      {broken && (
         <Typography
           variant="caption"
           color="error"

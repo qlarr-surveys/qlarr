@@ -11,6 +11,7 @@ import {
   refreshDsl,
 } from "../state/mutations";
 import { quotaMessageKey } from "../constants/design";
+import { brokenQuotaCodes } from "../state/addInstructions";
 import sample from "./fixtures/sample-survey.json";
 
 const QUESTION = "Q298jbb";
@@ -129,6 +130,15 @@ describe("quotas", () => {
     const kept = quotaInstructions(state).find((i) => i.code === `quota_${first}`);
     expect(kept).toBe(firstInstruction);
     expect(kept.errors).toEqual(["SOME_ERROR"]);
+  });
+
+  it("reports quotas whose compiled condition has errors as broken", () => {
+    const [first, second] = addQuotas(2);
+    updateQuota(state, { code: first, changes: { condition } });
+    updateQuota(state, { code: second, changes: { condition } });
+    quotaInstructions(state).find((i) => i.code === `quota_${first}`).errors = ["SOME_ERROR"];
+
+    expect(brokenQuotaCodes(state.Survey)).toEqual(new Set([first]));
   });
 
   it("recompiles quota conditions when their question changes type", () => {

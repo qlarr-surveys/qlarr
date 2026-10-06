@@ -409,6 +409,9 @@
     "settings": "Configuración",
     "publish_tooltip": "Tus cambios aún no están en vivo. Publica para actualizar tu encuesta para todos.",
     "publish_error": "Por favor corrige los errores en tu encuesta antes de comenzar.",
+    "broken_quotas_title": "Algunas cuotas no se aplicarán",
+    "broken_quotas": "Estas cuotas hacen referencia a preguntas u opciones que ya no existen, por lo que no contarán ni excluirán a ningún encuestado: {{quotas}}. Corrige sus condiciones en Cuotas o publica de todos modos.",
+    "publish_anyway": "Publicar de todos modos",
     "download_qr_code": "Descargar código QR"
   },
   "email": {
@@ -656,6 +659,7 @@
     "untitled": "Cuota sin título",
     "no_condition": "Sin condición",
     "full": "Llena",
+    "inactive": "Inactiva",
     "no_limit": "sin límite",
     "condition_error": "Esta condición hace referencia a una pregunta u opción que ya no existe.",
     "label": "Etiqueta",

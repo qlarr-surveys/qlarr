@@ -409,6 +409,9 @@
     "settings": "Paramètres",
     "publish_tooltip": "Vos modifications ne sont pas encore en direct. Publiez pour mettre à jour votre sondage pour tout le monde.",
     "publish_error": "Veuillez corriger les erreurs dans votre sondage avant de commencer.",
+    "broken_quotas_title": "Certains quotas ne seront pas appliqués",
+    "broken_quotas": "Ces quotas font référence à des questions ou options qui n'existent plus, ils ne compteront ni n'excluront aucun répondant : {{quotas}}. Corrigez leurs conditions dans Quotas, ou publiez quand même.",
+    "publish_anyway": "Publier quand même",
     "download_qr_code": "Télécharger le code QR"
   },
   "email": {
@@ -656,6 +659,7 @@
     "untitled": "Quota sans titre",
     "no_condition": "Aucune condition définie",
     "full": "Plein",
+    "inactive": "Inactif",
     "no_limit": "sans limite",
     "condition_error": "Cette condition fait référence à une question ou une option qui n'existe plus.",
     "label": "Libellé",

@@ -409,6 +409,9 @@
     "settings": "Configurações",
     "publish_tooltip": "Suas alterações ainda não estão ativas. Publique para atualizar sua pesquisa para todos.",
     "publish_error": "Por favor corrija os erros em sua pesquisa antes de começar.",
+    "broken_quotas_title": "Algumas cotas não serão aplicadas",
+    "broken_quotas": "Estas cotas fazem referência a perguntas ou opções que já não existem, portanto não contarão nem excluirão nenhum respondente: {{quotas}}. Corrija as suas condições em Cotas ou publique mesmo assim.",
+    "publish_anyway": "Publicar mesmo assim",
     "download_qr_code": "Baixar código QR"
   },
   "email": {
@@ -656,6 +659,7 @@
     "untitled": "Cota sem título",
     "no_condition": "Nenhuma condição definida",
     "full": "Cheia",
+    "inactive": "Inativa",
     "no_limit": "sem limite",
     "condition_error": "Esta condição faz referência a uma pergunta ou opção que não existe mais.",
     "label": "Rótulo",

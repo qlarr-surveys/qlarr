@@ -409,6 +409,9 @@
     "settings": "Settings",
     "publish_tooltip": "Your changes are not live yet. Publish to update your survey for everyone.",
     "publish_error": "Please fix the errors in your survey before starting.",
+    "broken_quotas_title": "Some quotas won't be enforced",
+    "broken_quotas": "These quotas reference questions or options that no longer exist, so no respondent will be counted or screened out by them: {{quotas}}. Fix their conditions in Quotas, or publish anyway.",
+    "publish_anyway": "Publish anyway",
     "download_qr_code": "Download QR Code"
   },
   "email": {
@@ -656,6 +659,7 @@
     "untitled": "Untitled quota",
     "no_condition": "No condition set",
     "full": "Full",
+    "inactive": "Inactive",
     "no_limit": "no limit",
     "condition_error": "This condition references a question or option that no longer exists.",
     "label": "Label",

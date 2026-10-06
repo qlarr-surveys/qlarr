@@ -409,6 +409,9 @@
     "settings": "Instellingen",
     "publish_tooltip": "Je wijzigingen zijn nog niet live. Publiceer om je enquête voor iedereen bij te werken.",
     "publish_error": "Corrigeer de fouten in je enquête voordat je begint.",
+    "broken_quotas_title": "Sommige quota worden niet toegepast",
+    "broken_quotas": "Deze quota verwijzen naar vragen of opties die niet meer bestaan, dus ze tellen of weigeren geen respondenten: {{quotas}}. Herstel hun voorwaarden bij Quota, of publiceer toch.",
+    "publish_anyway": "Toch publiceren",
     "download_qr_code": "QR-code downloaden"
   },
   "email": {
@@ -656,6 +659,7 @@
     "untitled": "Quotum zonder titel",
     "no_condition": "Geen voorwaarde ingesteld",
     "full": "Vol",
+    "inactive": "Inactief",
     "no_limit": "geen limiet",
     "condition_error": "Deze voorwaarde verwijst naar een vraag of optie die niet meer bestaat.",
     "label": "Label",

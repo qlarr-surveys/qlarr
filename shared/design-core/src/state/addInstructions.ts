@@ -1255,6 +1255,14 @@ export const quotaInstruction = (quota, state) => {
   return { code, text, isActive: true, returnType: "boolean" };
 };
 
+
+export const brokenQuotaCodes = (survey) =>
+  new Set(
+    (survey?.instructionList || [])
+      .filter((instruction) => instruction.code.startsWith("quota_") && instruction.errors?.length)
+      .map((instruction) => instruction.code.slice("quota_".length)),
+  );
+
 export const conditionalRelevanceEquation = (logic, rule, state) => {
   const code = "conditional_relevance";
   if (rule == "show_always") {
