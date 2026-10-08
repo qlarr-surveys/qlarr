@@ -115,6 +115,45 @@ class DesignService extends BaseService {
     );
     return response.data;
   }
+
+  async uploadHierarchicalResource(file, componentId, levelCount, surveyId = null) {
+    if (!surveyId) {
+      surveyId = sessionStorage.getItem("surveyId");
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await authenticatedApi.post(
+      `/hierarchical-autocomplete/${surveyId}/${componentId}`,
+      formData,
+      {
+        params: { levels: levelCount },
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  }
+
+  async getHierarchicalCsv(componentId, langs, labels, surveyId = null) {
+    if (!surveyId) {
+      surveyId = sessionStorage.getItem("surveyId");
+    }
+    const response = await authenticatedApi.get(
+      `/hierarchical-autocomplete/${surveyId}/${componentId}`,
+      {
+        params: {
+          langs: Array.isArray(langs) ? langs.join(",") : langs,
+          labels: JSON.stringify(labels || []),
+        },
+        responseType: "blob",
+      }
+    );
+    return response.data;
+  }
 }
 
 export default DesignService;

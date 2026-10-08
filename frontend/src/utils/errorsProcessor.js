@@ -27,6 +27,10 @@ export const PROCESSED_ERRORS = {
     name: "autocomplete_malformed_input",
     handleGlobally: false,
   },
+  HIERARCHICAL_AUTOCOMPLETE_MALFORMED_INPUT: {
+    name: "hierarchical_autocomplete_malformed_input",
+    handleGlobally: false,
+  },
   MAX_UPLOAD_SIZE_EXCEEDED: {
     name: "max_upload_size_exceeded",
     handleGlobally: false,
@@ -114,6 +118,8 @@ export const processError = (e) => {
         return PROCESSED_ERRORS.WRONG_CREDENTIALS;
       case "AutoCompleteMalformedInputException":
         return PROCESSED_ERRORS.AUTOCOMPLETE_MALFORMED_INPUT;
+      case "HierarchicalAutoCompleteMalformedInputException":
+        return PROCESSED_ERRORS.HIERARCHICAL_AUTOCOMPLETE_MALFORMED_INPUT;
       case "MaxUploadSizeExceededException":
         return PROCESSED_ERRORS.MAX_UPLOAD_SIZE_EXCEEDED;
       case "SizeLimitExceededException":

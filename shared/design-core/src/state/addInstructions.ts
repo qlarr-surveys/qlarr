@@ -906,7 +906,10 @@ const requiredText = (qualifiedCode, component) => {
       ` == ` +
       rows.length
     );
-  } else if (component.type == "multiple_text") {
+  } else if (
+    component.type == "multiple_text" ||
+    component.type == "hierarchical_autocomplete"
+  ) {
     const rows = component.children;
     return (
       `[${rows.map(
@@ -1677,12 +1680,16 @@ export const processValidation = (state, code, rule, modifyEquation = true) => {
     (component.type == "scq_array" ||
       component.type == "mcq_array" ||
       component.type == "multiple_text" ||
+      component.type == "hierarchical_autocomplete" ||
       component.type == "scq_icon_array") &&
     rule == "validation_required"
   ) {
     component.children
       .filter(
-        (child) => child.type == "row" || component.type == "multiple_text",
+        (child) =>
+          child.type == "row" ||
+          component.type == "multiple_text" ||
+          component.type == "hierarchical_autocomplete",
       )
       .forEach((row) => {
         const child = state[row.qualifiedCode];

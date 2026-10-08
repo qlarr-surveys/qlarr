@@ -92,8 +92,16 @@ export const toCsv = (rows: string[][]): string =>
 export function parseCsv(text: string): string[][] {
   // Node keeps the BOM Excel writes, and the header check needs it gone.
   if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
-  // Excel set to a decimal-comma locale (de, fr, nl, es, pt) saves with `;`.
-  const sep = /^"?code"?;/.test(text) ? ';' : ',';
+  // Pick the delimiter from the header line: `;` when it structures the header
+  // (Excel in decimal-comma locales — de, fr, nl, es, pt — saves that way), else
+  // `,`. Header-agnostic, so CSVs whose header isn't `code,…` (e.g. the
+  // language-keyed hierarchical-autocomplete data) parse correctly too.
+  const firstLine = text.split(/\r?\n/, 1)[0] ?? '';
+  const sep =
+    firstLine.includes(';') &&
+    firstLine.split(';').length > firstLine.split(',').length
+      ? ';'
+      : ',';
   const rows: string[][] = [];
   let row: string[] = [];
   let cell = '';

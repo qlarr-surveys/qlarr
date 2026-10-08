@@ -32,6 +32,22 @@ export class AutoCompleteRepository {
   }
 
   /**
+   * Same `auto_complete` row, but `data` is an array of per-language objects
+   * (`{ en: [...], de: [...] }`) rather than a flat string list.
+   */
+  async getHierarchicalData(
+    surveyId: string,
+    componentId: string,
+  ): Promise<Array<Record<string, string[]>>> {
+    const [row]: Array<{ data: Array<Record<string, string[]>> }> =
+      await this.db.manager.query(
+        `SELECT data FROM auto_complete WHERE survey_id = $1 AND component_id = $2`,
+        [surveyId, componentId],
+      );
+    return row && Array.isArray(row.data) ? row.data : [];
+  }
+
+  /**
    * Distinct values in a survey's autocomplete file matching the term. A survey
    * that can't be resolved is 404'd upstream before reaching here, so this
    * always runs against an existing survey.
@@ -110,5 +126,17 @@ export class AutoCompleteRepository {
        VALUES ($1, $2, $3::jsonb, $4)`,
       [surveyId, componentId, data, filename],
     );
+  }
+
+  async replace(
+    surveyId: string,
+    componentId: string,
+    data: string,
+    filename: string,
+  ): Promise<void> {
+    await this.db.manager.transaction(async (tx) => {
+      await this.deleteRow(surveyId, componentId, tx);
+      await this.insert(surveyId, componentId, data, filename, tx);
+    });
   }
 }
