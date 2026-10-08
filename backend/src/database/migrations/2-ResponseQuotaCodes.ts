@@ -17,9 +17,9 @@ export class ResponseQuotaCodes0000000000002 implements MigrationInterface {
               NEW.quota_codes := '{}';
           ELSE
               NEW.quota_codes := ARRAY(
-                  SELECT substr(kv.key, 14)
+                  SELECT substring(kv.key FROM '^Survey\\.var_(.+)_met$')
                     FROM jsonb_each_text(NEW."values") AS kv(key, value)
-                   WHERE left(kv.key, 13) = 'Survey.quota_' AND kv.value = 'true'
+                   WHERE kv.key ~ '^Survey\\.var_.+_met$' AND kv.value = 'true'
                    ORDER BY 1
               );
           END IF;
@@ -35,7 +35,7 @@ export class ResponseQuotaCodes0000000000002 implements MigrationInterface {
        WHERE "values" IS NOT NULL
          AND EXISTS (
              SELECT 1 FROM jsonb_object_keys("values") AS k
-              WHERE left(k, 13) = 'Survey.quota_'
+              WHERE k ~ '^Survey\\.var_.+_met$'
          );
     `);
   }

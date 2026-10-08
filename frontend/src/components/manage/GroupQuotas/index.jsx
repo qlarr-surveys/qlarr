@@ -95,10 +95,7 @@ function GroupQuotas({ disabled }) {
     [status],
   );
 
-  const brokenCodes = useMemo(
-    () => brokenQuotaCodes(survey),
-    [survey?.instructionList],
-  );
+  const brokenCodes = useMemo(() => brokenQuotaCodes(designState), [designState]);
 
   const navigate = useNavigate();
   const { surveyId } = useParams();

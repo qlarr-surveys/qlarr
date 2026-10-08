@@ -188,16 +188,16 @@ describe('Survey metadata endpoints', () => {
            VALUES ($1,1,$2,false,'{}','2024-02-01 09:00:00',$3,'en','[]',$4::jsonb)`,
           [id, survey, submitted ? '2024-02-01 09:05:00' : null, JSON.stringify(values)],
         );
-      await addResponse('20000000-0000-0000-0000-0000000000c1', { 'Survey.quota_QT1': true });
+      await addResponse('20000000-0000-0000-0000-0000000000c1', { 'Survey.var_QT1_met': true });
       await addResponse('20000000-0000-0000-0000-0000000000c2', {
-        'Survey.quota_QT1': true,
-        'Survey.quota_QT2': true,
+        'Survey.var_QT1_met': true,
+        'Survey.var_QT2_met': true,
       });
       await addResponse('20000000-0000-0000-0000-0000000000c3', {
-        'Survey.quota_QT1': true,
+        'Survey.var_QT1_met': true,
         'Survey.disqualified': true,
       });
-      await addResponse('20000000-0000-0000-0000-0000000000c4', { 'Survey.quota_QT1': true }, false);
+      await addResponse('20000000-0000-0000-0000-0000000000c4', { 'Survey.var_QT1_met': true }, false);
 
       const res = await get('/survey/offline').expect(200);
       const quotaSurvey = res.body.find((s: { id: string }) => s.id === survey);

@@ -8,7 +8,7 @@ import {
   NavigationModeName,
 } from '../../engine/engine.types';
 import { ProcessedSurvey } from '../design/design.service';
-import { screenedOutQuota, stripQuotaKeys } from '../design/quota.helpers';
+import { fullQuotaValues, screenedOutQuota, stripQuotaKeys } from '../design/quota.helpers';
 import { QuotaService } from '../design/quota.service';
 import { ResponseRepository } from '../responses/response.repository';
 import { navigationModeFrom } from '../surveys/survey.enums';
@@ -114,7 +114,11 @@ export class NavigationService {
       : await this.quotas.fullQuotas(survey, processedSurvey.output);
 
     const navigationJsonOutput = await this.engine.navigate({
-      values: JSON.stringify({ ...(response?.values ?? {}), ...values }),
+      values: JSON.stringify({
+        ...(response?.values ?? {}),
+        ...values,
+        ...fullQuotaValues(fullQuotas),
+      }),
       processedSurvey: JSON.stringify(processedSurvey.output),
       lang: lang.code,
       navigationMode: mode,
@@ -122,7 +126,6 @@ export class NavigationService {
       navigationDirection: params.navigationDirection,
       skipInvalid: navData.skipInvalid,
       surveyMode: params.surveyMode,
-      fullQuotas,
     });
 
     // Disqualification is final: the engine clears it when resuming (e.g. reloading the end page).

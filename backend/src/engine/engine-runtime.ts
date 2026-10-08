@@ -196,7 +196,6 @@ export function runNavigate(params: NavigateParams): NavigationJsonOutput {
     toNavigationDirection(params.navigationDirection),
     params.skipInvalid,
     toSurveyMode(params.surveyMode),
-    JSON.stringify(params.fullQuotas ?? []),
   );
   return JSON.parse(
     quietly(() => wrapper.navigate(scriptengine.createNavigationEngine())),

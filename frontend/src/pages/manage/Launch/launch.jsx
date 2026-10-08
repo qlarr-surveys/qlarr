@@ -48,13 +48,13 @@ function LaunchPage({ onPublish }) {
     );
   });
 
-  const designSurvey = useSelector((state) => state.designState.Survey);
+  const designState = useSelector((state) => state.designState);
   const brokenQuotaLabels = useMemo(() => {
-    const broken = brokenQuotaCodes(designSurvey);
-    return (designSurvey?.quotas || [])
+    const broken = brokenQuotaCodes(designState);
+    return (designState.Survey?.quotas || [])
       .filter((quota) => broken.has(quota.code))
       .map((quota) => quota.label || quota.code);
-  }, [designSurvey?.instructionList, designSurvey?.quotas]);
+  }, [designState]);
 
   const params = new URLSearchParams([
     ["version", versionDto?.version],

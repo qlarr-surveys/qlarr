@@ -11,6 +11,7 @@ import {
   isEquivalent,
   nextId,
   buildCodeIndex,
+  isQuestion,
   lastIndexInArray,
 } from "../utils/pureUtils";
 import {
@@ -29,6 +30,7 @@ import {
   CARRY_FORWARD_SOURCE_TYPES,
   isArrayType,
   languageSetup,
+  QUOTA_SKIP_CODE,
   quotaMessageKey,
   setupOptions,
   themeSetup,
@@ -51,9 +53,14 @@ import {
   cleanupDefaultValue,
   conditionalRelevanceEquation,
   instructionByCode,
+  isQuotaVariable,
   processValidation,
-  quotaInstruction,
+  quotaDecidingQuestion,
+  quotaScreenOutCondition,
+  quotaSkipInstruction,
+  quotaVariables,
   removeInstruction,
+  surveyQuestionCodes,
   updateRandomByRule,
   updatePriorityByRule,
 } from "./addInstructions";
@@ -280,22 +287,59 @@ export function quotaMessageRevealed(state) {
   }
 }
 
+// Rebuilds each quota's Survey variables and the screen-out skips on the
+// questions where quotas are decided. Unchanged instructions are kept so they
+// keep the errors the backend reported on them.
 const refreshQuotaInstructions = (state) => {
   const survey = state.Survey;
+  if (!survey) {
+    return;
+  }
   const previous = new Map();
   survey.instructionList = (survey.instructionList || []).filter((instruction) => {
-    const isQuota = instruction.code.startsWith("quota_");
+    const isQuota = isQuotaVariable(instruction.code);
     if (isQuota) previous.set(instruction.code, instruction);
     return !isQuota;
   });
+
+  const questionCodes = surveyQuestionCodes(state);
+  const screenOuts = new Map();
   (survey.quotas || []).forEach((quota) => {
-    const instruction = quotaInstruction(quota, state);
-    if (instruction.remove) {
+    const variables = quotaVariables(quota, state);
+    if (!variables.length) {
       return;
     }
-    const kept = previous.get(instruction.code);
-    // An unchanged instruction is kept so it keeps the errors the backend reported on it.
-    survey.instructionList.push(kept?.text === instruction.text ? kept : instruction);
+    variables.forEach((variable) => {
+      const kept = previous.get(variable.code);
+      survey.instructionList.push(kept?.text === variable.text ? kept : variable);
+    });
+    const question = quotaDecidingQuestion(quota, questionCodes);
+    if (question) {
+      screenOuts.set(question, [
+        ...(screenOuts.get(question) || []),
+        quotaScreenOutCondition(quota.code),
+      ]);
+    }
+  });
+
+  const endGroupCode = survey.children?.find(
+    (group) => state[group.code]?.groupType?.toUpperCase() === "END",
+  )?.code;
+  Object.keys(state).forEach((code) => {
+    const question = state[code];
+    if (!isQuestion(code) || !question) {
+      return;
+    }
+    const conditions = screenOuts.get(code);
+    if (!conditions || !endGroupCode) {
+      if (question.instructionList) removeInstruction(question, QUOTA_SKIP_CODE);
+      return;
+    }
+    const skip = quotaSkipInstruction(conditions, endGroupCode);
+    const kept = question.instructionList && instructionByCode(question, QUOTA_SKIP_CODE);
+    if (kept?.text !== skip.text || kept?.skipToComponent !== skip.skipToComponent) {
+      changeInstruction(question, skip);
+    }
   });
 };
 
@@ -405,6 +449,7 @@ export function cloneQuestion(state, payload) {
   );
   setup(state, { code: newQuestionId, rules: setupOptions(newQuestion.type) });
   cleanupRandomRules(group);
+  refreshQuotaInstructions(state);
   state.index = buildCodeIndex(state);
   state.focus = newQuestionId;
 }
@@ -955,6 +1000,7 @@ export function deleteGroup(state, payload) {
   delete state[groupCode];
   cleanupRandomRules(survey);
   cleanupSkipDestinations(state, groupCode);
+  refreshQuotaInstructions(state);
 }
 
 export function deleteQuestion(state, payload) {
@@ -984,6 +1030,7 @@ export function deleteQuestion(state, payload) {
   cleanupRandomRules(group);
   cleanupSkipDestinations(state, questionCode);
   resyncSourceDependents(state, questionCode);
+  refreshQuotaInstructions(state);
 }
 
 export function convertQuestion(state, payload) {
@@ -1361,14 +1408,17 @@ export function onDrag(state, payload) {
   switch (payload.type) {
     case "reorder_questions":
       reorderQuestions(state, state.Survey, payload);
+      refreshQuotaInstructions(state);
       state.index = buildCodeIndex(state);
       break;
     case "reparent_question":
       reparentQuestion(state, state.Survey, payload);
+      refreshQuotaInstructions(state);
       state.index = buildCodeIndex(state);
       break;
     case "reorder_groups":
       reorderGroups(state.Survey, payload);
+      refreshQuotaInstructions(state);
       state.index = buildCodeIndex(state);
       state.skipScroll = false;
       state.lastAddedComponent = { type: "group", index: payload.toIndex };

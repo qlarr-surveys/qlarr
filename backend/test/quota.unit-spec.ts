@@ -4,17 +4,26 @@ import {
   fullQuotaCodes,
   quotaDefinitions,
   screenedOutQuota,
+  fullQuotaValues,
   stripQuotaKeys,
   withComputedQuotaKeys,
 } from '../src/modules/design/quota.helpers';
 import { NavigationService } from '../src/modules/run/navigation.service';
 import { nowUtcString } from '../src/common/datetime';
 
-const quotaInstruction = (code: string, text: string) => ({
-  code: `quota_${code}`,
-  text,
+const quotaVariables = (code: string, text: string) => [
+  { code: `var_${code}_met`, text, returnType: 'boolean', isActive: true },
+  { code: `var_${code}_full`, text: 'false', returnType: 'boolean', isActive: false },
+];
+
+const quotaSkip = (code: string, endGroup: string) => ({
+  code: 'skip_to_quota',
+  text: `Survey.var_${code}_met && Survey.var_${code}_full`,
   returnType: 'boolean',
   isActive: true,
+  skipToComponent: endGroup,
+  toEnd: false,
+  disqualify: true,
 });
 
 describe('quota helpers', () => {
@@ -64,10 +73,18 @@ describe('quota helpers', () => {
     expect(
       stripQuotaKeys({
         'Q1.value': 'male',
-        'Survey.quota_QT1': true,
+        'Survey.var_QT1_met': true,
+        'Survey.var_QT1_full': false,
         'Survey.lang': 'en',
       }),
     ).toEqual({ 'Q1.value': 'male', 'Survey.lang': 'en' });
+  });
+
+  it('marks full quotas as engine input values', () => {
+    expect(fullQuotaValues(['QT1', 'QT2'])).toEqual({
+      'Survey.var_QT1_full': true,
+      'Survey.var_QT2_full': true,
+    });
   });
 
   it('takes quota membership from the engine and keeps everything else', () => {
@@ -75,16 +92,16 @@ describe('quota helpers', () => {
       withComputedQuotaKeys(
         {
           'Q1.value': 'male',
-          'Survey.quota_QT1': false,
-          'Survey.quota_FAKE': true,
+          'Survey.var_QT1_met': false,
+          'Survey.var_FAKE_met': true,
           'Survey.disqualified': true,
         },
-        { 'Q1.value': 'ignored', 'Survey.quota_QT1': true, 'Survey.disqualified': false },
+        { 'Q1.value': 'ignored', 'Survey.var_QT1_met': true, 'Survey.disqualified': false },
       ),
     ).toEqual({
       'Q1.value': 'male',
       'Survey.disqualified': true,
-      'Survey.quota_QT1': true,
+      'Survey.var_QT1_met': true,
     });
   });
 
@@ -92,9 +109,9 @@ describe('quota helpers', () => {
     const end = { name: 'end' };
     const toSave = {
       'Survey.disqualified': true,
-      'Survey.quota_QT1': false,
-      'Survey.quota_QT2': true,
-      'Survey.quota_QT3': true,
+      'Survey.var_QT1_met': false,
+      'Survey.var_QT2_met': true,
+      'Survey.var_QT3_met': true,
     };
     expect(screenedOutQuota(['QT1', 'QT2', 'QT3'], end, toSave)).toBe('QT2');
     expect(screenedOutQuota(['QT1'], end, toSave)).toBeNull();
@@ -113,7 +130,10 @@ describe('quota engine binding', () => {
       {
         code: 'Q1',
         type: 'text',
-        instructionList: [{ code: 'value', text: '', returnType: 'string', isActive: false }],
+        instructionList: [
+          { code: 'value', text: '', returnType: 'string', isActive: false },
+          quotaSkip('QT1', survey.groups[1].code),
+        ],
       },
     ];
     survey.quotas = [
@@ -124,14 +144,15 @@ describe('quota engine binding', () => {
         condition: { logic: { '==': [{ var: 'Q1.value' }, 'male'] } },
       },
     ];
-    survey.instructionList = [quotaInstruction('QT1', 'Q1.value == "male"')];
+    survey.instructionList = quotaVariables('QT1', 'Q1.value == "male"');
     return survey;
   };
-  const processedSurvey = JSON.stringify(runValidate(JSON.stringify(design())));
+  const processed = runValidate(JSON.stringify(design()));
+  const processedSurvey = JSON.stringify(processed);
 
-  const next = (fullQuotas: string[]) =>
+  const next = (fullQuotas: string[], extra: Record<string, unknown> = {}) =>
     engine.navigate({
-      values: JSON.stringify({ 'Q1.value': 'male' }),
+      values: JSON.stringify({ 'Q1.value': 'male', ...fullQuotaValues(fullQuotas), ...extra }),
       processedSurvey,
       lang: null,
       navigationMode: 'GROUP_BY_GROUP',
@@ -139,22 +160,39 @@ describe('quota engine binding', () => {
       navigationDirection: { name: 'NEXT' },
       skipInvalid: true,
       surveyMode: 'ONLINE',
-      fullQuotas,
     });
+
+  it('validates the quota variables and screen-out skip without errors', () => {
+    const survey = processed.survey as {
+      instructionList: { errors?: unknown[] }[];
+      groups: { questions: { instructionList: { errors?: unknown[] }[] }[] }[];
+    };
+    const instructions = [
+      ...survey.instructionList,
+      ...survey.groups[0].questions[0].instructionList,
+    ];
+    expect(instructions.filter((instruction) => instruction.errors?.length)).toEqual([]);
+  });
 
   it('screens a respondent matching a full quota out to the end, disqualified', async () => {
     const out = await next(['QT1']);
     expect(out.navigationIndex.name).toBe('end');
     expect(out.toSave['Survey.disqualified']).toBe(true);
-    expect(out.toSave['Survey.quota_QT1']).toBe(true);
+    expect(out.toSave['Survey.var_QT1_met']).toBe(true);
+    expect(out.toSave['Survey.var_QT1_full']).toBeUndefined();
     expect(screenedOutQuota(['QT1'], out.navigationIndex, out.toSave)).toBe('QT1');
+  });
+
+  it('only treats a JSON boolean true as full', async () => {
+    const out = await next([], { 'Survey.var_QT1_full': 'true' });
+    expect(out.toSave['Survey.disqualified']).toBe(false);
   });
 
   it('lets a respondent matching an open quota through, saving membership', async () => {
     const out = await next([]);
     expect(out.navigationIndex.name).toBe('end');
     expect(out.toSave['Survey.disqualified']).toBe(false);
-    expect(out.toSave['Survey.quota_QT1']).toBe(true);
+    expect(out.toSave['Survey.var_QT1_met']).toBe(true);
     expect(out.toSave['Survey.passed_quotas']).toBeUndefined();
   });
 
@@ -167,7 +205,7 @@ describe('quota engine binding', () => {
       instructionList: { code: string; text: string }[];
     };
     expect(JSON.stringify(survey.quotas[0].condition)).toContain('Qgender.value');
-    expect(survey.instructionList.find((i) => i.code === 'quota_QT1')?.text).toBe(
+    expect(survey.instructionList.find((i) => i.code === 'var_QT1_met')?.text).toBe(
       'Qgender.value == "male"',
     );
   });
@@ -197,7 +235,7 @@ describe('navigation quota enforcement', () => {
   const setup = () => {
     const engineNavigate = jest.fn().mockResolvedValue({
       navigationIndex: { name: 'end' },
-      toSave: { 'Survey.disqualified': true, 'Survey.quota_QT1': true },
+      toSave: { 'Survey.disqualified': true, 'Survey.var_QT1_met': true },
     });
     const fullQuotas = jest.fn().mockResolvedValue(['QT1']);
     const svc = new NavigationService(
@@ -208,7 +246,7 @@ describe('navigation quota enforcement', () => {
     return { svc, engineNavigate, fullQuotas };
   };
 
-  it('passes full quotas to the engine and ignores quota keys sent by the client', async () => {
+  it('passes full quotas to the engine as values and ignores quota keys sent by the client', async () => {
     const { svc, engineNavigate } = setup();
     const result = await svc.navigate({
       surveyId: 's',
@@ -220,14 +258,16 @@ describe('navigation quota enforcement', () => {
       },
       processedSurvey: processed,
       navigationDirection: { name: 'NEXT' },
-      values: { 'Q1.value': 'male', 'Survey.quota_QT1': false },
+      values: { 'Q1.value': 'male', 'Survey.var_QT1_met': false, 'Survey.var_QT1_full': false },
       preview: false,
       surveyMode: 'ONLINE',
     } as any);
 
     const params = engineNavigate.mock.calls[0][0];
-    expect(params.fullQuotas).toEqual(['QT1']);
-    expect(JSON.parse(params.values)).toEqual({ 'Q1.value': 'male' });
+    expect(JSON.parse(params.values)).toEqual({
+      'Q1.value': 'male',
+      'Survey.var_QT1_full': true,
+    });
     expect(result.screenedOutQuota).toBe('QT1');
   });
 
@@ -235,12 +275,12 @@ describe('navigation quota enforcement', () => {
     const { svc, engineNavigate } = setup();
     engineNavigate.mockResolvedValue({
       navigationIndex: { name: 'end' },
-      toSave: { 'Survey.disqualified': false, 'Survey.quota_QT1': true },
+      toSave: { 'Survey.disqualified': false, 'Survey.var_QT1_met': true },
     });
     const result = await svc.navigate({
       surveyId: 's',
       response: {
-        values: { 'Q1.value': 'male', 'Survey.disqualified': true, 'Survey.quota_QT1': true },
+        values: { 'Q1.value': 'male', 'Survey.disqualified': true, 'Survey.var_QT1_met': true },
         navigationIndex: { name: 'end' },
         lang: 'en',
         startDate: nowUtcString(),
@@ -269,6 +309,6 @@ describe('navigation quota enforcement', () => {
     } as any);
 
     expect(fullQuotas).not.toHaveBeenCalled();
-    expect(engineNavigate.mock.calls[0][0].fullQuotas).toEqual([]);
+    expect(JSON.parse(engineNavigate.mock.calls[0][0].values)).toEqual({});
   });
 });

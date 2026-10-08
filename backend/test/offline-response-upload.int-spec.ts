@@ -46,14 +46,26 @@ quotaDesign.groups[0].questions = [
   {
     code: 'Q1',
     type: 'text',
-    instructionList: [{ code: 'value', text: '', returnType: 'string', isActive: false }],
+    instructionList: [
+      { code: 'value', text: '', returnType: 'string', isActive: false },
+      {
+        code: 'skip_to_quota',
+        text: 'Survey.var_QT1_met && Survey.var_QT1_full',
+        returnType: 'boolean',
+        isActive: true,
+        skipToComponent: quotaDesign.groups[1].code,
+        toEnd: false,
+        disqualify: true,
+      },
+    ],
   },
 ];
 quotaDesign.quotas = [
   { code: 'QT1', label: 'Male', limit: 1, condition: { logic: { '==': [{ var: 'Q1' }, 'male'] } } },
 ];
 quotaDesign.instructionList = [
-  { code: 'quota_QT1', text: 'Q1.value == "male"', returnType: 'boolean', isActive: true },
+  { code: 'var_QT1_met', text: 'Q1.value == "male"', returnType: 'boolean', isActive: true },
+  { code: 'var_QT1_full', text: 'false', returnType: 'boolean', isActive: false },
 ];
 const QUOTA_DESIGN_JSON = JSON.stringify(runValidate(JSON.stringify(quotaDesign)));
 const navigateQuota = (values: object, navigationIndex: unknown, direction: string) =>
@@ -177,20 +189,20 @@ describe('Offline survey response upload', () => {
 
     const faked = await upload('30000000-0000-0000-0000-0000000000a1', {
       ...male,
-      'Survey.quota_QT1': false,
+      'Survey.var_QT1_met': false,
     });
-    expect(faked.values['Survey.quota_QT1']).toBe(true);
+    expect(faked.values['Survey.var_QT1_met']).toBe(true);
     expect(faked.quota_codes).toEqual(['QT1']);
 
     const old = await upload('30000000-0000-0000-0000-0000000000a2', male);
-    expect(old.values['Survey.quota_QT1']).toBe(true);
+    expect(old.values['Survey.var_QT1_met']).toBe(true);
 
     const female = await upload('30000000-0000-0000-0000-0000000000a3', {
       'Q1.value': 'female',
-      'Survey.quota_QT1': true,
+      'Survey.var_QT1_met': true,
       'Survey.disqualified': false,
     });
-    expect(female.values['Survey.quota_QT1']).toBe(false);
+    expect(female.values['Survey.var_QT1_met']).toBe(false);
     expect(female.quota_codes).toEqual([]);
 
     const screenedOut = await upload('30000000-0000-0000-0000-0000000000a4', {
@@ -198,7 +210,7 @@ describe('Offline survey response upload', () => {
       'Survey.disqualified': true,
     });
     expect(screenedOut.values['Survey.disqualified']).toBe(true);
-    expect(screenedOut.values['Survey.quota_QT1']).toBe(true);
+    expect(screenedOut.values['Survey.var_QT1_met']).toBe(true);
     expect(screenedOut.quota_codes).toEqual([]);
 
     expect(lastBody.quotaCounts).toEqual({ QT1: 2 });

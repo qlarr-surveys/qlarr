@@ -65,14 +65,14 @@ describe('Quota counts (responses.quota_codes)', () => {
   it('records the quotas a response is a member of', async () => {
     const both = await addResponse({
       'Q1.value': 'x',
-      'Survey.quota_QTb': true,
-      'Survey.quota_QTa': 'true',
-      'Survey.quota_QTc': false,
+      'Survey.var_QTb_met': true,
+      'Survey.var_QTa_met': 'true',
+      'Survey.var_QTc_met': false,
     });
     expect(await quotaCodes(both)).toEqual(['QTa', 'QTb']);
 
     for (const value of [false, 'false', 1, null, 'TRUE', { nested: true }]) {
-      expect(await quotaCodes(await addResponse({ 'Survey.quota_QTa': value }))).toEqual([]);
+      expect(await quotaCodes(await addResponse({ 'Survey.var_QTa_met': value }))).toEqual([]);
     }
     expect(await quotaCodes(await addResponse({ 'Q1.value': 'x' }))).toEqual([]);
     expect(await quotaCodes(await addResponse(null))).toEqual([]);
@@ -81,20 +81,20 @@ describe('Quota counts (responses.quota_codes)', () => {
   it('records none for a disqualified response', async () => {
     for (const disqualified of [true, 'true']) {
       const id = await addResponse({
-        'Survey.quota_QTa': true,
+        'Survey.var_QTa_met': true,
         'Survey.disqualified': disqualified,
       });
       expect(await quotaCodes(id)).toEqual([]);
     }
-    const kept = await addResponse({ 'Survey.quota_QTa': true, 'Survey.disqualified': false });
+    const kept = await addResponse({ 'Survey.var_QTa_met': true, 'Survey.disqualified': false });
     expect(await quotaCodes(kept)).toEqual(['QTa']);
   });
 
   it('follows the response as its values change', async () => {
-    const id = await addResponse({ 'Survey.quota_QTa': false });
+    const id = await addResponse({ 'Survey.var_QTa_met': false });
     await root.query(`UPDATE responses SET "values" = $2::jsonb WHERE id = $1`, [
       id,
-      JSON.stringify({ 'Survey.quota_QTa': true }),
+      JSON.stringify({ 'Survey.var_QTa_met': true }),
     ]);
     expect(await quotaCodes(id)).toEqual(['QTa']);
     await root.query(
@@ -106,10 +106,10 @@ describe('Quota counts (responses.quota_codes)', () => {
 
   it('counts only complete, non-preview members of the requested quotas', async () => {
     await root.query(`DELETE FROM responses`);
-    const member = { 'Survey.quota_QTa': true, 'Survey.quota_QTb': true };
+    const member = { 'Survey.var_QTa_met': true, 'Survey.var_QTb_met': true };
     await addResponse(member);
     await addResponse(member);
-    await addResponse({ 'Survey.quota_QTa': true });
+    await addResponse({ 'Survey.var_QTa_met': true });
     await addResponse(member, { preview: true });
     await addResponse(member, { complete: false });
     await addResponse({ ...member, 'Survey.disqualified': true });

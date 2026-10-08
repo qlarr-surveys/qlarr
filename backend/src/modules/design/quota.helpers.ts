@@ -1,5 +1,9 @@
-
-export const QUOTA_VALUE_PREFIX = 'Survey.quota_';
+// Survey variables never come from the client: calculated ones come from the engine, input ones from us.
+export const SURVEY_VARIABLE_PREFIX = 'Survey.var_';
+/** Saved with the response: whether it belongs to the quota. */
+export const quotaMetKey = (code: string) => `${SURVEY_VARIABLE_PREFIX}${code}_met`;
+/** Passed in on every navigation, never saved: whether the quota is full. */
+export const quotaFullKey = (code: string) => `${SURVEY_VARIABLE_PREFIX}${code}_full`;
 const QUOTA_CODE_RE = /^[A-Za-z0-9][A-Za-z0-9_]*$/;
 
 export interface QuotaDefinition {
@@ -44,13 +48,18 @@ export function screenedOutQuota(
   if (navigationIndex.name !== 'end' || toSave['Survey.disqualified'] !== true) {
     return null;
   }
-  return fullQuotas.find((code) => toSave[`${QUOTA_VALUE_PREFIX}${code}`] === true) ?? null;
+  return fullQuotas.find((code) => toSave[quotaMetKey(code)] === true) ?? null;
 }
 
 export function stripQuotaKeys(values: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(
-    Object.entries(values).filter(([key]) => !key.startsWith(QUOTA_VALUE_PREFIX)),
+    Object.entries(values).filter(([key]) => !key.startsWith(SURVEY_VARIABLE_PREFIX)),
   );
+}
+
+/** Engine input values marking the given quotas as full. */
+export function fullQuotaValues(fullQuotas: string[]): Record<string, true> {
+  return Object.fromEntries(fullQuotas.map((code) => [quotaFullKey(code), true]));
 }
 
 export function withComputedQuotaKeys(
@@ -60,7 +69,7 @@ export function withComputedQuotaKeys(
   return {
     ...stripQuotaKeys(values),
     ...Object.fromEntries(
-      Object.entries(computed).filter(([key]) => key.startsWith(QUOTA_VALUE_PREFIX)),
+      Object.entries(computed).filter(([key]) => key.startsWith(SURVEY_VARIABLE_PREFIX)),
     ),
   };
 }

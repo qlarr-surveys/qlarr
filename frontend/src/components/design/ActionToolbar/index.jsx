@@ -7,7 +7,7 @@ import LowPriorityIcon from "@mui/icons-material/LowPriority";
 import MoveDownIcon from "@mui/icons-material/MoveDown";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import { setupOptions } from "@qlarr/design-core/constants/design";
+import { QUOTA_SKIP_CODE, setupOptions } from "@qlarr/design-core/constants/design";
 import { setup, cloneQuestion, deleteQuestion, deleteGroup, resetSetup } from "~/state/design/designState";
 import { useTheme } from "@emotion/react";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
@@ -129,7 +129,7 @@ function ActionToolbar({ code, isGroup, parentCode, showActions }) {
   const textColor = theme.palette.primary.main;
   const hasSkip = useSelector((state) => {
     let skipInstructions = state.designState[code]?.instructionList?.filter(
-      (el) => el.code.startsWith("skip_to")
+      (el) => el.code.startsWith("skip_to") && el.code !== QUOTA_SKIP_CODE
     );
     return skipInstructions?.filter((el) => !el.errors)?.length >= 1;
   });

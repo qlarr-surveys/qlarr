@@ -8,13 +8,18 @@ import {
   changeContent,
   deleteQuestion,
   convertQuestion,
+  cloneQuestion,
+  onDrag,
   refreshDsl,
 } from "../state/mutations";
-import { quotaMessageKey } from "../constants/design";
-import { brokenQuotaCodes } from "../state/addInstructions";
+import { QUOTA_SKIP_CODE, quotaMessageKey } from "../constants/design";
+import { brokenQuotaCodes, isQuotaVariable } from "../state/addInstructions";
 import sample from "./fixtures/sample-survey.json";
 
 const QUESTION = "Q298jbb";
+const CHOICE = "Q867ezm";
+const LATER = "Q976owq";
+const END = "G2";
 const condition = { logic: { "==": [{ var: QUESTION }, "yes"] } };
 
 const freshState = () =>
@@ -33,8 +38,19 @@ const quotaCodes = (state) => state.Survey.quotas.map((quota) => quota.code);
 
 const quotaInstructions = (state) =>
   (state.Survey.instructionList || []).filter((instruction) =>
-    instruction.code.startsWith("quota_"),
+    isQuotaVariable(instruction.code),
   );
+
+const metVariable = (state, code) =>
+  quotaInstructions(state).find((i) => i.code === `var_${code}_met`);
+
+const quotaSkip = (state, question) =>
+  state[question].instructionList?.find((i) => i.code === QUOTA_SKIP_CODE);
+
+const questionsWithQuotaSkip = (state) =>
+  Object.keys(state).filter((code) => /^Q[a-z0-9_]+$/.test(code) && quotaSkip(state, code));
+
+const screenOut = (code) => `Survey.var_${code}_met && Survey.var_${code}_full`;
 
 describe("quotas", () => {
   let state;
@@ -67,23 +83,111 @@ describe("quotas", () => {
     expect(quotaCodes(state)[0]).toBe(first);
   });
 
-  it("compiles a quota's condition into a boolean Survey instruction", () => {
+  it("compiles a quota's condition into a calculated and an input Survey variable", () => {
     const [code] = addQuotas(1);
     updateQuota(state, { code, changes: { label: "Men", limit: 5 } });
     expect(state.Survey.quotas[0]).toMatchObject({ label: "Men", limit: 5 });
     expect(quotaInstructions(state)).toEqual([]);
 
     updateQuota(state, { code, changes: { condition } });
-    const [instruction] = quotaInstructions(state);
-    expect(instruction).toMatchObject({
-      code: `quota_${code}`,
+    const [met, full] = quotaInstructions(state);
+    expect(met).toMatchObject({
+      code: `var_${code}_met`,
       isActive: true,
       returnType: "boolean",
     });
-    expect(instruction.text).toContain(QUESTION);
+    expect(met.text).toContain(QUESTION);
+    expect(full).toEqual({
+      code: `var_${code}_full`,
+      text: "false",
+      isActive: false,
+      returnType: "boolean",
+    });
 
     updateQuota(state, { code, changes: { condition: { logic: null } } });
     expect(quotaInstructions(state)).toEqual([]);
+    expect(questionsWithQuotaSkip(state)).toEqual([]);
+  });
+
+  it("screens out to the end group from the last question the condition depends on", () => {
+    const [code] = addQuotas(1);
+    updateQuota(state, {
+      code,
+      changes: {
+        condition: {
+          logic: {
+            and: [
+              { "==": [{ var: CHOICE }, "A1"] },
+              { "==": [{ var: QUESTION }, "yes"] },
+            ],
+          },
+        },
+      },
+    });
+
+    expect(questionsWithQuotaSkip(state)).toEqual([CHOICE]);
+    expect(quotaSkip(state, CHOICE)).toEqual({
+      code: QUOTA_SKIP_CODE,
+      text: screenOut(code),
+      returnType: "boolean",
+      isActive: true,
+      skipToComponent: END,
+      toEnd: false,
+      disqualify: true,
+    });
+  });
+
+  it("combines quotas decided on the same question into one skip", () => {
+    const [first, second, third] = addQuotas(3);
+    updateQuota(state, { code: first, changes: { condition } });
+    updateQuota(state, { code: second, changes: { condition } });
+    updateQuota(state, {
+      code: third,
+      changes: { condition: { logic: { "==": [{ var: LATER }, "A1"] } } },
+    });
+
+    expect(questionsWithQuotaSkip(state).sort()).toEqual([QUESTION, LATER].sort());
+    expect(quotaSkip(state, QUESTION).text).toBe(
+      `(${screenOut(first)}) || (${screenOut(second)})`,
+    );
+    expect(quotaSkip(state, LATER).text).toBe(screenOut(third));
+
+    removeQuota(state, first);
+    expect(quotaSkip(state, QUESTION).text).toBe(screenOut(second));
+  });
+
+  it("moves the skip when the deciding question moves or is deleted", () => {
+    const [code] = addQuotas(1);
+    updateQuota(state, {
+      code,
+      changes: {
+        condition: {
+          logic: {
+            and: [
+              { "==": [{ var: QUESTION }, "yes"] },
+              { "==": [{ var: LATER }, "A1"] },
+            ],
+          },
+        },
+      },
+    });
+    expect(questionsWithQuotaSkip(state)).toEqual([LATER]);
+
+    onDrag(state, { type: "reorder_groups", fromIndex: 1, toIndex: 0 });
+    expect(questionsWithQuotaSkip(state)).toEqual([QUESTION]);
+
+    onDrag(state, { type: "reorder_groups", fromIndex: 0, toIndex: 1 });
+    expect(questionsWithQuotaSkip(state)).toEqual([LATER]);
+
+    deleteQuestion(state, LATER);
+    expect(questionsWithQuotaSkip(state)).toEqual([QUESTION]);
+  });
+
+  it("does not copy the screen-out skip to a cloned question", () => {
+    const [code] = addQuotas(1);
+    updateQuota(state, { code, changes: { condition } });
+    cloneQuestion(state, QUESTION);
+    expect(questionsWithQuotaSkip(state)).toEqual([QUESTION]);
   });
 
   it("ignores updates to a quota that does not exist", () => {
@@ -94,7 +198,6 @@ describe("quotas", () => {
   });
 
   it("keeps working after a question a quota refers to is deleted", () => {
-    const CHOICE = "Q867ezm";
     const stale = { in: [{ var: CHOICE }, ["A1"]] };
     const [first, second] = addQuotas(2);
     updateQuota(state, { code: first, changes: { condition: { logic: stale } } });
@@ -119,30 +222,38 @@ describe("quotas", () => {
     expect(state.Survey.resources).toEqual({ [`content_en_${key10}_1`]: "ten.png" });
   });
 
-  it("keeps an unchanged quota instruction, with its errors, when another quota changes", () => {
+  it("keeps unchanged quota instructions, with their errors, when another quota changes", () => {
     const [first, second] = addQuotas(2);
     updateQuota(state, { code: first, changes: { condition } });
-    const firstInstruction = quotaInstructions(state)[0];
+    const firstInstruction = metVariable(state, first);
     firstInstruction.errors = ["SOME_ERROR"];
+    const skip = quotaSkip(state, QUESTION);
+    skip.errors = ["SKIP_ERROR"];
 
-    updateQuota(state, { code: second, changes: { condition } });
+    updateQuota(state, { code: second, changes: { label: "Women" } });
 
-    const kept = quotaInstructions(state).find((i) => i.code === `quota_${first}`);
+    const kept = metVariable(state, first);
     expect(kept).toBe(firstInstruction);
     expect(kept.errors).toEqual(["SOME_ERROR"]);
+    expect(quotaSkip(state, QUESTION)).toBe(skip);
   });
 
-  it("reports quotas whose compiled condition has errors as broken", () => {
-    const [first, second] = addQuotas(2);
+  it("reports quotas whose variables or screen-out skip have errors as broken", () => {
+    const [first, second, third] = addQuotas(3);
     updateQuota(state, { code: first, changes: { condition } });
     updateQuota(state, { code: second, changes: { condition } });
-    quotaInstructions(state).find((i) => i.code === `quota_${first}`).errors = ["SOME_ERROR"];
+    updateQuota(state, {
+      code: third,
+      changes: { condition: { logic: { "==": [{ var: LATER }, "A1"] } } },
+    });
+    metVariable(state, first).errors = ["SOME_ERROR"];
+    expect(brokenQuotaCodes(state)).toEqual(new Set([first]));
 
-    expect(brokenQuotaCodes(state.Survey)).toEqual(new Set([first]));
+    quotaSkip(state, LATER).errors = ["SKIP_ERROR"];
+    expect(brokenQuotaCodes(state)).toEqual(new Set([first, third]));
   });
 
   it("recompiles quota conditions when their question changes type", () => {
-    const CHOICE = "Q867ezm";
     const [code] = addQuotas(1);
     updateQuota(state, {
       code,
@@ -183,7 +294,8 @@ describe("quotas", () => {
     expect(state.Survey.content.de[key1]).toBeUndefined();
     expect(state.Survey.content.en[key2]).toBe("<p>Other</p>");
     expect(quotaInstructions(state).map((instruction) => instruction.code)).toEqual([
-      `quota_${second}`,
+      `var_${second}_met`,
+      `var_${second}_full`,
     ]);
   });
 });

@@ -99,5 +99,4 @@ export interface NavigateParams {
   navigationDirection: NavigationDirectionJson;
   skipInvalid: boolean;
   surveyMode: SurveyModeName;
-  fullQuotas?: string[];
 }
