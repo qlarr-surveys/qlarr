@@ -244,6 +244,7 @@
   "preview": "Vorschau",
   "processed_errors": {
     "autocomplete_malformed_input": "Fehlerhaft formatierte Eingabe: Datei muss ein JSON-Array sein, das nur Zeichenketten enthält",
+    "hierarchical_autocomplete_malformed_input": "Ungültige Eingabe: Die CSV muss eine Spalte pro Ebene und Sprache haben (Überschriften wie „Country (en)“); die Sprachgruppe jeder Zeile muss vollständig ausgefüllt oder leer sein, mit eindeutigen Pfaden pro Sprache",
     "max_upload_size_exceeded": "Die Dateigröße überschreitet das maximale Upload-Limit.",
     "size_limit_exceeded": "Die Massendateien überschreiten 200 MB. Bitte reduzieren Sie den Bereich oder filtern Sie nach vollständigen/unvollständigen Antworten.",
     "backend_down": "Backend ist nicht erreichbar... Bitte versuchen Sie es später erneut",
@@ -631,6 +632,7 @@
     "question_type_email": "E-Mail",
     "question_type_multiple_text": "Mehrfachtext",
     "question_type_autocomplete": "Autovervollständigung",
+    "question_type_hierarchical_autocomplete": "Hierarchische Autovervollständigung",
     "question_type_icon_scq": "Icon-Einfachauswahl",
     "question_type_icon_mcq": "Icon-Mehrfachauswahl",
     "question_type_scq_array": "Einfachauswahl-Matrix",

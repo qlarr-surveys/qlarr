@@ -98,3 +98,12 @@ export class AutoCompleteMalformedInputException extends HttpException {
     );
   }
 }
+
+export class HierarchicalAutoCompleteMalformedInputException extends HttpException {
+  constructor() {
+    super(
+      { message: null, error: 'HierarchicalAutoCompleteMalformedInputException' },
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+}

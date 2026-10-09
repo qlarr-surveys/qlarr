@@ -12,6 +12,7 @@
   "number": "Sammeln Sie numerische Eingaben wie Alter oder Menge",
   "email": "Sammeln und validieren Sie E-Mail-Adressen",
   "autocomplete": "Texteingabe mit Vorschlägen aus einer vordefinierten Liste sammeln",
+  "hierarchical_autocomplete": "Erfassen Sie eine kaskadierende Auswahl über benannte Ebenen (z. B. Land → Bundesland → Stadt) aus hochgeladenen, übersetzbaren Daten",
   "scq": "Benutzer können eine Option aus einer Liste auswählen",
   "icon_scq": "Benutzer können eine Option mit Symbolen auswählen",
   "image_scq": "Benutzer können eine Option mit Bildern auswählen",

@@ -1,10 +1,39 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
+import { nowUtcString } from '../../common/datetime';
+import {
+  FILE_HELPER,
+  FileHelper,
+} from '../../integrations/filesystem/file-helper';
+import { HierarchicalAutoCompleteFileInfo } from '../../integrations/filesystem/file-info';
+import { SurveyFolder } from '../../integrations/filesystem/survey-folder';
+import { DesignService } from '../design/design.service';
+import { additionalLang, defaultSurveyLang } from '../run/run.helpers';
 import { AutoCompleteRepository } from './autocomplete.repository';
-import { SurveyNotFoundException } from './survey.exceptions';
+import {
+  HierarchicalAutoCompleteMalformedInputException,
+  SurveyIsClosedException,
+  SurveyNotFoundException,
+} from './survey.exceptions';
+import {
+  fromCsv,
+  HierarchicalRow,
+  languagesOf,
+  toCsv,
+} from './hierarchical-autocomplete-csv';
+import {
+  findRow,
+  searchLang,
+  searchLevel,
+} from './hierarchical-autocomplete-search';
 
 @Injectable()
 export class AutoCompleteService {
-  constructor(private readonly autoComplete: AutoCompleteRepository) {}
+  constructor(
+    private readonly autoComplete: AutoCompleteRepository,
+    private readonly designs: DesignService,
+    @Inject(FILE_HELPER) private readonly files: FileHelper,
+  ) {}
 
   /**
    * The stored autocomplete values for a component — the design-time editor's
@@ -34,5 +63,130 @@ export class AutoCompleteService {
     limit: number,
   ): Promise<string[]> {
     return this.autoComplete.search(surveyId, filename, searchTerm, limit);
+  }
+
+  /**
+   * Respondent search for one level of a hierarchical autocomplete: the distinct
+   * values at `level` among rows matching the levels above (`prefix`), in the
+   * respondent's language — or the default language when no row carries it.
+   */
+  async searchHierarchical(
+    surveyId: string,
+    filename: string,
+    level: number,
+    prefix: string[],
+    query: string,
+    lang: string,
+    defaultLang: string,
+    limit: number,
+  ): Promise<string[]> {
+    const rows = await this.autoComplete.getHierarchicalDataByFilename(
+      surveyId,
+      filename,
+    );
+    const effective = searchLang(rows, lang, defaultLang);
+    return searchLevel(rows, effective, level, prefix, query, limit);
+  }
+
+  /**
+   * The whole row (every language) for a fully selected path, or null. The path
+   * is in `lang` — or the default language when no row carries `lang`.
+   */
+  async hierarchicalRow(
+    surveyId: string,
+    filename: string,
+    path: string[],
+    lang: string,
+    defaultLang: string,
+  ): Promise<HierarchicalRow | null> {
+    const rows = await this.autoComplete.getHierarchicalDataByFilename(
+      surveyId,
+      filename,
+    );
+    return findRow(rows, searchLang(rows, lang, defaultLang), path);
+  }
+
+  async getHierarchicalCsv(
+    surveyId: string,
+    componentId: string,
+    langs: string[] = [],
+    labels: string[] = [],
+  ): Promise<string> {
+    if (!(await this.autoComplete.surveyExists(surveyId))) {
+      throw new SurveyNotFoundException();
+    }
+    const data = await this.autoComplete.getHierarchicalData(
+      surveyId,
+      componentId,
+    );
+    return toCsv(data, langs, labels);
+  }
+
+  async uploadHierarchical(
+    surveyId: string,
+    componentId: string,
+    levels: number,
+    file: { size: number; buffer: Buffer },
+  ): Promise<HierarchicalAutoCompleteFileInfo> {
+    if (!file || file.size === 0 || !file.buffer?.length) {
+      throw new HierarchicalAutoCompleteMalformedInputException();
+    }
+    const surveyLangs = await this.openSurveyLangs(surveyId);
+
+    // The file is the full data set — it replaces whatever was stored. Columns
+    // for languages the survey doesn't have are silently ignored.
+    const { rows, imported } = fromCsv(
+      file.buffer.toString('utf8'),
+      levels,
+      surveyLangs,
+    );
+    const serialized = JSON.stringify(rows);
+
+    const previousFilename = await this.autoComplete.findFilename(
+      surveyId,
+      componentId,
+    );
+    const savedFilename = await this.files.upload(
+      surveyId,
+      SurveyFolder.Resources,
+      Buffer.from(serialized, 'utf8'),
+      'application/json',
+      randomUUID(),
+    );
+    await this.autoComplete.replace(surveyId, componentId, serialized, savedFilename);
+
+    // The old file is unreferenced only once the swap has committed. Best-effort.
+    if (previousFilename) {
+      try {
+        await this.files.delete(surveyId, SurveyFolder.Resources, previousFilename);
+      } catch {
+        // best-effort cleanup
+      }
+    }
+
+    return {
+      name: savedFilename,
+      rowCount: rows.length,
+      levels,
+      languages: languagesOf(rows),
+      imported,
+      lastModified: nowUtcString(),
+    };
+  }
+
+  /**
+   * The survey's languages (default first) from its saved design, after
+   * asserting the survey exists and isn't closed.
+   */
+  private async openSurveyLangs(surveyId: string): Promise<string[]> {
+    const { survey, output } = await this.designs.getProcessedSurvey(
+      surveyId,
+      false,
+    );
+    if (survey.status === 'CLOSED') throw new SurveyIsClosedException();
+    return [
+      defaultSurveyLang(output.survey),
+      ...additionalLang(output.survey),
+    ].map((l) => l.code);
   }
 }

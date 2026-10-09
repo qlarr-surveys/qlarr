@@ -790,6 +790,34 @@ const baseSetupOptions = (type) => {
         },
       ];
 
+    case "hierarchical_autocomplete":
+      return [
+        {
+          title: "general",
+          key: "general",
+          rules: [
+            "changeCode",
+            "disabled",
+            "showDescription",
+          ],
+        },
+        {
+          title: "logic",
+          key: "logic",
+          rules: ["relevance", "prefill", "order_instructions"],
+        },
+        {
+          title: "validation",
+          key: "validation",
+          rules: ["validation_required", "custom_validation_rules"],
+        },
+        {
+          title: "design",
+          key: "design",
+          rules: ["customCss"],
+        },
+      ];
+
     case "multiple_text":
       return [
         {

@@ -3,6 +3,7 @@
   "allow_jump": "Habilitar un índice de encuesta para que los encuestados puedan saltar a cualquier página en la encuesta.",
   "allow_previous": "Permitir a los encuestados navegar hacia atrás a páginas anteriores para revisar o cambiar sus respuestas.",
   "autocomplete": "Recopilar entrada de texto con sugerencias anticipadas de una lista predefinida",
+  "hierarchical_autocomplete": "Recopila una selección en cascada por niveles con nombre (p. ej., País → Provincia → Ciudad) a partir de datos subidos y traducibles",
   "barcode": "Escanear códigos de barras usando un dispositivo móvil o tableta (modo sin conexión)",
   "columns_number": "Establecer cuántas opciones aparecen por fila.",
   "columns_order": "Elegir el orden de visualización de las columnas—tal como está, aleatorio, invertido o personalizado.",

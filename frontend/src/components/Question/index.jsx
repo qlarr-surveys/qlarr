@@ -8,6 +8,7 @@ import LoadingDots from "../common/LoadingDots";
 import Validation from "../run/Validation";
 import MultipleText from "../Questions/MultipleText/MultipleText";
 import AutoCompleteQuestion from "../Questions/AutoComplete/AutoCompleteQuestion";
+import HierarchicalAutoCompleteQuestion from "../Questions/HierarchicalAutoComplete/HierarchicalAutoCompleteQuestion";
 import { replaceFormatInstructions } from "../run/Content";
 
 const DateTimeQuestion = React.lazy(
@@ -202,6 +203,13 @@ const Question = forwardRef((props, ref) => {
       case "autocomplete":
         return (
           <AutoCompleteQuestion
+            key={props.component.qualifiedCode}
+            component={props.component}
+          />
+        );
+      case "hierarchical_autocomplete":
+        return (
+          <HierarchicalAutoCompleteQuestion
             key={props.component.qualifiedCode}
             component={props.component}
           />

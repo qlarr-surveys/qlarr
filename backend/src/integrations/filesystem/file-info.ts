@@ -17,6 +17,17 @@ export interface AutoCompleteFileInfo {
   lastModified: string;
 }
 
+/** Metadata for a stored hierarchical-autocomplete resource (after an upload). */
+export interface HierarchicalAutoCompleteFileInfo {
+  name: string;
+  rowCount: number;
+  levels: number;
+  languages: string[];
+  imported: string[];
+  /** "yyyy-MM-dd HH:mm:ss" UTC wall clock. */
+  lastModified: string;
+}
+
 /** A file's bytes plus the headers a download response needs (≈ `FileDownload`). */
 export interface FileDownload {
   contentType: string;
