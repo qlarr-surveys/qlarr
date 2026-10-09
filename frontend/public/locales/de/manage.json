@@ -2,7 +2,7 @@
   "action_btn": {
     "add": "Hinzufügen",
     "add_user": "Benutzer hinzufügen",
-    "cancel": "Stornieren",
+    "cancel": "Abbrechen",
     "clone": "Klon",
     "close": "Schließen",
     "create": "Erstellen",
@@ -12,7 +12,7 @@
     "save": "Speichern"
   },
   "add_user": {
-    "cancel": "Stornieren",
+    "cancel": "Abbrechen",
     "roles": "Rollen",
     "save": "Speichern",
     "title": "Neuen Benutzer hinzufügen"
@@ -271,7 +271,7 @@
     "updated": "Erfolgreich aktualisiert"
   },
   "profile": {
-    "cancel": "Stornieren",
+    "cancel": "Abbrechen",
     "change_email": "E-Mail ändern",
     "change_password": "Passwort ändern",
     "hint": "Wenn Sie Ihre E-Mail-Adresse oder Ihr Passwort ändern, werden Sie abgemeldet",
