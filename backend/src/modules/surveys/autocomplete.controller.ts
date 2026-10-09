@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Public } from '../../auth/public.decorator';
+import { FileNamePipe } from '../../common/file-name.pipe';
 import { Role } from '../../auth/role.enum';
 import { Roles } from '../../auth/roles.decorator';
 import { AutoCompleteFileInfo } from '../../integrations/filesystem/file-info';
@@ -29,11 +30,13 @@ export class AutoCompleteController {
   constructor(private readonly autocomplete: AutoCompleteService) {}
 
   // Public respondent-facing search. Tenant comes from the surveyId in the path.
+  // `filename` only keys the `auto_complete` row (no storage read), but it is
+  // held to the same plain-basename rule as every other filename param.
   @Public()
   @Get(':surveyId/autocomplete/:filename')
   search(
     @Param('surveyId') surveyId: string,
-    @Param('filename') filename: string,
+    @Param('filename', FileNamePipe) filename: string,
     @Query('q') q = '',
     @Query('limit') limit = '10',
   ): Promise<string[]> {

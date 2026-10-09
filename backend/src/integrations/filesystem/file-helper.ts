@@ -16,7 +16,10 @@ export const FILE_HELPER = Symbol('FILE_HELPER');
  *
  * Every file lives under the key `{surveyId}/{folder}/{filename}`;
  * implementations must preserve that layout so existing files stay addressable
- * across the migration.
+ * across the migration. They must also reject (`InvalidFilePathException`) a
+ * surveyId, folder segment (the responseId) or filename that fails
+ * `isSafePathSegment` — these reach storage URL-decoded, so `..%2F` is a real
+ * `../`, and a key must never resolve outside its own `{surveyId}/{folder}/`.
  *
  * Scope note (migration): the ZIP export/import methods, media optimization on
  * upload, and `deleteUnusedResponseFiles` are added with their owning phases

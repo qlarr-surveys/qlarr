@@ -6,6 +6,7 @@ import {
   Header,
   HttpCode,
   Param,
+  ParseUUIDPipe,
   Post,
   Res,
   UploadedFile,
@@ -15,6 +16,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { MAX_RESPONSE_UPLOAD_BYTES, uploadLimits } from '../../common/upload';
 import { assertEventTimes } from '../../common/datetime';
+import { FileNamePipe } from '../../common/file-name.pipe';
 import { CurrentUser } from '../../auth/current-user.decorator';
 import { CurrentUserPrincipal } from '../../auth/jwt.types';
 import { Public } from '../../auth/public.decorator';
@@ -51,6 +53,10 @@ function streamFile(res: Response, file: FileDownload, disposition?: string): vo
  * attach up/download are public (tenant from the survey); the offline-sync
  * routes are role-gated. `uploadOfflineSurveyResponse`
  * navigates via the engine and is deferred to Phase 5.
+ *
+ * Every `responseId` is a UUID (`ParseUUIDPipe`) and every filename a plain
+ * basename (`FileNamePipe`): both become storage path segments, and Express
+ * URL-decodes params, so `..%2F` would otherwise arrive as a real `../`.
  */
 @Controller('survey')
 export class ResponseOpsController {
@@ -61,7 +67,7 @@ export class ResponseOpsController {
   @UseInterceptors(FileInterceptor('file', uploadLimits(MAX_RESPONSE_UPLOAD_BYTES)))
   uploadResponseFile(
     @Param('surveyId') surveyId: string,
-    @Param('responseId') responseId: string,
+    @Param('responseId', ParseUUIDPipe) responseId: string,
     @Param('questionId') questionId: string,
     @UploadedFile() file: UploadedResource,
   ): Promise<ResponseUploadFile> {
@@ -73,7 +79,7 @@ export class ResponseOpsController {
   @UseInterceptors(FileInterceptor('file', uploadLimits(MAX_RESPONSE_UPLOAD_BYTES)))
   uploadPreviewFile(
     @Param('surveyId') surveyId: string,
-    @Param('responseId') responseId: string,
+    @Param('responseId', ParseUUIDPipe) responseId: string,
     @Param('questionId') questionId: string,
     @UploadedFile() file: UploadedResource,
   ): Promise<ResponseUploadFile> {
@@ -85,7 +91,7 @@ export class ResponseOpsController {
   @Get(':surveyId/response/attach/:responseId/:questionId')
   async downloadFileNew(
     @Param('surveyId') surveyId: string,
-    @Param('responseId') responseId: string,
+    @Param('responseId', ParseUUIDPipe) responseId: string,
     @Param('questionId') questionId: string,
     @Res() res: Response,
   ): Promise<void> {
@@ -101,8 +107,8 @@ export class ResponseOpsController {
   @Get(':surveyId/response/:responseId/attach/:filename')
   async downloadFile(
     @Param('surveyId') surveyId: string,
-    @Param('responseId') responseId: string,
-    @Param('filename') filename: string,
+    @Param('responseId', ParseUUIDPipe) responseId: string,
+    @Param('filename', FileNamePipe) filename: string,
     @Res() res: Response,
   ): Promise<void> {
     const download = await this.ops.downloadFile(surveyId, responseId, filename);
@@ -114,7 +120,7 @@ export class ResponseOpsController {
   @HttpCode(200)
   uploadOfflineSurveyResponse(
     @Param('surveyId') surveyId: string,
-    @Param('responseId') responseId: string,
+    @Param('responseId', ParseUUIDPipe) responseId: string,
     @Body() body: UploadResponseRequestData,
     @CurrentUser() user: CurrentUserPrincipal,
   ): Promise<ResponseCountDto> {
@@ -130,8 +136,8 @@ export class ResponseOpsController {
   @UseInterceptors(FileInterceptor('file', uploadLimits(MAX_RESPONSE_UPLOAD_BYTES)))
   uploadOfflineFile(
     @Param('surveyId') surveyId: string,
-    @Param('responseId') responseId: string,
-    @Param('fileName') fileName: string,
+    @Param('responseId', ParseUUIDPipe) responseId: string,
+    @Param('fileName', FileNamePipe) fileName: string,
     @UploadedFile() file: UploadedResource,
   ): Promise<ResponseUploadFile> {
     if (!file) throw new BadRequestException('file is required');
@@ -145,8 +151,8 @@ export class ResponseOpsController {
   @Header('Content-Type', 'application/json')
   isOfflineFileUploaded(
     @Param('surveyId') surveyId: string,
-    @Param('responseId') responseId: string,
-    @Param('filename') filename: string,
+    @Param('responseId', ParseUUIDPipe) responseId: string,
+    @Param('filename', FileNamePipe) filename: string,
   ): Promise<boolean> {
     return this.ops.isOfflineFileAlreadyUploaded(surveyId, responseId, filename);
   }

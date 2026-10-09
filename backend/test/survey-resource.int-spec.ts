@@ -11,6 +11,9 @@ const S_MISSING = '10000000-0000-0000-0000-0000000000ff';
 
 const BEARER = bearer({ authorities: ['super_admin'] });
 
+/** URL-encoded into one path segment; Express decodes it back into `../`. */
+const enc = (s: string) => encodeURIComponent(s);
+
 /** Stub storage: the endpoints/survey checks are under test, not the disk. */
 const fileHelper = {
   upload: jest.fn().mockResolvedValue('stored-abc.png'),
@@ -114,6 +117,17 @@ describe('Survey resource endpoints', () => {
         'stored-abc.png',
       );
     });
+
+    it('400s an encoded traversal in the file name before storage', async () => {
+      // `../design/1` would reach this survey's design; `../../<id>/…` another survey.
+      for (const name of ['../design/1', `../../${S_CLOSED}/design/1`, 'a\\b']) {
+        const res = await request(server())
+          .get(`/survey/${S_OPEN}/resource/${enc(name)}`)
+          .expect(400);
+        expect(res.body.error).toBe('InvalidFilePathException');
+      }
+      expect(fileHelper.download).not.toHaveBeenCalled();
+    });
   });
 
   describe('DELETE /survey/:id/resource/:file', () => {
@@ -134,6 +148,14 @@ describe('Survey resource endpoints', () => {
         .delete(`/survey/${S_CLOSED}/resource/x.png`)
         .set('Authorization', BEARER)
         .expect(400));
+
+    it('400s an encoded traversal in the file name before storage', async () => {
+      await request(server())
+        .delete(`/survey/${S_OPEN}/resource/${enc(`../../${S_CLOSED}/design/1`)}`)
+        .set('Authorization', BEARER)
+        .expect(400);
+      expect(fileHelper.delete).not.toHaveBeenCalled();
+    });
 
     it('rejects an unauthenticated delete with 401', () =>
       request(server())

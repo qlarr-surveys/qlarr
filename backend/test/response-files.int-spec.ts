@@ -17,6 +17,10 @@ const R_ENDED = '20000000-0000-0000-0000-000000000004';
 
 const SUPER = bearer({ authorities: ['super_admin'] });
 
+/** `../../../<other survey>/design/1`, URL-encoded into one path segment —
+ *  Express decodes it back into a real traversal before the handler runs. */
+const TRAVERSAL = encodeURIComponent('../../../10000000-0000-0000-0000-0000000000ff/design/1');
+
 /** Collect the raw response bytes (for binary/zip assertions). */
 const binaryParser = (res: any, cb: (err: Error | null, body: Buffer) => void) => {
   const chunks: Buffer[] = [];
@@ -275,6 +279,25 @@ describe('Response file ops + bulk download', () => {
         .get(`/survey/${SURVEY}/response/${R_FILE}/attach/stored-1`)
         .expect(200)
         .expect((r) => expect(r.headers['cache-control']).toBe('max-age=2592000')));
+
+    it('400s an encoded traversal in the download filename before storage', async () => {
+      const res = await request(server())
+        .get(`/survey/${SURVEY}/response/${R_FILE}/attach/${TRAVERSAL}`)
+        .expect(400);
+      expect(res.body.error).toBe('InvalidFilePathException');
+      expect(files.download).not.toHaveBeenCalled();
+    });
+
+    it('400s a non-UUID responseId on the public attach routes (not a uuid-column 500)', async () => {
+      await request(server())
+        .post(`/survey/${SURVEY}/response/attach/not-a-uuid/q1`)
+        .attach('file', Buffer.from('x'), 'a.png')
+        .expect(400);
+      await request(server()).get(`/survey/${SURVEY}/response/attach/not-a-uuid/q1`).expect(400);
+      await request(server()).get(`/survey/${SURVEY}/response/not-a-uuid/attach/stored-1`).expect(400);
+      expect(files.upload).not.toHaveBeenCalled();
+      expect(files.download).not.toHaveBeenCalled();
+    });
   });
 
   describe('preview attach upload (authenticated — designer only)', () => {
@@ -322,6 +345,39 @@ describe('Response file ops + bulk download', () => {
         .set('Authorization', SUPER)
         .expect(201)
         .expect((r) => expect(r.body).toBe(true)));
+
+    it('400s an encoded traversal in the offline fileName before storage', async () => {
+      const res = await request(server())
+        .post(`/survey/${SURVEY}/offline/response/${R_FILE}/upload/${TRAVERSAL}`)
+        .set('Authorization', SUPER)
+        .attach('file', Buffer.from('x'), 'x.jpg')
+        .expect(400);
+      expect(res.body.error).toBe('InvalidFilePathException');
+      expect(files.upload).not.toHaveBeenCalled();
+    });
+
+    it('400s an encoded traversal in the offline responseId before storage', async () => {
+      const responseId = encodeURIComponent('../../10000000-0000-0000-0000-0000000000ff/design');
+      await request(server())
+        .post(`/survey/${SURVEY}/offline/response/${responseId}/upload/1`)
+        .set('Authorization', SUPER)
+        .attach('file', Buffer.from('x'), 'x.jpg')
+        .expect(400);
+      await request(server())
+        .post(`/survey/${SURVEY}/offline/response/${responseId}/upload/1/exists`)
+        .set('Authorization', SUPER)
+        .expect(400);
+      expect(files.upload).not.toHaveBeenCalled();
+      expect(files.doesFileExist).not.toHaveBeenCalled();
+    });
+
+    it('400s an encoded traversal in the exists probe instead of answering', async () => {
+      await request(server())
+        .post(`/survey/${SURVEY}/offline/response/${R_FILE}/upload/${TRAVERSAL}/exists`)
+        .set('Authorization', SUPER)
+        .expect(400);
+      expect(files.doesFileExist).not.toHaveBeenCalled();
+    });
 
     it('rejects an unauthenticated offline upload (401)', () =>
       request(server())

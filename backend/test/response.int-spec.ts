@@ -184,6 +184,14 @@ describe('Response summary + delete', () => {
         .delete(`/survey/${SURVEY}/response/20000000-0000-0000-0000-0000000000ff`)
         .set('Authorization', SUPER)
         .expect(400));
+
+    it('400s a non-UUID responseId before touching its files folder', async () => {
+      await request(server())
+        .delete(`/survey/${SURVEY}/response/${encodeURIComponent('../design')}`)
+        .set('Authorization', SUPER)
+        .expect(400);
+      expect(files.responseFiles).not.toHaveBeenCalled();
+    });
   });
 
   describe('authorization', () => {
