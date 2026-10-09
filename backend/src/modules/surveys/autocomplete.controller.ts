@@ -12,6 +12,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Public } from '../../auth/public.decorator';
 import { Role } from '../../auth/role.enum';
 import { Roles } from '../../auth/roles.decorator';
+import { MAX_UPLOAD_BYTES, uploadLimits } from '../../common/upload';
 import { AutoCompleteFileInfo } from '../../integrations/filesystem/file-info';
 import { AutoCompleteService } from './autocomplete.service';
 import { SurveyResourceService } from './survey-resource.service';
@@ -65,7 +66,7 @@ export class AutoCompleteAdminController {
 
   @Post(':surveyId/:componentId')
   @Roles(Role.SUPER_ADMIN, Role.SURVEY_ADMIN)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', uploadLimits(MAX_UPLOAD_BYTES)))
   upload(
     @Param('surveyId') surveyId: string,
     @Param('componentId') componentId: string,
