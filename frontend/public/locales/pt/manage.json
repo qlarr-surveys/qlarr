@@ -220,6 +220,7 @@
     "duplicate_survey_name": "Nome de Pesquisa Duplicado",
     "autocomplete_malformed_input": "Entrada Malformada: O arquivo deve ser um array JSON contendo apenas strings",
     "max_upload_size_exceeded": "O tamanho do arquivo excede o limite máximo de upload.",
+    "file_too_big": "O tamanho do arquivo excede o máximo permitido para este tipo de arquivo.",
     "size_limit_exceeded": "Os arquivos em massa excedem 200MB. Por favor, reduza o intervalo ou filtre por respostas completas/incompletas.",
     "expired_confirmation_token": "Token de Confirmação Expirado, Por favor Registre-se Mais Uma Vez",
     "expired_reset_token": "Token de Confirmação Expirado, Por favor Clique em Esqueci minha Senha Mais Uma Vez",

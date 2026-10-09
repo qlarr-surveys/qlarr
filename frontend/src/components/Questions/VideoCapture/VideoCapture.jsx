@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Box } from "@mui/system";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
@@ -9,6 +10,11 @@ import { getFileFromPath } from "~/networking/common";
 import { useService } from "~/hooks/use-service";
 import { Button } from "@mui/material";
 import VideocamIcon from "@mui/icons-material/Videocam";
+import UploadError, {
+  MAX_VIDEO_UPLOAD_SIZE_KB,
+  effectiveMaxSizeKb,
+  uploadErrorFrom,
+} from "~/components/Questions/shared/UploadError";
 
 function VideoCapture(props) {
   const runService = useService("run");
@@ -26,35 +32,29 @@ function VideoCapture(props) {
   });
 
   const dispatch = useDispatch();
+  const [uploadError, setUploadError] = useState();
 
   const onImageClick = () => {
     const code = component.qualifiedCode;
-    const validationMaxSize =
-      (component.validation?.validation_max_file_size?.isActive &&
-        component.validation?.validation_max_file_size?.max_size) ||
-      -1;
-
     // Limit to validation value or 30MB (30720 KB), whichever is smaller
-    const VIDEO_MAX_SIZE_KB = 30720; // 30MB
-    const maxFileSize = validationMaxSize > 0
-      ? Math.min(validationMaxSize, VIDEO_MAX_SIZE_KB)
-      : VIDEO_MAX_SIZE_KB;
+    const maxFileSize = effectiveMaxSizeKb(component, MAX_VIDEO_UPLOAD_SIZE_KB);
 
     if (preview && mode == "offline") {
-      getFileFromPath("/dummy_video.mp4").then((response) => {
-        uploadFile(runService, code, preview, response)
-          .then((response) => {
-            dispatch(
-              valueChange({
-                componentCode: props.component.qualifiedCode,
-                value: response,
-              })
-            );
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-      });
+      setUploadError(undefined);
+      getFileFromPath("/dummy_video.mp4")
+        .then((file) => uploadFile(runService, code, preview, file))
+        .then((response) => {
+          dispatch(
+            valueChange({
+              componentCode: props.component.qualifiedCode,
+              value: response,
+            })
+          );
+        })
+        .catch((err) => {
+          setUploadError(uploadErrorFrom(err, maxFileSize));
+          console.error(err);
+        });
     } else if (window["Android"]) {
       window["Android"].captureVideo(code, maxFileSize);
       window["onVideoCaptured" + code] = (value) => {
@@ -97,6 +97,7 @@ function VideoCapture(props) {
           />
         </div>
       )}
+      <UploadError error={uploadError} />
       <br />
       {component.showHint && <span>{component.content?.hint}</span>}
     </Box>

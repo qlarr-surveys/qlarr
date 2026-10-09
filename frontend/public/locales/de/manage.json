@@ -245,6 +245,7 @@
   "processed_errors": {
     "autocomplete_malformed_input": "Fehlerhaft formatierte Eingabe: Datei muss ein JSON-Array sein, das nur Zeichenketten enthält",
     "max_upload_size_exceeded": "Die Dateigröße überschreitet das maximale Upload-Limit.",
+    "file_too_big": "Die Dateigröße überschreitet das für diesen Dateityp zulässige Maximum.",
     "size_limit_exceeded": "Die Massendateien überschreiten 200 MB. Bitte reduzieren Sie den Bereich oder filtern Sie nach vollständigen/unvollständigen Antworten.",
     "backend_down": "Backend ist nicht erreichbar... Bitte versuchen Sie es später erneut",
     "component_deleted": "Umfrageelemente können nicht gelöscht werden, nachdem die Umfrage veröffentlicht wurde",

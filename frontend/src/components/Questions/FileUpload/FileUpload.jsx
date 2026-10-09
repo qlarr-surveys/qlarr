@@ -4,7 +4,12 @@ import Link from "@mui/material/Link";
 import { previewUrlByFilename, uploadFile } from "~/networking/run";
 import styles from "./FileUpload.module.css";
 import { useDispatch, useSelector } from "react-redux";
-import ValidationItem from "~/components/run/ValidationItem";
+import UploadError, {
+  MAX_UPLOAD_SIZE_KB,
+  effectiveMaxSizeKb,
+  fileTooLargeError,
+  uploadErrorFrom,
+} from "~/components/Questions/shared/UploadError";
 import { valueChange } from "~/state/runState";
 import { setDirty } from "~/state/templateState";
 import { useTranslation } from "react-i18next";
@@ -22,16 +27,8 @@ function FileUpload(props) {
     props.component.validation?.validation_file_types?.fileTypes
   );
 
-  const validationMaxSize =
-    (props.component.validation?.validation_max_file_size?.isActive &&
-      props.component.validation?.validation_max_file_size?.max_size) ||
-    -1;
-
   // Limit to validation value or 10MB (10240 KB), whichever is smaller
-  const MAX_FILE_SIZE = 10240; // 10MB
-  const maxFileSize = validationMaxSize > 0
-    ? Math.min(validationMaxSize, MAX_FILE_SIZE)
-    : MAX_FILE_SIZE;
+  const maxFileSize = effectiveMaxSizeKb(props.component, MAX_UPLOAD_SIZE_KB);
 
   const state = useSelector((state) => {
     let questionState = state.runState.values[props.component.qualifiedCode];
@@ -46,6 +43,7 @@ function FileUpload(props) {
 
   const [selectedFile, setSelectedFile] = useState();
   const [isUploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState();
 
   const previewAndroid = () => {
     window["Android"].previewFileUpload(state.stored_filename, state.filename);
@@ -65,10 +63,13 @@ function FileUpload(props) {
 
   const changeHandler = (event) => {
     const file = event.target.files?.[0];
+    // Reset the input so picking the same file again (to retry) fires onChange
+    event.target.value = "";
     if (!file) return;
 
     dispatch(setDirty(props.component.qualifiedCode));
     setSelectedFile(file);
+    setUploadError(undefined);
 
     const invalidType = accepted.length > 0 && !accepted.includes(file.type);
     const tooBig = maxFileSize > 0 && file.size / 1024 > maxFileSize;
@@ -94,12 +95,14 @@ function FileUpload(props) {
       })
       .catch((err) => {
         setUploading(false);
+        setUploadError(uploadErrorFrom(err, maxFileSize));
         console.error(err);
       });
   };
 
   const resetSelectedFile = () => {
     setSelectedFile(undefined);
+    setUploadError(undefined);
   };
 
   const onButtonClick = (event) => {
@@ -115,6 +118,7 @@ function FileUpload(props) {
         const fileLike = { name, size, type };
         dispatch(setDirty(code));
         setSelectedFile(fileLike);
+        setUploadError(undefined);
 
         const invalidType = accepted.length > 0 && !accepted.includes(type);
         const tooBig = maxFileSize > 0 && size / 1024 > maxFileSize;
@@ -166,20 +170,21 @@ function FileUpload(props) {
       {invalidSize && (
         <React.Fragment>
           <br />
-          <ValidationItem
-            name="validation_max_file_size"
-            validation={{ ...props.component.validation?.validation_max_file_size, max_size: maxFileSize }}
-          />
+          <UploadError error={fileTooLargeError(maxFileSize)} />
         </React.Fragment>
       )}
 
       {invalidSelectedFile && (
         <React.Fragment>
           <br />
-          <ValidationItem
-            name="validation_file_types"
-            validation={props.component.validation?.validation_file_types}
-          />
+          <UploadError error={{ name: "validation_file_types" }} />
+        </React.Fragment>
+      )}
+
+      {uploadError && !isUploading && (
+        <React.Fragment>
+          <br />
+          <UploadError error={uploadError} />
         </React.Fragment>
       )}
 
