@@ -113,7 +113,7 @@ describe('decodeCsv', () => {
     // ... Mac Roman on a Mac (é = 0x8E) ...
     expect(decodeCsv(Buffer.from(text.replace('é', '\x8e'), 'latin1'))).toBeNull();
     // ... and UTF-16 for "Unicode Text".
-    expect(decodeCsv(Buffer.from('﻿' + text, 'utf16le'))).toBeNull();
+    expect(decodeCsv(Buffer.from(BOM + text, 'utf16le'))).toBeNull();
   });
 });
 
