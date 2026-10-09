@@ -14,6 +14,10 @@ import { valueChange } from "~/state/runState";
 import styles from "./Signature.module.css";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
+import UploadError, {
+  MAX_UPLOAD_SIZE_KB,
+  uploadErrorFrom,
+} from "~/components/Questions/shared/UploadError";
 
 function Signature(props) {
   const runService = useService("run");
@@ -22,6 +26,7 @@ function Signature(props) {
   const [submitEnabled, setSubmitEnabled] = useState(false);
   const [clearEnabled, setClearEnabled] = useState(false);
   const [signature, setSignature] = useState(undefined);
+  const [uploadError, setUploadError] = useState();
 
   const state = useSelector((state) => {
     let questionState = state.runState.values[props.component.qualifiedCode];
@@ -61,8 +66,10 @@ function Signature(props) {
     setSignature(undefined);
     setClearEnabled(false);
     setSubmitEnabled(false);
+    setUploadError(undefined);
   };
   const submit = () => {
+    setUploadError(undefined);
     const dataUrl = sigCanvas.current.toDataURL("image/png");
     uploadDataUrl(
       runService,
@@ -80,6 +87,7 @@ function Signature(props) {
         );
       })
       .catch((err) => {
+        setUploadError(uploadErrorFrom(err, MAX_UPLOAD_SIZE_KB));
         console.error(err);
       });
   };
@@ -136,6 +144,7 @@ function Signature(props) {
           {t("submit")}
         </Button>
       </div>
+      <UploadError error={uploadError} />
     </>
   );
 }

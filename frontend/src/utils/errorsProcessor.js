@@ -31,6 +31,10 @@ export const PROCESSED_ERRORS = {
     name: "max_upload_size_exceeded",
     handleGlobally: false,
   },
+  FILE_TOO_BIG: {
+    name: "file_too_big",
+    handleGlobally: false,
+  },
   SIZE_LIMIT_EXCEEDED: {
     name: "size_limit_exceeded",
     handleGlobally: false,
@@ -116,6 +120,8 @@ export const processError = (e) => {
         return PROCESSED_ERRORS.AUTOCOMPLETE_MALFORMED_INPUT;
       case "MaxUploadSizeExceededException":
         return PROCESSED_ERRORS.MAX_UPLOAD_SIZE_EXCEEDED;
+      case "FileTooBigException":
+        return PROCESSED_ERRORS.FILE_TOO_BIG;
       case "SizeLimitExceededException":
         return PROCESSED_ERRORS.SIZE_LIMIT_EXCEEDED;
       case "DuplicateEmailException":
