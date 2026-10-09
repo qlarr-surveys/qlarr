@@ -235,7 +235,8 @@
     "wrong_reset_token": "Este Token de Redefinição está incorreto.",
     "wrong_confirmation_token": "Este Token de Confirmação está incorreto, Por favor Registre-se Mais Uma Vez",
     "survey_quota": "Desculpe, esta pesquisa não está mais aceitando respostas.",
-    "invalid_translations_csv": "Não é um CSV de traduções."
+    "invalid_translations_csv": "Não é um CSV de traduções.",
+    "translations_csv_not_utf8": "Este arquivo não está em UTF-8. No Excel, use Arquivo → Salvar como → “CSV UTF-8 (Delimitado por vírgulas)” e importe novamente."
   },
   "processed_successes": {
     "copied": "Copiado para a área de transferência",

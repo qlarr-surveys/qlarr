@@ -235,7 +235,8 @@
     "wrong_reset_token": "Deze Reset Token is onjuist.",
     "wrong_confirmation_token": "Deze Bevestiging Token is onjuist, Registreer Opnieuw",
     "survey_quota": "Sorry, deze enquête accepteert geen reacties meer.",
-    "invalid_translations_csv": "Geen CSV met vertalingen."
+    "invalid_translations_csv": "Geen CSV met vertalingen.",
+    "translations_csv_not_utf8": "Dit bestand is niet in UTF-8. Kies in Excel Bestand → Opslaan als → “CSV UTF-8 (door komma's gescheiden)” en importeer het opnieuw."
   },
   "processed_successes": {
     "copied": "Gekopieerd naar klembord",

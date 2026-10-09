@@ -235,7 +235,8 @@
     "wrong_reset_token": "Este Token de Restablecimiento es incorrecto.",
     "wrong_confirmation_token": "Este Token de Confirmación es incorrecto, Por favor Regístrate Una Vez Más",
     "survey_quota": "Lo sentimos, esta encuesta ya no está aceptando respuestas.",
-    "invalid_translations_csv": "No es un CSV de traducciones."
+    "invalid_translations_csv": "No es un CSV de traducciones.",
+    "translations_csv_not_utf8": "Este archivo no está en UTF-8. En Excel, usa Archivo → Guardar como → «CSV UTF-8 (delimitado por comas)» e impórtalo de nuevo."
   },
   "processed_successes": {
     "copied": "Copiado al portapapeles",

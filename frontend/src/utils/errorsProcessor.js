@@ -59,6 +59,10 @@ export const PROCESSED_ERRORS = {
     name: "invalid_translations_csv",
     handleGlobally: false,
   },
+  TRANSLATIONS_CSV_NOT_UTF8: {
+    name: "translations_csv_not_utf8",
+    handleGlobally: false,
+  },
 };
 
 export const onApiError = ({
@@ -169,6 +173,8 @@ export const processError = (e) => {
         return PROCESSED_ERRORS.DUPLICATE_TO_CODE;
       case "InvalidTranslationsCsvException":
         return PROCESSED_ERRORS.INVALID_TRANSLATIONS_CSV;
+      case "TranslationsCsvNotUtf8Exception":
+        return PROCESSED_ERRORS.TRANSLATIONS_CSV_NOT_UTF8;
       default:
         return PROCESSED_ERRORS.UNIDENTIFIED_ERROR;
     }

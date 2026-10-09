@@ -1,5 +1,6 @@
 import {
   csvChanges,
+  decodeCsv,
   DesignState,
   parseCsv,
   toCsv,
@@ -95,6 +96,24 @@ describe('toCsv and parseCsv', () => {
       ['G1', 'label', 'Page; one', 'الصفحة'],
       ['Q1', 'hint', 'Pick one, please', ''],
     ]);
+  });
+});
+
+describe('decodeCsv', () => {
+  it('reads UTF-8 and drops the BOM of Excel\'s "CSV UTF-8"', () => {
+    const file = Buffer.from(BOM + 'code,key,en,fr\r\nG1,label,Page,Café\r\n', 'utf8');
+    expect(decodeCsv(file)).toBe('code,key,en,fr\r\nG1,label,Page,Café\r\n');
+    expect(parseCsv(decodeCsv(Buffer.from(toCsv(exported)))!)).toEqual(exported);
+  });
+
+  it('returns null for a file that is not UTF-8, instead of turning é into U+FFFD', () => {
+    const text = 'code,key,en,fr\r\nG1,label,Page,Café\r\n';
+    // Excel's plain "CSV (Comma delimited)": Windows-1252 on Windows (é = 0xE9) ...
+    expect(decodeCsv(Buffer.from(text, 'latin1'))).toBeNull();
+    // ... Mac Roman on a Mac (é = 0x8E) ...
+    expect(decodeCsv(Buffer.from(text.replace('é', '\x8e'), 'latin1'))).toBeNull();
+    // ... and UTF-16 for "Unicode Text".
+    expect(decodeCsv(Buffer.from('﻿' + text, 'utf16le'))).toBeNull();
   });
 });
 

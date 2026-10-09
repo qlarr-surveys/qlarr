@@ -235,7 +235,8 @@
     "wrong_reset_token": "This Reset Token is incorrect.",
     "wrong_confirmation_token": "This Confirmation Token is incorrect, Please Register Once more",
     "survey_quota": "Sorry, this survey is no longer accepting responses.",
-    "invalid_translations_csv": "Not a translations CSV."
+    "invalid_translations_csv": "Not a translations CSV.",
+    "translations_csv_not_utf8": "This file isn't UTF-8. In Excel, use File → Save As → 'CSV UTF-8 (Comma delimited)' and import again."
   },
   "processed_successes": {
     "copied": "Copied to clipboard",
