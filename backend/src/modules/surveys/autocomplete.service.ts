@@ -15,7 +15,17 @@ import {
   SurveyIsClosedException,
   SurveyNotFoundException,
 } from './survey.exceptions';
-import { fromCsv, languagesOf, toCsv } from './hierarchical-autocomplete-csv';
+import {
+  fromCsv,
+  HierarchicalRow,
+  languagesOf,
+  toCsv,
+} from './hierarchical-autocomplete-csv';
+import {
+  findRow,
+  searchLang,
+  searchLevel,
+} from './hierarchical-autocomplete-search';
 
 @Injectable()
 export class AutoCompleteService {
@@ -53,6 +63,47 @@ export class AutoCompleteService {
     limit: number,
   ): Promise<string[]> {
     return this.autoComplete.search(surveyId, filename, searchTerm, limit);
+  }
+
+  /**
+   * Respondent search for one level of a hierarchical autocomplete: the distinct
+   * values at `level` among rows matching the levels above (`prefix`), in the
+   * respondent's language — or the default language when no row carries it.
+   */
+  async searchHierarchical(
+    surveyId: string,
+    filename: string,
+    level: number,
+    prefix: string[],
+    query: string,
+    lang: string,
+    defaultLang: string,
+    limit: number,
+  ): Promise<string[]> {
+    const rows = await this.autoComplete.getHierarchicalDataByFilename(
+      surveyId,
+      filename,
+    );
+    const effective = searchLang(rows, lang, defaultLang);
+    return searchLevel(rows, effective, level, prefix, query, limit);
+  }
+
+  /**
+   * The whole row (every language) for a fully selected path, or null. The path
+   * is in `lang` — or the default language when no row carries `lang`.
+   */
+  async hierarchicalRow(
+    surveyId: string,
+    filename: string,
+    path: string[],
+    lang: string,
+    defaultLang: string,
+  ): Promise<HierarchicalRow | null> {
+    const rows = await this.autoComplete.getHierarchicalDataByFilename(
+      surveyId,
+      filename,
+    );
+    return findRow(rows, searchLang(rows, lang, defaultLang), path);
   }
 
   async getHierarchicalCsv(

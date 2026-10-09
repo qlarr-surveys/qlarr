@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Controller,
   Get,
+  NotFoundException,
   Param,
   Post,
   Query,
@@ -19,6 +20,7 @@ import {
   HierarchicalAutoCompleteFileInfo,
 } from '../../integrations/filesystem/file-info';
 import { AutoCompleteService } from './autocomplete.service';
+import { HierarchicalRow } from './hierarchical-autocomplete-csv';
 import { SurveyResourceService } from './survey-resource.service';
 
 /** Uploaded file shape from Multer's memory storage. */
@@ -45,6 +47,84 @@ export class AutoCompleteController {
     const n = Math.min(Math.max(parseInt(limit, 10) || 10, 1), 100);
     return this.autocomplete.search(surveyId, filename, q, n);
   }
+
+  // Public respondent-facing search for one level of a hierarchical
+  // autocomplete. `prefix` is a JSON array of the values selected for the
+  // levels above (in the search language); `level` is 0-based.
+  @Public()
+  @Get(':surveyId/hierarchical-autocomplete/:filename')
+  searchHierarchical(
+    @Param('surveyId') surveyId: string,
+    @Param('filename') filename: string,
+    @Query('level') level: string,
+    @Query('prefix') prefix: string,
+    @Query('q') q = '',
+    @Query('lang') lang: string,
+    @Query('defaultLang') defaultLang: string,
+    @Query('limit') limit = '10',
+  ): Promise<string[]> {
+    const levelIndex = parseInt(level, 10);
+    if (!Number.isInteger(levelIndex) || levelIndex < 0) {
+      throw new BadRequestException('level must be a non-negative integer');
+    }
+    const prefixValues = parseStringArray(prefix ?? '[]', 'prefix');
+    if (prefixValues.length !== levelIndex) {
+      throw new BadRequestException('prefix must hold one value per level above');
+    }
+    const n = Math.min(Math.max(parseInt(limit, 10) || 10, 1), 100);
+    return this.autocomplete.searchHierarchical(
+      surveyId,
+      filename,
+      levelIndex,
+      prefixValues,
+      q,
+      requireLang(lang, 'lang'),
+      requireLang(defaultLang, 'defaultLang'),
+      n,
+    );
+  }
+
+  // Public: the whole row (every language) for a fully selected path. The
+  // respondent UI uses it to turn the stored default-language values into the
+  // respondent's language, and to get the default-language values for a path
+  // picked in the respondent's language.
+  @Public()
+  @Get(':surveyId/hierarchical-autocomplete/:filename/row')
+  async hierarchicalRow(
+    @Param('surveyId') surveyId: string,
+    @Param('filename') filename: string,
+    @Query('path') path: string,
+    @Query('lang') lang: string,
+    @Query('defaultLang') defaultLang: string,
+  ): Promise<HierarchicalRow> {
+    const row = await this.autocomplete.hierarchicalRow(
+      surveyId,
+      filename,
+      parseStringArray(path, 'path'),
+      requireLang(lang, 'lang'),
+      requireLang(defaultLang, 'defaultLang'),
+    );
+    if (!row) throw new NotFoundException();
+    return row;
+  }
+}
+
+function parseStringArray(raw: string, name: string): string[] {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new BadRequestException(`${name} must be a JSON array of strings`);
+  }
+  if (!Array.isArray(parsed) || !parsed.every((v) => typeof v === 'string')) {
+    throw new BadRequestException(`${name} must be a JSON array of strings`);
+  }
+  return parsed;
+}
+
+function requireLang(lang: string, name: string): string {
+  if (!lang) throw new BadRequestException(`${name} is required`);
+  return lang;
 }
 
 /**

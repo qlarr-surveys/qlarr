@@ -34,6 +34,65 @@ export const autoCompleteSearch = (runService, uuid, query) => {
   }
 };
 
+export const hierarchicalSearch = (
+  runService,
+  filename,
+  level,
+  prefix,
+  query,
+  lang,
+  defaultLang
+) => {
+  if (window["Android"]) {
+    return new Promise((resolve, reject) => {
+      window["Android"].searchHierarchicalAutoComplete(
+        filename,
+        level,
+        JSON.stringify(prefix),
+        query,
+        lang,
+        defaultLang
+      );
+      window["searchHierarchicalAutoComplete"] = (res) => {
+        resolve(res);
+      };
+    });
+  } else {
+    return runService.searchHierarchical(
+      filename,
+      level,
+      prefix,
+      query,
+      lang,
+      defaultLang
+    );
+  }
+};
+
+export const hierarchicalRow = (
+  runService,
+  filename,
+  path,
+  lang,
+  defaultLang
+) => {
+  if (window["Android"]) {
+    return new Promise((resolve, reject) => {
+      window["Android"].hierarchicalAutoCompleteRow(
+        filename,
+        JSON.stringify(path),
+        lang,
+        defaultLang
+      );
+      window["hierarchicalAutoCompleteRow"] = (res) => {
+        resolve(res);
+      };
+    });
+  } else {
+    return runService.hierarchicalRow(filename, path, lang, defaultLang);
+  }
+};
+
 export const continueNavigation = (
   runService,
   payload,

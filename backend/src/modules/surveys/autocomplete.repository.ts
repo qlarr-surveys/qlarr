@@ -47,6 +47,19 @@ export class AutoCompleteRepository {
     return row && Array.isArray(row.data) ? row.data : [];
   }
 
+  /** A hierarchical autocomplete's rows by its resource filename (respondent search). */
+  async getHierarchicalDataByFilename(
+    surveyId: string,
+    filename: string,
+  ): Promise<Array<Record<string, string[]>>> {
+    const [row]: Array<{ data: Array<Record<string, string[]>> }> =
+      await this.db.manager.query(
+        `SELECT data FROM auto_complete WHERE survey_id = $1 AND filename = $2`,
+        [surveyId, filename],
+      );
+    return row && Array.isArray(row.data) ? row.data : [];
+  }
+
   /**
    * Distinct values in a survey's autocomplete file matching the term. A survey
    * that can't be resolved is 404'd upstream before reaching here, so this
