@@ -110,8 +110,11 @@ export class LocalFileHelper implements FileHelper, OnModuleInit {
     contentType: string,
     filename: string,
   ): Promise<void> {
+    // Resolve (and validate) the path first: an unsafe name is rejected before
+    // any image/video re-encode is spent on it.
+    const path = this.filePath(surveyId, folder, filename);
     const bytes = await this.optimizeIfResource(folder, body, contentType, filename);
-    await this.write(this.filePath(surveyId, folder, filename), bytes, contentType);
+    await this.write(path, bytes, contentType);
   }
 
   /**
