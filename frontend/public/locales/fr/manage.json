@@ -236,7 +236,8 @@
     "wrong_reset_token": "Ce Jeton de Réinitialisation est incorrect.",
     "wrong_confirmation_token": "Ce Jeton de Confirmation est incorrect, Veuillez Vous Inscrire à Nouveau",
     "survey_quota": "Désolé, ce sondage n'accepte plus de réponses.",
-    "invalid_translations_csv": "Ce n'est pas un CSV de traductions."
+    "invalid_translations_csv": "Ce n'est pas un CSV de traductions.",
+    "translations_csv_not_utf8": "Ce fichier n'est pas encodé en UTF-8. Dans Excel, utilisez Fichier → Enregistrer sous → « CSV UTF-8 (délimité par des virgules) » puis importez-le à nouveau."
   },
   "processed_successes": {
     "copied": "Copié dans le presse-papiers",

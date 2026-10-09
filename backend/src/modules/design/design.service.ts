@@ -21,8 +21,16 @@ import {
   InvalidDesignException,
   InvalidTranslationsCsvException,
   NoPublishedVersionException,
+  TranslationsCsvNotUtf8Exception,
 } from './design.exceptions';
-import { csvChanges, DesignState, parseCsv, toCsv, toCsvRows } from './translations-csv';
+import {
+  csvChanges,
+  decodeCsv,
+  DesignState,
+  parseCsv,
+  toCsv,
+  toCsvRows,
+} from './translations-csv';
 
 export interface ProcessedSurvey {
   survey: SurveyEntity;
@@ -128,9 +136,11 @@ export class DesignService {
   /** Applies a translations CSV with the designer's own `changeContent`, as one design save. */
   async importTranslations(
     surveyId: string,
-    csv: string,
+    file: Uint8Array,
     overrideMainLang: boolean,
   ): Promise<{ updated: number; design: DesignDto }> {
+    const csv = decodeCsv(file);
+    if (csv === null) throw new TranslationsCsvNotUtf8Exception();
     const design = await this.getDesign(surveyId);
     const saved = design.designerInput.state as DesignState;
     const changes = csvChanges(parseCsv(csv), saved, overrideMainLang);

@@ -265,7 +265,8 @@
     "wrong_credentials": "Falsche E-Mail oder Passwort",
     "wrong_password": "Falsches Passwort",
     "wrong_reset_token": "Dieses Reset-Token ist falsch.",
-    "invalid_translations_csv": "Keine Übersetzungs-CSV."
+    "invalid_translations_csv": "Keine Übersetzungs-CSV.",
+    "translations_csv_not_utf8": "Diese Datei ist nicht UTF-8-kodiert. Wählen Sie in Excel Datei → Speichern unter → „CSV UTF-8 (durch Trennzeichen getrennt)“ und importieren Sie sie erneut."
   },
   "processed_successes": {
     "copied": "In die Zwischenablage kopiert",

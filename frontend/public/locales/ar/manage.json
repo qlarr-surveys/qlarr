@@ -236,7 +236,8 @@
     "wrong_reset_token": "رمز إعادة التعيين هذا غير صحيح.",
     "wrong_confirmation_token": "رمز التأكيد هذا غير صحيح، يرجى التسجيل مرة أخرى",
     "survey_quota": "عذرًا، لم يعد هذا الاستبيان يقبل الردود.",
-    "invalid_translations_csv": "هذا ليس ملف ترجمات CSV."
+    "invalid_translations_csv": "هذا ليس ملف ترجمات CSV.",
+    "translations_csv_not_utf8": "هذا الملف ليس بترميز UTF-8. في Excel، اختر ملف ← حفظ باسم ← \"CSV UTF-8 (محدد بفواصل)\" ثم استورده مرة أخرى."
   },
   "processed_successes": {
     "copied": "نسخ إلى الحافظة",
