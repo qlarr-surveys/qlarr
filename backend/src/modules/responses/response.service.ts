@@ -330,9 +330,16 @@ export class ResponseService {
           const pass = new PassThrough();
           currentBody = dl.body;
           currentPass = pass;
+          // The question id and original filename are response data (an
+          // offline sync stores the client's values as sent), so flatten any
+          // `/` or `\` — the entry must stay one file at the ZIP root, and yazl
+          // throws on a `..` segment, which would drop the file from the ZIP.
           zip.addReadStream(
             pass,
-            `${file.index}-${file.questionId}-${file.originalFilename}`,
+            `${file.index}-${file.questionId}-${file.originalFilename}`.replace(
+              /[/\\]/g,
+              "_",
+            ),
           );
           dl.body.on("error", (err) => {
             this.logger.error(
