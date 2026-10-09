@@ -220,6 +220,7 @@
     "duplicate_survey_name": "Nom de Sondage en Double",
     "autocomplete_malformed_input": "Entrée Malformée : Le fichier doit être un tableau JSON contenant uniquement des chaînes de caractères",
     "max_upload_size_exceeded": "La taille du fichier dépasse la limite maximale de téléchargement.",
+    "file_too_big": "La taille du fichier dépasse le maximum autorisé pour ce type de fichier.",
     "size_limit_exceeded": "Les fichiers en masse dépassent 200 Mo. Veuillez réduire la plage ou filtrer par réponses complètes/incomplètes.",
     "expired_confirmation_token": "Jeton de Confirmation Expiré, Veuillez Vous Inscrire à Nouveau",
     "expired_reset_token": "Jeton de Confirmation Expiré, Veuillez Cliquer sur Mot de Passe Oublié à Nouveau",

@@ -219,6 +219,7 @@
     "duplicate_email": "Email address is already registered.",
     "autocomplete_malformed_input": "Malformed Input: File must be a JSON array containing only strings",
     "max_upload_size_exceeded": "File size exceeds the maximum upload limit.",
+    "file_too_big": "File size exceeds the maximum allowed for this file type.",
     "size_limit_exceeded": "The bulk files exceed 200MB. Please reduce the range or filter by complete/incomplete responses.",
     "duplicate_survey_name": "Duplicate Survey Name",
     "expired_confirmation_token": "Expired Confirmation Token, Please Register Once more",

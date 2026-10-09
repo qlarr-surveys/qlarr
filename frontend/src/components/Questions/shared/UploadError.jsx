@@ -38,10 +38,14 @@ export const uploadErrorFrom = (error, maxSizeKb) => {
   return tooLarge ? fileTooLargeError(maxSizeKb) : { name: "upload_failed" };
 };
 
-/** `10240` → "10 MB", `500` → "500 KB", with the survey language's number format. */
+/**
+ * `10240` → "10 MB", `500` → "500 KB", with the survey language's number format.
+ * MB is rounded down so the shown limit never exceeds the real one
+ * (`1500` → "1.4 MB", not "1.5 MB").
+ */
 const formatSize = (kb, t, language) => {
   const inMb = kb >= 1024;
-  const value = inMb ? kb / 1024 : kb;
+  const value = inMb ? Math.floor((kb / 1024) * 10) / 10 : kb;
   let size;
   try {
     size = new Intl.NumberFormat(language, {
