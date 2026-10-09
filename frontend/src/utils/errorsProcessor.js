@@ -98,9 +98,10 @@ export const processApiError = async ({
     }
   }
 
-  const processed = !error
-    ? PROCESSED_ERRORS.UNIDENTIFIED_ERROR
-    : processError(error);
+  // processError returns nothing for a response without an `error` name
+  // (e.g. a proxy's 502 HTML page, a timeout), so fall back to unidentified.
+  const processed =
+    (error && processError(error)) || PROCESSED_ERRORS.UNIDENTIFIED_ERROR;
   if (processed.handleGlobally) {
     globalErrorHandler(processed);
   }
