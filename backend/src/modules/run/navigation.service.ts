@@ -8,6 +8,8 @@ import {
   NavigationModeName,
 } from '../../engine/engine.types';
 import { ProcessedSurvey } from '../design/design.service';
+import { fullQuotaValues, screenedOutQuota, stripQuotaKeys } from '../design/quota.helpers';
+import { QuotaService } from '../design/quota.service';
 import { ResponseRepository } from '../responses/response.repository';
 import { navigationModeFrom } from '../surveys/survey.enums';
 import { SurveyIsClosedException } from '../surveys/survey.exceptions';
@@ -39,6 +41,7 @@ export interface NavigationResult {
   };
   lang: SurveyLang;
   additionalLang: SurveyLang[];
+  screenedOutQuota: string | null;
 }
 
 /**
@@ -51,6 +54,7 @@ export class NavigationService {
   constructor(
     private readonly responses: ResponseRepository,
     private readonly engine: EngineService,
+    private readonly quotas: QuotaService,
   ) {}
 
   async navigate(params: {
@@ -104,8 +108,17 @@ export class NavigationService {
       navModeFromIndex(response?.navigationIndex) ??
       navData.navigationMode;
 
+    const values = stripQuotaKeys(params.values);
+    const fullQuotas = preview
+      ? []
+      : await this.quotas.fullQuotas(survey, processedSurvey.output);
+
     const navigationJsonOutput = await this.engine.navigate({
-      values: JSON.stringify({ ...(response?.values ?? {}), ...params.values }),
+      values: JSON.stringify({
+        ...(response?.values ?? {}),
+        ...values,
+        ...fullQuotaValues(fullQuotas),
+      }),
       processedSurvey: JSON.stringify(processedSurvey.output),
       lang: lang.code,
       navigationMode: mode,
@@ -115,12 +128,26 @@ export class NavigationService {
       surveyMode: params.surveyMode,
     });
 
+    // Disqualification is final: the engine clears it when resuming (e.g. reloading the end page).
+    if (response?.values?.['Survey.disqualified'] === true) {
+      navigationJsonOutput.toSave['Survey.disqualified'] = true;
+    }
+
     const others = [
       defaultSurveyLang(processedSurvey.output.survey),
       ...additionalLang(processedSurvey.output.survey),
     ].filter((l) => l.code !== lang.code);
 
-    return { navigationJsonOutput, lang, additionalLang: others };
+    return {
+      navigationJsonOutput,
+      lang,
+      additionalLang: others,
+      screenedOutQuota: screenedOutQuota(
+        fullQuotas,
+        navigationJsonOutput.navigationIndex,
+        navigationJsonOutput.toSave,
+      ),
+    };
   }
 
   private validateForNavigation(

@@ -1,4 +1,9 @@
 // @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
+import {
+  QUOTA_SKIP_CODE,
+  quotaFullVariable,
+  quotaMetVariable,
+} from "../constants/design";
 export const cleanupDefaultValue = (component) => {
   // Check if this is a single choice question type that supports default values
   if (
@@ -1262,10 +1267,102 @@ const getQuestionType = (state, code) => {
   const match = code.match(/^Q[a-z0-9_]+/);
   const captured = match ? match[0] : null;
   if (captured) {
-    return state[captured].type;
+    // The question may have been deleted while logic still refers to it.
+    return state[captured]?.type;
   } else {
     return null;
   }
+};
+
+const QUOTA_VARIABLE = /^var_.+_(met|full)$/;
+
+export const isQuotaVariable = (code) => QUOTA_VARIABLE.test(code);
+
+// A quota compiles into two Survey variables: whether the respondent belongs to
+// it (calculated from its condition) and whether it is full (an input the
+// backend passes in on every navigation; false until then).
+export const quotaVariables = (quota, state) => {
+  const text = jsonToJs(
+    quota.condition?.logic,
+    false,
+    (componentCode) => state[componentCode]?.type,
+    (componentCode) => getQuestionType(state, componentCode),
+  );
+  if (!text) {
+    return [];
+  }
+  return [
+    { code: quotaMetVariable(quota.code), text, isActive: true, returnType: "boolean" },
+    { code: quotaFullVariable(quota.code), text: "false", isActive: false, returnType: "boolean" },
+  ];
+};
+
+export const quotaScreenOutCondition = (quotaCode) =>
+  `Survey.${quotaMetVariable(quotaCode)} && Survey.${quotaFullVariable(quotaCode)}`;
+
+// Questions in survey order, outside the end group.
+export const surveyQuestionCodes = (state) =>
+  (state.Survey?.children || [])
+    .map((group) => state[group.code])
+    .filter((group) => group && group.groupType?.toUpperCase() !== "END")
+    .flatMap((group) => (group.children || []).map((question) => question.code))
+    .filter((code) => state[code]);
+
+const logicVars = (logic) => {
+  if (!logic || typeof logic !== "object") {
+    return [];
+  }
+  if (Array.isArray(logic)) {
+    return logic.flatMap(logicVars);
+  }
+  return Object.entries(logic).flatMap(([key, value]) =>
+    key === "var" && typeof value === "string" ? [value] : logicVars(value),
+  );
+};
+
+// The last question (of `questionCodes`, in survey order) the quota's condition
+// depends on; the first question when it depends on none of them.
+export const quotaDecidingQuestion = (quota, questionCodes) => {
+  const referenced = new Set(
+    logicVars(quota.condition?.logic).map((name) => name.match(/^Q[a-z0-9_]+/)?.[0]),
+  );
+  return questionCodes.filter((code) => referenced.has(code)).pop() ?? questionCodes[0];
+};
+
+// Screens the respondent out to the end page once any of the given quota
+// conditions holds.
+export const quotaSkipInstruction = (conditions, endGroupCode) => ({
+  code: QUOTA_SKIP_CODE,
+  text: conditions.length === 1 ? conditions[0] : conditions.map((it) => `(${it})`).join(" || "),
+  returnType: "boolean",
+  isActive: true,
+  skipToComponent: endGroupCode,
+  toEnd: false,
+  disqualify: true,
+});
+
+// Quotas the engine rejected (their variables or screen-out skip have errors).
+export const brokenQuotaCodes = (state) => {
+  const survey = state?.Survey;
+  if (!survey?.quotas?.length) {
+    return new Set();
+  }
+  const questionCodes = surveyQuestionCodes(state);
+  return new Set(
+    survey.quotas
+      .filter((quota) => {
+        const variables = [quotaMetVariable(quota.code), quotaFullVariable(quota.code)]
+          .map((code) => instructionByCode(survey, code))
+          .filter(Boolean);
+        if (!variables.length) {
+          return false;
+        }
+        const question = quotaDecidingQuestion(quota, questionCodes);
+        const skip = question && instructionByCode(state[question], QUOTA_SKIP_CODE);
+        return [...variables, skip].some((instruction) => instruction?.errors?.length);
+      })
+      .map((quota) => quota.code),
+  );
 };
 
 export const conditionalRelevanceEquation = (logic, rule, state) => {

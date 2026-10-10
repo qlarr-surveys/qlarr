@@ -91,3 +91,32 @@ function Group(props) {
 }
 
 export default React.memo(Group);
+
+export const QuotaMessage = React.memo(function QuotaMessage({
+  group,
+  contentKey,
+  message,
+}) {
+  const theme = useTheme();
+  return (
+    <Box
+      data-code={group.code}
+      className={styles.topLevel}
+      style={{
+        '--qlarr-shadow-color': alpha(theme.textStyles.question.color, 0.15),
+        '--qlarr-bg-color': theme.palette.background.paper,
+      }}
+    >
+      <div className={styles.groupHeader}>
+        <Content
+          elementCode="Survey"
+          name={contentKey}
+          customStyle={`
+        font-size: ${theme.textStyles.group.size}px;
+        `}
+          content={message}
+        />
+      </div>
+    </Box>
+  );
+});

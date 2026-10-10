@@ -11,12 +11,14 @@ import {
   isEquivalent,
   nextId,
   buildCodeIndex,
+  isQuestion,
   lastIndexInArray,
 } from "../utils/pureUtils";
 import {
   buildValidationDefaultData,
   nextGroupId,
   nextQuestionId,
+  nextQuotaCode,
   reorder,
   buildFormatInstruction,
 } from "./stateUtils";
@@ -28,6 +30,8 @@ import {
   CARRY_FORWARD_SOURCE_TYPES,
   isArrayType,
   languageSetup,
+  QUOTA_SKIP_CODE,
+  quotaMessageKey,
   setupOptions,
   themeSetup,
 } from "../constants/design";
@@ -49,8 +53,14 @@ import {
   cleanupDefaultValue,
   conditionalRelevanceEquation,
   instructionByCode,
+  isQuotaVariable,
   processValidation,
+  quotaDecidingQuestion,
+  quotaScreenOutCondition,
+  quotaSkipInstruction,
+  quotaVariables,
   removeInstruction,
+  surveyQuestionCodes,
   updateRandomByRule,
   updatePriorityByRule,
 } from "./addInstructions";
@@ -61,7 +71,8 @@ import {
   stripRepeatedCopies,
 } from "./repetition";
 
-const reservedKeys = [
+// Designer-only state: never saved, kept on reload. Add any new UI-only key here.
+export const UI_STATE_KEYS = [
   "setup",
   "advancedByCode",
   "langInfo",
@@ -75,8 +86,23 @@ const reservedKeys = [
   "lastAddedComponent",
   "index",
   "skipScroll",
-  "advancedByCode",
+  "focus",
+  "componentIndex",
+  "designStateReceived",
+  "versionDto",
+  "quotaMessageView",
 ];
+
+export function designChanges(state, latest) {
+  const changes = {};
+  const keys = new Set([...Object.keys(state), ...Object.keys(latest)]);
+  keys.forEach((key) => {
+    if (!UI_STATE_KEYS.includes(key) && !isEquivalent(state[key], latest[key])) {
+      changes[key] = state[key];
+    }
+  });
+  return changes;
+}
 
 // Formerly the `designStateReceived` reducer. Mutates `state` in place and also
 // returns it, so a frontend delegator can `return core.buildDesignState(...)`
@@ -95,10 +121,10 @@ export function buildDesignState(state, payload) {
   stripRepeatedCopies(newState);
 
   const newKeys = Object.keys(newState).filter(
-    (el) => !reservedKeys.includes(el),
+    (el) => !UI_STATE_KEYS.includes(el),
   );
   const toBeRemoved = Object.keys(state).filter(
-    (el) => !reservedKeys.includes(el) && !newKeys.includes(el),
+    (el) => !UI_STATE_KEYS.includes(el) && !newKeys.includes(el),
   );
 
   if (!state.langInfo || response.overWriteLang) {
@@ -119,6 +145,8 @@ export function buildDesignState(state, payload) {
   toBeRemoved.forEach((key) => {
     delete state[key];
   });
+  // A load ends any pending edit focus (it was never kept across loads).
+  delete state.focus;
   const inCurrentSetup = state["setup"]?.code;
   if (!newKeys.includes(inCurrentSetup)) {
     delete state["setup"];
@@ -208,6 +236,112 @@ export function setDesignModeToTheme(state) {
   setup(state, themeSetup);
   state.designMode = DESIGN_SURVEY_MODE.THEME;
 }
+
+export function addQuota(state) {
+  const survey = state.Survey;
+  survey.quotas = survey.quotas || [];
+  survey.quotas.push({
+    code: nextQuotaCode(survey.quotas),
+    label: "",
+    limit: 0,
+    condition: { logic: null },
+  });
+}
+
+export function updateQuota(state, payload) {
+  const { code, changes } = payload;
+  const quota = state.Survey.quotas?.find((quota) => quota.code === code);
+  if (!quota) {
+    return;
+  }
+  Object.assign(quota, changes);
+  if ("condition" in changes) {
+    refreshQuotaInstructions(state);
+  }
+}
+
+export function removeQuota(state, payload) {
+  const survey = state.Survey;
+  survey.quotas = (survey.quotas || []).filter(
+    (quota) => quota.code !== payload,
+  );
+  const messageKey = quotaMessageKey(payload);
+  Object.keys(survey.content || {}).forEach((lang) => {
+    if (survey.content[lang][messageKey] === undefined) {
+      return;
+    }
+    changeContent(state, { code: "Survey", key: messageKey, lang, value: "" });
+    delete survey.content[lang][messageKey];
+  });
+  refreshQuotaInstructions(state);
+}
+
+export function showQuotaMessage(state, payload) {
+  const { code = null, reveal = false } = payload;
+  state.quotaMessageView = { code, reveal };
+}
+
+export function quotaMessageRevealed(state) {
+  if (state.quotaMessageView) {
+    state.quotaMessageView.reveal = false;
+  }
+}
+
+// Rebuilds each quota's Survey variables and the screen-out skips on the
+// questions where quotas are decided. Unchanged instructions are kept so they
+// keep the errors the backend reported on them.
+const refreshQuotaInstructions = (state) => {
+  const survey = state.Survey;
+  if (!survey) {
+    return;
+  }
+  const previous = new Map();
+  survey.instructionList = (survey.instructionList || []).filter((instruction) => {
+    const isQuota = isQuotaVariable(instruction.code);
+    if (isQuota) previous.set(instruction.code, instruction);
+    return !isQuota;
+  });
+
+  const questionCodes = surveyQuestionCodes(state);
+  const screenOuts = new Map();
+  (survey.quotas || []).forEach((quota) => {
+    const variables = quotaVariables(quota, state);
+    if (!variables.length) {
+      return;
+    }
+    variables.forEach((variable) => {
+      const kept = previous.get(variable.code);
+      survey.instructionList.push(kept?.text === variable.text ? kept : variable);
+    });
+    const question = quotaDecidingQuestion(quota, questionCodes);
+    if (question) {
+      screenOuts.set(question, [
+        ...(screenOuts.get(question) || []),
+        quotaScreenOutCondition(quota.code),
+      ]);
+    }
+  });
+
+  const endGroupCode = survey.children?.find(
+    (group) => state[group.code]?.groupType?.toUpperCase() === "END",
+  )?.code;
+  Object.keys(state).forEach((code) => {
+    const question = state[code];
+    if (!isQuestion(code) || !question) {
+      return;
+    }
+    const conditions = screenOuts.get(code);
+    if (!conditions || !endGroupCode) {
+      if (question.instructionList) removeInstruction(question, QUOTA_SKIP_CODE);
+      return;
+    }
+    const skip = quotaSkipInstruction(conditions, endGroupCode);
+    const kept = question.instructionList && instructionByCode(question, QUOTA_SKIP_CODE);
+    if (kept?.text !== skip.text || kept?.skipToComponent !== skip.skipToComponent) {
+      changeInstruction(question, skip);
+    }
+  });
+};
 
 export function changeAttribute(state, payload) {
   if (
@@ -315,6 +449,7 @@ export function cloneQuestion(state, payload) {
   );
   setup(state, { code: newQuestionId, rules: setupOptions(newQuestion.type) });
   cleanupRandomRules(group);
+  refreshQuotaInstructions(state);
   state.index = buildCodeIndex(state);
   state.focus = newQuestionId;
 }
@@ -865,6 +1000,7 @@ export function deleteGroup(state, payload) {
   delete state[groupCode];
   cleanupRandomRules(survey);
   cleanupSkipDestinations(state, groupCode);
+  refreshQuotaInstructions(state);
 }
 
 export function deleteQuestion(state, payload) {
@@ -894,6 +1030,7 @@ export function deleteQuestion(state, payload) {
   cleanupRandomRules(group);
   cleanupSkipDestinations(state, questionCode);
   resyncSourceDependents(state, questionCode);
+  refreshQuotaInstructions(state);
 }
 
 export function convertQuestion(state, payload) {
@@ -965,6 +1102,7 @@ export function convertQuestion(state, payload) {
     severCarryForwardTargets(state, questionCode);
   }
   resyncSourceDependents(state, questionCode);
+  refreshQuotaInstructions(state);
 }
 
 export function changeContent(state, payload) {
@@ -1257,6 +1395,7 @@ export function refreshDsl(state) {
       addMaskedValuesInstructions(questionCode, question, state);
     });
   });
+  refreshQuotaInstructions(state);
 }
 
 export function setUpdating(state, payload) {
@@ -1269,14 +1408,17 @@ export function onDrag(state, payload) {
   switch (payload.type) {
     case "reorder_questions":
       reorderQuestions(state, state.Survey, payload);
+      refreshQuotaInstructions(state);
       state.index = buildCodeIndex(state);
       break;
     case "reparent_question":
       reparentQuestion(state, state.Survey, payload);
+      refreshQuotaInstructions(state);
       state.index = buildCodeIndex(state);
       break;
     case "reorder_groups":
       reorderGroups(state.Survey, payload);
+      refreshQuotaInstructions(state);
       state.index = buildCodeIndex(state);
       state.skipScroll = false;
       state.lastAddedComponent = { type: "group", index: payload.toIndex };
@@ -1442,7 +1584,7 @@ const saveContentResources = (
   // Remove existing items with matching keys
   const prefix = `content_${contentLang}_${contentKey}`;
   Object.keys(component.resources).forEach((key) => {
-    if (key.startsWith(prefix)) {
+    if (key.startsWith(`${prefix}_`)) {
       delete component.resources[key];
     }
   });

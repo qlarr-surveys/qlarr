@@ -2,7 +2,11 @@ import { useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { createSelector } from "@reduxjs/toolkit";
 import { isGroup } from "~/utils/design/utils";
-import { surveySetup, setupOptions } from "@qlarr/design-core/constants/design";
+import {
+  QUOTA_SKIP_CODE,
+  surveySetup,
+  setupOptions,
+} from "@qlarr/design-core/constants/design";
 import { setup, disableCarryForward } from "~/state/design/designState";
 import { getHighlighted, isLabelInstruction } from "~/utils/design/errorDisplay";
 
@@ -26,6 +30,8 @@ const useErrorDisplay = (code) => {
             designState.instructionList?.filter(
               (instruction) =>
                 instruction.errors?.length > 0 &&
+                // Quota screen-out errors show on the quota as inactive.
+                instruction.code !== QUOTA_SKIP_CODE &&
                 (onMainLang || isLabelInstruction(instruction.code))
             ) || [];
 

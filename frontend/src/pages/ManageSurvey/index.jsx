@@ -80,6 +80,10 @@ function ManageSurvey({ landingPage }) {
   };
 
   useEffect(() => {
+    setSelectedTab(landingTab(landingPage, user));
+  }, [landingPage]);
+
+  useEffect(() => {
     const handlePopState = () => {
       const currentPath = window.location.pathname;
       const currentTab = currentPath.split("/")[1];

@@ -159,6 +159,15 @@ export const nextQuestionId = (state, groups) => {
   return generateId(existing);
 };
 
+export const nextQuotaCode = (quotas) => {
+  const existing = new Set(quotas.map((quota) => quota.code));
+  let code;
+  do {
+    code = `QT${generateId(new Set())}`;
+  } while (existing.has(code));
+  return code;
+};
+
 export const buildFormatInstruction = (content, name, key, contentPath) => {
   const allMatches = getAllMatches(content);
   return allMatches.map((match, index) =>{

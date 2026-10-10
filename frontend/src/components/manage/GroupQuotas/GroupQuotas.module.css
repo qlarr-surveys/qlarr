@@ -1,0 +1,150 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.notice {
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 16px;
+  border: 1px dashed #C4CDD5;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card {
+  border: 1px solid #DFE3E8;
+  border-radius: 8px;
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.card:hover,
+.cardExpanded {
+  border-color: #C4CDD5;
+}
+
+.cardExpanded {
+  box-shadow: 0 2px 8px rgba(22, 32, 91, 0.06);
+}
+
+.cardFull {
+  border-color: #f0a12f;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+}
+
+.cardHeader:focus-visible {
+  outline: 2px solid #2d3cb1;
+  outline-offset: -2px;
+}
+
+.cardHeaderStatic {
+  cursor: default;
+}
+
+.cardTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.fill {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  min-width: 96px;
+}
+
+.fillBar {
+  width: 96px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.cardError {
+  padding: 0 16px 12px;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-top: 1px solid #F4F6F8;
+}
+
+.fieldRow {
+  display: flex;
+  gap: 12px;
+}
+
+.limitField {
+  width: 160px;
+  flex-shrink: 0;
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 600px) {
+  .fieldRow {
+    flex-direction: column;
+  }
+
+  .limitField {
+    width: 100%;
+  }
+}
+
+.messageRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}

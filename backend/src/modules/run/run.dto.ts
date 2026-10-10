@@ -39,4 +39,5 @@ export interface RunSurveyDto {
   lang: SurveyLang;
   additionalLang: SurveyLang[];
   saveTimings: boolean;
+  screenedOutQuota: string | null;
 }

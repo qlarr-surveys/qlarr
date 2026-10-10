@@ -54,6 +54,16 @@ export const languageSetup = {
   code: "Survey",
   rules: [{ title: "", rules: ["language"] }],
 };
+
+export const quotaMessageKey = (quotaCode) => `quota_message_${quotaCode}`;
+// Survey variables a quota compiles into: whether the respondent belongs to it
+// (calculated, saved) and whether it is full (input, passed in on navigation).
+export const quotaMetVariable = (quotaCode) => `var_${quotaCode}_met`;
+export const quotaFullVariable = (quotaCode) => `var_${quotaCode}_full`;
+// Screen-out skip placed on the question where a quota is decided.
+export const QUOTA_SKIP_CODE = "skip_to_quota";
+export const QUOTA_MESSAGE_PARAM = "quota_message";
+export const QUOTA_PARAM = "quota";
 export const logoSetup = {
   code: "Survey",
   rules: [{ title: "", key: "", rules: ["logo_setup"] }],
