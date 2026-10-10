@@ -13,7 +13,7 @@
  * `upload-limits.unit-spec.ts` fails if any routed multer interceptor lacks a
  * `fileSize` limit.
  *
- * Finer per-type limits for *valid* response uploads (10MB image / 30MB video)
+ * Finer per-type limits for *valid* response uploads (10MB image / 60MB video)
  * still run in the service (`checkMaxFileSize` → `FileTooBigException`) — the
  * multipart cap is only the coarse guard for anything larger than any
  * legitimate upload.
@@ -25,12 +25,12 @@ const MB = 1024 * 1024;
 export const MAX_UPLOAD_BYTES = 100 * MB;
 
 /**
- * Tighter cap for response-file attachments — 30MB, the largest a *valid*
- * response upload can be (the 30MB video per-type limit). The respondent-facing
- * attach route is public, so we abort at 30MB rather than buffering up to the
+ * Tighter cap for response-file attachments — 60MB, the largest a *valid*
+ * response upload can be (the 60MB video per-type limit). The respondent-facing
+ * attach route is public, so we abort at 60MB rather than buffering up to the
  * default 100MB; the finer per-type check still runs in the service afterwards.
  */
-export const MAX_RESPONSE_UPLOAD_BYTES = 30 * MB;
+export const MAX_RESPONSE_UPLOAD_BYTES = 60 * MB;
 
 /** Cap for a translations CSV: even a large survey in every language is well under 5MB. */
 export const MAX_TRANSLATIONS_UPLOAD_BYTES = 5 * MB;
