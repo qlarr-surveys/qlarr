@@ -1,3 +1,5 @@
+import { BadRequestException } from '@nestjs/common';
+
 /**
  * The folder a survey file lives under, within a survey's storage prefix.
  * `path` is the exact segment used in the storage key, so it MUST keep these
@@ -7,21 +9,16 @@
  *   - responses/{id}      → files attached to one response
  */
 export class SurveyFolder {
-  /** `path` split into its segments — `responses/{id}` is two. Kept apart so
-   *  storage can validate the caller-supplied response id as ONE segment (an id
-   *  of `../..` must not pass as the extra segments of a longer folder). */
-  readonly segments: readonly string[];
-  readonly path: string;
-
-  private constructor(...segments: string[]) {
-    this.segments = segments;
-    this.path = segments.join('/');
-  }
+  private constructor(readonly path: string) {}
 
   static readonly Resources = new SurveyFolder('resources');
   static readonly Design = new SurveyFolder('design');
   static Responses(responseId: string): SurveyFolder {
-    return new SurveyFolder('responses', responseId);
+    // A responseId must stay a single segment (see LocalFileHelper.filePath).
+    if (/[/\\]/.test(responseId)) {
+      throw new BadRequestException('Invalid file path');
+    }
+    return new SurveyFolder(`responses/${responseId}`);
   }
 
   /** True for a `responses/*` folder — the only one with per-response nesting. */

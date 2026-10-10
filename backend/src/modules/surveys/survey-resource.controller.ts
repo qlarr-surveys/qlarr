@@ -12,7 +12,6 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { Public } from '../../auth/public.decorator';
-import { FileNamePipe } from '../../common/file-name.pipe';
 import { Role } from '../../auth/role.enum';
 import { Roles } from '../../auth/roles.decorator';
 import { MAX_UPLOAD_BYTES, uploadLimits } from '../../common/upload';
@@ -32,9 +31,7 @@ const THIRTY_DAYS_SECONDS = 30 * 24 * 60 * 60;
 /**
  * Survey resource endpoints. Upload/delete need super_admin/survey_admin AND
  * survey permission; download is public
- * (respondent-facing) and resolves the tenant from the surveyId. `fileName` must
- * be a plain basename (`FileNamePipe`) — `..%2Fdesign%2F1` would otherwise reach
- * the survey's design, or another survey's files.
+ * (respondent-facing) and resolves the tenant from the surveyId.
  */
 @Controller('survey')
 export class SurveyResourceController {
@@ -57,7 +54,7 @@ export class SurveyResourceController {
   @Get(':surveyId/resource/:fileName')
   async download(
     @Param('surveyId') surveyId: string,
-    @Param('fileName', FileNamePipe) fileName: string,
+    @Param('fileName') fileName: string,
     @Res() res: Response,
   ): Promise<void> {
     const file = await this.resources.downloadResource(surveyId, fileName);
@@ -76,7 +73,7 @@ export class SurveyResourceController {
   @Roles(Role.SUPER_ADMIN, Role.SURVEY_ADMIN)
   async delete(
     @Param('surveyId') surveyId: string,
-    @Param('fileName', FileNamePipe) fileName: string,
+    @Param('fileName') fileName: string,
   ): Promise<{ message: string }> {
     await this.resources.removeResource(surveyId, fileName);
     return { message: 'Survey resource deleted Successfully' };

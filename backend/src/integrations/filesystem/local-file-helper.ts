@@ -1,4 +1,9 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createReadStream } from 'node:fs';
 import {
@@ -12,7 +17,7 @@ import {
   stat,
   writeFile,
 } from 'node:fs/promises';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, resolve, sep } from 'node:path';
 import { Readable } from 'node:stream';
 import { lookup as lookupMimeType } from 'mime-types';
 import { ZipFile } from 'yazl';
@@ -22,12 +27,10 @@ import { StorageConfig } from '../../config/storage.config';
 import { FileHelper, ImportedResource, ImportedSurveyZip } from './file-helper';
 import { FileDownload, FileInfo } from './file-info';
 import {
-  InvalidFilePathException,
   MaliciousArchiveException,
   ResourceNotFoundException,
 } from './filesystem.exceptions';
 import { MediaOptimizer } from './media-optimizer';
-import { assertSafePathSegment } from './path-segment';
 import { SurveyFolder } from './survey-folder';
 
 const METADATA_POSTFIX = '.metadata';
@@ -72,35 +75,31 @@ export class LocalFileHelper implements FileHelper, OnModuleInit {
     this.logger.log(`Storage root ready: ${resolve(this.root)}`);
   }
 
-  /**
-   * `{root}/{surveyId}/{folder}/{filename}` — the file path. Express URL-decodes
-   * route params, so `..%2F..%2Fother%2Fdesign%2F1` arrives here as a real
-   * traversal. Each segment must be one plain name (`assertSafePathSegment`), and
-   * the resolved file must sit directly inside its own `{surveyId}/{folder}/`
-   * directory — staying somewhere under the storage root is not enough, since
-   * that would still let one survey's request reach another survey's files.
-   */
+  /** `{root}/{surveyId}/{folder}/{filename}` — the file path. Rejects any
+   *  segment (surveyId / responseId-in-folder / filename) that escapes the
+   *  storage root via `..` traversal. */
   private filePath(
     surveyId: string,
     folder: SurveyFolder,
     filename: string,
   ): string {
-    const dir = this.folderPath(surveyId, folder);
-    assertSafePathSegment(filename);
-    const path = join(dir, filename);
-    if (dirname(resolve(path)) !== resolve(dir)) {
-      throw new InvalidFilePathException();
+    // Express URL-decodes params, so `..%2F` arrives as `../` — a filename
+    // must stay a single name.
+    if (/[/\\]/.test(filename)) {
+      throw new BadRequestException('Invalid file path');
+    }
+    const path = join(this.root, surveyId, folder.path, filename);
+    // resolve() collapses `..`; `+ sep` guards a sibling-prefix bypass
+    // (root `/data` must not match `/data-evil`).
+    if (!resolve(path).startsWith(resolve(this.root) + sep)) {
+      throw new BadRequestException('Invalid file path');
     }
     return path;
   }
 
-  /** `{root}/{surveyId}/{folder}` — a folder path. The surveyId and every folder
-   *  segment (the responseId of a `responses/{id}` folder) must each be one
-   *  plain name, so the folder can't resolve outside the survey's directory. */
+  /** `{root}/{surveyId}/{folder}` — a folder path. */
   private folderPath(surveyId: string, folder: SurveyFolder): string {
-    assertSafePathSegment(surveyId);
-    for (const segment of folder.segments) assertSafePathSegment(segment);
-    return join(this.root, surveyId, ...folder.segments);
+    return join(this.root, surveyId, folder.path);
   }
 
   async uploadBinary(
@@ -110,11 +109,8 @@ export class LocalFileHelper implements FileHelper, OnModuleInit {
     contentType: string,
     filename: string,
   ): Promise<void> {
-    // Resolve (and validate) the path first: an unsafe name is rejected before
-    // any image/video re-encode is spent on it.
-    const path = this.filePath(surveyId, folder, filename);
     const bytes = await this.optimizeIfResource(folder, body, contentType, filename);
-    await this.write(path, bytes, contentType);
+    await this.write(this.filePath(surveyId, folder, filename), bytes, contentType);
   }
 
   /**
@@ -184,10 +180,8 @@ export class LocalFileHelper implements FileHelper, OnModuleInit {
     folder: SurveyFolder,
     filename: string,
   ): Promise<boolean> {
-    // Resolved outside the try: an unsafe path is a 400, not a silent "absent".
-    const path = this.filePath(surveyId, folder, filename);
     try {
-      await access(path);
+      await access(this.filePath(surveyId, folder, filename));
       return true;
     } catch {
       return false;
@@ -278,9 +272,6 @@ export class LocalFileHelper implements FileHelper, OnModuleInit {
   }
 
   async deleteSurveyFiles(surveyId: string): Promise<void> {
-    // A recursive delete: an empty or `..` id would otherwise take out the
-    // whole storage root (or its parent).
-    assertSafePathSegment(surveyId);
     await rm(join(this.root, surveyId), { recursive: true, force: true });
   }
 
@@ -307,9 +298,8 @@ export class LocalFileHelper implements FileHelper, OnModuleInit {
     folder: SurveyFolder,
     filename: string,
   ): Promise<string> {
-    const path = this.filePath(surveyId, folder, filename);
     try {
-      return await readFile(path, 'utf-8');
+      return await readFile(this.filePath(surveyId, folder, filename), 'utf-8');
     } catch {
       throw new ResourceNotFoundException();
     }

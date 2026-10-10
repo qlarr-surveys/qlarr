@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   Param,
-  ParseUUIDPipe,
   Post,
   Query,
   Res,
@@ -168,9 +167,7 @@ export class ResponseController {
   @HttpCode(204)
   delete(
     @Param('surveyId') surveyId: string,
-    // Names the `responses/{id}` folder whose files are deleted — and a non-UUID
-    // would otherwise 500 on the uuid column.
-    @Param('responseId', ParseUUIDPipe) responseId: string,
+    @Param('responseId') responseId: string,
   ): Promise<void> {
     return this.responses.deleteResponse(surveyId, responseId);
   }

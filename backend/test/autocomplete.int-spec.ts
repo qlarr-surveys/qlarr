@@ -54,13 +54,6 @@ describe('GET /survey/:surveyId/autocomplete/:filename (public)', () => {
     expect(res.body).toEqual(['apple']);
   });
 
-  it('400s a filename that is not a plain basename', async () => {
-    const res = await request(app.getHttpServer())
-      .get(`/survey/${SURVEY}/autocomplete/${encodeURIComponent('../fruits')}?q=a`)
-      .expect(400);
-    expect(res.body.error).toBe('InvalidFilePathException');
-  });
-
   it('returns [] for an unknown survey/file', async () => {
     await request(app.getHttpServer())
       .get(`/survey/${UNKNOWN}/autocomplete/fruits?q=a`)

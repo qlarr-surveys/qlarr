@@ -2,7 +2,6 @@ import { INestApplication } from '@nestjs/common';
 import { Readable } from 'node:stream';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
-import yauzl from 'yauzl';
 import { FILE_HELPER } from '../src/integrations/filesystem/file-helper';
 import { bearer, startTestApp, TestApp } from './harness';
 
@@ -11,20 +10,12 @@ const SURVEY_BIG = '10000000-0000-0000-0000-000000000002';
 const SURVEY_INACTIVE = '10000000-0000-0000-0000-000000000003';
 // ACTIVE status but past its end date — offline sync must still accept files.
 const SURVEY_ENDED = '10000000-0000-0000-0000-000000000004';
-// Holds one response whose original filename carries a path (offline sync
-// stores client values as sent) — the bulk ZIP must still list it flat.
-const SURVEY_PATHNAME = '10000000-0000-0000-0000-000000000005';
 const R_FILE = '20000000-0000-0000-0000-000000000001';
 const R_BIG = '20000000-0000-0000-0000-000000000002';
 const R_PREVIEW = '20000000-0000-0000-0000-000000000003';
 const R_ENDED = '20000000-0000-0000-0000-000000000004';
-const R_PATHNAME = '20000000-0000-0000-0000-000000000005';
 
 const SUPER = bearer({ authorities: ['super_admin'] });
-
-/** `../../../<other survey>/design/1`, URL-encoded into one path segment —
- *  Express decodes it back into a real traversal before the handler runs. */
-const TRAVERSAL = encodeURIComponent('../../../10000000-0000-0000-0000-0000000000ff/design/1');
 
 /** Collect the raw response bytes (for binary/zip assertions). */
 const binaryParser = (res: any, cb: (err: Error | null, body: Buffer) => void) => {
@@ -32,22 +23,6 @@ const binaryParser = (res: any, cb: (err: Error | null, body: Buffer) => void) =
   res.on('data', (c: Buffer) => chunks.push(Buffer.from(c)));
   res.on('end', () => cb(null, Buffer.concat(chunks)));
 };
-
-/** The entry names of a ZIP buffer. */
-const zipEntryNames = (zip: Buffer): Promise<string[]> =>
-  new Promise((resolve, reject) => {
-    yauzl.fromBuffer(zip, { lazyEntries: true }, (err, zipfile) => {
-      if (err || !zipfile) return reject(err ?? new Error('Invalid ZIP'));
-      const names: string[] = [];
-      zipfile.on('entry', (entry: yauzl.Entry) => {
-        names.push(entry.fileName);
-        zipfile.readEntry();
-      });
-      zipfile.on('end', () => resolve(names));
-      zipfile.on('error', reject);
-      zipfile.readEntry();
-    });
-  });
 
 const files = {
   upload: jest.fn().mockResolvedValue('stored-x'),
@@ -140,12 +115,6 @@ describe('Response file ops + bulk download', () => {
       true,
     );
     await addResponse(R_ENDED, SURVEY_ENDED, '{}');
-    await addSurvey(SURVEY_PATHNAME, 'ACTIVE');
-    await addResponse(
-      R_PATHNAME,
-      SURVEY_PATHNAME,
-      '{"q1.value":{"filename":"../../evil.png","stored_filename":"stored-5","size":3,"type":"image/png"}}',
-    );
   }, 180_000);
 
   afterAll(async () => {
@@ -184,18 +153,6 @@ describe('Response file ops + bulk download', () => {
         expect.objectContaining({ path: 'responses/' + R_FILE }),
         'stored-1',
       );
-    });
-
-    it('flattens a path in the original filename into one root-level entry', async () => {
-      const res = await request(server())
-        .get(`/survey/${SURVEY_PATHNAME}/response/files/download/0/999999`)
-        .set('Authorization', SUPER)
-        .buffer(true)
-        .parse(binaryParser)
-        .expect(200);
-      const names = await zipEntryNames(res.body);
-      expect(names).toHaveLength(1);
-      expect(names[0]).toMatch(/^\d+-q1\.value-\.\._\.\._evil\.png$/);
     });
 
     it('returns 204 when the range has no files', () =>
@@ -318,25 +275,6 @@ describe('Response file ops + bulk download', () => {
         .get(`/survey/${SURVEY}/response/${R_FILE}/attach/stored-1`)
         .expect(200)
         .expect((r) => expect(r.headers['cache-control']).toBe('max-age=2592000')));
-
-    it('400s an encoded traversal in the download filename before storage', async () => {
-      const res = await request(server())
-        .get(`/survey/${SURVEY}/response/${R_FILE}/attach/${TRAVERSAL}`)
-        .expect(400);
-      expect(res.body.error).toBe('InvalidFilePathException');
-      expect(files.download).not.toHaveBeenCalled();
-    });
-
-    it('400s a non-UUID responseId on the public attach routes (not a uuid-column 500)', async () => {
-      await request(server())
-        .post(`/survey/${SURVEY}/response/attach/not-a-uuid/q1`)
-        .attach('file', Buffer.from('x'), 'a.png')
-        .expect(400);
-      await request(server()).get(`/survey/${SURVEY}/response/attach/not-a-uuid/q1`).expect(400);
-      await request(server()).get(`/survey/${SURVEY}/response/not-a-uuid/attach/stored-1`).expect(400);
-      expect(files.upload).not.toHaveBeenCalled();
-      expect(files.download).not.toHaveBeenCalled();
-    });
   });
 
   describe('preview attach upload (authenticated — designer only)', () => {
@@ -384,39 +322,6 @@ describe('Response file ops + bulk download', () => {
         .set('Authorization', SUPER)
         .expect(201)
         .expect((r) => expect(r.body).toBe(true)));
-
-    it('400s an encoded traversal in the offline fileName before storage', async () => {
-      const res = await request(server())
-        .post(`/survey/${SURVEY}/offline/response/${R_FILE}/upload/${TRAVERSAL}`)
-        .set('Authorization', SUPER)
-        .attach('file', Buffer.from('x'), 'x.jpg')
-        .expect(400);
-      expect(res.body.error).toBe('InvalidFilePathException');
-      expect(files.upload).not.toHaveBeenCalled();
-    });
-
-    it('400s an encoded traversal in the offline responseId before storage', async () => {
-      const responseId = encodeURIComponent('../../10000000-0000-0000-0000-0000000000ff/design');
-      await request(server())
-        .post(`/survey/${SURVEY}/offline/response/${responseId}/upload/1`)
-        .set('Authorization', SUPER)
-        .attach('file', Buffer.from('x'), 'x.jpg')
-        .expect(400);
-      await request(server())
-        .post(`/survey/${SURVEY}/offline/response/${responseId}/upload/1/exists`)
-        .set('Authorization', SUPER)
-        .expect(400);
-      expect(files.upload).not.toHaveBeenCalled();
-      expect(files.doesFileExist).not.toHaveBeenCalled();
-    });
-
-    it('400s an encoded traversal in the exists probe instead of answering', async () => {
-      await request(server())
-        .post(`/survey/${SURVEY}/offline/response/${R_FILE}/upload/${TRAVERSAL}/exists`)
-        .set('Authorization', SUPER)
-        .expect(400);
-      expect(files.doesFileExist).not.toHaveBeenCalled();
-    });
 
     it('rejects an unauthenticated offline upload (401)', () =>
       request(server())

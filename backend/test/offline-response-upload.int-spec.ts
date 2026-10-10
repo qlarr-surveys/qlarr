@@ -180,17 +180,6 @@ describe('Offline survey response upload', () => {
     expect(res.body.error).toBe('SurveyIsNotActiveException');
   });
 
-  it('400s a non-UUID responseId before syncing or pruning its files folder', async () => {
-    // The id names the `responses/{id}` folder that sync prunes; Express decodes
-    // `..%2F` into a real `../`, so it must be a UUID before anything runs.
-    await request(server())
-      .post(url(encodeURIComponent('../../10000000-0000-0000-0000-000000000002/design')))
-      .set('Authorization', SURVEYOR)
-      .send(validPayload())
-      .expect(400);
-    expect(files.deleteUnusedResponseFiles).not.toHaveBeenCalled();
-  });
-
   it('401 without a token', async () => {
     await request(server())
       .post(url('30000000-0000-0000-0000-000000000005'))

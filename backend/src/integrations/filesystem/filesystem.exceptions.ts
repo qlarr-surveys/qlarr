@@ -14,22 +14,6 @@ export class ResourceNotFoundException extends HttpException {
 }
 
 /**
- * A storage path segment (surveyId / responseId / filename) that is not one
- * plain name — empty, `.`/`..`, or carrying `/`, `\` or NUL — so it could
- * address a file outside its own `{surveyId}/{folder}/` directory. Express
- * URL-decodes route params, so an encoded `..%2F..%2Fother%2Fdesign%2F1` arrives
- * as a real traversal. 400.
- */
-export class InvalidFilePathException extends HttpException {
-  constructor() {
-    super(
-      { message: 'Invalid file path', error: 'InvalidFilePathException' },
-      HttpStatus.BAD_REQUEST,
-    );
-  }
-}
-
-/**
  * An imported ZIP tries to inflate past our decompression budget (a zip bomb) —
  * too many entries, or a single/total uncompressed size beyond the cap. The
  * multipart limit only bounds the *compressed* upload, so this is the guard that
