@@ -83,6 +83,11 @@ export class LocalFileHelper implements FileHelper, OnModuleInit {
     folder: SurveyFolder,
     filename: string,
   ): string {
+    // Express URL-decodes params, so `..%2F` arrives as `../` — a filename
+    // must stay a single name.
+    if (/[/\\]/.test(filename)) {
+      throw new BadRequestException('Invalid file path');
+    }
     const path = join(this.root, surveyId, folder.path, filename);
     // resolve() collapses `..`; `+ sep` guards a sibling-prefix bypass
     // (root `/data` must not match `/data-evil`).
