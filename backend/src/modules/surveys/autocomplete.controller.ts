@@ -171,7 +171,7 @@ export class AutoCompleteAdminController {
 
   @Post('hierarchical-autocomplete/:surveyId/:componentId')
   @Roles(Role.SUPER_ADMIN, Role.SURVEY_ADMIN)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', uploadLimits(MAX_UPLOAD_BYTES)))
   uploadHierarchical(
     @Param('surveyId') surveyId: string,
     @Param('componentId') componentId: string,
