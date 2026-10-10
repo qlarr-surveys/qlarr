@@ -10,6 +10,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Role } from '../../auth/role.enum';
 import { Roles } from '../../auth/roles.decorator';
+import { MAX_UPLOAD_BYTES, uploadLimits } from '../../common/upload';
 import { SurveyCreateRequest, SurveyDTO } from './survey.dto';
 import { SurveysService } from './surveys.service';
 
@@ -37,7 +38,7 @@ export class SurveyCreateController {
   @Post('import')
   @Roles(Role.SUPER_ADMIN, Role.SURVEY_ADMIN)
   @HttpCode(200)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', uploadLimits(MAX_UPLOAD_BYTES)))
   import(@UploadedFile() file: UploadedZip): Promise<SurveyDTO> {
     if (!file) {
       throw new BadRequestException('file is required');

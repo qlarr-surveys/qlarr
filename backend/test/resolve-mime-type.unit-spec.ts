@@ -7,7 +7,7 @@ describe('resolveMimeType', () => {
 
   it('probes the filename when the content type is generic octet-stream', () => {
     // Multer defaults a headerless file part to octet-stream — the Android
-    // offline case. It must still resolve to video/mp4 (→ 30MB limit).
+    // offline case. It must still resolve to video/mp4 (→ 60MB limit).
     expect(
       resolveMimeType({
         originalname: 'interview.mp4',

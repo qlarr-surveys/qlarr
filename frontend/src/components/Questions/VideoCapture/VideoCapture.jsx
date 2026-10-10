@@ -34,8 +34,8 @@ function VideoCapture(props) {
         component.validation?.validation_max_file_size?.max_size) ||
       -1;
 
-    // Limit to validation value or 30MB (30720 KB), whichever is smaller
-    const VIDEO_MAX_SIZE_KB = 30720; // 30MB
+    // Limit to validation value or 60MB (61440 KB), whichever is smaller
+    const VIDEO_MAX_SIZE_KB = 61440; // 60MB
     const maxFileSize = validationMaxSize > 0
       ? Math.min(validationMaxSize, VIDEO_MAX_SIZE_KB)
       : VIDEO_MAX_SIZE_KB;

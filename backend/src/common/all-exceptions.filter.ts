@@ -52,8 +52,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
         return { status, body: response };
       }
       // Framework exceptions: keep the status, synthesise the missing `error`
-      // from the class name. Multer turns a part exceeding the global upload cap
-      // into a PayloadTooLargeException; report it as
+      // from the class name. Multer turns a part exceeding the route's upload cap
+      // (`uploadLimits`) into a PayloadTooLargeException; report it as
       // `MaxUploadSizeExceededException`, which is what
       // clients switch on for "file too large".
       const message =

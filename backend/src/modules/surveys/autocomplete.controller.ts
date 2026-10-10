@@ -15,6 +15,7 @@ import { Response } from 'express';
 import { Public } from '../../auth/public.decorator';
 import { Role } from '../../auth/role.enum';
 import { Roles } from '../../auth/roles.decorator';
+import { MAX_UPLOAD_BYTES, uploadLimits } from '../../common/upload';
 import {
   AutoCompleteFileInfo,
   HierarchicalAutoCompleteFileInfo,
@@ -156,7 +157,7 @@ export class AutoCompleteAdminController {
 
   @Post('autocomplete/:surveyId/:componentId')
   @Roles(Role.SUPER_ADMIN, Role.SURVEY_ADMIN)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', uploadLimits(MAX_UPLOAD_BYTES)))
   upload(
     @Param('surveyId') surveyId: string,
     @Param('componentId') componentId: string,
@@ -170,7 +171,7 @@ export class AutoCompleteAdminController {
 
   @Post('hierarchical-autocomplete/:surveyId/:componentId')
   @Roles(Role.SUPER_ADMIN, Role.SURVEY_ADMIN)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', uploadLimits(MAX_UPLOAD_BYTES)))
   uploadHierarchical(
     @Param('surveyId') surveyId: string,
     @Param('componentId') componentId: string,
