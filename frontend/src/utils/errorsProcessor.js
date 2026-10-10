@@ -27,6 +27,10 @@ export const PROCESSED_ERRORS = {
     name: "autocomplete_malformed_input",
     handleGlobally: false,
   },
+  HIERARCHICAL_AUTOCOMPLETE_MALFORMED_INPUT: {
+    name: "hierarchical_autocomplete_malformed_input",
+    handleGlobally: false,
+  },
   MAX_UPLOAD_SIZE_EXCEEDED: {
     name: "max_upload_size_exceeded",
     handleGlobally: false,
@@ -57,6 +61,10 @@ export const PROCESSED_ERRORS = {
   DUPLICATE_TO_CODE: { name: "duplicate_to_code", handleGlobally: false },
   INVALID_TRANSLATIONS_CSV: {
     name: "invalid_translations_csv",
+    handleGlobally: false,
+  },
+  TRANSLATIONS_CSV_NOT_UTF8: {
+    name: "translations_csv_not_utf8",
     handleGlobally: false,
   },
 };
@@ -114,6 +122,8 @@ export const processError = (e) => {
         return PROCESSED_ERRORS.WRONG_CREDENTIALS;
       case "AutoCompleteMalformedInputException":
         return PROCESSED_ERRORS.AUTOCOMPLETE_MALFORMED_INPUT;
+      case "HierarchicalAutoCompleteMalformedInputException":
+        return PROCESSED_ERRORS.HIERARCHICAL_AUTOCOMPLETE_MALFORMED_INPUT;
       case "MaxUploadSizeExceededException":
         return PROCESSED_ERRORS.MAX_UPLOAD_SIZE_EXCEEDED;
       case "SizeLimitExceededException":
@@ -169,6 +179,8 @@ export const processError = (e) => {
         return PROCESSED_ERRORS.DUPLICATE_TO_CODE;
       case "InvalidTranslationsCsvException":
         return PROCESSED_ERRORS.INVALID_TRANSLATIONS_CSV;
+      case "TranslationsCsvNotUtf8Exception":
+        return PROCESSED_ERRORS.TRANSLATIONS_CSV_NOT_UTF8;
       default:
         return PROCESSED_ERRORS.UNIDENTIFIED_ERROR;
     }

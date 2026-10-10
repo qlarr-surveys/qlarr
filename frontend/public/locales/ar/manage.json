@@ -219,6 +219,7 @@
     "duplicate_email": "عنوان البريد الإلكتروني مسجل بالفعل.",
     "duplicate_survey_name": "تكرار اسم الاستطلاع",
     "autocomplete_malformed_input": "إدخال غير صحيح: يجب أن يكون الملف عبارة عن مصفوفة JSON تحتوي على نصوص فقط",
+    "hierarchical_autocomplete_malformed_input": "إدخال غير صالح: يجب أن يحتوي ملف CSV على عمود واحد لكل مستوى لكل لغة (عناوين مثل \"Country (en)\")، ومجموعة اللغة في كل صف ممتلئة بالكامل أو فارغة، مع مسارات فريدة لكل لغة",
     "max_upload_size_exceeded": "حجم الملف يتجاوز الحد الأقصى المسموح به للرفع.",
     "size_limit_exceeded": "تتجاوز الملفات المجمعة 200 ميجابايت. يرجى تقليل النطاق أو التصفية حسب الإجابات الكاملة/غير الكاملة.",
     "expired_confirmation_token": "رمز التأكيد منتهي الصلاحية , الرجاء التسجيل مرة أخرى",
@@ -235,7 +236,8 @@
     "wrong_reset_token": "رمز إعادة التعيين هذا غير صحيح.",
     "wrong_confirmation_token": "رمز التأكيد هذا غير صحيح، يرجى التسجيل مرة أخرى",
     "survey_quota": "عذرًا، لم يعد هذا الاستبيان يقبل الردود.",
-    "invalid_translations_csv": "هذا ليس ملف ترجمات CSV."
+    "invalid_translations_csv": "هذا ليس ملف ترجمات CSV.",
+    "translations_csv_not_utf8": "هذا الملف ليس بترميز UTF-8. في Excel، اختر ملف ← حفظ باسم ← \"CSV UTF-8 (محدد بفواصل)\" ثم استورده مرة أخرى."
   },
   "processed_successes": {
     "copied": "نسخ إلى الحافظة",
@@ -638,6 +640,7 @@
     "question_type_email": "بريد إلكتروني",
     "question_type_multiple_text": "نص متعدد",
     "question_type_autocomplete": "إكمال تلقائي",
+    "question_type_hierarchical_autocomplete": "الإكمال التلقائي الهرمي",
     "question_type_icon_scq": "اختيار واحد بأيقونة",
     "question_type_icon_mcq": "اختيار متعدد بأيقونة",
     "question_type_scq_array": "مصفوفة اختيار واحد",

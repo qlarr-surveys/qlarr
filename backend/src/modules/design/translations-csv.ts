@@ -89,11 +89,33 @@ const quote = (v: string) => `"${v.replace(/"/g, '""')}"`;
 export const toCsv = (rows: string[][]): string =>
   BOM + rows.map((row) => row.map(quote).join(',')).join('\n');
 
+/**
+ * The file's text, or null when it isn't UTF-8. Excel's plain "CSV (Comma
+ * delimited)" saves in the system code page (Windows-1252, Mac Roman): its
+ * header is ASCII, so it would pass the header check while every accented cell
+ * decodes to U+FFFD and overwrites the real text. The BOM of "CSV UTF-8" is dropped.
+ */
+export function decodeCsv(bytes: Uint8Array): string | null {
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+  } catch {
+    return null;
+  }
+}
+
 export function parseCsv(text: string): string[][] {
-  // Node keeps the BOM Excel writes, and the header check needs it gone.
+  // Excel writes a BOM, and the header check needs it gone.
   if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
-  // Excel set to a decimal-comma locale (de, fr, nl, es, pt) saves with `;`.
-  const sep = /^"?code"?;/.test(text) ? ';' : ',';
+  // Pick the delimiter from the header line: `;` when it structures the header
+  // (Excel in decimal-comma locales — de, fr, nl, es, pt — saves that way), else
+  // `,`. Header-agnostic, so CSVs whose header isn't `code,…` (e.g. the
+  // language-keyed hierarchical-autocomplete data) parse correctly too.
+  const firstLine = text.split(/\r?\n/, 1)[0] ?? '';
+  const sep =
+    firstLine.includes(';') &&
+    firstLine.split(';').length > firstLine.split(',').length
+      ? ';'
+      : ',';
   const rows: string[][] = [];
   let row: string[] = [];
   let cell = '';

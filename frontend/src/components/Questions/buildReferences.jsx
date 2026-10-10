@@ -85,36 +85,28 @@ const buildReference = (code, component, state, mainLang) => {
     case "scq_array":
       return component.children
         .filter((el) => el.type == "row")
-        .map((element) => {
-          return {
-            value:
-              label +
-              " - " +
-              code +
-              "." +
-              stripTags(
-                state[element.qualifiedCode].content?.[mainLang]?.label
-              ),
-            id: code + element.code,
-            type: "Array Row",
-            instruction: code + element.code + ".masked_value",
-          };
-        });
-    case "multiple_text":
-      return component.children.map((element) => {
-        return {
-          value:
-            label +
-            " - " +
-            code +
-            "." +
-            stripTags(state[element.qualifiedCode].content?.[mainLang]?.label),
+        .map((element) => ({
+          value: answerEntryLabel(element, label, state, mainLang),
           id: code + element.code,
-          type: "Multiple Text",
-          instruction: code + element.code + ".value",
-        };
-      });
-      break;
+          type: "Array Row",
+          instruction: code + element.code + ".masked_value",
+        }));
+    // one reference per answer; for hierarchical_autocomplete, one per level,
+    // piping its masked_value (the level in the respondent's language)
+    case "multiple_text":
+    case "hierarchical_autocomplete":
+      return component.children.map((element) => ({
+        value: answerEntryLabel(element, label, state, mainLang),
+        id: code + element.code,
+        type:
+          component.type == "multiple_text"
+            ? "Multiple Text"
+            : "Hierarchical",
+        instruction:
+          code +
+          element.code +
+          (component.type == "multiple_text" ? ".value" : ".masked_value"),
+      }));
     case "text":
       type = "Short Text";
       instruction = `${code}.value`;
@@ -195,6 +187,15 @@ const buildReference = (code, component, state, mainLang) => {
     references.push(otherReference);
   }
   return references;
+};
+
+// Menu text for an answer-level entry: the question, then the answer. An
+// unlabelled answer shows its own code (A1), not the qualified one.
+const answerEntryLabel = (element, questionLabel, state, mainLang) => {
+  const answerLabel = stripTags(
+    state[element.qualifiedCode]?.content?.[mainLang]?.label || ""
+  ).trim();
+  return questionLabel + " — " + (answerLabel || element.code);
 };
 
 const buildOtherReference = (code, component, state, mainLang, label) => {

@@ -15,6 +15,7 @@ import { Public } from '../../auth/public.decorator';
 import { FileNamePipe } from '../../common/file-name.pipe';
 import { Role } from '../../auth/role.enum';
 import { Roles } from '../../auth/roles.decorator';
+import { MAX_UPLOAD_BYTES, uploadLimits } from '../../common/upload';
 import { FileInfo } from '../../integrations/filesystem/file-info';
 import { SurveyResourceService } from './survey-resource.service';
 
@@ -41,7 +42,7 @@ export class SurveyResourceController {
 
   @Post(':surveyId/resource')
   @Roles(Role.SUPER_ADMIN, Role.SURVEY_ADMIN)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', uploadLimits(MAX_UPLOAD_BYTES)))
   upload(
     @Param('surveyId') surveyId: string,
     @UploadedFile() file: UploadedResource,

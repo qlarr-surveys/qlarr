@@ -331,6 +331,37 @@ describe('Survey design (get + set)', () => {
       expect(res.body.error).toBe('InvalidTranslationsCsvException');
     });
 
+    it('imports a UTF-8 file with the BOM Excel\'s "CSV UTF-8" writes', async () => {
+      const bom = Buffer.from([0xef, 0xbb, 0xbf]);
+      const res = await importCsv(
+        SURVEY,
+        Buffer.concat([bom, csv('code,key,en,ar', 'G1,label,Feedback,<p>Café ملاحظات</p>')]),
+      ).expect(200);
+      expect(res.body.updated).toBe(1);
+      expect(res.body.design.designerInput.state.G1.content.ar.label).toBe(
+        '<p>Café ملاحظات</p>',
+      );
+    });
+
+    it('400 TranslationsCsvNotUtf8Exception for a Windows-1252 file, and saves nothing', async () => {
+      const versions = () =>
+        root.query(
+          `SELECT version, sub_version, last_modified FROM versions
+            WHERE survey_id = $1 ORDER BY version`,
+          [SURVEY],
+        );
+      const before = await versions();
+
+      // Excel's plain "CSV (Comma delimited)": an ASCII header, but é is the byte 0xE9.
+      const file = Buffer.from('code,key,en,ar\nG1,label,Feedback,Café', 'latin1');
+      const res = await importCsv(SURVEY, file).expect(400);
+
+      expect(res.body.error).toBe('TranslationsCsvNotUtf8Exception');
+      // The texts aren't overwritten with U+FFFD: no design save, no new version.
+      expect(files.uploadText).not.toHaveBeenCalled();
+      expect(await versions()).toEqual(before);
+    });
+
     it('400 without a file', () =>
       request(server())
         .post(`/survey/${SURVEY}/translations/import`)

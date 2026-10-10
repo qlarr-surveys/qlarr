@@ -84,6 +84,41 @@ class RunService extends BaseService {
     return response.data;
   }
 
+  // Options for one level of a hierarchical autocomplete, filtered by the levels
+  // already selected (`prefix`, in the search language) and the typed query.
+  async searchHierarchical(filename, level, prefix, query, lang, defaultLang) {
+    const surveyId = sessionStorage.getItem("surveyId");
+    const response = await this.handleRequest(() =>
+      publicApi.get(
+        `/survey/${surveyId}/hierarchical-autocomplete/${filename}`,
+        {
+          params: {
+            level,
+            prefix: JSON.stringify(prefix),
+            q: query,
+            lang,
+            defaultLang,
+          },
+        }
+      )
+    );
+    return response.data;
+  }
+
+  // The whole row (every language) for a fully selected path in `lang`.
+  async hierarchicalRow(filename, path, lang, defaultLang) {
+    const surveyId = sessionStorage.getItem("surveyId");
+    const response = await this.handleRequest(
+      () =>
+        publicApi.get(
+          `/survey/${surveyId}/hierarchical-autocomplete/${filename}/row`,
+          { params: { path: JSON.stringify(path), lang, defaultLang } }
+        ),
+      { silent: true }
+    );
+    return response.data;
+  }
+
   async uploadResponseBlob(key, preview, blob, fileName) {
     const surveyId = sessionStorage.getItem("surveyId");
     const responseId = sessionStorage.getItem("responseId");

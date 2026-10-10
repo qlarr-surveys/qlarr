@@ -219,6 +219,7 @@
     "duplicate_email": "L'adresse e-mail est déjà enregistrée.",
     "duplicate_survey_name": "Nom de Sondage en Double",
     "autocomplete_malformed_input": "Entrée Malformée : Le fichier doit être un tableau JSON contenant uniquement des chaînes de caractères",
+    "hierarchical_autocomplete_malformed_input": "Entrée non valide : le CSV doit comporter une colonne par niveau et par langue (en-têtes comme « Country (en) ») ; le groupe de langue de chaque ligne doit être entièrement rempli ou vide, avec des chemins uniques par langue",
     "max_upload_size_exceeded": "La taille du fichier dépasse la limite maximale de téléchargement.",
     "size_limit_exceeded": "Les fichiers en masse dépassent 200 Mo. Veuillez réduire la plage ou filtrer par réponses complètes/incomplètes.",
     "expired_confirmation_token": "Jeton de Confirmation Expiré, Veuillez Vous Inscrire à Nouveau",
@@ -235,7 +236,8 @@
     "wrong_reset_token": "Ce Jeton de Réinitialisation est incorrect.",
     "wrong_confirmation_token": "Ce Jeton de Confirmation est incorrect, Veuillez Vous Inscrire à Nouveau",
     "survey_quota": "Désolé, ce sondage n'accepte plus de réponses.",
-    "invalid_translations_csv": "Ce n'est pas un CSV de traductions."
+    "invalid_translations_csv": "Ce n'est pas un CSV de traductions.",
+    "translations_csv_not_utf8": "Ce fichier n'est pas encodé en UTF-8. Dans Excel, utilisez Fichier → Enregistrer sous → « CSV UTF-8 (délimité par des virgules) » puis importez-le à nouveau."
   },
   "processed_successes": {
     "copied": "Copié dans le presse-papiers",
@@ -630,6 +632,7 @@
     "question_type_email": "E-mail",
     "question_type_multiple_text": "Texte multiple",
     "question_type_autocomplete": "Auto-complétion",
+    "question_type_hierarchical_autocomplete": "Auto-complétion hiérarchique",
     "question_type_icon_scq": "Choix unique avec icône",
     "question_type_icon_mcq": "Choix multiple avec icône",
     "question_type_scq_array": "Matrice choix unique",

@@ -42,7 +42,7 @@ const OCTET_STREAM = 'application/octet-stream';
  * `application/octet-stream`, so we treat that generic value as "absent" and
  * probe the filename extension. Otherwise e.g. an `interview.mp4` uploaded by an
  * offline client with no content type would get the 10MB image limit instead of
- * the 30MB video limit.
+ * the 60MB video limit.
  */
 export function resolveMimeType(file: {
   originalname: string;
@@ -267,7 +267,7 @@ export class ResponseOpsService {
   }
 
   private checkMaxFileSize(size: number, mimeType: string): void {
-    const maxSize = mimeType.startsWith('video/') ? 30 * MB : 10 * MB;
+    const maxSize = mimeType.startsWith('video/') ? 60 * MB : 10 * MB;
     if (size > maxSize) {
       throw new FileTooBigException(size, maxSize, mimeType);
     }

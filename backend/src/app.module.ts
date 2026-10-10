@@ -1,10 +1,8 @@
 import { Module, ValidationPipe } from '@nestjs/common';
 import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
-import { MulterModule } from '@nestjs/platform-express';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AllExceptionsFilter } from './common/all-exceptions.filter';
-import { MAX_UPLOAD_BYTES } from './common/upload';
 import appConfig from './config/app.config';
 import dbConfig from './config/db.config';
 import engineConfig from './config/engine.config';
@@ -50,9 +48,6 @@ import { RunModule } from './modules/run/run.module';
       throttlers: [{ ttl: 60_000, limit: 30 }],
       skipIf: () => process.env.THROTTLE_DISABLED === 'true',
     }),
-    // Flat 100MB cap on every multipart upload; bounds per-request memory globally
-    // so no FileInterceptor reads an unbounded body into the heap.
-    MulterModule.register({ limits: { fileSize: MAX_UPLOAD_BYTES } }),
     EngineModule,
     DatabaseModule,
     AuthModule,

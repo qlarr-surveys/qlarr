@@ -478,10 +478,11 @@ const toFileInfo = (e: {
 
 const MB = 1024 * 1024;
 /**
- * Decompression budget for an imported ZIP. The multipart layer only caps the
- * *compressed* upload (100MB), which a zip bomb inflates far past in heap. yauzl
- * streams entry-by-entry (`lazyEntries`), so we bound three things: the entry
- * count, the size of any single entry, and the total across the archive. Sizes
+ * Decompression budget for an imported ZIP. The import route's multipart cap
+ * (`uploadLimits(MAX_UPLOAD_BYTES)`) only bounds the *compressed* upload
+ * (100MB), which a zip bomb inflates far past in heap. yauzl streams
+ * entry-by-entry (`lazyEntries`), so we bound three things: the entry count,
+ * the size of any single entry, and the total across the archive. Sizes
  * are enforced against the *actual* decompressed bytes (see
  * `streamToBufferBounded`) — the declared header is only used for an early-out.
  */

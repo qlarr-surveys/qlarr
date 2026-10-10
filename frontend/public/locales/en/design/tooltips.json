@@ -10,6 +10,7 @@
   "multiple_text": "Collect multiple text",
   "paragraph": "Collect detailed, open-ended responses",
   "autocomplete": "Collect text input with type-ahead suggestions from a predefined list",
+  "hierarchical_autocomplete": "Collect a cascading selection across named levels (e.g. Country → State → City) from uploaded, translatable data",
   "number": "Collect numeric input like age or quantity",
   "email": "Collect and validate email addresses",
   "scq": "Let users select one option from a list",
