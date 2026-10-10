@@ -219,6 +219,7 @@
     "duplicate_email": "O endereço de e-mail já está registrado.",
     "duplicate_survey_name": "Nome de Pesquisa Duplicado",
     "autocomplete_malformed_input": "Entrada Malformada: O arquivo deve ser um array JSON contendo apenas strings",
+    "hierarchical_autocomplete_malformed_input": "Entrada inválida: o CSV deve ter uma coluna por nível e por idioma (cabeçalhos como “Country (en)”); o grupo de idioma de cada linha totalmente preenchido ou vazio, com caminhos únicos por idioma",
     "max_upload_size_exceeded": "O tamanho do arquivo excede o limite máximo de upload.",
     "size_limit_exceeded": "Os arquivos em massa excedem 200MB. Por favor, reduza o intervalo ou filtre por respostas completas/incompletas.",
     "expired_confirmation_token": "Token de Confirmação Expirado, Por favor Registre-se Mais Uma Vez",
@@ -235,7 +236,8 @@
     "wrong_reset_token": "Este Token de Redefinição está incorreto.",
     "wrong_confirmation_token": "Este Token de Confirmação está incorreto, Por favor Registre-se Mais Uma Vez",
     "survey_quota": "Desculpe, esta pesquisa não está mais aceitando respostas.",
-    "invalid_translations_csv": "Não é um CSV de traduções."
+    "invalid_translations_csv": "Não é um CSV de traduções.",
+    "translations_csv_not_utf8": "Este arquivo não está em UTF-8. No Excel, use Arquivo → Salvar como → “CSV UTF-8 (Delimitado por vírgulas)” e importe novamente."
   },
   "processed_successes": {
     "copied": "Copiado para a área de transferência",
@@ -630,6 +632,7 @@
     "question_type_email": "E-mail",
     "question_type_multiple_text": "Texto múltiplo",
     "question_type_autocomplete": "Autocompletar",
+    "question_type_hierarchical_autocomplete": "Autocompletar hierárquico",
     "question_type_icon_scq": "Escolha única com ícone",
     "question_type_icon_mcq": "Escolha múltipla com ícone",
     "question_type_scq_array": "Matriz de escolha única",

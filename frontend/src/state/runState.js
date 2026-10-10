@@ -9,6 +9,9 @@ export const runState = createSlice({
     valueChange: (state, action) => {
       setValueInState(state, action.payload);
     },
+    valueMetaChange: (state, action) => {
+      setValueMetaInState(state, action.payload);
+    },
     orderChange: (state, action) => {
       let keys = Object.keys(action.payload);
       if (!state.order) {
@@ -69,6 +72,7 @@ export const runState = createSlice({
 
 export const {
   valueChange,
+  valueMetaChange,
   orderChange,
   stateReceived,
   langChange,
@@ -97,6 +101,26 @@ function setValueInState(state, payload) {
       "VALUE CHANGE"
     );
     console.debug("NEW STATE in: " + (Date.now() - time) + " millis");
+  }
+}
+
+// `value_meta`: a client-set object kept with a component's answer (a
+// hierarchical autocomplete's selected row, in every language). Saved with the
+// response and sent on navigation; only masked_value / format instructions read it.
+function setValueMetaInState(state, payload) {
+  let componentCode = payload.componentCode;
+  let valueMeta = payload.valueMeta;
+  let element = state.values[componentCode];
+  if (typeof element !== "undefined" && element["value_meta"] !== valueMeta) {
+    window.qlarrStateMachine(
+      state.values,
+      qlarrDependents,
+      window.qlarrRuntime,
+      componentCode,
+      "value_meta",
+      valueMeta,
+      "VALUE CHANGE"
+    );
   }
 }
 
@@ -156,6 +180,9 @@ export function getValues(values) {
         } else {
           retrunObj[key + ".value"] = null;
         }
+      }
+      if (element.hasOwnProperty("value_meta")) {
+        retrunObj[key + ".value_meta"] = element["value_meta"] ?? {};
       }
     }
   }

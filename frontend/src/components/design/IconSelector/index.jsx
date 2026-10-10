@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
+import { buildIcon, loadIcon, replaceIDs } from "@iconify/react";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -15,7 +16,6 @@ import styles from "./IconSelector.module.css";
 function IconSelector({ currentIcon, onIconSelected }) {
   const { t } = useTranslation(NAMESPACES.DESIGN_CORE);
   const [searchTerm, setSearchTerm] = useState("");
-  const [cancelToken, setCancelToken] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
 
   const defaultIcons = [
@@ -33,25 +33,12 @@ function IconSelector({ currentIcon, onIconSelected }) {
     "mdi:alert-circle",
     "mdi:smiley",
     "mdi:smiley-outline",
-    "jam:smiley",
-    "guidance:smiley",
     "ph:smiley",
     "ph:smiley-bold",
     "ph:smiley-duotone",
     "ph:smiley-fill",
     "ph:smiley-light",
     "ph:smiley-thin",
-    "octicon:smiley-16",
-    "octicon:smiley-24",
-    "f7:smiley",
-    "f7:smiley-fill",
-    "pajamas:smiley",
-    "codicon:smiley",
-    "dashicons:smiley",
-    "fontisto:smiley",
-    "el:smiley",
-    "jam:smiley-f",
-    "vaadin:smiley-o",
     "mdi:smiley-cry",
     "mdi:smiley-cry-outline",
     "mdi:smiley-sad",
@@ -68,8 +55,6 @@ function IconSelector({ currentIcon, onIconSelected }) {
     "ph:smiley-sad-fill",
     "ph:smiley-sad-light",
     "ph:smiley-sad-thin",
-    "gis:map-smiley",
-    "el:smiley-alt",
     "mdi:smiley-cool",
     "mdi:smiley-cool-outline",
     "mdi:smiley-dead",
@@ -97,26 +82,17 @@ function IconSelector({ currentIcon, onIconSelected }) {
     "ph:smiley-wink-fill",
     "ph:smiley-wink-light",
     "ph:smiley-wink-thin",
-    "garden:smiley-fill-12",
-    "garden:smiley-fill-16",
-    "streamline:smiley-cool",
-    "streamline:smiley-cool-solid",
-    "streamline:smiley-cute",
-    "streamline:smiley-cute-solid",
-    "streamline:smiley-kiss",
-    "streamline:smiley-kiss-solid",
-    "streamline:smiley-mask",
-    "streamline:smiley-mask-solid",
   ];
 
   useEffect(() => {
-    if (cancelToken) {
-      cancelToken.cancel("Operation canceled by the user.");
+    if (!searchTerm) {
+      setSearchResults([]);
+      return;
     }
-    if (searchTerm) {
-      // Define your API endpoint for icon search
-      const source = axios.CancelToken.source();
-      setCancelToken(source);
+    // Search once typing pauses. Every result list loads icons from each set
+    // in it, so searching on each keystroke multiplies requests to Iconify.
+    const source = axios.CancelToken.source();
+    const timer = setTimeout(() => {
       IconService.search(searchTerm, source)
         .then((result) => {
           setSearchResults(result);
@@ -124,9 +100,11 @@ function IconSelector({ currentIcon, onIconSelected }) {
         .catch((e) => {
           console.error(e);
         });
-    } else {
-      setSearchResults([]); // Clear the results if the search term is empty
-    }
+    }, 300);
+    return () => {
+      clearTimeout(timer);
+      source.cancel("Operation canceled by the user.");
+    };
   }, [searchTerm]);
 
   const handleInputChange = (event) => {
@@ -151,29 +129,21 @@ function IconSelector({ currentIcon, onIconSelected }) {
         <div>
           <input
             type="text"
+            autoFocus
             placeholder={t("search_icons")}
             value={searchTerm}
             onChange={handleInputChange}
           />
 
           <div className="search-results">
-            {iconsToDisplay.map((icon, index) => {
-              const parts = icon.split(":");
-              return (
-                <SVGDisplay
-                  onClick={onIconSelected}
-                  key={index}
-                  source={`https://api.iconify.design/${parts[0]}/${parts[1]}.svg`}
-                />
-              );
-            })}
+            {iconsToDisplay.map((icon) => (
+              <SVGDisplay onClick={onIconSelected} key={icon} icon={icon} />
+            ))}
           </div>
         </div>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => {}} autoFocus>
-          {t("select")}
-        </Button>
+        <Button onClick={() => onIconSelected(false)}>{t("cancel")}</Button>
       </DialogActions>
     </Dialog>
   );
@@ -181,16 +151,24 @@ function IconSelector({ currentIcon, onIconSelected }) {
 
 export default IconSelector;
 
-function SVGDisplay({ source, onClick }) {
+function SVGDisplay({ icon, onClick }) {
   const [svgSource, setSvgSource] = useState("");
   useEffect(() => {
-    // Fetch the SVG source after the component mounts
-    axios.get(source).then((response) => {
-      if (isSVGValid(response.data)) {
-        setSvgSource(response.data);
-      }
-    });
-  }, [source]);
+    let active = true;
+    // loadIcon batches every tile into one request per icon set. Fetching each
+    // icon's .svg separately trips Iconify's rate limit (HTTP 429) and leaves
+    // blank tiles.
+    loadIcon(icon)
+      .then((data) => {
+        if (active) {
+          setSvgSource(toSvg(data));
+        }
+      })
+      .catch((e) => console.error(e));
+    return () => {
+      active = false;
+    };
+  }, [icon]);
   return (
     <div
       onClick={() => {
@@ -202,11 +180,10 @@ function SVGDisplay({ source, onClick }) {
   );
 }
 
-function isSVGValid(svgContent) {
-  if (typeof svgContent !== "string") {
-    return false;
-  }
-
-  // Check if the string starts with "<svg" and ends with "</svg>"
-  return /^<svg[\s\S]*<\/svg>$/.test(svgContent);
+function toSvg(iconData) {
+  const { attributes, body } = buildIcon(iconData);
+  const attrs = Object.entries(attributes)
+    .map(([key, value]) => `${key}="${value}"`)
+    .join(" ");
+  return `<svg xmlns="http://www.w3.org/2000/svg" ${attrs}>${replaceIDs(body)}</svg>`;
 }

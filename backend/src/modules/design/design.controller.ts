@@ -100,10 +100,6 @@ export class DesignController {
     @Query('override_main_lang') overrideMainLang: string,
   ): Promise<{ updated: number; design: DesignDto }> {
     if (!file) throw new BadRequestException('file is required');
-    return this.design.importTranslations(
-      surveyId,
-      file.buffer.toString('utf8'),
-      overrideMainLang === 'true',
-    );
+    return this.design.importTranslations(surveyId, file.buffer, overrideMainLang === 'true');
   }
 }

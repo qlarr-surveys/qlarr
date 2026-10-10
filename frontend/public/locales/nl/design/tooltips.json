@@ -3,6 +3,7 @@
   "allow_jump": "Schakel een enquête index in zodat respondenten naar elke pagina in de enquête kunnen springen.",
   "allow_previous": "Sta respondenten toe om terug te navigeren naar vorige pagina's om hun antwoorden te bekijken of te wijzigen.",
   "autocomplete": "Tekst invoer verzamelen met type-ahead suggesties uit een voorgedefinieerde lijst",
+  "hierarchical_autocomplete": "Verzamel een trapsgewijze selectie over benoemde niveaus (bijv. Land → Provincie → Stad) uit geüploade, vertaalbare gegevens",
   "barcode": "Scan barcodes met een mobiel apparaat of tablet (offline modus)",
   "columns_number": "Stel in hoeveel opties per rij verschijnen.",
   "columns_order": "Kies de weergavevolgorde van kolommen—zoals het is, willekeurig, omgekeerd of aangepast.",

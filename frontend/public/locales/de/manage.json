@@ -2,7 +2,7 @@
   "action_btn": {
     "add": "Hinzufügen",
     "add_user": "Benutzer hinzufügen",
-    "cancel": "Stornieren",
+    "cancel": "Abbrechen",
     "clone": "Klon",
     "close": "Schließen",
     "create": "Erstellen",
@@ -12,7 +12,7 @@
     "save": "Speichern"
   },
   "add_user": {
-    "cancel": "Stornieren",
+    "cancel": "Abbrechen",
     "roles": "Rollen",
     "save": "Speichern",
     "title": "Neuen Benutzer hinzufügen"
@@ -244,6 +244,7 @@
   "preview": "Vorschau",
   "processed_errors": {
     "autocomplete_malformed_input": "Fehlerhaft formatierte Eingabe: Datei muss ein JSON-Array sein, das nur Zeichenketten enthält",
+    "hierarchical_autocomplete_malformed_input": "Ungültige Eingabe: Die CSV muss eine Spalte pro Ebene und Sprache haben (Überschriften wie „Country (en)“); die Sprachgruppe jeder Zeile muss vollständig ausgefüllt oder leer sein, mit eindeutigen Pfaden pro Sprache",
     "max_upload_size_exceeded": "Die Dateigröße überschreitet das maximale Upload-Limit.",
     "size_limit_exceeded": "Die Massendateien überschreiten 200 MB. Bitte reduzieren Sie den Bereich oder filtern Sie nach vollständigen/unvollständigen Antworten.",
     "backend_down": "Backend ist nicht erreichbar... Bitte versuchen Sie es später erneut",
@@ -264,14 +265,15 @@
     "wrong_credentials": "Falsche E-Mail oder Passwort",
     "wrong_password": "Falsches Passwort",
     "wrong_reset_token": "Dieses Reset-Token ist falsch.",
-    "invalid_translations_csv": "Keine Übersetzungs-CSV."
+    "invalid_translations_csv": "Keine Übersetzungs-CSV.",
+    "translations_csv_not_utf8": "Diese Datei ist nicht UTF-8-kodiert. Wählen Sie in Excel Datei → Speichern unter → „CSV UTF-8 (durch Trennzeichen getrennt)“ und importieren Sie sie erneut."
   },
   "processed_successes": {
     "copied": "In die Zwischenablage kopiert",
     "updated": "Erfolgreich aktualisiert"
   },
   "profile": {
-    "cancel": "Stornieren",
+    "cancel": "Abbrechen",
     "change_email": "E-Mail ändern",
     "change_password": "Passwort ändern",
     "hint": "Wenn Sie Ihre E-Mail-Adresse oder Ihr Passwort ändern, werden Sie abgemeldet",
@@ -631,6 +633,7 @@
     "question_type_email": "E-Mail",
     "question_type_multiple_text": "Mehrfachtext",
     "question_type_autocomplete": "Autovervollständigung",
+    "question_type_hierarchical_autocomplete": "Hierarchische Autovervollständigung",
     "question_type_icon_scq": "Icon-Einfachauswahl",
     "question_type_icon_mcq": "Icon-Mehrfachauswahl",
     "question_type_scq_array": "Einfachauswahl-Matrix",

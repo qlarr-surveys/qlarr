@@ -356,6 +356,22 @@ export const createQuestion = (type, qId, lang) => {
     case "time":
       state.fullDayFormat = false;
       break;
+    case "hierarchical_autocomplete":
+      // levels == answers; seed 2, no minimum. Each child holds a string value
+      // (via addAnswerInstructions default branch), exactly like multiple_text.
+      returnObj[`Q${qId}A1`] = {};
+      returnObj[`Q${qId}A2`] = {};
+      state.children = [
+        {
+          code: "A1",
+          qualifiedCode: `Q${qId}A1`,
+        },
+        {
+          code: "A2",
+          qualifiedCode: `Q${qId}A2`,
+        },
+      ];
+      break;
     case "autocomplete":
     case "text_display":
     case "video_display":

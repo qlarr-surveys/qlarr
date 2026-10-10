@@ -3,6 +3,7 @@
   "allow_jump": "Activer un index de sondage pour que les répondants puissent sauter à n'importe quelle page du sondage.",
   "allow_previous": "Permettre aux répondants de naviguer en arrière vers les pages précédentes pour examiner ou modifier leurs réponses.",
   "autocomplete": "Collecter une saisie de texte avec des suggestions anticipées d'une liste prédéfinie",
+  "hierarchical_autocomplete": "Recueillez une sélection en cascade sur des niveaux nommés (p. ex. Pays → Région → Ville) à partir de données importées et traduisibles",
   "barcode": "Scanner des codes-barres en utilisant un appareil mobile ou une tablette (mode hors ligne)",
   "columns_number": "Définir combien d'options apparaissent par ligne.",
   "columns_order": "Choisir l'ordre d'affichage des colonnes—tel quel, aléatoire, inversé ou personnalisé.",

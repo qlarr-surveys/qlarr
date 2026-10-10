@@ -230,11 +230,25 @@ export const addMaskedValuesInstructions = (
       "date",
       "date_time",
       "time",
+      "hierarchical_autocomplete",
     ].includes(component.type)
   ) {
     return;
   }
   switch (component.type) {
+    case "hierarchical_autocomplete":
+      // A level shows its position in the selected row, in the survey's current
+      // language. safeAccess throws on a missing language, which leaves it blank.
+      component.children?.forEach((el, i) => {
+        if (!state[el.qualifiedCode]) return;
+        changeInstruction(state[el.qualifiedCode], {
+          code: "masked_value",
+          isActive: true,
+          returnType: "string",
+          text: `QlarrScripts.safeAccess(QlarrScripts.safeAccess(${qualifiedCode}.value_meta, Survey.lang), ${i})`,
+        });
+      });
+      break;
     case "date":
       if (component.dateFormat) {
         changeInstruction(component, {
@@ -580,6 +594,17 @@ export const addQuestionValueInstruction = (question) => {
         text: "offline",
       });
       break;
+    case "hierarchical_autocomplete":
+      // The levels' values live on the answers; the root question holds the
+      // selected row in every language (`{ en: [...], de: [...] }`), set by the
+      // client. Each level's masked_value reads its own position from it.
+      editInstruction(question, {
+        code: "value_meta",
+        isActive: false,
+        returnType: "map",
+        text: "",
+      });
+      break;
     case "date":
       editInstruction(question, {
         code: "value",
@@ -906,7 +931,10 @@ const requiredText = (qualifiedCode, component) => {
       ` == ` +
       rows.length
     );
-  } else if (component.type == "multiple_text") {
+  } else if (
+    component.type == "multiple_text" ||
+    component.type == "hierarchical_autocomplete"
+  ) {
     const rows = component.children;
     return (
       `[${rows.map(
@@ -1677,12 +1705,16 @@ export const processValidation = (state, code, rule, modifyEquation = true) => {
     (component.type == "scq_array" ||
       component.type == "mcq_array" ||
       component.type == "multiple_text" ||
+      component.type == "hierarchical_autocomplete" ||
       component.type == "scq_icon_array") &&
     rule == "validation_required"
   ) {
     component.children
       .filter(
-        (child) => child.type == "row" || component.type == "multiple_text",
+        (child) =>
+          child.type == "row" ||
+          component.type == "multiple_text" ||
+          component.type == "hierarchical_autocomplete",
       )
       .forEach((row) => {
         const child = state[row.qualifiedCode];
