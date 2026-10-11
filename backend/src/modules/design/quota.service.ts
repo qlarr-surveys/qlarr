@@ -9,6 +9,10 @@ import {
   quotaDefinitions,
 } from './quota.helpers';
 
+// A response is a member of a quota when it is not disqualified and the engine saved
+// `Survey.var_<code>_met = true` on it.
+const NOT_DISQUALIFIED = `COALESCE(r."values" ->> 'Survey.disqualified', 'false') <> 'true'`;
+
 export interface QuotaStatusDto {
   quotas: (QuotaDefinition & { count: number; full: boolean })[];
 }
@@ -26,11 +30,12 @@ export class QuotaService {
     const rows: { code: string; count: number }[] = await manager.query(
       `SELECT code, COUNT(*)::int AS count
          FROM responses r
-         CROSS JOIN unnest(r.quota_codes) AS code
+         CROSS JOIN unnest($2::text[]) AS code
         WHERE r.survey_id = $1
           AND r.submit_date IS NOT NULL
           AND r.preview = false
-          AND code = ANY($2::text[])
+          AND ${NOT_DISQUALIFIED}
+          AND r."values" ->> ('Survey.var_' || code || '_met') = 'true'
         GROUP BY code`,
       [surveyId, codes],
     );
@@ -43,12 +48,16 @@ export class QuotaService {
     );
     if (surveyIds.length === 0) return result;
     const rows: { survey_id: string; code: string; count: number }[] = await this.db.manager.query(
-      `SELECT r.survey_id, code, COUNT(*)::int AS count
+      `SELECT r.survey_id, substring(kv.key FROM '^Survey\\.var_(.+)_met$') AS code,
+              COUNT(*)::int AS count
          FROM responses r
-         CROSS JOIN unnest(r.quota_codes) AS code
+         CROSS JOIN LATERAL jsonb_each_text(r."values") AS kv(key, value)
         WHERE r.survey_id = ANY($1::uuid[])
           AND r.submit_date IS NOT NULL
           AND r.preview = false
+          AND ${NOT_DISQUALIFIED}
+          AND kv.key ~ '^Survey\\.var_.+_met$'
+          AND kv.value = 'true'
         GROUP BY r.survey_id, code`,
       [surveyIds],
     );

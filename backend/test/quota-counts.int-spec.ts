@@ -7,7 +7,7 @@ import { startTestApp, TestApp } from './harness';
 const SURVEY = '30000000-0000-0000-0000-000000000001';
 const OTHER_SURVEY = '30000000-0000-0000-0000-000000000002';
 
-describe('Quota counts (responses.quota_codes)', () => {
+describe('Quota counts', () => {
   let ctx: TestApp;
   let root: DataSource;
   let quotas: QuotaService;
@@ -34,9 +34,6 @@ describe('Quota counts (responses.quota_codes)', () => {
     return id;
   };
 
-  const quotaCodes = async (id: string): Promise<string[]> =>
-    (await root.query(`SELECT quota_codes FROM responses WHERE id = $1`, [id]))[0].quota_codes;
-
   beforeAll(async () => {
     ctx = await startTestApp();
     root = ctx.root;
@@ -62,46 +59,32 @@ describe('Quota counts (responses.quota_codes)', () => {
     await ctx?.close();
   });
 
-  it('records the quotas a response is a member of', async () => {
-    const both = await addResponse({
+  it('counts a response only where its saved membership is true', async () => {
+    await root.query(`DELETE FROM responses`);
+    await addResponse({
       'Q1.value': 'x',
       'Survey.var_QTb_met': true,
       'Survey.var_QTa_met': 'true',
       'Survey.var_QTc_met': false,
     });
-    expect(await quotaCodes(both)).toEqual(['QTa', 'QTb']);
-
     for (const value of [false, 'false', 1, null, 'TRUE', { nested: true }]) {
-      expect(await quotaCodes(await addResponse({ 'Survey.var_QTa_met': value }))).toEqual([]);
+      await addResponse({ 'Survey.var_QTd_met': value });
     }
-    expect(await quotaCodes(await addResponse({ 'Q1.value': 'x' }))).toEqual([]);
-    expect(await quotaCodes(await addResponse(null))).toEqual([]);
+    await addResponse({ 'Q1.value': 'x' });
+    await addResponse(null);
+
+    expect(await quotas.counts(SURVEY, ['QTa', 'QTb', 'QTc', 'QTd'])).toEqual({ QTa: 1, QTb: 1 });
+    expect((await quotas.memberCounts([SURVEY]))[SURVEY]).toEqual({ QTa: 1, QTb: 1 });
   });
 
-  it('records none for a disqualified response', async () => {
+  it('does not count a disqualified response', async () => {
+    await root.query(`DELETE FROM responses`);
     for (const disqualified of [true, 'true']) {
-      const id = await addResponse({
-        'Survey.var_QTa_met': true,
-        'Survey.disqualified': disqualified,
-      });
-      expect(await quotaCodes(id)).toEqual([]);
+      await addResponse({ 'Survey.var_QTa_met': true, 'Survey.disqualified': disqualified });
     }
-    const kept = await addResponse({ 'Survey.var_QTa_met': true, 'Survey.disqualified': false });
-    expect(await quotaCodes(kept)).toEqual(['QTa']);
-  });
-
-  it('follows the response as its values change', async () => {
-    const id = await addResponse({ 'Survey.var_QTa_met': false });
-    await root.query(`UPDATE responses SET "values" = $2::jsonb WHERE id = $1`, [
-      id,
-      JSON.stringify({ 'Survey.var_QTa_met': true }),
-    ]);
-    expect(await quotaCodes(id)).toEqual(['QTa']);
-    await root.query(
-      `UPDATE responses SET "values" = "values" || '{"Survey.disqualified": true}' WHERE id = $1`,
-      [id],
-    );
-    expect(await quotaCodes(id)).toEqual([]);
+    await addResponse({ 'Survey.var_QTa_met': true, 'Survey.disqualified': false });
+    expect(await quotas.counts(SURVEY, ['QTa'])).toEqual({ QTa: 1 });
+    expect((await quotas.memberCounts([SURVEY]))[SURVEY]).toEqual({ QTa: 1 });
   });
 
   it('counts only complete, non-preview members of the requested quotas', async () => {
@@ -117,6 +100,10 @@ describe('Quota counts (responses.quota_codes)', () => {
 
     expect(await quotas.counts(SURVEY, ['QTa', 'QTb', 'QTnone'])).toEqual({ QTa: 3, QTb: 2 });
     expect(await quotas.counts(SURVEY, ['QTb'])).toEqual({ QTb: 2 });
+    expect(await quotas.memberCounts([SURVEY, OTHER_SURVEY])).toEqual({
+      [SURVEY]: { QTa: 3, QTb: 2 },
+      [OTHER_SURVEY]: { QTa: 1, QTb: 1 },
+    });
     expect(await quotas.counts(SURVEY, [])).toEqual({});
   });
 

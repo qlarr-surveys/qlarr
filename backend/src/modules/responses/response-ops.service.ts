@@ -6,7 +6,7 @@ import { FileDownload } from '../../integrations/filesystem/file-info';
 import { FILE_HELPER, FileHelper } from '../../integrations/filesystem/file-helper';
 import { SurveyFolder } from '../../integrations/filesystem/survey-folder';
 import { DesignService } from '../design/design.service';
-import { stripQuotaKeys, withComputedQuotaKeys } from '../design/quota.helpers';
+import { quotaDefinitions, stripQuotaKeys, withComputedQuotaKeys } from '../design/quota.helpers';
 import { QuotaService } from '../design/quota.service';
 import { ResponseRepository } from './response.repository';
 import { SurveyDesignWithErrorException } from '../run/run.exceptions';
@@ -140,20 +140,21 @@ export class ResponseOpsService {
       data.events ?? [],
     );
 
-    return this.responseCount(surveyId, currentUserId);
+    const quotaCodes = quotaDefinitions(processed.output.survey).map((quota) => quota.code);
+    return this.responseCount(surveyId, currentUserId, quotaCodes);
   }
 
   /** Complete + this-user response counts for a survey. */
   private async responseCount(
     surveyId: string,
     userId: string,
+    quotaCodes: string[],
   ): Promise<ResponseCountDto> {
     const counts = await this.responses.counts(surveyId, userId);
-    const quotaCounts = await this.quotas.memberCounts([surveyId]);
     return {
       completeResponseCount: counts.completeResponseCount,
       userResponsesCount: counts.userResponseCount,
-      quotaCounts: quotaCounts[surveyId],
+      quotaCounts: await this.quotas.counts(surveyId, quotaCodes),
     };
   }
 

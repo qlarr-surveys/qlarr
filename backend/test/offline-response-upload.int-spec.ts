@@ -180,7 +180,7 @@ describe('Offline survey response upload', () => {
         .expect(200);
       lastBody = res.body;
       const [row] = await root.query(
-        `SELECT "values", quota_codes FROM responses WHERE id = $1`,
+        `SELECT "values" FROM responses WHERE id = $1`,
         [responseId],
       );
       return row;
@@ -192,7 +192,6 @@ describe('Offline survey response upload', () => {
       'Survey.var_QT1_met': false,
     });
     expect(faked.values['Survey.var_QT1_met']).toBe(true);
-    expect(faked.quota_codes).toEqual(['QT1']);
 
     const old = await upload('30000000-0000-0000-0000-0000000000a2', male);
     expect(old.values['Survey.var_QT1_met']).toBe(true);
@@ -203,7 +202,6 @@ describe('Offline survey response upload', () => {
       'Survey.disqualified': false,
     });
     expect(female.values['Survey.var_QT1_met']).toBe(false);
-    expect(female.quota_codes).toEqual([]);
 
     const screenedOut = await upload('30000000-0000-0000-0000-0000000000a4', {
       ...male,
@@ -211,7 +209,6 @@ describe('Offline survey response upload', () => {
     });
     expect(screenedOut.values['Survey.disqualified']).toBe(true);
     expect(screenedOut.values['Survey.var_QT1_met']).toBe(true);
-    expect(screenedOut.quota_codes).toEqual([]);
 
     expect(lastBody.quotaCounts).toEqual({ QT1: 2 });
   });
