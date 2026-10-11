@@ -8,6 +8,7 @@ import { getFileFromPath } from '~/networking/common';
 import { useService } from "~/hooks/use-service";
 import { Button } from "@mui/material";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import { MAX_FILE_SIZE_BYTES } from "@qlarr/design-core";
 
 function PhotoCapture(props) {
   const runService = useService("run");
@@ -30,8 +31,8 @@ function PhotoCapture(props) {
     const validationMaxSize = (component.validation?.validation_max_file_size?.isActive &&
       component.validation?.validation_max_file_size?.max_size) || -1;
   
-  // Limit to validation value or 10MB (10240 KB), whichever is smaller
-  const IMAGE_MAX_SIZE_KB = 10240; // 10MB
+  // Limit to validation value or the backend cap (in KB), whichever is smaller
+  const IMAGE_MAX_SIZE_KB = MAX_FILE_SIZE_BYTES / 1024;
   const maxFileSize = validationMaxSize > 0 
     ? Math.min(validationMaxSize, IMAGE_MAX_SIZE_KB)
     : IMAGE_MAX_SIZE_KB;

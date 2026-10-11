@@ -25,3 +25,7 @@ export {
 } from "./constants/design";
 export { STRIP_TAGS_PATTERN } from "./constants/instruction";
 export { DESIGN_SURVEY_MODE } from "./constants/designMode";
+export {
+  MAX_FILE_SIZE_BYTES,
+  MAX_VIDEO_FILE_SIZE_BYTES,
+} from "./constants/upload";
