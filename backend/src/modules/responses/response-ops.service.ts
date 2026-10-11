@@ -1,6 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { lookup } from 'mime-types';
+import {
+  MAX_FILE_SIZE_BYTES,
+  MAX_VIDEO_FILE_SIZE_BYTES,
+} from '@qlarr/design-core';
 import { EngineService } from '../../engine/engine.service';
 import { FileDownload } from '../../integrations/filesystem/file-info';
 import { FILE_HELPER, FileHelper } from '../../integrations/filesystem/file-helper';
@@ -33,7 +37,6 @@ interface UploadedFile {
   buffer: Buffer;
 }
 
-const MB = 1024 * 1024;
 const OCTET_STREAM = 'application/octet-stream';
 
 /**
@@ -267,7 +270,9 @@ export class ResponseOpsService {
   }
 
   private checkMaxFileSize(size: number, mimeType: string): void {
-    const maxSize = mimeType.startsWith('video/') ? 60 * MB : 10 * MB;
+    const maxSize = mimeType.startsWith('video/')
+      ? MAX_VIDEO_FILE_SIZE_BYTES
+      : MAX_FILE_SIZE_BYTES;
     if (size > maxSize) {
       throw new FileTooBigException(size, maxSize, mimeType);
     }
