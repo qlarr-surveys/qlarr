@@ -15,7 +15,7 @@ import { useDispatch } from "react-redux";
 import { changeAttribute, changeResources } from "~/state/design/designState";
 import { defaultSurveyTheme } from "~/constants/theme";
 import { Close, KeyboardArrowDown } from "@mui/icons-material";
-import { useService } from "~/hooks/use-service";
+import { useResourceUpload } from "~/hooks/useResourceUpload";
 import { ChromePicker } from "react-color";
 import { useBoolean } from "~/hooks/use-boolean";
 import CloseIcon from "@mui/icons-material/Close";
@@ -37,7 +37,7 @@ const listFont = [
 ];
 
 function Theming({ t }) {
-  const designService = useService("design");
+  const uploadResource = useResourceUpload();
 
   const dispatch = useDispatch();
 
@@ -122,10 +122,12 @@ function Theming({ t }) {
 
   function handleBackgroundUpload(e) {
     e.preventDefault();
-    let file = e.target.files[0];
-    designService
-      .uploadResource(file)
-      .then((response) => {
+    const file = e.target.files[0];
+    // Clear the input so picking the same file again (e.g. a retry) still
+    // fires onChange.
+    e.target.value = "";
+    uploadResource(file).then((response) => {
+      if (response) {
         dispatch(
           changeResources({
             code: "Survey",
@@ -140,10 +142,8 @@ function Theming({ t }) {
             value: { ...theme, bgColor: "rgba(0, 0, 0, 0)" },
           })
         );
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+      }
+    });
   }
   const handleBackgroundReset = () => {
     dispatch(

@@ -20,7 +20,7 @@ import { useRef, useState } from "react";
 import { rtlLanguage } from "~/utils/common";
 import { useDrag, useDrop } from "react-dnd";
 import LoadingDots from "~/components/common/LoadingDots";
-import { useService } from "~/hooks/use-service";
+import { useResourceUpload } from "~/hooks/useResourceUpload";
 import { contentEditable, inDesign } from "~/routes";
 import { Build } from "@mui/icons-material";
 import { setupOptions } from "@qlarr/design-core/constants/design";
@@ -42,7 +42,7 @@ function ImageChoiceItemDesign({
   t,
   addAnswer,
 }) {
-  const designService = useService("design");
+  const uploadResource = useResourceUpload();
   const dispatch = useDispatch();
   const theme = useTheme();
   const ref = useRef();
@@ -87,23 +87,26 @@ function ImageChoiceItemDesign({
 
   function handleImageChange(e) {
     e.preventDefault();
-    let file = e.target.files[0];
+    const file = e.target.files[0];
+    // Clear the input so picking the same file again (e.g. a retry) still
+    // fires onChange.
+    e.target.value = "";
+    if (!file) return;
     setUploading(true);
-    designService
-      .uploadResource(file)
+    uploadResource(file)
       .then((response) => {
-        setUploading(false);
-        dispatch(
-          changeResources({
-            code: qualifiedCode,
-            key: "image",
-            value: response.name,
-          })
-        );
+        if (response) {
+          dispatch(
+            changeResources({
+              code: qualifiedCode,
+              key: "image",
+              value: response.name,
+            })
+          );
+        }
       })
-      .catch((err) => {
+      .finally(() => {
         setUploading(false);
-        console.error(err);
       });
   }
 

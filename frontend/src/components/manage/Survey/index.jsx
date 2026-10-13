@@ -27,6 +27,7 @@ import { setLoading } from "~/state/edit/editState";
 import { useService } from "~/hooks/use-service";
 import { PROCESSED_ERRORS } from "~/utils/errorsProcessor";
 import { buildResourceUrl } from "~/networking/common";
+import { MAX_RESOURCE_UPLOAD_BYTES } from "~/constants/networking";
 import ImageIcon from "@mui/icons-material/Image";
 import { useNavigate } from "react-router-dom";
 import { EditableSurveyTitle } from "./EditableSurveyTitle";
@@ -229,6 +230,17 @@ const Survey = ({
 
   const handleImageUpload = (event) => {
     const image = event.target.files[0];
+    // Clear the input so picking the same file again (e.g. a retry) still
+    // fires onChange.
+    event.target.value = "";
+    if (!image) return;
+    if (image.size > MAX_RESOURCE_UPLOAD_BYTES) {
+      setError(
+        t(`processed_errors.${PROCESSED_ERRORS.MAX_UPLOAD_SIZE_EXCEEDED.name}`)
+      );
+      setOpenSnackbar(true);
+      return;
+    }
     const reader = new FileReader();
 
     reader.onload = () => {
