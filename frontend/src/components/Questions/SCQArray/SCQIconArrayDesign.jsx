@@ -29,7 +29,7 @@ import { rtlLanguage } from "~/utils/common";
 import IconSelector from "~/components/design/IconSelector";
 import DynamicSvg from "~/components/DynamicSvg";
 import { buildResourceUrl } from "~/networking/common";
-import { useService } from "~/hooks/use-service";
+import { useResourceUpload } from "~/hooks/useResourceUpload";
 import { useReleaseGuard } from "~/hooks/useReleaseGuard";
 import { contentEditable } from "~/routes";
 import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
@@ -353,7 +353,7 @@ function SCQArrayHeaderDesign({
   langInfo,
   parentQualifiedCode,
 }) {
-  const designService = useService("design");
+  const uploadResource = useResourceUpload();
   const icon = icons[index];
   const [iconSelectoOpen, setIconSelectorOpen] = useState(false);
   const dispatch = useDispatch();
@@ -437,9 +437,8 @@ function SCQArrayHeaderDesign({
 
     const svgFile = new File([svgBlob], "file.svg", { type: "image/svg+xml" });
 
-    designService
-      .uploadResource(svgFile)
-      .then((response) => {
+    uploadResource(svgFile).then((response) => {
+      if (response) {
         dispatch(
           changeResources({
             code: item.qualifiedCode,
@@ -447,10 +446,8 @@ function SCQArrayHeaderDesign({
             value: response.name,
           })
         );
-      })
-      .catch((error) => {
-        console.error(error.message);
-      });
+      }
+    });
   };
 
   drop(preview(ref));

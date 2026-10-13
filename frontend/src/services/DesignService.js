@@ -67,7 +67,7 @@ class DesignService extends BaseService {
     );
     return response.data;
   }
-  async uploadResource(file, surveyId = null) {
+  async uploadResource(file, surveyId = null, onProgress = null) {
     if (!surveyId) {
       surveyId = sessionStorage.getItem("surveyId");
     }
@@ -77,6 +77,13 @@ class DesignService extends BaseService {
 
     const response = await this.handleRequest(() =>
       authenticatedApi.post(`/survey/${surveyId}/resource`, formData, {
+        onUploadProgress: (progressEvent) => {
+          if (onProgress && progressEvent.total) {
+            onProgress(
+              Math.round((progressEvent.loaded / progressEvent.total) * 100)
+            );
+          }
+        },
         headers: {
           Accept: "application/json",
           "Content-Type": "multipart/form-data",

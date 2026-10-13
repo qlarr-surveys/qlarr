@@ -9,12 +9,13 @@ import { useDispatch } from "react-redux";
 import { changeResources } from "~/state/design/designState";
 import styles from "./VideoDisplay.module.css";
 import LoadingDots from "~/components/common/LoadingDots";
-import { useService } from "~/hooks/use-service";
+import { useResourceUpload } from "~/hooks/useResourceUpload";
 
 function VideoDisplayDesign({ code, t, onMainLang }) {
-  const designService = useService("design");
+  const uploadResource = useResourceUpload();
   const dispatch = useDispatch();
   const [isUploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const state = useSelector((state) => {
     return state.designState[code];
@@ -22,16 +23,21 @@ function VideoDisplayDesign({ code, t, onMainLang }) {
 
   const handleVideoUpload = (e) => {
     e.preventDefault();
+    const file = e.target.files[0];
+    // Clear the input so picking the same file again (e.g. a retry) still
+    // fires onChange.
+    e.target.value = "";
+    if (!file) return;
+    setProgress(0);
     setUploading(true);
-    let file = e.target.files[0];
-    designService
-      .uploadResource(file)
+    uploadResource(file, { onProgress: setProgress })
       .then((response) => {
-        setUploading(false);
-        dispatch(changeResources({ code, key: "videoUrl", value: response.name }));
+        if (response) {
+          dispatch(changeResources({ code, key: "videoUrl", value: response.name }));
+        }
       })
-      .catch((err) => {
-        console.error(err);
+      .finally(() => {
+        setUploading(false);
       });
   };
 
@@ -62,7 +68,9 @@ function VideoDisplayDesign({ code, t, onMainLang }) {
         <div className={styles.buttonContainer}>
           <LoadingDots />
           <br />
-          <span>{t("uploading_video")}</span>
+          <span>
+            {t("uploading_video")} {progress}%
+          </span>
         </div>
       ) : onMainLang ? (
         <div className={styles.buttonContainer}>

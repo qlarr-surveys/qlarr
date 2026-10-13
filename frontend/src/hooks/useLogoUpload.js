@@ -1,29 +1,27 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { changeResources } from "~/state/design/designState";
-import { useService } from "~/hooks/use-service";
+import { useResourceUpload } from "~/hooks/useResourceUpload";
 
 export function useLogoUpload() {
   const dispatch = useDispatch();
-  const designService = useService("design");
+  const uploadResource = useResourceUpload();
   const [isUploading, setIsUploading] = useState(false);
 
   const uploadLogo = (file) => {
     if (!file || !file.type?.startsWith("image/")) return;
     setIsUploading(true);
-    designService
-      .uploadResource(file)
+    uploadResource(file)
       .then((response) => {
-        dispatch(
-          changeResources({
-            code: "Survey",
-            key: "logoImage",
-            value: response.name,
-          })
-        );
-      })
-      .catch((err) => {
-        console.error(err);
+        if (response) {
+          dispatch(
+            changeResources({
+              code: "Survey",
+              key: "logoImage",
+              value: response.name,
+            })
+          );
+        }
       })
       .finally(() => {
         setIsUploading(false);
