@@ -23,9 +23,28 @@ const matchesPrefix = (path: string[], prefix: string[]): boolean =>
   prefix.every((value, i) => path[i] === value);
 
 /**
- * Distinct values at `level` among the rows whose levels above match `prefix`,
- * matching the query like the plain autocomplete does: case-insensitive
- * substring, sorted, capped at `limit`.
+ * Every distinct value at `level` among the rows whose levels above match
+ * `prefix`, sorted. Uncapped: a dropdown level shows all of its options.
+ */
+export function listLevel(
+  rows: HierarchicalRow[],
+  lang: string,
+  level: number,
+  prefix: string[],
+): string[] {
+  const values = new Set<string>();
+  for (const row of rows) {
+    const path = row[lang];
+    if (!Array.isArray(path) || !matchesPrefix(path, prefix)) continue;
+    const value = path[level];
+    if (value) values.add(value);
+  }
+  return [...values].sort((a, b) => a.localeCompare(b));
+}
+
+/**
+ * The values of `listLevel` matching the query like the plain autocomplete
+ * does: case-insensitive substring, sorted, capped at `limit`.
  */
 export function searchLevel(
   rows: HierarchicalRow[],
@@ -36,14 +55,9 @@ export function searchLevel(
   limit: number,
 ): string[] {
   const needle = query.toLowerCase();
-  const matches = new Set<string>();
-  for (const row of rows) {
-    const path = row[lang];
-    if (!Array.isArray(path) || !matchesPrefix(path, prefix)) continue;
-    const value = path[level];
-    if (value && value.toLowerCase().includes(needle)) matches.add(value);
-  }
-  return [...matches].sort((a, b) => a.localeCompare(b)).slice(0, limit);
+  return listLevel(rows, lang, level, prefix)
+    .filter((value) => value.toLowerCase().includes(needle))
+    .slice(0, limit);
 }
 
 /** The row whose path in `lang` is exactly `path` (paths are unique per language). */

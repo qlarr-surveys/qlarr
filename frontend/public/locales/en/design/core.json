@@ -275,6 +275,7 @@
   "select_default_answer": "Select default answer",
   "no_default": "No default",
   "show_description": "Show description",
+  "hierarchical_dropdown": "Show as dropdown",
   "show_description_page": "Show description",
   "show_hide": "Show/Hide",
   "show_if": "Show If",

@@ -799,6 +799,7 @@ const baseSetupOptions = (type) => {
             "changeCode",
             "disabled",
             "showDescription",
+            "hierarchicalDropdown",
           ],
         },
         {

@@ -64,14 +64,7 @@ export class AutoCompleteController {
     @Query('defaultLang') defaultLang: string,
     @Query('limit') limit = '10',
   ): Promise<string[]> {
-    const levelIndex = parseInt(level, 10);
-    if (!Number.isInteger(levelIndex) || levelIndex < 0) {
-      throw new BadRequestException('level must be a non-negative integer');
-    }
-    const prefixValues = parseStringArray(prefix ?? '[]', 'prefix');
-    if (prefixValues.length !== levelIndex) {
-      throw new BadRequestException('prefix must hold one value per level above');
-    }
+    const { levelIndex, prefixValues } = parseLevel(level, prefix);
     const n = Math.min(Math.max(parseInt(limit, 10) || 10, 1), 100);
     return this.autocomplete.searchHierarchical(
       surveyId,
@@ -82,6 +75,29 @@ export class AutoCompleteController {
       requireLang(lang, 'lang'),
       requireLang(defaultLang, 'defaultLang'),
       n,
+    );
+  }
+
+  // Public: every option for one level of a hierarchical autocomplete shown as
+  // a dropdown — no query and no cap. `prefix` and `level` as in the search.
+  @Public()
+  @Get(':surveyId/hierarchical-autocomplete/:filename/options')
+  listHierarchicalLevel(
+    @Param('surveyId') surveyId: string,
+    @Param('filename') filename: string,
+    @Query('level') level: string,
+    @Query('prefix') prefix: string,
+    @Query('lang') lang: string,
+    @Query('defaultLang') defaultLang: string,
+  ): Promise<string[]> {
+    const { levelIndex, prefixValues } = parseLevel(level, prefix);
+    return this.autocomplete.listHierarchicalLevel(
+      surveyId,
+      filename,
+      levelIndex,
+      prefixValues,
+      requireLang(lang, 'lang'),
+      requireLang(defaultLang, 'defaultLang'),
     );
   }
 
@@ -108,6 +124,22 @@ export class AutoCompleteController {
     if (!row) throw new NotFoundException();
     return row;
   }
+}
+
+// `level` is 0-based; `prefix` is a JSON array holding one value per level above.
+function parseLevel(
+  level: string,
+  prefix: string | undefined,
+): { levelIndex: number; prefixValues: string[] } {
+  const levelIndex = parseInt(level, 10);
+  if (!Number.isInteger(levelIndex) || levelIndex < 0) {
+    throw new BadRequestException('level must be a non-negative integer');
+  }
+  const prefixValues = parseStringArray(prefix ?? '[]', 'prefix');
+  if (prefixValues.length !== levelIndex) {
+    throw new BadRequestException('prefix must hold one value per level above');
+  }
+  return { levelIndex, prefixValues };
 }
 
 function parseStringArray(raw: string, name: string): string[] {
