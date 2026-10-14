@@ -69,6 +69,46 @@ export const hierarchicalSearch = (
   }
 };
 
+const hierarchicalListResolvers = {};
+let hierarchicalListRequestId = 0;
+
+export const hierarchicalList = (
+  runService,
+  filename,
+  level,
+  prefix,
+  lang,
+  defaultLang
+) => {
+  if (window["Android"]) {
+    return new Promise((resolve, reject) => {
+      const requestId = ++hierarchicalListRequestId;
+      hierarchicalListResolvers[requestId] = resolve;
+      window["listHierarchicalAutoCompleteLevel"] = (resRequestId, res) => {
+        const resolveRequest = hierarchicalListResolvers[resRequestId];
+        delete hierarchicalListResolvers[resRequestId];
+        if (resolveRequest) resolveRequest(res);
+      };
+      window["Android"].listHierarchicalAutoCompleteLevel(
+        requestId,
+        filename,
+        level,
+        JSON.stringify(prefix),
+        lang,
+        defaultLang
+      );
+    });
+  } else {
+    return runService.listHierarchical(
+      filename,
+      level,
+      prefix,
+      lang,
+      defaultLang
+    );
+  }
+};
+
 export const hierarchicalRow = (
   runService,
   filename,

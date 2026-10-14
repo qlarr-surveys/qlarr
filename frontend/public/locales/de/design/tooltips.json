@@ -37,6 +37,7 @@
   "file_upload": "Dateien wie Dokumente oder Bilder hochladen",
   "signature": "Digitale Unterschrift erfassen",
   "show_description": "Fügen Sie eine Beschreibung unter dem Fragentitel hinzu, um den Nutzern Kontext oder Anweisungen zu geben.",
+  "hierarchical_dropdown": "Jede Ebene als Dropdown mit allen Optionen anzeigen, statt als Feld zum Eintippen und Suchen.",
   "show_description_page": "Fügen Sie eine Beschreibung unter dem Seitentitel hinzu, um den Nutzern Kontext oder Anweisungen zu geben.",
   "show_word_count": "Wortanzahl anzeigen",
   "show_question_hint": "Fügen Sie einen dezenten Hinweis unter der Frage hinzu, um zusätzliche Klarheit zu schaffen.",

@@ -295,6 +295,7 @@
   "setup_for": "Configuration pour",
   "show_always": "Afficher Toujours",
   "show_description": "Afficher la description",
+  "hierarchical_dropdown": "Afficher sous forme de liste déroulante",
   "show_description_page": "Afficher la description",
   "show_hide": "Afficher/Masquer",
   "show_if": "Afficher Si",

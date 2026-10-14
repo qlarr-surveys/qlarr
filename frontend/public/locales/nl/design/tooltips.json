@@ -68,6 +68,7 @@
   "scq_array": "Beoordeel meerdere items met één keuze per rij",
   "scq_icon_array": "Beoordeel meerdere items visueel met pictogrammen",
   "show_description": "Voeg een beschrijving toe onder de vraagtitel om gebruikers context of instructies te geven.",
+  "hierarchical_dropdown": "Toon elk niveau als een vervolgkeuzelijst met al zijn opties, in plaats van een veld om te typen en te zoeken.",
   "show_description_page": "Voeg een beschrijving toe onder de paginatitel om gebruikers context of instructies te geven.",
   "show_question_hint": "Voeg een subtiele tip toe onder de vraag voor extra duidelijkheid.",
   "show_word_count": "Toon woordentelling aan de gebruiker",
