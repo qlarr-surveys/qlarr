@@ -63,12 +63,12 @@ describe('Quota counts', () => {
     await root.query(`DELETE FROM responses`);
     await addResponse({
       'Q1.value': 'x',
-      'Survey.var_QTb_met': true,
-      'Survey.var_QTa_met': 'true',
-      'Survey.var_QTc_met': false,
+      'Survey.quota_QTb': true,
+      'Survey.quota_QTa': 'true',
+      'Survey.quota_QTc': false,
     });
     for (const value of [false, 'false', 1, null, 'TRUE', { nested: true }]) {
-      await addResponse({ 'Survey.var_QTd_met': value });
+      await addResponse({ 'Survey.quota_QTd': value });
     }
     await addResponse({ 'Q1.value': 'x' });
     await addResponse(null);
@@ -80,19 +80,19 @@ describe('Quota counts', () => {
   it('does not count a disqualified response', async () => {
     await root.query(`DELETE FROM responses`);
     for (const disqualified of [true, 'true']) {
-      await addResponse({ 'Survey.var_QTa_met': true, 'Survey.disqualified': disqualified });
+      await addResponse({ 'Survey.quota_QTa': true, 'Survey.disqualified': disqualified });
     }
-    await addResponse({ 'Survey.var_QTa_met': true, 'Survey.disqualified': false });
+    await addResponse({ 'Survey.quota_QTa': true, 'Survey.disqualified': false });
     expect(await quotas.counts(SURVEY, ['QTa'])).toEqual({ QTa: 1 });
     expect((await quotas.memberCounts([SURVEY]))[SURVEY]).toEqual({ QTa: 1 });
   });
 
   it('counts only complete, non-preview members of the requested quotas', async () => {
     await root.query(`DELETE FROM responses`);
-    const member = { 'Survey.var_QTa_met': true, 'Survey.var_QTb_met': true };
+    const member = { 'Survey.quota_QTa': true, 'Survey.quota_QTb': true };
     await addResponse(member);
     await addResponse(member);
-    await addResponse({ 'Survey.var_QTa_met': true });
+    await addResponse({ 'Survey.quota_QTa': true });
     await addResponse(member, { preview: true });
     await addResponse(member, { complete: false });
     await addResponse({ ...member, 'Survey.disqualified': true });

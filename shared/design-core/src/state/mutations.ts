@@ -11,7 +11,6 @@ import {
   isEquivalent,
   nextId,
   buildCodeIndex,
-  isQuestion,
   lastIndexInArray,
 } from "../utils/pureUtils";
 import {
@@ -30,7 +29,6 @@ import {
   CARRY_FORWARD_SOURCE_TYPES,
   isArrayType,
   languageSetup,
-  QUOTA_SKIP_CODE,
   quotaMessageKey,
   setupOptions,
   themeSetup,
@@ -53,14 +51,10 @@ import {
   cleanupDefaultValue,
   conditionalRelevanceEquation,
   instructionByCode,
-  isQuotaVariable,
+  isQuotaInstruction,
   processValidation,
-  quotaDecidingQuestion,
-  quotaScreenOutCondition,
-  quotaSkipInstruction,
-  quotaVariables,
+  quotaInstruction,
   removeInstruction,
-  surveyQuestionCodes,
   updateRandomByRule,
   updatePriorityByRule,
 } from "./addInstructions";
@@ -287,9 +281,8 @@ export function quotaMessageRevealed(state) {
   }
 }
 
-// Rebuilds each quota's Survey variables and the screen-out skips on the
-// questions where quotas are decided. Unchanged instructions are kept so they
-// keep the errors the backend reported on them.
+// Rebuilds each quota's instruction (the survey engine derives the rest from it).
+// An unchanged instruction is kept so it keeps the errors the backend reported on it.
 const refreshQuotaInstructions = (state) => {
   const survey = state.Survey;
   if (!survey) {
@@ -297,48 +290,16 @@ const refreshQuotaInstructions = (state) => {
   }
   const previous = new Map();
   survey.instructionList = (survey.instructionList || []).filter((instruction) => {
-    const isQuota = isQuotaVariable(instruction.code);
+    const isQuota = isQuotaInstruction(instruction.code);
     if (isQuota) previous.set(instruction.code, instruction);
     return !isQuota;
   });
 
-  const questionCodes = surveyQuestionCodes(state);
-  const screenOuts = new Map();
   (survey.quotas || []).forEach((quota) => {
-    const variables = quotaVariables(quota, state);
-    if (!variables.length) {
-      return;
-    }
-    variables.forEach((variable) => {
-      const kept = previous.get(variable.code);
-      survey.instructionList.push(kept?.text === variable.text ? kept : variable);
-    });
-    const question = quotaDecidingQuestion(quota, questionCodes);
-    if (question) {
-      screenOuts.set(question, [
-        ...(screenOuts.get(question) || []),
-        quotaScreenOutCondition(quota.code),
-      ]);
-    }
-  });
-
-  const endGroupCode = survey.children?.find(
-    (group) => state[group.code]?.groupType?.toUpperCase() === "END",
-  )?.code;
-  Object.keys(state).forEach((code) => {
-    const question = state[code];
-    if (!isQuestion(code) || !question) {
-      return;
-    }
-    const conditions = screenOuts.get(code);
-    if (!conditions || !endGroupCode) {
-      if (question.instructionList) removeInstruction(question, QUOTA_SKIP_CODE);
-      return;
-    }
-    const skip = quotaSkipInstruction(conditions, endGroupCode);
-    const kept = question.instructionList && instructionByCode(question, QUOTA_SKIP_CODE);
-    if (kept?.text !== skip.text || kept?.skipToComponent !== skip.skipToComponent) {
-      changeInstruction(question, skip);
+    const instruction = quotaInstruction(quota, state);
+    if (instruction) {
+      const kept = previous.get(instruction.code);
+      survey.instructionList.push(kept?.text === instruction.text ? kept : instruction);
     }
   });
 };

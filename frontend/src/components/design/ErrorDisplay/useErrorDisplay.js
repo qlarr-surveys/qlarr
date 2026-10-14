@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { createSelector } from "@reduxjs/toolkit";
 import { isGroup } from "~/utils/design/utils";
 import {
-  QUOTA_SKIP_CODE,
   surveySetup,
   setupOptions,
 } from "@qlarr/design-core/constants/design";
@@ -30,8 +29,6 @@ const useErrorDisplay = (code) => {
             designState.instructionList?.filter(
               (instruction) =>
                 instruction.errors?.length > 0 &&
-                // Quota screen-out errors show on the quota as inactive.
-                instruction.code !== QUOTA_SKIP_CODE &&
                 (onMainLang || isLabelInstruction(instruction.code))
             ) || [];
 
