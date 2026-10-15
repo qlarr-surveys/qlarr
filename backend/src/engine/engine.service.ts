@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { com } from '@qlarr/survey-engine';
 import {
+  CalculateOutput,
+  Calculation,
   ComponentIndex,
   DesignerInput,
   NavigateParams,
   NavigationJsonOutput,
+  ValidatedCalculation,
   ValidationJsonOutput,
 } from './engine.types';
 import { ChangeCodeResult } from './engine-runtime';
@@ -32,8 +35,9 @@ const MASKED_SUFFIX = '.masked_value';
  * `expressionmanager.SurveyProcessor`), backed by the `@qlarr/survey-engine`
  * npm package — the same KMP code the JVM runs, so output is authoritative.
  *
- * The four ops that compile/evaluate survey-author JavaScript — `validate`,
- * `navigate`, `process`, `changeCode` — are dispatched through {@link EnginePool}
+ * The ops that compile/evaluate survey-author JavaScript — `validate`,
+ * `navigate`, `process`, `changeCode`, `validateCalculations`, `calculate` —
+ * are dispatched through {@link EnginePool}
  * so they run off the main event loop under a hard timeout and memory cap; they
  * are therefore async. The remaining methods here are pure data-shaping or cheap,
  * bounded `ext.*` calls that never execute author expressions, so they stay
@@ -98,6 +102,43 @@ export class EngineService {
       case 'invalid_change':
         throw new InvalidCodeChangeException();
     }
+  }
+
+  /**
+   * Validate a calculation set against a processed survey (the stringified
+   * `ValidationJsonOutput`). Returns the set in the same order with each
+   * calculation's `errors` rebuilt. The engine drops `label`, so it is put back
+   * by position.
+   */
+  async validateCalculations(
+    processedSurvey: string,
+    calculations: Calculation[],
+  ): Promise<Calculation[]> {
+    const validated = await this.pool.run<ValidatedCalculation[]>(
+      'validateCalculations',
+      {
+        processedSurvey,
+        calculations: JSON.stringify(calculations),
+      },
+    );
+    return validated.map((c, i) => ({ ...c, label: calculations[i].label }));
+  }
+
+  /**
+   * Evaluate a validated calculation set over responses keyed by ID
+   * (`{ responseId: values }`). The engine trusts `errors` and doesn't
+   * re-validate, so pass the set exactly as `validateCalculations` returned it.
+   */
+  calculate(
+    processedSurvey: string,
+    calculations: Calculation[],
+    responses: Record<string, Record<string, unknown>>,
+  ): Promise<CalculateOutput> {
+    return this.pool.run('calculate', {
+      processedSurvey,
+      calculations: JSON.stringify(calculations),
+      responses: JSON.stringify(responses),
+    });
   }
 
   /** A blank starter design for a new survey (≈ `ValidationUseCaseWrapper.new`). */

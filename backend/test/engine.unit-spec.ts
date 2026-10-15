@@ -1,3 +1,4 @@
+import { readFileSync } from 'fs';
 import { EngineService } from '../src/engine/engine.service';
 
 /**
@@ -163,6 +164,97 @@ describe('EngineService (survey-engine binding)', () => {
         'Q3',
         'Q2',
       ]);
+    });
+  });
+
+  describe('calculations', () => {
+    // The fixture has a number question, Q880htp.
+    let processedSurvey: string;
+    beforeAll(async () => {
+      processedSurvey = JSON.stringify(
+        await engine.validate(
+          readFileSync(`${__dirname}/fixtures/survey-design.json`, 'utf8'),
+        ),
+      );
+    });
+    const calc = (code: string, expression: string) => ({
+      code,
+      label: `${code} label`,
+      expression,
+    });
+
+    it('validates a set, keeping order and labels', async () => {
+      const validated = await engine.validateCalculations(processedSurvey, [
+        calc('double', 'Q880htp.value * 2'),
+        calc('mode', 'Survey.mode'),
+      ]);
+      expect(validated).toEqual([
+        { ...calc('double', 'Q880htp.value * 2'), errors: [] },
+        { ...calc('mode', 'Survey.mode'), errors: [] },
+      ]);
+    });
+
+    it('reports errors on each calculation', async () => {
+      const validated = await engine.validateCalculations(processedSurvey, [
+        calc('Bad', '1'),
+        calc('dup', '1'),
+        calc('dup', '2'),
+        calc('broken', 'Q880htp.value +'),
+        calc('unknown', 'Q999.value'),
+        calc('notallowed', 'Q880htp.relevance'),
+      ]);
+      const errors = validated.map((c) => c.errors ?? []);
+      expect(errors[0]).toEqual([{ name: 'InvalidCode' }]);
+      expect(errors[1]).toEqual([{ name: 'DuplicateCode' }]);
+      expect(errors[2]).toEqual([{ name: 'DuplicateCode' }]);
+      for (const e of errors.slice(3)) {
+        expect(e).toEqual([
+          expect.objectContaining({
+            name: 'ScriptError',
+            start: expect.any(Number),
+            end: expect.any(Number),
+          }),
+        ]);
+      }
+      expect(errors[4][0]).toMatchObject({ start: 0, end: 10 });
+      expect(validated.map((c) => c.label)).toEqual(
+        ['Bad', 'dup', 'dup', 'broken', 'unknown', 'notallowed'].map(
+          (c) => `${c} label`,
+        ),
+      );
+    });
+
+    it('calculates per response: results, no value, runtime errors', async () => {
+      const validated = await engine.validateCalculations(processedSurvey, [
+        calc('double', 'Q880htp.value * 2'),
+        calc('mode', 'Survey.mode'),
+        calc('nothing', 'null'),
+        calc('fixed', 'Q880htp.value.toFixed(1)'),
+      ]);
+      const out = await engine.calculate(processedSurvey, validated, {
+        r1: { 'Q880htp.value': 21, 'Survey.mode': 'online' },
+        r2: {},
+      });
+      expect(out.r1).toEqual({
+        results: { double: 42, mode: 'online', fixed: '21.0' },
+        errors: {},
+      });
+      // Missing variables are undefined: undefined * 2 is NaN (serialized as
+      // null, so no value), and reading a property of undefined throws.
+      expect(out.r2.results).toEqual({});
+      expect(Object.keys(out.r2.errors)).toEqual(['fixed']);
+      expect(out.r2.errors.fixed.name).toBe('TypeError');
+    });
+
+    it('skips calculations that have validation errors', async () => {
+      const validated = await engine.validateCalculations(processedSurvey, [
+        calc('double', 'Q880htp.value * 2'),
+        calc('broken', 'Q880htp.value +'),
+      ]);
+      const out = await engine.calculate(processedSurvey, validated, {
+        r1: { 'Q880htp.value': 2 },
+      });
+      expect(out).toEqual({ r1: { results: { double: 4 }, errors: {} } });
     });
   });
 });
