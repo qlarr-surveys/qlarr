@@ -51,6 +51,7 @@ describe('SurveysService.importSurvey — rollback on partial failure', () => {
       surveys as any,
       versions as any,
       {} as any, // autoComplete (unused before the failure point)
+      {} as any, // calculations (the zip has none)
       {} as any, // engine
       {} as any, // design
       files as any,
