@@ -17,6 +17,7 @@ export interface ResponseExportRow {
   submitDate: string | null;
   lang: string;
   values: Record<string, unknown>;
+  computations: Record<string, unknown> | null;
 }
 
 /** A response row for bulk file download (id + index + raw values). */
@@ -40,6 +41,7 @@ export interface ResponseDetailRow {
   index: number | null;
   events: unknown[];
   values: Record<string, unknown>;
+  computations: Record<string, unknown> | null;
   firstName: string | null;
   lastName: string | null;
 }
@@ -115,7 +117,7 @@ export class ResponseRepository {
       `SELECT survey_response_index AS index, id,
               to_char(start_date, 'YYYY-MM-DD HH24:MI:SS') AS "startDate",
               to_char(submit_date, 'YYYY-MM-DD HH24:MI:SS') AS "submitDate",
-              lang, "values"
+              lang, "values", computations
        FROM responses
        WHERE survey_id = $1 AND preview = false ${completeClause(complete)}
          AND survey_response_index BETWEEN $2 AND $3
@@ -189,7 +191,7 @@ export class ResponseRepository {
               to_char(r.start_date, 'YYYY-MM-DD HH24:MI:SS') AS "startDate",
               to_char(r.submit_date, 'YYYY-MM-DD HH24:MI:SS') AS "submitDate",
               r.lang, r.ip_addr AS "ipAddress",
-              r.survey_response_index AS index, r.events, r."values",
+              r.survey_response_index AS index, r.events, r."values", r.computations,
               u.first_name AS "firstName", u.last_name AS "lastName"
        FROM responses r
        LEFT JOIN users u ON r.surveyor = u.id

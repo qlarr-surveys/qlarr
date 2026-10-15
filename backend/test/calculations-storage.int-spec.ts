@@ -304,7 +304,7 @@ describe('Calculations storage', () => {
       expect(await repo.saveSet(cloned.body.id, [calc('b', '2')], 0)).toBe(1);
     });
 
-    it('export drops errors; import re-validates and drops invalid calculations', async () => {
+    it('export drops errors; import re-validates and keeps invalid calculations with their errors', async () => {
       const id = await createSurvey('Export');
       // Stored directly, so the set can hold invalid calculations and a
       // made-up error that must not travel.
@@ -318,11 +318,14 @@ describe('Calculations storage', () => {
         0,
       );
 
-      expect(await repo.find(await exportThenImport(id))).toMatchObject({
-        revision: 0,
-        status: 'idle',
-        calculations: [calc('double', 'Q880htp.value * 2')],
-      });
+      const row = await repo.find(await exportThenImport(id));
+      expect(row).toMatchObject({ revision: 0, status: 'idle' });
+      // The made-up error is gone (re-validated); the invalid ones keep fresh errors.
+      expect(row?.calculations.map((c) => [c.code, c.errors?.map((e) => e.name)])).toEqual([
+        ['double', []],
+        ['unknown', ['ScriptError']],
+        ['Bad', ['InvalidCode']],
+      ]);
     });
 
     it('import enforces the limits: long expressions dropped, first 10 kept', async () => {

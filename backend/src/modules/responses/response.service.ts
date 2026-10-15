@@ -10,6 +10,13 @@ import {
   FileHelper,
 } from "../../integrations/filesystem/file-helper";
 import { SurveyFolder } from "../../integrations/filesystem/survey-folder";
+import {
+  CalculatedValue,
+  exportCell,
+  resolveCalculations,
+  validCalculations,
+} from "../calculations/calculation-values";
+import { CalculationsRepository } from "../calculations/calculations.repository";
 import { DesignService } from "../design/design.service";
 import { ResponseDetailRow, ResponseRepository } from "./response.repository";
 import {
@@ -63,7 +70,31 @@ export class ResponseService {
     @Inject(FILE_HELPER) private readonly files: FileHelper,
     private readonly design: DesignService,
     private readonly engine: EngineService,
+    private readonly calculations: CalculationsRepository,
   ) {}
+
+  /**
+   * A survey's calculated values for each exported/reviewed response: the
+   * valid calculations (in the set's order; ones with errors never show) and a
+   * resolver from a response's stored `computations`. Incomplete responses get
+   * no calculations.
+   */
+  private async calculationsFor(surveyId: string): Promise<{
+    columns: Array<{ code: string; label: string }>;
+    resolve: (
+      submitDate: string | null,
+      computations: Record<string, unknown> | null,
+    ) => CalculatedValue[];
+  }> {
+    const row = await this.calculations.find(surveyId);
+    const set = row?.calculations ?? [];
+    const status = row?.status ?? "idle";
+    return {
+      columns: validCalculations(set).map(({ code, label }) => ({ code, label })),
+      resolve: (submitDate, computations) =>
+        submitDate == null ? [] : resolveCalculations(set, status, computations),
+    };
+  }
 
   /**
    * Export responses in an index range as CSV/XLSX using the stored (DB) values.
@@ -89,7 +120,12 @@ export class ResponseService {
     const colNames = processed.output.schema.map(
       (f) => `${f.componentCode}.${String(f.columnName).toLowerCase()}`,
     );
-    const finalCols = [...ADDITIONAL_COL_NAMES, ...colNames];
+    const calculated = await this.calculationsFor(surveyId);
+    const finalCols = [
+      ...ADDITIONAL_COL_NAMES,
+      ...colNames,
+      ...calculated.columns.map((c) => c.code),
+    ];
     const rows = responses.map((r) => [
       r.index,
       r.id,
@@ -98,6 +134,10 @@ export class ResponseService {
       r.lang,
       r.values["Survey.disqualified"] ?? false,
       ...colNames.map((c) => r.values[c] ?? null),
+      ...calculationCells(
+        calculated.columns.length,
+        calculated.resolve(r.submitDate, r.computations),
+      ),
     ]);
     return format === "XLSX"
       ? exportXlsx(rows, finalCols)
@@ -160,7 +200,12 @@ export class ResponseService {
       return indexList[componentCodes[0]] + " " + componentLabels.join(" - ");
     });
 
-    const finalCols = [...ADDITIONAL_COL_NAMES, ...colNames];
+    const calculated = await this.calculationsFor(surveyId);
+    const finalCols = [
+      ...ADDITIONAL_COL_NAMES,
+      ...colNames,
+      ...calculated.columns.map((c) => c.label),
+    ];
     const rows = responses.map((r) => {
       return [
         r.index,
@@ -182,6 +227,10 @@ export class ResponseService {
             ) ?? ""
           );
         }),
+        ...calculationCells(
+          calculated.columns.length,
+          calculated.resolve(r.submitDate, r.computations),
+        ),
       ];
     });
 
@@ -430,6 +479,10 @@ export class ResponseService {
         return name !== "ValueTiming" && name !== "Navigation";
       }),
       ipAddress: row.ipAddress,
+      calculations: (await this.calculationsFor(row.surveyId)).resolve(
+        row.submitDate,
+        row.computations,
+      ),
     };
   }
 
@@ -683,4 +736,17 @@ function dataTypeName(dataType: unknown): string | undefined {
     return (dataType as { type: string }).type.toLowerCase();
   }
   return undefined;
+}
+
+/**
+ * One export cell per calculation: the resolved cells for a completed response,
+ * or empty cells for an incomplete one (which has no calculations).
+ */
+function calculationCells(
+  count: number,
+  calculated: CalculatedValue[],
+): unknown[] {
+  return calculated.length > 0
+    ? calculated.map(exportCell)
+    : Array.from({ length: count }, () => "");
 }

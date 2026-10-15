@@ -20,3 +20,25 @@ export class CalculationsRevisionConflictException extends CalculationsException
     );
   }
 }
+
+/** Save, Test and Compute are all refused while a Compute run is in progress. */
+export class CalculationRunInProgressException extends CalculationsException {
+  constructor() {
+    super(
+      'A computation is in progress',
+      'CalculationRunInProgressException',
+      HttpStatus.CONFLICT,
+    );
+  }
+}
+
+/** Test and Compute need a saved set with at least one calculation. */
+export class NoCalculationsException extends CalculationsException {
+  constructor() {
+    super(
+      'There are no calculations to compute',
+      'NoCalculationsException',
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+}

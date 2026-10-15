@@ -165,6 +165,72 @@ export class CalculationsRepository {
     return written.length;
   }
 
+  async surveyExists(surveyId: string): Promise<boolean> {
+    const rows: unknown[] = await this.db.manager.query(
+      `SELECT 1 FROM surveys WHERE id = $1`,
+      [surveyId],
+    );
+    return rows.length > 0;
+  }
+
+  /** Ids of the survey's completed responses (previews included), by id. */
+  async completedResponseIds(surveyId: string): Promise<string[]> {
+    const rows: Array<{ id: string }> = await this.db.manager.query(
+      `SELECT id FROM responses
+       WHERE survey_id = $1 AND submit_date IS NOT NULL
+       ORDER BY id`,
+      [surveyId],
+    );
+    return rows.map((r) => r.id);
+  }
+
+  /** Stored values by response id, for a chunk of a run. */
+  async responseValues(
+    ids: string[],
+  ): Promise<Record<string, Record<string, unknown>>> {
+    const rows: Array<{ id: string; values: Record<string, unknown> | null }> =
+      await this.db.manager.query(
+        `SELECT id, "values" FROM responses WHERE id = ANY($1::uuid[])`,
+        [ids],
+      );
+    return Object.fromEntries(rows.map((r) => [r.id, r.values ?? {}]));
+  }
+
+  /** The most recent completed responses (previews included), for a dry run. */
+  recentCompleted(
+    surveyId: string,
+    limit: number,
+  ): Promise<
+    Array<{
+      id: string;
+      index: number | null;
+      preview: boolean;
+      values: Record<string, unknown> | null;
+    }>
+  > {
+    return this.db.manager.query(
+      `SELECT id, survey_response_index AS index, preview, "values"
+       FROM responses
+       WHERE survey_id = $1 AND submit_date IS NOT NULL
+       ORDER BY submit_date DESC
+       LIMIT $2`,
+      [surveyId, limit],
+    );
+  }
+
+  /**
+   * Completed responses without `computations`. Only meaningful after a
+   * completed run, where these are the responses submitted since.
+   */
+  async countWithoutComputations(surveyId: string): Promise<number> {
+    const [{ count }]: Array<{ count: string }> = await this.db.manager.query(
+      `SELECT COUNT(*) AS count FROM responses
+       WHERE survey_id = $1 AND submit_date IS NOT NULL AND computations IS NULL`,
+      [surveyId],
+    );
+    return Number(count);
+  }
+
   /** On boot, a run that was `running` can't still be: mark it `failed`. */
   async resetRunningOnBoot(): Promise<void> {
     await this.db.manager.query(

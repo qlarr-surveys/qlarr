@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { FilesystemModule } from '../../integrations/filesystem/filesystem.module';
+import { CalculationsModule } from '../calculations/calculations.module';
 import { DesignModule } from '../design/design.module';
 import { AnalyticsService } from './analytics.service';
 import { CrosstabService } from './crosstab.service';
@@ -11,7 +12,7 @@ import { ResponseRepository } from './response.repository';
 import { ResponseService } from './response.service';
 
 @Module({
-  imports: [FilesystemModule, DesignModule],
+  imports: [FilesystemModule, DesignModule, CalculationsModule],
   controllers: [ResponseController, ResponseOpsController, ResponseReadController],
   providers: [
     ResponseService,
