@@ -82,7 +82,8 @@
       "last_modified": "Última Modificación",
       "start_date": "Fecha de Inicio",
       "end_date": "Fecha de Finalización"
-    }
+    },
+    "version_history": "Historial de versiones"
   },
   "edit_user": {
     "title": "Editar Usuario"
@@ -237,7 +238,9 @@
     "wrong_confirmation_token": "Este Token de Confirmación es incorrecto, Por favor Regístrate Una Vez Más",
     "survey_quota": "Lo sentimos, esta encuesta ya no está aceptando respuestas.",
     "invalid_translations_csv": "No es un CSV de traducciones.",
-    "translations_csv_not_utf8": "Este archivo no está en UTF-8. En Excel, usa Archivo → Guardar como → «CSV UTF-8 (delimitado por comas)» e impórtalo de nuevo."
+    "translations_csv_not_utf8": "Este archivo no está en UTF-8. En Excel, usa Archivo → Guardar como → «CSV UTF-8 (delimitado por comas)» e impórtalo de nuevo.",
+    "snapshot_not_found": "Esta versión ya no existe. Recarga la página e inténtalo de nuevo.",
+    "nothing_to_revert": "No hay cambios no publicados que descartar."
   },
   "processed_successes": {
     "copied": "Copiado al portapapeles",
@@ -411,7 +414,10 @@
     "settings": "Configuración",
     "publish_tooltip": "Tus cambios aún no están en vivo. Publica para actualizar tu encuesta para todos.",
     "publish_error": "Por favor corrige los errores en tu encuesta antes de comenzar.",
-    "download_qr_code": "Descargar código QR"
+    "download_qr_code": "Descargar código QR",
+    "discard_changes": "Descartar cambios no publicados",
+    "discard_title": "¿Descartar los cambios no publicados?",
+    "discard_description": "El diseño vuelve a la última versión publicada. El diseño actual se guarda en el historial de versiones para que puedas restaurarlo más tarde."
   },
   "email": {
     "check": "Revisa tu Correo Electrónico",
@@ -649,5 +655,21 @@
     "question_type_text_display": "Visualización de Texto",
     "question_type_image_display": "Visualización de Imagen",
     "question_type_video_display": "Visualización de Video"
+  },
+  "version_history": {
+    "description": "Puntos de restauración de tus cambios no publicados, guardados automáticamente mientras editas. El historial se borra cada vez que publicas.",
+    "empty": "Aún no hay puntos de restauración.",
+    "restore": "Restaurar",
+    "restore_title": "¿Restaurar esta versión?",
+    "restore_description": "El diseño vuelve a como estaba el {{date}}. El diseño actual se guarda en el historial de versiones para que puedas restaurarlo más tarde.",
+    "reason": {
+      "timer": "Guardado automático",
+      "delete": "Antes de eliminar {{codes}}",
+      "change_code": "Antes de renombrar {{from}} → {{to}}",
+      "translations_import_one": "Antes de importar traducciones ({{count}} campo)",
+      "translations_import_other": "Antes de importar traducciones ({{count}} campos)",
+      "restore": "Antes de restaurar una versión anterior",
+      "discard": "Antes de descartar los cambios no publicados"
+    }
   }
 }

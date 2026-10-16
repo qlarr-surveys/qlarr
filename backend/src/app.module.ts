@@ -8,6 +8,7 @@ import dbConfig from './config/db.config';
 import engineConfig from './config/engine.config';
 import jwtConfig from './config/jwt.config';
 import mailConfig from './config/mail.config';
+import snapshotsConfig from './config/snapshots.config';
 import storageConfig from './config/storage.config';
 import { envValidationOptions, envValidationSchema } from './config/env.validation';
 import { AuthModule } from './auth/auth.module';
@@ -33,6 +34,7 @@ import { RunModule } from './modules/run/run.module';
         engineConfig,
         jwtConfig,
         mailConfig,
+        snapshotsConfig,
         storageConfig,
       ],
     }),

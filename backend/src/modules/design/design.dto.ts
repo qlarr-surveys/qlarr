@@ -2,6 +2,7 @@ import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { DesignerInput, ValidationJsonOutput } from '../../engine/engine.types';
 import { FileInfo } from '../../integrations/filesystem/file-info';
 import { Status } from '../surveys/survey.enums';
+import { SnapshotReason } from './design-snapshot.entity';
 
 /** ≈ VersionDto — a design version's metadata (status is the survey's, lowercase). */
 export interface VersionDto {
@@ -39,4 +40,17 @@ export interface DesignDiffDto {
   files: FileInfo[];
   publishInfo: PublishInfo;
   validationJsonOutput?: ValidationJsonOutput;
+}
+
+export interface SnapshotDto {
+  id: string;
+  createdAt: string;
+  createdBy: { id: string; name: string | null } | null;
+  reason: SnapshotReason;
+  details: Record<string, unknown> | null;
+}
+
+export interface SnapshotListDto {
+  snapshots: SnapshotDto[];
+  lastPublished: { version: number; subVersion: number; lastModified: string } | null;
 }

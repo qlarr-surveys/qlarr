@@ -84,7 +84,8 @@
     "background_audio": "Hintergrundaudio",
     "record_gps": "GPS aufzeichnen",
     "save_ip": "IP speichern",
-    "save_timings": "Zeiten speichern"
+    "save_timings": "Zeiten speichern",
+    "version_history": "Versionsverlauf"
   },
   "edit_user": {
     "title": "Benutzer bearbeiten"
@@ -220,7 +221,10 @@
     "publish_tooltip": "Ihre Änderungen sind noch nicht live. Veröffentlichen Sie, um Ihre Umfrage für alle zu aktualisieren.",
     "qr_code": "QR-Code",
     "settings": "Einstellungen",
-    "unpublished_text": "Veröffentlichen Sie die Umfrage, um die neuesten Änderungen anzuwenden"
+    "unpublished_text": "Veröffentlichen Sie die Umfrage, um die neuesten Änderungen anzuwenden",
+    "discard_changes": "Unveröffentlichte Änderungen verwerfen",
+    "discard_title": "Unveröffentlichte Änderungen verwerfen?",
+    "discard_description": "Das Design wird auf die zuletzt veröffentlichte Version zurückgesetzt. Das aktuelle Design bleibt im Versionsverlauf erhalten und kann später wiederhergestellt werden."
   },
   "login": {
     "dont_have_acc": "Sie haben noch kein Konto?",
@@ -266,7 +270,9 @@
     "wrong_password": "Falsches Passwort",
     "wrong_reset_token": "Dieses Reset-Token ist falsch.",
     "invalid_translations_csv": "Keine Übersetzungs-CSV.",
-    "translations_csv_not_utf8": "Diese Datei ist nicht UTF-8-kodiert. Wählen Sie in Excel Datei → Speichern unter → „CSV UTF-8 (durch Trennzeichen getrennt)“ und importieren Sie sie erneut."
+    "translations_csv_not_utf8": "Diese Datei ist nicht UTF-8-kodiert. Wählen Sie in Excel Datei → Speichern unter → „CSV UTF-8 (durch Trennzeichen getrennt)“ und importieren Sie sie erneut.",
+    "snapshot_not_found": "Diese Version existiert nicht mehr. Laden Sie die Seite neu und versuchen Sie es erneut.",
+    "nothing_to_revert": "Es gibt keine unveröffentlichten Änderungen zum Verwerfen."
   },
   "processed_successes": {
     "copied": "In die Zwischenablage kopiert",
@@ -650,5 +656,21 @@
     "question_type_text_display": "Textanzeige",
     "question_type_image_display": "Bildanzeige",
     "question_type_video_display": "Videoanzeige"
+  },
+  "version_history": {
+    "description": "Wiederherstellungspunkte für Ihre unveröffentlichten Änderungen, die beim Bearbeiten automatisch angelegt werden. Der Verlauf wird bei jeder Veröffentlichung geleert.",
+    "empty": "Noch keine Wiederherstellungspunkte.",
+    "restore": "Wiederherstellen",
+    "restore_title": "Diese Version wiederherstellen?",
+    "restore_description": "Das Design wird auf den Stand vom {{date}} zurückgesetzt. Das aktuelle Design bleibt im Versionsverlauf erhalten und kann später wiederhergestellt werden.",
+    "reason": {
+      "timer": "Automatische Sicherung",
+      "delete": "Vor dem Löschen von {{codes}}",
+      "change_code": "Vor dem Umbenennen {{from}} → {{to}}",
+      "translations_import_one": "Vor dem Import von Übersetzungen ({{count}} Feld)",
+      "translations_import_other": "Vor dem Import von Übersetzungen ({{count}} Felder)",
+      "restore": "Vor dem Wiederherstellen einer früheren Version",
+      "discard": "Vor dem Verwerfen unveröffentlichter Änderungen"
+    }
   }
 }
