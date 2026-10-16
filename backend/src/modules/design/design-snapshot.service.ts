@@ -13,7 +13,7 @@ import { ComponentIndex } from '../../engine/engine.types';
 import { DesignSnapshotEntity, SnapshotReason } from './design-snapshot.entity';
 import { SnapshotDto } from './design.dto';
 
-const MAX_SNAPSHOTS = 20;
+const MAX_SNAPSHOTS = 100;
 const COOLDOWN_MS = 2 * 60_000;
 
 export function snapshotReason(opts: {

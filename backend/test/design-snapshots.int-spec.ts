@@ -319,14 +319,14 @@ describe('Design snapshots', () => {
     });
   });
 
-  it('keeps at most 20 per survey, evicting the oldest', async () => {
+  it('keeps at most 100 per survey, evicting the oldest', async () => {
     const id = await newSurvey();
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 100; i++) {
       await root.query(
         `INSERT INTO design_snapshots (id, survey_id, created_at, reason, data)
          VALUES (gen_random_uuid(), $1, (now() at time zone 'utc') - make_interval(hours => $2),
                  'TIMER', '{}')`,
-        [id, 20 - i],
+        [id, 100 - i],
       );
     }
     const [oldest] = await root.query(
@@ -339,7 +339,7 @@ describe('Design snapshots', () => {
       .expect(201);
 
     const { snapshots } = await list(id);
-    expect(snapshots).toHaveLength(20);
+    expect(snapshots).toHaveLength(100);
     expect(snapshots[0].reason).toBe('CHANGE_CODE');
     expect(snapshots.map((s: { id: string }) => s.id)).not.toContain(oldest.id);
   });
