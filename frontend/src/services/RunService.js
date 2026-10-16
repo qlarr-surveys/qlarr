@@ -105,6 +105,21 @@ class RunService extends BaseService {
     return response.data;
   }
 
+  // Every option for one level of a hierarchical autocomplete shown as a
+  // dropdown, filtered by the levels already selected (`prefix`).
+  async listHierarchical(filename, level, prefix, lang, defaultLang) {
+    const surveyId = sessionStorage.getItem("surveyId");
+    const response = await this.handleRequest(() =>
+      publicApi.get(
+        `/survey/${surveyId}/hierarchical-autocomplete/${filename}/options`,
+        {
+          params: { level, prefix: JSON.stringify(prefix), lang, defaultLang },
+        }
+      )
+    );
+    return response.data;
+  }
+
   // The whole row (every language) for a fully selected path in `lang`.
   async hierarchicalRow(filename, path, lang, defaultLang) {
     const surveyId = sessionStorage.getItem("surveyId");

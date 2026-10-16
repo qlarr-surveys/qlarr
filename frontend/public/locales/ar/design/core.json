@@ -271,6 +271,7 @@
   "select_default_answer": "اختر الإجابة الافتراضية",
   "no_default": "لا يوجد افتراضي",
   "show_description": "إظهار الوصف",
+  "hierarchical_dropdown": "عرض كقائمة منسدلة",
   "show_description_page": "إظهار الوصف",
   "show_hide": "إظهار/إخفاء",
   "show_if": "أظهر إذا",

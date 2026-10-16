@@ -68,6 +68,7 @@
   "scq_array": "Évaluer plusieurs éléments avec un choix par ligne",
   "scq_icon_array": "Évaluer plusieurs éléments visuellement en utilisant des icônes",
   "show_description": "Ajouter une description sous le titre de la question pour donner du contexte ou des instructions aux utilisateurs.",
+  "hierarchical_dropdown": "Afficher chaque niveau sous forme de liste déroulante avec toutes ses options, au lieu d'un champ de saisie et de recherche.",
   "show_description_page": "Ajouter une description sous le titre de la page pour donner du contexte ou des instructions aux utilisateurs.",
   "show_question_hint": "Ajouter un conseil subtil sous la question pour plus de clarté.",
   "show_word_count": "Afficher le compteur de mots à l'utilisateur",

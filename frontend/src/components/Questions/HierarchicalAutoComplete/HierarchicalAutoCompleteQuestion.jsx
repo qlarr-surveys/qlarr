@@ -2,11 +2,24 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { Autocomplete, Box, CircularProgress, TextField } from "@mui/material";
+import {
+  Autocomplete,
+  Box,
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+} from "@mui/material";
 import debounce from "lodash/debounce";
 import styles from "../AutoComplete/AutoComplete.module.css";
 import { setDirty } from "~/state/templateState";
-import { hierarchicalRow, hierarchicalSearch } from "~/networking/run";
+import {
+  hierarchicalList,
+  hierarchicalRow,
+  hierarchicalSearch,
+} from "~/networking/run";
 import { useService } from "~/hooks/use-service";
 import { valueChange, valueMetaChange } from "~/state/runState";
 import { stripTags } from "~/utils/design/utils";
@@ -18,6 +31,8 @@ import { stripTags } from "~/utils/design/utils";
 // language. The engine saves value_meta with the response, so a completed answer
 // shows in the respondent's current language after back-navigation, resume or a
 // language switch with no lookup (and each level's masked_value pipes it).
+// With `hierarchicalDropdown` each level is a dropdown listing all of its
+// options instead, loaded once the level above is selected.
 function HierarchicalAutoCompleteQuestion({ component }) {
   const { t } = useTranslation("run");
   const runService = useService("run");
@@ -26,6 +41,7 @@ function HierarchicalAutoCompleteQuestion({ component }) {
   const levels = component.answers || [];
   const levelCount = levels.length;
   const filename = component.resources?.hierarchicalAutoComplete;
+  const dropdown = !!component.hierarchicalDropdown;
 
   const lang = useSelector((state) => state.runState.values.Survey.lang);
   const defaultLang = useSelector(
@@ -73,41 +89,72 @@ function HierarchicalAutoCompleteQuestion({ component }) {
 
   // Latest request per level, so a slow, stale response never overwrites a newer one.
   const requestIds = useRef(levels.map(() => 0));
+  const loadLevel = async (k, request) => {
+    const requestId = ++requestIds.current[k];
+    setLevelState(setLoading, k, true);
+    try {
+      const data = await request();
+      if (requestId === requestIds.current[k]) {
+        setLevelState(setOptions, k, data || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch options:", error);
+      if (requestId === requestIds.current[k]) {
+        setLevelState(setOptions, k, []);
+      }
+    } finally {
+      if (requestId === requestIds.current[k]) {
+        setLevelState(setLoading, k, false);
+      }
+    }
+  };
   const fetchOptions = useMemo(
     () =>
       levels.map((_, k) =>
-        debounce(async (query, prefix) => {
-          const requestId = ++requestIds.current[k];
-          setLevelState(setLoading, k, true);
-          try {
-            const data = await hierarchicalSearch(
-              runService,
-              filename,
-              k,
-              prefix,
-              query,
-              lang,
-              defaultLang
-            );
-            if (requestId === requestIds.current[k]) {
-              setLevelState(setOptions, k, data || []);
-            }
-          } catch (error) {
-            console.error("Failed to fetch options:", error);
-            if (requestId === requestIds.current[k]) {
-              setLevelState(setOptions, k, []);
-            }
-          } finally {
-            if (requestId === requestIds.current[k]) {
-              setLevelState(setLoading, k, false);
-            }
-          }
-        }, 300)
+        debounce(
+          (query, prefix) =>
+            loadLevel(k, () =>
+              hierarchicalSearch(
+                runService,
+                filename,
+                k,
+                prefix,
+                query,
+                lang,
+                defaultLang
+              )
+            ),
+          300
+        )
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [filename, levelCount, lang, defaultLang]
   );
   useEffect(() => () => fetchOptions.forEach((fn) => fn.cancel()), [fetchOptions]);
+
+  // Dropdown: every enabled level lists all of its options for the levels
+  // selected above it. A level is (re)loaded when that prefix or the language
+  // changes; a disabled level is forgotten so it reloads once enabled again.
+  const loadedKeys = useRef(levels.map(() => null));
+  const selectedKey = JSON.stringify(selected);
+  useEffect(() => {
+    if (!dropdown || !filename) return;
+    levels.forEach((_, k) => {
+      const enabled = k === 0 || !!selected[k - 1];
+      if (!enabled) {
+        loadedKeys.current[k] = null;
+        return;
+      }
+      const prefix = selected.slice(0, k);
+      const key = JSON.stringify([lang, defaultLang, prefix]);
+      if (loadedKeys.current[k] === key) return;
+      loadedKeys.current[k] = key;
+      loadLevel(k, () =>
+        hierarchicalList(runService, filename, k, prefix, lang, defaultLang)
+      );
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dropdown, filename, selectedKey, lang, defaultLang, levelCount]);
 
   const clearValues = () => {
     levels.forEach((level) =>
@@ -178,7 +225,7 @@ function HierarchicalAutoCompleteQuestion({ component }) {
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column" }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: dropdown ? 2 : 0 }}>
       {levels.map((level, k) => (
         <HierarchicalLevel
           key={level.qualifiedCode}
@@ -188,6 +235,7 @@ function HierarchicalAutoCompleteQuestion({ component }) {
           options={options[k] || []}
           loading={loading[k] || false}
           disabled={!filename || (k > 0 && !selected[k - 1])}
+          dropdown={dropdown}
           noOptionsText={t("no_options")}
           onChange={(option) => handleChange(k, option)}
           onInputChange={(query) => handleInputChange(k, query)}
@@ -206,6 +254,7 @@ const HierarchicalLevel = React.memo(function HierarchicalLevel({
   loading,
   disabled,
   noOptionsText,
+  dropdown,
   onChange,
   onInputChange,
   onBlur,
@@ -216,6 +265,53 @@ const HierarchicalLevel = React.memo(function HierarchicalLevel({
     const validity = state.runState.values[level.qualifiedCode]?.validity;
     return (show_errors || isDirty) && validity === false;
   });
+
+  if (dropdown) {
+    // keep the selection among the options while they (re)load
+    const items =
+      value && !options.includes(value) ? [value, ...options] : options;
+    const labelId = `${level.qualifiedCode}-label`;
+    return (
+      <FormControl
+        className={styles.autocompleteResponsive}
+        disabled={disabled}
+        error={invalid}
+      >
+        <InputLabel id={labelId}>{label}</InputLabel>
+        <Select
+          labelId={labelId}
+          label={label}
+          value={value || ""}
+          onChange={(event) => onChange(event.target.value || null)}
+          onBlur={onBlur}
+          endAdornment={
+            loading && (
+              <CircularProgress
+                color="inherit"
+                size={20}
+                sx={{ mr: 3, flexShrink: 0 }}
+              />
+            )
+          }
+        >
+          {/* an empty entry clears the level, like the autocomplete's clear button */}
+          <MenuItem value="">
+            <em>—</em>
+          </MenuItem>
+          {items.map((option) => (
+            <MenuItem key={option} value={option}>
+              {option}
+            </MenuItem>
+          ))}
+          {!loading && items.length === 0 && (
+            <MenuItem disabled value="__none">
+              {noOptionsText}
+            </MenuItem>
+          )}
+        </Select>
+      </FormControl>
+    );
+  }
 
   return (
     <Autocomplete

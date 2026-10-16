@@ -1,5 +1,6 @@
 import {
   findRow,
+  listLevel,
   searchLang,
   searchLevel,
 } from '../src/modules/surveys/hierarchical-autocomplete-search';
@@ -24,6 +25,34 @@ describe('hierarchical-autocomplete search', () => {
 
     it('falls back to the default language when no row carries it', () => {
       expect(searchLang(ROWS, 'fr', 'en')).toBe('en');
+    });
+  });
+
+  describe('listLevel', () => {
+    it('returns every distinct, sorted value for the first level', () => {
+      expect(listLevel(ROWS, 'en', 0, [])).toEqual(['France', 'Germany']);
+    });
+
+    it('filters by the levels above', () => {
+      expect(listLevel(ROWS, 'en', 1, ['Germany'])).toEqual([
+        'Bavaria',
+        'Berlin',
+      ]);
+      expect(listLevel(ROWS, 'de', 2, ['Deutschland', 'Bayern'])).toEqual([
+        'München',
+        'Nürnberg',
+      ]);
+    });
+
+    it('leaves out rows that lack the language', () => {
+      expect(listLevel(ROWS, 'de', 0, [])).toEqual(['Deutschland']);
+    });
+
+    it('is not capped', () => {
+      const many: HierarchicalRow[] = Array.from({ length: 250 }, (_, i) => ({
+        en: ['Country', `City ${String(i).padStart(3, '0')}`],
+      }));
+      expect(listLevel(many, 'en', 1, ['Country'])).toHaveLength(250);
     });
   });
 
@@ -99,6 +128,17 @@ describe('AutoCompleteService hierarchical respondent lookups', () => {
     await expect(
       service.searchHierarchical('s1', 'f.json', 1, ['Germany'], '', 'fr', 'en', 10),
     ).resolves.toEqual(['Bavaria', 'Berlin']);
+    expect(autoComplete.getHierarchicalDataByFilename).toHaveBeenCalledWith(
+      's1',
+      'f.json',
+    );
+  });
+
+  it('lists every option of a level by filename, in the default language when the respondent language has no data', async () => {
+    const { service, autoComplete } = make();
+    await expect(
+      service.listHierarchicalLevel('s1', 'f.json', 2, ['Germany', 'Bavaria'], 'fr', 'en'),
+    ).resolves.toEqual(['Munich', 'Nuremberg']);
     expect(autoComplete.getHierarchicalDataByFilename).toHaveBeenCalledWith(
       's1',
       'f.json',

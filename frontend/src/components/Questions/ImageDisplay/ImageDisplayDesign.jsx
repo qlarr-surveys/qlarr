@@ -8,10 +8,10 @@ import { useDispatch } from "react-redux";
 import { changeResources } from "~/state/design/designState";
 import styles from "./ImageDisplayDesign.module.css";
 import LoadingDots from "~/components/common/LoadingDots";
-import { useService } from "~/hooks/use-service";
+import { useResourceUpload } from "~/hooks/useResourceUpload";
 
 function ImageDisplayDesign({ code, t, onMainLang }) {
-  const designService = useService("design");
+  const uploadResource = useResourceUpload();
   const dispatch = useDispatch();
   const [isUploading, setUploading] = useState(false);
 
@@ -21,18 +21,22 @@ function ImageDisplayDesign({ code, t, onMainLang }) {
 
   const handleUpload = (e) => {
     e.preventDefault();
+    const file = e.target.files[0];
+    // Clear the input so picking the same file again (e.g. a retry) still
+    // fires onChange.
+    e.target.value = "";
+    if (!file) return;
     setUploading(true);
-    let file = e.target.files[0];
-    designService
-      .uploadResource(file)
+    uploadResource(file)
       .then((response) => {
-        setUploading(false);
-        dispatch(
-          changeResources({ code, key: "imageUrl", value: response.name })
-        );
+        if (response) {
+          dispatch(
+            changeResources({ code, key: "imageUrl", value: response.name })
+          );
+        }
       })
-      .catch((err) => {
-        console.error(err);
+      .finally(() => {
+        setUploading(false);
       });
   };
 

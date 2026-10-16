@@ -68,6 +68,7 @@
   "scq_array": "Avaliar múltiplos itens com uma escolha por linha",
   "scq_icon_array": "Avaliar múltiplos itens visualmente usando ícones",
   "show_description": "Adicionar uma descrição abaixo do título da pergunta para dar contexto ou instruções aos usuários.",
+  "hierarchical_dropdown": "Mostrar cada nível como uma lista suspensa com todas as suas opções, em vez de um campo para digitar e pesquisar.",
   "show_description_page": "Adicionar uma descrição abaixo do título da página para dar contexto ou instruções aos usuários.",
   "show_question_hint": "Adicionar uma dica sutil abaixo da pergunta para maior clareza.",
   "show_word_count": "Mostrar contador de palavras ao usuário",

@@ -68,6 +68,7 @@
   "scq_array": "Calificar múltiples elementos con una elección por fila",
   "scq_icon_array": "Calificar múltiples elementos visualmente usando iconos",
   "show_description": "Agregar una descripción debajo del título de la pregunta para dar contexto o instrucciones a los usuarios.",
+  "hierarchical_dropdown": "Mostrar cada nivel como una lista desplegable con todas sus opciones, en lugar de un campo para escribir y buscar.",
   "show_description_page": "Agregar una descripción debajo del título de la página para dar contexto o instrucciones a los usuarios.",
   "show_question_hint": "Agregar una pista sutil debajo de la pregunta para mayor claridad.",
   "show_word_count": "Mostrar contador de palabras al usuario",

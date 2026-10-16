@@ -23,6 +23,7 @@ import {
 } from './hierarchical-autocomplete-csv';
 import {
   findRow,
+  listLevel,
   searchLang,
   searchLevel,
 } from './hierarchical-autocomplete-search';
@@ -86,6 +87,26 @@ export class AutoCompleteService {
     );
     const effective = searchLang(rows, lang, defaultLang);
     return searchLevel(rows, effective, level, prefix, query, limit);
+  }
+
+  /**
+   * Every option for one level of a hierarchical autocomplete shown as a
+   * dropdown: the distinct values at `level` among rows matching `prefix`, in
+   * the respondent's language — or the default language when no row carries it.
+   */
+  async listHierarchicalLevel(
+    surveyId: string,
+    filename: string,
+    level: number,
+    prefix: string[],
+    lang: string,
+    defaultLang: string,
+  ): Promise<string[]> {
+    const rows = await this.autoComplete.getHierarchicalDataByFilename(
+      surveyId,
+      filename,
+    );
+    return listLevel(rows, searchLang(rows, lang, defaultLang), level, prefix);
   }
 
   /**

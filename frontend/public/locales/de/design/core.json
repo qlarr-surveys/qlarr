@@ -271,6 +271,7 @@
   "select_default_answer": "Standardantwort auswählen",
   "no_default": "Kein Standard",
   "show_description": "Beschreibung anzeigen",
+  "hierarchical_dropdown": "Als Dropdown anzeigen",
   "show_description_page": "Beschreibung anzeigen",
   "show_hide": "Anzeigen/Ausblenden",
   "show_if": "Zeige wenn",
