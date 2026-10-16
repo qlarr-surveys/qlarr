@@ -79,8 +79,6 @@ function LaunchPage({ onPublish }) {
   }, [survey]);
 
   const isDisabled = !isSurveyAdmin() || survey?.status == SURVEY_STATUS.CLOSED;
-  // A version above 1 means an earlier one was published, so there is
-  // something to go back to.
   const canDiscard = !published && versionDto?.version > 1 && !isDisabled;
 
   const getUserTimezone = () => {
@@ -180,8 +178,6 @@ function LaunchPage({ onPublish }) {
             variant="subtitle1"
             sx={{
               color: theme.palette.warning.dark,
-              // With both buttons the text gives way, so they wrap below it
-              // instead of overflowing on narrow screens.
               flex: canDiscard ? '1 1 180px' : undefined,
             }}
           >

@@ -24,10 +24,7 @@ export function snapshotReason(opts: {
   intervalMs: number;
 }): SnapshotReason | null {
   const { event, lastSnapshotAt, anchor, now, intervalMs } = opts;
-  // A restore replaces the whole design, so the replaced draft is always kept.
   if (event === SnapshotReason.RESTORE) return event;
-  // Other events skip within the cooldown of any snapshot: that snapshot still
-  // holds everything older than it, so a burst of changes keeps one entry.
   if (event && (lastSnapshotAt === null || now - lastSnapshotAt >= COOLDOWN_MS)) {
     return event;
   }

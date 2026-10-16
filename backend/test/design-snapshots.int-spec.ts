@@ -289,7 +289,6 @@ describe('Design snapshots', () => {
         await root.query(`SELECT version FROM versions WHERE survey_id = $1`, [id]),
       ).toEqual([{ version: 1 }]);
 
-      // Nothing left to discard, but the discarded draft is still restorable.
       await request(server())
         .post(`/survey/${id}/design/restore_published?version=1`)
         .set('Authorization', SUPER)

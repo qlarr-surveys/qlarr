@@ -135,9 +135,6 @@ export class DesignService {
       userId,
     });
 
-    // Drop the working version rather than saving a copy of the published one,
-    // so the published version is the latest again (no unpublished changes).
-    // The snapshot keeps the discarded draft restorable.
     survey.lastModified = nowUtcString();
     await this.db.manager.transaction(async (tx) => {
       if (snapshot) await this.snapshots.create(snapshot, tx);
@@ -145,7 +142,6 @@ export class DesignService {
       await this.versions.deleteVersion(surveyId, latest.version, tx);
       await tx.getRepository(SurveyEntity).save(survey);
     });
-    // Post-commit cleanup: the draft's design file is now unreferenced.
     await this.files.delete(surveyId, SurveyFolder.Design, String(latest.version));
 
     return {

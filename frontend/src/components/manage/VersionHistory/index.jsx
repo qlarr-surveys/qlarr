@@ -58,14 +58,12 @@ function VersionHistory() {
   const [snapshots, setSnapshots] = useState(null);
   const [toRestore, setToRestore] = useState(null);
 
-  // Any save, restore or publish changes the version — and the history with it.
   useEffect(() => {
     if (!versionDto) return;
     designService
       .listSnapshots()
       .then((data) => setSnapshots(data.snapshots))
       .catch((error) => {
-        // handleRequest already dispatched the errors the app handles globally.
         if (!error?.handleGlobally) dispatch(onError(error));
       });
   }, [versionDto?.version, versionDto?.subVersion]);
