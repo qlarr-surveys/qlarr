@@ -55,14 +55,14 @@ describe('snapshotReason', () => {
 describe('deletedComponents', () => {
   const index = (...codes: string[]) => codes.map((code) => ({ code }));
   const engine = new EngineService();
-  const isQuestionCode = (code: string) => engine.isQuestionCode(code);
+  const isTracked = (code: string) => engine.isGroupCode(code) || engine.isQuestionCode(code);
 
   it('lists removed groups and questions', () => {
     expect(
       deletedComponents(
         index('Survey', 'G1', 'Q1', 'Q2', 'G2'),
         index('Survey', 'G1', 'Q1'),
-        isQuestionCode,
+        isTracked,
       ),
     ).toEqual(['Q2', 'G2']);
   });
@@ -72,7 +72,7 @@ describe('deletedComponents', () => {
       deletedComponents(
         index('Survey', 'G1', 'Q1', 'Q1A1', 'Q1A2', 'Q1Ac1'),
         index('Survey', 'G1', 'Q1', 'Q1A1', 'Q3'),
-        isQuestionCode,
+        isTracked,
       ),
     ).toEqual([]);
   });

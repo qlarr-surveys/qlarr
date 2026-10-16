@@ -138,6 +138,10 @@ export class EngineService {
     return ext.isQuestionCode(code);
   }
 
+  isGroupCode(code: string): boolean {
+    return ext.isGroupCode(code);
+  }
+
   /** Split a component code into its ancestor question/answer codes (≈ `splitToComponentCodes`). */
   splitToComponentCodes(code: string): string[] {
     return ext.splitToComponentCodes(code);

@@ -222,7 +222,7 @@ export class DesignService {
       : deletedComponents(
           before.componentIndexList,
           after.componentIndexList,
-          (code) => this.engine.isQuestionCode(code),
+          (code) => this.engine.isGroupCode(code) || this.engine.isQuestionCode(code),
         );
     const event = opts.event ?? (deleted.length ? SnapshotReason.DELETE : null);
     const reason = await this.snapshots.reasonFor(survey.id, event, async () => {

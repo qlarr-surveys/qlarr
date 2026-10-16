@@ -34,12 +34,12 @@ export function snapshotReason(opts: {
 export function deletedComponents(
   before: ComponentIndex[],
   after: ComponentIndex[],
-  isQuestionCode: (code: string) => boolean,
+  isTracked: (code: string) => boolean,
 ): string[] {
   const kept = new Set(after.map((c) => c.code));
   return before
     .map((c) => c.code)
-    .filter((code) => !kept.has(code) && (code.startsWith('G') || isQuestionCode(code)));
+    .filter((code) => !kept.has(code) && isTracked(code));
 }
 
 export interface SnapshotInput {
