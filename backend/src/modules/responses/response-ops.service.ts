@@ -98,7 +98,7 @@ export class ResponseOpsService {
       throw new IncompleteResponse();
     }
 
-    // Quota membership comes from this re-run, not the device; the device's disqualified flag is kept (only it knows it screened the respondent out).
+    // Quota membership comes from this re-run, not the device; the device's disqualified flag and screened_out_by_quota are kept (only it knows it screened the respondent out).
     const values = data.values ?? {};
     const navigation = await this.engine.navigate({
       values: JSON.stringify(stripQuotaKeys(values)),

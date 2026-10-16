@@ -8,7 +8,7 @@ import {
   NavigationModeName,
 } from '../../engine/engine.types';
 import { ProcessedSurvey } from '../design/design.service';
-import { fullQuotaValues, screenedOutQuota, stripQuotaKeys } from '../design/quota.helpers';
+import { fullQuotaValues, stripQuotaKeys } from '../design/quota.helpers';
 import { QuotaService } from '../design/quota.service';
 import { ResponseRepository } from '../responses/response.repository';
 import { navigationModeFrom } from '../surveys/survey.enums';
@@ -132,6 +132,10 @@ export class NavigationService {
     if (response?.values?.['Survey.disqualified'] === true) {
       navigationJsonOutput.toSave['Survey.disqualified'] = true;
     }
+    const screenedOutBy = response?.values?.['Survey.screened_out_by_quota'];
+    if (typeof screenedOutBy === 'string') {
+      navigationJsonOutput.toSave['Survey.screened_out_by_quota'] = screenedOutBy;
+    }
 
     const others = [
       defaultSurveyLang(processedSurvey.output.survey),
@@ -142,11 +146,8 @@ export class NavigationService {
       navigationJsonOutput,
       lang,
       additionalLang: others,
-      screenedOutQuota: screenedOutQuota(
-        fullQuotas,
-        navigationJsonOutput.navigationIndex,
-        navigationJsonOutput.toSave,
-      ),
+      screenedOutQuota:
+        (navigationJsonOutput.toSave['Survey.screened_out_by_quota'] as string) ?? null,
     };
   }
 

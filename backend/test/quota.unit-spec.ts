@@ -3,7 +3,6 @@ import { runChangeCode, runValidate } from '../src/engine/engine-runtime';
 import {
   fullQuotaCodes,
   quotaDefinitions,
-  screenedOutQuota,
   fullQuotaValues,
   stripQuotaKeys,
   withComputedQuotaKeys,
@@ -88,36 +87,22 @@ describe('quota helpers', () => {
           'Survey.quota_QT1': false,
           'Survey.quota_FAKE': true,
           'Survey.disqualified': true,
+          'Survey.screened_out_by_quota': 'QT1',
         },
         { 'Q1.value': 'ignored', 'Survey.quota_QT1': true, 'Survey.disqualified': false },
       ),
     ).toEqual({
       'Q1.value': 'male',
       'Survey.disqualified': true,
+      'Survey.screened_out_by_quota': 'QT1',
       'Survey.quota_QT1': true,
     });
-  });
-
-  it('names the first full quota the respondent belongs to when screened out', () => {
-    const end = { name: 'end' };
-    const toSave = {
-      'Survey.disqualified': true,
-      'Survey.quota_QT1': false,
-      'Survey.quota_QT2': true,
-      'Survey.quota_QT3': true,
-    };
-    expect(screenedOutQuota(['QT1', 'QT2', 'QT3'], end, toSave)).toBe('QT2');
-    expect(screenedOutQuota(['QT1'], end, toSave)).toBeNull();
-    expect(
-      screenedOutQuota(['QT2'], end, { ...toSave, 'Survey.disqualified': false }),
-    ).toBeNull();
-    expect(screenedOutQuota(['QT2'], { name: 'group' }, toSave)).toBeNull();
   });
 });
 
 describe('quota engine binding', () => {
   const engine = new EngineService();
-  const design = () => {
+  const design = (disqualifyOnQ1?: string) => {
     const survey = JSON.parse(engine.newSurvey('Quotas'));
     survey.groups[0].questions = [
       {
@@ -125,6 +110,19 @@ describe('quota engine binding', () => {
         type: 'text',
         instructionList: [
           { code: 'value', text: '', returnType: 'string', isActive: false },
+          ...(disqualifyOnQ1
+            ? [
+                {
+                  code: 'skip_to_G2',
+                  skipToComponent: 'G2',
+                  toEnd: false,
+                  disqualify: true,
+                  text: disqualifyOnQ1,
+                  returnType: 'boolean',
+                  isActive: true,
+                },
+              ]
+            : []),
         ],
       },
     ];
@@ -142,10 +140,14 @@ describe('quota engine binding', () => {
   const processed = runValidate(JSON.stringify(design()));
   const processedSurvey = JSON.stringify(processed);
 
-  const next = (fullQuotas: string[], extra: Record<string, unknown> = {}) =>
+  const next = (
+    fullQuotas: string[],
+    extra: Record<string, unknown> = {},
+    survey: string = processedSurvey,
+  ) =>
     engine.navigate({
       values: JSON.stringify({ 'Q1.value': 'male', ...fullQuotaValues(fullQuotas), ...extra }),
-      processedSurvey,
+      processedSurvey: survey,
       lang: null,
       navigationMode: 'GROUP_BY_GROUP',
       navigationIndex: { name: 'group', groupId: 'G1' },
@@ -172,7 +174,17 @@ describe('quota engine binding', () => {
     expect(out.toSave['Survey.disqualified']).toBe(true);
     expect(out.toSave['Survey.quota_QT1']).toBe(true);
     expect(out.toSave['Survey.quota_QT1_full']).toBeUndefined();
-    expect(screenedOutQuota(['QT1'], out.navigationIndex, out.toSave)).toBe('QT1');
+    expect(out.toSave['Survey.screened_out_by_quota']).toBe('QT1');
+  });
+
+  it('does not report a quota when a disqualifying skip ended the survey', async () => {
+    const withSkip = JSON.stringify(runValidate(JSON.stringify(design('Q1.value == "male"'))));
+    expect((await next([], {}, withSkip)).toSave['Survey.disqualified']).toBe(true);
+    const out = await next(['QT1'], {}, withSkip);
+    expect(out.navigationIndex.name).toBe('end');
+    expect(out.toSave['Survey.disqualified']).toBe(true);
+    expect(out.toSave['Survey.quota_QT1']).toBe(true);
+    expect(out.toSave['Survey.screened_out_by_quota']).toBeUndefined();
   });
 
   it('only treats a JSON boolean true as full', async () => {
@@ -186,6 +198,7 @@ describe('quota engine binding', () => {
     expect(out.toSave['Survey.disqualified']).toBe(false);
     expect(out.toSave['Survey.quota_QT1']).toBe(true);
     expect(out.toSave['Survey.passed_quotas']).toBeUndefined();
+    expect(out.toSave['Survey.screened_out_by_quota']).toBeUndefined();
   });
 
   it('renames question codes inside quota conditions and compiled instructions', () => {
@@ -227,7 +240,11 @@ describe('navigation quota enforcement', () => {
   const setup = () => {
     const engineNavigate = jest.fn().mockResolvedValue({
       navigationIndex: { name: 'end' },
-      toSave: { 'Survey.disqualified': true, 'Survey.quota_QT1': true },
+      toSave: {
+        'Survey.disqualified': true,
+        'Survey.quota_QT1': true,
+        'Survey.screened_out_by_quota': 'QT1',
+      },
     });
     const fullQuotas = jest.fn().mockResolvedValue(['QT1']);
     const svc = new NavigationService(
@@ -263,7 +280,7 @@ describe('navigation quota enforcement', () => {
     expect(result.screenedOutQuota).toBe('QT1');
   });
 
-  it('keeps a screened-out response disqualified when it is resumed', async () => {
+  it('keeps a screened-out response disqualified and its quota when it is resumed', async () => {
     const { svc, engineNavigate } = setup();
     engineNavigate.mockResolvedValue({
       navigationIndex: { name: 'end' },
@@ -272,7 +289,12 @@ describe('navigation quota enforcement', () => {
     const result = await svc.navigate({
       surveyId: 's',
       response: {
-        values: { 'Q1.value': 'male', 'Survey.disqualified': true, 'Survey.quota_QT1': true },
+        values: {
+          'Q1.value': 'male',
+          'Survey.disqualified': true,
+          'Survey.quota_QT1': true,
+          'Survey.screened_out_by_quota': 'QT1',
+        },
         navigationIndex: { name: 'end' },
         lang: 'en',
         startDate: nowUtcString(),
@@ -285,7 +307,32 @@ describe('navigation quota enforcement', () => {
     } as any);
 
     expect(result.navigationJsonOutput.toSave['Survey.disqualified']).toBe(true);
+    expect(result.navigationJsonOutput.toSave['Survey.screened_out_by_quota']).toBe('QT1');
     expect(result.screenedOutQuota).toBe('QT1');
+  });
+
+  it('does not name a quota the engine did not report', async () => {
+    const { svc, engineNavigate } = setup();
+    engineNavigate.mockResolvedValue({
+      navigationIndex: { name: 'end' },
+      toSave: { 'Survey.disqualified': true, 'Survey.quota_QT1': true },
+    });
+    const result = await svc.navigate({
+      surveyId: 's',
+      response: {
+        values: { 'Q1.value': 'male' },
+        navigationIndex: { name: 'group', groupId: 'G1' },
+        lang: 'en',
+        startDate: nowUtcString(),
+      },
+      processedSurvey: processed,
+      navigationDirection: { name: 'NEXT' },
+      values: { 'Q1.value': 'male', 'Survey.screened_out_by_quota': 'QT1' },
+      preview: false,
+      surveyMode: 'ONLINE',
+    } as any);
+
+    expect(result.screenedOutQuota).toBeNull();
   });
 
   it('does not enforce quotas in preview', async () => {

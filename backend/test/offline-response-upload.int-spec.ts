@@ -157,7 +157,7 @@ describe('Offline survey response upload', () => {
     expect(files.deleteUnusedResponseFiles).toHaveBeenCalledTimes(1);
   });
 
-  it('saves quota membership from the backend engine, keeping the device disqualified flag', async () => {
+  it('saves quota membership from the backend engine, keeping the device screen-out', async () => {
     expect(quotaEnd.navigationIndex.name).toBe('end');
     let lastBody: { quotaCounts?: Record<string, number> } = {};
     const upload = async (responseId: string, values: object) => {
@@ -194,8 +194,10 @@ describe('Offline survey response upload', () => {
     const screenedOut = await upload('30000000-0000-0000-0000-0000000000a4', {
       ...male,
       'Survey.disqualified': true,
+      'Survey.screened_out_by_quota': 'QT1',
     });
     expect(screenedOut.values['Survey.disqualified']).toBe(true);
+    expect(screenedOut.values['Survey.screened_out_by_quota']).toBe('QT1');
     expect(screenedOut.values['Survey.quota_QT1']).toBe(true);
 
     expect(lastBody.quotaCounts).toEqual({ QT1: 2 });

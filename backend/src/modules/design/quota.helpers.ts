@@ -1,8 +1,6 @@
 // Survey variables and quotas never come from the client: calculated ones come from the engine, inputs from us.
 const ENGINE_OWNED_PREFIXES = ['Survey.var_', 'Survey.quota_'];
 const isEngineOwnedKey = (key: string) => ENGINE_OWNED_PREFIXES.some((prefix) => key.startsWith(prefix));
-/** Saved with the response: whether it belongs to the quota. */
-export const quotaMetKey = (code: string) => `Survey.quota_${code}`;
 /** Passed in on every navigation, never saved: whether the quota is full. */
 export const quotaFullKey = (code: string) => `Survey.quota_${code}_full`;
 const QUOTA_CODE_RE = /^[A-Za-z0-9][A-Za-z0-9_]*$/;
@@ -39,17 +37,6 @@ export function fullQuotaCodes(
   return definitions
     .filter((quota) => quota.limit > 0 && (counts[quota.code] ?? 0) >= quota.limit)
     .map((quota) => quota.code);
-}
-
-export function screenedOutQuota(
-  fullQuotas: string[],
-  navigationIndex: { name: string },
-  toSave: Record<string, unknown>,
-): string | null {
-  if (navigationIndex.name !== 'end' || toSave['Survey.disqualified'] !== true) {
-    return null;
-  }
-  return fullQuotas.find((code) => toSave[quotaMetKey(code)] === true) ?? null;
 }
 
 export function stripQuotaKeys(values: Record<string, unknown>): Record<string, unknown> {
