@@ -98,6 +98,7 @@ export interface OfflineSurveyDto {
   surveyQuota: number;
   userResponsesCount: number;
   completeResponseCount: number;
+  quotaCounts: Record<string, number>;
   latestVersion: VersionDto;
   navigationData: SurveyNavigationData;
   saveTimings: boolean;

@@ -306,6 +306,17 @@ export function runChangeCode(
     }
   }
 
+  if (ext.isGroupCode(from) || ext.isQuestionCode(from)) {
+    const quotas = result.survey['quotas'];
+    if (Array.isArray(quotas)) {
+      for (const quota of quotas) {
+        if (quota && typeof quota === 'object') {
+          replaceInField(quota as Record<string, unknown>, 'condition', from, to);
+        }
+      }
+    }
+  }
+
   return { ok: true, output: result };
 }
 

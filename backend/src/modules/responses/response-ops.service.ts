@@ -10,6 +10,8 @@ import { FileDownload } from '../../integrations/filesystem/file-info';
 import { FILE_HELPER, FileHelper } from '../../integrations/filesystem/file-helper';
 import { SurveyFolder } from '../../integrations/filesystem/survey-folder';
 import { DesignService } from '../design/design.service';
+import { quotaDefinitions, stripQuotaKeys, withComputedQuotaKeys } from '../design/quota.helpers';
+import { QuotaService } from '../design/quota.service';
 import { ResponseRepository } from './response.repository';
 import { SurveyDesignWithErrorException } from '../run/run.exceptions';
 import {
@@ -69,6 +71,7 @@ export class ResponseOpsService {
     @Inject(FILE_HELPER) private readonly files: FileHelper,
     private readonly design: DesignService,
     private readonly engine: EngineService,
+    private readonly quotas: QuotaService,
   ) {}
 
   /**
@@ -98,8 +101,10 @@ export class ResponseOpsService {
       throw new IncompleteResponse();
     }
 
+    // Quota membership comes from this re-run, not the device; the device's disqualified flag and screened_out_by_quota are kept (only it knows it screened the respondent out).
+    const values = data.values ?? {};
     const navigation = await this.engine.navigate({
-      values: JSON.stringify(data.values ?? {}),
+      values: JSON.stringify(stripQuotaKeys(values)),
       processedSurvey: JSON.stringify(processed.output),
       navigationDirection: { name: 'RESUME' },
       navigationIndex: data.navigationIndex,
@@ -128,7 +133,7 @@ export class ResponseOpsService {
       lang: data.lang,
       ipAddress: null,
       events: data.events ?? [],
-      values: data.values ?? {},
+      values: withComputedQuotaKeys(values, navigation.toSave),
     });
 
     await this.files.deleteUnusedResponseFiles(
@@ -138,18 +143,21 @@ export class ResponseOpsService {
       data.events ?? [],
     );
 
-    return this.responseCount(surveyId, currentUserId);
+    const quotaCodes = quotaDefinitions(processed.output.survey).map((quota) => quota.code);
+    return this.responseCount(surveyId, currentUserId, quotaCodes);
   }
 
   /** Complete + this-user response counts for a survey. */
   private async responseCount(
     surveyId: string,
     userId: string,
+    quotaCodes: string[],
   ): Promise<ResponseCountDto> {
     const counts = await this.responses.counts(surveyId, userId);
     return {
       completeResponseCount: counts.completeResponseCount,
       userResponsesCount: counts.userResponseCount,
+      quotaCounts: await this.quotas.counts(surveyId, quotaCodes),
     };
   }
 

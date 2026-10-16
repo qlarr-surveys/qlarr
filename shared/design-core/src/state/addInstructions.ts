@@ -1,4 +1,5 @@
 // @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
+import { quotaInstructionCode } from "../constants/design";
 export const cleanupDefaultValue = (component) => {
   // Check if this is a single choice question type that supports default values
   if (
@@ -1262,10 +1263,44 @@ const getQuestionType = (state, code) => {
   const match = code.match(/^Q[a-z0-9_]+/);
   const captured = match ? match[0] : null;
   if (captured) {
-    return state[captured].type;
+    // The question may have been deleted while logic still refers to it.
+    return state[captured]?.type;
   } else {
     return null;
   }
+};
+
+// A quota's own instruction, or the full input the engine adds for it.
+const QUOTA_INSTRUCTION = /^quota_.+$/;
+
+export const isQuotaInstruction = (code) => QUOTA_INSTRUCTION.test(code);
+
+// A quota compiles into one Survey instruction holding its condition; null
+// while it has none.
+export const quotaInstruction = (quota, state) => {
+  const text = jsonToJs(
+    quota.condition?.logic,
+    false,
+    (componentCode) => state[componentCode]?.type,
+    (componentCode) => getQuestionType(state, componentCode),
+  );
+  if (!text) {
+    return null;
+  }
+  return { code: quotaInstructionCode(quota.code), text, isActive: true, returnType: "boolean" };
+};
+
+// Quotas the engine rejected (their instruction has errors).
+export const brokenQuotaCodes = (state) => {
+  const survey = state?.Survey;
+  if (!survey?.quotas?.length) {
+    return new Set();
+  }
+  return new Set(
+    survey.quotas
+      .filter((quota) => instructionByCode(survey, quotaInstructionCode(quota.code))?.errors?.length)
+      .map((quota) => quota.code),
+  );
 };
 
 export const conditionalRelevanceEquation = (logic, rule, state) => {

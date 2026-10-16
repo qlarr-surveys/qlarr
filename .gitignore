@@ -5,6 +5,7 @@
 # OS / editor / tooling
 .DS_Store
 .claude/
+.idea/
 
 # stray installs (belt-and-suspenders; apps own their own node_modules)
 node_modules

@@ -177,6 +177,32 @@ describe('Survey metadata endpoints', () => {
         expect(['offline', 'mixed']).toContain(s.usage);
       }
     });
+
+    it('includes completed quota members per quota code', async () => {
+      const survey = '10000000-0000-0000-0000-0000000000c0';
+      await insertSurvey(survey, 'Quotas', 'ACTIVE', 'OFFLINE', null);
+      const addResponse = (id: string, values: object, submitted = true) =>
+        root.query(
+          `INSERT INTO responses
+             (id, version, survey_id, preview, nav_index, start_date, submit_date, lang, events, "values")
+           VALUES ($1,1,$2,false,'{}','2024-02-01 09:00:00',$3,'en','[]',$4::jsonb)`,
+          [id, survey, submitted ? '2024-02-01 09:05:00' : null, JSON.stringify(values)],
+        );
+      await addResponse('20000000-0000-0000-0000-0000000000c1', { 'Survey.quota_QT1': true });
+      await addResponse('20000000-0000-0000-0000-0000000000c2', {
+        'Survey.quota_QT1': true,
+        'Survey.quota_QT2': true,
+      });
+      await addResponse('20000000-0000-0000-0000-0000000000c3', {
+        'Survey.quota_QT1': true,
+        'Survey.disqualified': true,
+      });
+      await addResponse('20000000-0000-0000-0000-0000000000c4', { 'Survey.quota_QT1': true }, false);
+
+      const res = await get('/survey/offline').expect(200);
+      const quotaSurvey = res.body.find((s: { id: string }) => s.id === survey);
+      expect(quotaSurvey.quotaCounts).toEqual({ QT1: 2, QT2: 1 });
+    });
   });
 
   describe('DELETE /survey/:id', () => {
