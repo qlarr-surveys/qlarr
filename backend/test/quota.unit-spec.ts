@@ -1,3 +1,4 @@
+import { brokenQuotaCodes, buildDesignState, deleteQuestion, designChanges } from '@qlarr/design-core';
 import { EngineService } from '../src/engine/engine.service';
 import { runChangeCode, runValidate } from '../src/engine/engine-runtime';
 import {
@@ -213,6 +214,70 @@ describe('quota engine binding', () => {
     expect(survey.instructionList.find((i) => i.code === 'quota_QT1')?.text).toBe(
       'Qgender.value == "male"',
     );
+  });
+});
+
+describe('quota on a deleted question', () => {
+  const engine = new EngineService();
+  const textQuestion = (code: string) => ({
+    code,
+    type: 'text',
+    instructionList: [{ code: 'value', text: '', returnType: 'string', isActive: false }],
+  });
+  const survey = JSON.parse(engine.newSurvey('Deleted question'));
+  survey.groups[0].questions = [textQuestion('Q1'), textQuestion('Q2')];
+  survey.quotas = [
+    { code: 'QT1', label: 'Q2 is x', limit: 1, condition: { logic: { '==': [{ var: 'Q2' }, 'x'] } } },
+  ];
+  survey.instructionList = [quotaInstruction('QT1', 'Q2.value == "x"')];
+  const processed = runValidate(JSON.stringify(survey));
+
+  const next = (processedSurvey: unknown, values: Record<string, unknown>) =>
+    engine.navigate({
+      values: JSON.stringify({ ...values, ...fullQuotaValues(['QT1']) }),
+      processedSurvey: JSON.stringify(processedSurvey),
+      lang: null,
+      navigationMode: 'GROUP_BY_GROUP',
+      navigationIndex: { name: 'group', groupId: 'G1' },
+      navigationDirection: { name: 'NEXT' },
+      skipInvalid: true,
+      surveyMode: 'ONLINE',
+    });
+
+  // The designer's save: delete in design-core, send the diff, let the engine process it.
+  const deleteAndSave = async (questionCode: string) => {
+    const state = buildDesignState({}, { designerInput: engine.toDesignerInput(processed), versionDto: {} });
+    deleteQuestion(state, questionCode);
+    return engine.process(designChanges(state, state.latest), processed.survey);
+  };
+
+  it('screens out on its question before the question is deleted', async () => {
+    const out = await next(processed, { 'Q2.value': 'x' });
+    expect(out.toSave['Survey.screened_out_by_quota']).toBe('QT1');
+  });
+
+  it('is invalid once its question is deleted', async () => {
+    const saved = await deleteAndSave('Q2');
+    const instruction = (saved.survey as { instructionList: { code: string; errors?: unknown[] }[] })
+      .instructionList.find((i) => i.code === 'quota_QT1');
+    expect(instruction?.errors?.length).toBeGreaterThan(0);
+    expect([...brokenQuotaCodes(engine.toDesignerInput(saved).state)]).toEqual(['QT1']);
+  });
+
+  it('stops working once its question is deleted: no screen-out, no membership', async () => {
+    const saved = await deleteAndSave('Q2');
+    const out = await next(saved, { 'Q1.value': 'anything' });
+    expect(out.navigationIndex.name).toBe('end');
+    expect(out.toSave['Survey.disqualified']).toBe(false);
+    expect(out.toSave['Survey.screened_out_by_quota']).toBeUndefined();
+    expect(out.toSave['Survey.quota_QT1']).toBeUndefined();
+  });
+
+  it('stays valid when a different question is deleted', async () => {
+    const saved = await deleteAndSave('Q1');
+    expect(brokenQuotaCodes(engine.toDesignerInput(saved).state).size).toBe(0);
+    const out = await next(saved, { 'Q2.value': 'x' });
+    expect(out.toSave['Survey.screened_out_by_quota']).toBe('QT1');
   });
 });
 
