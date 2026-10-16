@@ -82,7 +82,8 @@
       "last_modified": "Laatst Gewijzigd",
       "start_date": "Startdatum",
       "end_date": "Einddatum"
-    }
+    },
+    "version_history": "Versiegeschiedenis"
   },
   "edit_user": {
     "title": "Gebruiker Bewerken"
@@ -237,7 +238,9 @@
     "wrong_confirmation_token": "Deze Bevestiging Token is onjuist, Registreer Opnieuw",
     "survey_quota": "Sorry, deze enquête accepteert geen reacties meer.",
     "invalid_translations_csv": "Geen CSV met vertalingen.",
-    "translations_csv_not_utf8": "Dit bestand is niet in UTF-8. Kies in Excel Bestand → Opslaan als → “CSV UTF-8 (door komma's gescheiden)” en importeer het opnieuw."
+    "translations_csv_not_utf8": "Dit bestand is niet in UTF-8. Kies in Excel Bestand → Opslaan als → “CSV UTF-8 (door komma's gescheiden)” en importeer het opnieuw.",
+    "snapshot_not_found": "Deze versie bestaat niet meer. Laad de pagina opnieuw en probeer het nog eens.",
+    "nothing_to_revert": "Er zijn geen niet-gepubliceerde wijzigingen om te verwerpen."
   },
   "processed_successes": {
     "copied": "Gekopieerd naar klembord",
@@ -411,7 +414,10 @@
     "settings": "Instellingen",
     "publish_tooltip": "Je wijzigingen zijn nog niet live. Publiceer om je enquête voor iedereen bij te werken.",
     "publish_error": "Corrigeer de fouten in je enquête voordat je begint.",
-    "download_qr_code": "QR-code downloaden"
+    "download_qr_code": "QR-code downloaden",
+    "discard_changes": "Niet-gepubliceerde wijzigingen verwerpen",
+    "discard_title": "Niet-gepubliceerde wijzigingen verwerpen?",
+    "discard_description": "Het ontwerp gaat terug naar de laatst gepubliceerde versie. Het huidige ontwerp blijft bewaard in de versiegeschiedenis, zodat je het later kunt herstellen."
   },
   "email": {
     "check": "Controleer je E-mail",
@@ -649,5 +655,21 @@
     "question_type_text_display": "Tekst Weergave",
     "question_type_image_display": "Afbeelding Weergave",
     "question_type_video_display": "Video Weergave"
+  },
+  "version_history": {
+    "description": "Herstelpunten van je niet-gepubliceerde wijzigingen, automatisch bewaard tijdens het bewerken. De geschiedenis wordt bij elke publicatie gewist.",
+    "empty": "Nog geen herstelpunten.",
+    "restore": "Herstellen",
+    "restore_title": "Deze versie herstellen?",
+    "restore_description": "Het ontwerp gaat terug naar hoe het was op {{date}}. Het huidige ontwerp blijft bewaard in de versiegeschiedenis, zodat je het later kunt herstellen.",
+    "reason": {
+      "timer": "Automatisch opgeslagen",
+      "delete": "Voor het verwijderen van {{codes}}",
+      "change_code": "Voor het hernoemen {{from}} → {{to}}",
+      "translations_import_one": "Voor het importeren van vertalingen ({{count}} veld)",
+      "translations_import_other": "Voor het importeren van vertalingen ({{count}} velden)",
+      "restore": "Voor het herstellen van een eerdere versie",
+      "discard": "Voor het verwerpen van niet-gepubliceerde wijzigingen"
+    }
   }
 }

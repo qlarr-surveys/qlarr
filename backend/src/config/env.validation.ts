@@ -46,6 +46,8 @@ export const envValidationSchema = Joi.object({
   // --- local file storage ---
   FILE_SYSTEM_ROOT_FOLDER: Joi.string().default('local-data'),
 
+  DESIGN_SNAPSHOT_INTERVAL_MS: Joi.number().integer().positive().default(1_800_000),
+
   // --- optional integrations (degrade gracefully) ---
   MAIL_HOST: Joi.string().allow('').optional(),
   MAIL_PORT: Joi.number().default(1025),

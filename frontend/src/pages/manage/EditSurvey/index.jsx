@@ -16,6 +16,7 @@ import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import NavigationSettings from "~/components/manage/NavigationSettings";
 import SurveyOffline from '../SurveyOffline';
 import SurveyPrivacy from '../SurveyPrivacy';
+import VersionHistory from "~/components/manage/VersionHistory";
 
 function EditSurvey({ onPublish }) {
   const { t } = useTranslation(NAMESPACES.MANAGE);
@@ -35,6 +36,11 @@ function EditSurvey({ onPublish }) {
   ];
 
   const sections = [
+    {
+      id: "version_history",
+      title: t("edit_survey.version_history"),
+      component: <VersionHistory />,
+    },
     {
       id: "navigation",
       title: t("edit_survey.navigation"),

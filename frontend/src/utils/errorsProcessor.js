@@ -67,6 +67,8 @@ export const PROCESSED_ERRORS = {
     name: "translations_csv_not_utf8",
     handleGlobally: false,
   },
+  SNAPSHOT_NOT_FOUND: { name: "snapshot_not_found", handleGlobally: false },
+  NOTHING_TO_REVERT: { name: "nothing_to_revert", handleGlobally: false },
 };
 
 export const onApiError = ({
@@ -181,6 +183,10 @@ export const processError = (e) => {
         return PROCESSED_ERRORS.INVALID_TRANSLATIONS_CSV;
       case "TranslationsCsvNotUtf8Exception":
         return PROCESSED_ERRORS.TRANSLATIONS_CSV_NOT_UTF8;
+      case "SnapshotNotFoundException":
+        return PROCESSED_ERRORS.SNAPSHOT_NOT_FOUND;
+      case "NothingToRevertException":
+        return PROCESSED_ERRORS.NOTHING_TO_REVERT;
       default:
         return PROCESSED_ERRORS.UNIDENTIFIED_ERROR;
     }
