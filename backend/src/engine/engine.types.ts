@@ -100,3 +100,47 @@ export interface NavigateParams {
   skipInvalid: boolean;
   surveyMode: SurveyModeName;
 }
+
+/** A calculation validation error (≈ engine `CalculationError`), discriminated
+ *  by `name`. `start`/`end` are offsets into the expression. */
+export type CalcError =
+  | { name: 'ScriptError'; message: string; start: number; end: number }
+  | { name: 'InvalidCode' }
+  | { name: 'DuplicateCode' };
+
+/** One calculated field. `errors` is set by validation; empty means valid. */
+export interface Calculation {
+  code: string;
+  label: string;
+  expression: string;
+  errors?: CalcError[];
+}
+
+/** A calculation as the engine's `validate` returns it (`label` is dropped). */
+export interface ValidatedCalculation {
+  code: string;
+  expression: string;
+  errors: CalcError[];
+}
+
+/** A calculation that failed on one response (≈ engine
+ *  `CalculationRuntimeError`). `name` is the JS error name, `NotSerializable` or
+ *  `EngineFailure`; `message` differs between engines and is for display only. */
+export interface CalcRuntimeError {
+  name: string;
+  message: string;
+}
+
+/**
+ * Output of `calculate`, keyed by response ID. `results` holds each produced
+ * value by code (`null`/`undefined` results are left out); `errors` holds the
+ * calculations that failed on that response. Invalid calculations appear in
+ * neither.
+ */
+export type CalculateOutput = Record<
+  string,
+  {
+    results: Record<string, unknown>;
+    errors: Record<string, CalcRuntimeError>;
+  }
+>;

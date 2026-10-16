@@ -40,6 +40,7 @@ import { useService } from "~/hooks/use-service";
 import ResponsesDownload from "~/components/manage/ResponsesDownload";
 import ResponsesExport from "~/components/manage/ResponsesExport";
 import ResponseEvents from "~/components/manage/ResponseEvents";
+import CalculationValue from "~/components/manage/CalculationValue";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import {
   previewUrlByFilename,
@@ -944,6 +945,50 @@ function ResponsesList() {
                           <Typography color="text.secondary">
                             {t("responses.no_answers", "No answers found")}
                           </Typography>
+                        </Box>
+                      )}
+
+                      {selected.calculations?.length > 0 && (
+                        <Box sx={{ mt: 3 }}>
+                          <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                            {t("calculations.title", "Calculated fields")}
+                          </Typography>
+                          <TableContainer component={Paper} variant="outlined">
+                            <Table size="small">
+                              <TableHead>
+                                <TableRow>
+                                  <TableCell sx={{ width: "40%", backgroundColor: "#212B36", color: "white" }}>
+                                    {t("calculations.label", "Label")}
+                                  </TableCell>
+                                  <TableCell sx={{ width: "20%", backgroundColor: "#212B36", color: "white" }}>
+                                    {t("calculations.code", "Code")}
+                                  </TableCell>
+                                  <TableCell sx={{ width: "40%", backgroundColor: "#212B36", color: "white" }}>
+                                    {t("calculations.value", "Value")}
+                                  </TableCell>
+                                </TableRow>
+                              </TableHead>
+                              <TableBody>
+                                {selected.calculations.map((calc) => (
+                                  <TableRow key={calc.code} hover>
+                                    <TableCell sx={{ verticalAlign: "top" }}>
+                                      <Typography variant="body2" color="text.secondary">
+                                        {calc.label}
+                                      </Typography>
+                                    </TableCell>
+                                    <TableCell sx={{ verticalAlign: "top" }}>
+                                      <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
+                                        {calc.code}
+                                      </Typography>
+                                    </TableCell>
+                                    <TableCell sx={{ verticalAlign: "top" }}>
+                                      <CalculationValue state={calc.state} value={calc.value} />
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </TableContainer>
                         </Box>
                       )}
                     </Box>
