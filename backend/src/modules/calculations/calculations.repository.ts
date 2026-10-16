@@ -3,14 +3,24 @@ import { Repository } from 'typeorm';
 import { DbContext } from '../../database/db-context';
 import { Calculation } from '../../engine/engine.types';
 import { RUN_TIME_LIMIT_SECONDS } from './calculations.constants';
-import { CalculationsRevisionConflictException } from './calculations.exceptions';
+import {
+  CalculationRunInProgressException,
+  CalculationsRevisionConflictException,
+} from './calculations.exceptions';
 import {
   CalculationStatus,
   SurveyCalculationsEntity,
 } from './survey-calculations.entity';
 
-/** SQL: the row's run started more than the time limit ago. */
-const RUN_EXPIRED = `started_at < now() - make_interval(secs => ${RUN_TIME_LIMIT_SECONDS})`;
+/**
+ * SQL: the row's run started more than the time limit ago. Columns are
+ * qualified because this also goes into the save's `ON CONFLICT ... WHERE`,
+ * where a bare name is ambiguous with `EXCLUDED`.
+ */
+const RUN_EXPIRED = `survey_calculations.started_at < now() - make_interval(secs => ${RUN_TIME_LIMIT_SECONDS})`;
+
+/** SQL: no run is going (a `running` row past the time limit counts as not running). */
+const NOT_RUNNING = `(survey_calculations.status <> 'running' OR ${RUN_EXPIRED})`;
 
 /**
  * Data-access for `survey_calculations` (the set and its Compute run state) and
@@ -40,9 +50,10 @@ export class CalculationsRepository {
 
   /**
    * Store a validated set, bump `revision` and set `status = idle` (hiding the
-   * stored results), only if `expectedRevision` is still current. A survey
-   * without a row is at revision 0, so the first save (expected 0) inserts it.
-   * Returns the new revision; a stale revision throws the 409 exception.
+   * stored results), only if `expectedRevision` is still current and no run is
+   * going. A survey without a row is at revision 0, so the first save (expected
+   * 0) inserts it. Returns the new revision; a stale revision or a run in
+   * progress throws the matching 409 exception.
    */
   async saveSet(
     surveyId: string,
@@ -60,12 +71,12 @@ export class CalculationsRepository {
                  revision = survey_calculations.revision + 1,
                  status = 'idle',
                  updated_at = now()
-             WHERE survey_calculations.revision = $3
+             WHERE survey_calculations.revision = $3 AND ${NOT_RUNNING}
            RETURNING revision`
         : `UPDATE survey_calculations
            SET calculations = $2::jsonb, revision = revision + 1, status = 'idle',
                updated_at = now()
-           WHERE survey_id = $1 AND revision = $3
+           WHERE survey_id = $1 AND revision = $3 AND ${NOT_RUNNING}
            RETURNING revision`;
     const rows = returnedRows<{ revision: number }>(
       await this.db.manager.query(sql, [
@@ -74,28 +85,50 @@ export class CalculationsRepository {
         expectedRevision,
       ]),
     );
-    if (rows.length === 0) throw new CalculationsRevisionConflictException();
+    if (rows.length === 0) throw await this.conflict(surveyId);
     return rows[0].revision;
   }
 
   /**
    * Start a run: `running`, `started_at = now()`, progress `0/total`. Only if no
-   * run is going (a `running` row past the time limit counts as not running).
-   * Returns the run's `started_at`, or null if a run is already going or the
-   * survey has no row.
+   * run is going and the set is still at `expectedRevision` (the one the run
+   * will compute). Returns the run's `started_at`; a run already going, or a
+   * set saved since (or never saved), throws the matching 409 exception.
    */
-  async startRun(surveyId: string, total: number): Promise<string | null> {
+  async startRun(
+    surveyId: string,
+    total: number,
+    expectedRevision: number,
+  ): Promise<string> {
     const rows = returnedRows<{ started_at: string }>(
       await this.db.manager.query(
         `UPDATE survey_calculations
          SET status = 'running', started_at = now(), progress_done = 0,
              progress_total = $2, updated_at = now()
-         WHERE survey_id = $1 AND (status <> 'running' OR ${RUN_EXPIRED})
+         WHERE survey_id = $1 AND revision = $3 AND ${NOT_RUNNING}
          RETURNING started_at::text AS started_at`,
-        [surveyId, total],
+        [surveyId, total, expectedRevision],
       ),
     );
-    return rows[0]?.started_at ?? null;
+    if (rows.length === 0) throw await this.conflict(surveyId);
+    return rows[0].started_at;
+  }
+
+  /**
+   * Why a guarded write (save or run start) matched no row: a run is going, or
+   * else the revision is no longer the expected one.
+   */
+  private async conflict(
+    surveyId: string,
+  ): Promise<CalculationRunInProgressException | CalculationsRevisionConflictException> {
+    const running: unknown[] = await this.db.manager.query(
+      `SELECT 1 FROM survey_calculations
+       WHERE survey_id = $1 AND NOT ${NOT_RUNNING}`,
+      [surveyId],
+    );
+    return running.length > 0
+      ? new CalculationRunInProgressException()
+      : new CalculationsRevisionConflictException();
   }
 
   /**

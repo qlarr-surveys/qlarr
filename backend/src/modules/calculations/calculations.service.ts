@@ -108,8 +108,9 @@ export class CalculationsService implements OnApplicationBootstrap {
 
     const processedSurvey = await this.latestProcessedSurvey(surveyId);
     const ids = await this.calculations.completedResponseIds(surveyId);
-    const startedAt = await this.calculations.startRun(surveyId, ids.length);
-    if (!startedAt) throw new CalculationRunInProgressException();
+    // Only starts if the set is still the one read above: a save in between
+    // would otherwise have this run compute the old set under the new one.
+    const startedAt = await this.calculations.startRun(surveyId, ids.length, row.revision);
 
     void this.run(surveyId, startedAt, processedSurvey, row.calculations, ids);
     return this.getState(surveyId);

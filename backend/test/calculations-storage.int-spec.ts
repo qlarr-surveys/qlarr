@@ -120,29 +120,69 @@ describe('Calculations storage', () => {
       }
       expect((await repo.find(id))?.calculations).toEqual([calc('a', '1')]);
     });
+
+    it('is refused with 409 while a run is going, and leaves the run running', async () => {
+      const id = await surveyWithSet('Save while running');
+      await repo.startRun(id, 4, 1);
+
+      await expect(repo.saveSet(id, [calc('x', '1')], 1)).rejects.toMatchObject({
+        status: 409,
+        response: { error: 'CalculationRunInProgressException' },
+      });
+      expect(await repo.find(id)).toMatchObject({
+        revision: 1,
+        status: 'running',
+        calculations: [calc('a', '1')],
+      });
+    });
+
+    it('is allowed once the run is past 2 minutes', async () => {
+      const id = await surveyWithSet('Save after expiry');
+      await repo.startRun(id, 4, 1);
+      await ageRun(id, 121);
+
+      expect(await repo.saveSet(id, [calc('x', '1')], 1)).toBe(2);
+    });
   });
 
   describe('Compute run state', () => {
     it('startRun starts one run at a time', async () => {
       const id = await surveyWithSet('Start');
 
-      const startedAt = await repo.startRun(id, 4);
+      const startedAt = await repo.startRun(id, 4, 1);
       expect(startedAt).toEqual(expect.any(String));
       expect(await repo.find(id)).toMatchObject({
         status: 'running',
         progressDone: 0,
         progressTotal: 4,
       });
-      expect(await repo.startRun(id, 4)).toBeNull();
+      await expect(repo.startRun(id, 4, 1)).rejects.toMatchObject({
+        status: 409,
+        response: { error: 'CalculationRunInProgressException' },
+      });
     });
 
-    it('startRun returns null for a survey without a row', async () => {
-      expect(await repo.startRun(await createSurvey('No row'), 1)).toBeNull();
+    it('startRun is refused with 409 when the set was saved since it was read', async () => {
+      const id = await surveyWithSet('Start stale');
+      await repo.saveSet(id, [calc('b', '2')], 1);
+
+      await expect(repo.startRun(id, 4, 1)).rejects.toMatchObject({
+        status: 409,
+        response: { error: 'CalculationsRevisionConflictException' },
+      });
+      expect((await repo.find(id))?.status).toBe('idle');
+      expect(await repo.startRun(id, 4, 2)).toEqual(expect.any(String));
+    });
+
+    it('startRun is refused with 409 for a survey without a row', async () => {
+      await expect(
+        repo.startRun(await createSurvey('No row'), 1, 0),
+      ).rejects.toMatchObject({ status: 409 });
     });
 
     it('updateRun only updates the current run', async () => {
       const id = await surveyWithSet('Update');
-      const startedAt = (await repo.startRun(id, 4))!;
+      const startedAt = await repo.startRun(id, 4, 1);
 
       expect(await repo.updateRun(id, startedAt, { progressDone: 2 })).toBe(true);
       expect(await repo.find(id)).toMatchObject({ status: 'running', progressDone: 2 });
@@ -155,7 +195,7 @@ describe('Calculations storage', () => {
 
     it('a run past 2 minutes is expired on read and can be replaced', async () => {
       const id = await surveyWithSet('Expire');
-      const first = (await repo.startRun(id, 4))!;
+      const first = await repo.startRun(id, 4, 1);
 
       // Within the limit: nothing changes.
       await ageRun(id, 60);
@@ -174,22 +214,22 @@ describe('Calculations storage', () => {
       )[0].s as string;
       expect(await repo.updateRun(id, aged, { progressDone: 1 })).toBe(false);
 
-      const second = await repo.startRun(id, 4);
+      const second = await repo.startRun(id, 4, 1);
       expect(second).not.toBeNull();
       expect(second).not.toBe(first);
     });
 
     it('startRun replaces a running row past 2 minutes, even before it is expired', async () => {
       const id = await surveyWithSet('Replace');
-      await repo.startRun(id, 4);
+      await repo.startRun(id, 4, 1);
       await ageRun(id, 121);
 
-      expect(await repo.startRun(id, 4)).not.toBeNull();
+      expect(await repo.startRun(id, 4, 1)).not.toBeNull();
     });
 
     it('resetRunningOnBoot turns running into failed', async () => {
       const id = await surveyWithSet('Boot');
-      await repo.startRun(id, 3);
+      await repo.startRun(id, 3, 1);
 
       await repo.resetRunningOnBoot();
 
@@ -208,7 +248,7 @@ describe('Calculations storage', () => {
       const id = await surveyWithSet('Write');
       await addResponse(r1, id);
       await addResponse(r2, id);
-      const startedAt = (await repo.startRun(id, 2))!;
+      const startedAt = await repo.startRun(id, 2, 1);
 
       expect(
         await repo.writeComputations(
@@ -230,9 +270,9 @@ describe('Calculations storage', () => {
     it('writes nothing for a run that is no longer current', async () => {
       const id = await surveyWithSet('Stale run');
       await addResponse(r3, id);
-      const old = (await repo.startRun(id, 1))!;
+      const old = await repo.startRun(id, 1, 1);
       await ageRun(id, 121);
-      await repo.startRun(id, 1);
+      await repo.startRun(id, 1, 1);
 
       // `old` was taken before ageRun, so it matches neither run.
       expect(
@@ -245,7 +285,7 @@ describe('Calculations storage', () => {
       const id = await surveyWithSet('Save hides');
       const r4 = '30000000-0000-0000-0000-000000000004';
       await addResponse(r4, id);
-      const startedAt = (await repo.startRun(id, 1))!;
+      const startedAt = await repo.startRun(id, 1, 1);
       await repo.writeComputations(id, [{ id: r4, computations: { a: 1 } }], startedAt);
       await repo.updateRun(id, startedAt, { progressDone: 1, status: 'completed' });
 
@@ -260,7 +300,7 @@ describe('Calculations storage', () => {
       const other = await surveyWithSet('Other survey');
       const r5 = '30000000-0000-0000-0000-000000000005';
       await addResponse(r5, other);
-      const startedAt = (await repo.startRun(id, 1))!;
+      const startedAt = await repo.startRun(id, 1, 1);
 
       expect(
         await repo.writeComputations(id, [{ id: r5, computations: { a: 1 } }], startedAt),
@@ -287,7 +327,7 @@ describe('Calculations storage', () => {
     it('clone copies the set at revision 0 and idle', async () => {
       const id = await surveyWithSet('Clone source');
       await repo.saveSet(id, [calc('a', '1')], 1);
-      await repo.startRun(id, 2);
+      await repo.startRun(id, 2, 2);
 
       const cloned = await request(server())
         .post(`/survey/${id}/clone`)

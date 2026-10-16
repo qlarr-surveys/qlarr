@@ -144,7 +144,7 @@ describe('Calculations', () => {
     it('reports a run past 2 minutes as failed', async () => {
       const { id } = await createSurvey();
       await save(id, [DOUBLE], 0).expect(200);
-      await repo.startRun(id, 3);
+      await repo.startRun(id, 3, 1);
       await root.query(
         `UPDATE survey_calculations SET started_at = started_at - interval '121 seconds'
          WHERE survey_id = $1`,
@@ -292,7 +292,7 @@ describe('Calculations', () => {
     it('everything is refused (409) while a run is in progress', async () => {
       const { id } = await createSurvey();
       await save(id, [DOUBLE], 0).expect(200);
-      await repo.startRun(id, 3);
+      await repo.startRun(id, 3, 1);
 
       await save(id, [FIXED], 1).expect(409);
       await request(server()).post(`${base(id)}/test`).set('Authorization', SUPER).expect(409);
