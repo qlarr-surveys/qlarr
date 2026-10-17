@@ -12,27 +12,32 @@ export const EditableSurveyDescription = ({
   onSave,
   isEditable = true,
 }) => {
+  // A survey with no description comes back as null, which React treats as an
+  // uncontrolled textarea. Normalise to "" and compare against the same
+  // normalisation, so merely opening and closing the editor saves nothing.
+  const savedDescription = survey.description ?? "";
+
   const [isDescriptionEditing, setIsDescriptionEditing] = useState(false);
-  const [description, setDescription] = useState(survey.description);
+  const [description, setDescription] = useState(savedDescription);
   const { t } = useTranslation(NAMESPACES.MANAGE);
 
   const charLimit = 125;
 
-  // See EditableSurveyTitle: follow the survey, and leave isEditing out of the
-  // dependencies so the text does not flash back mid-save.
+  // See EditableSurveyTitle: follow the prop, and leave isDescriptionEditing out
+  // of the dependencies so the text does not flash back mid-save.
   useEffect(() => {
     if (!isDescriptionEditing) {
-      setDescription(survey.description);
+      setDescription(savedDescription);
     }
-  }, [survey.description]);
+  }, [savedDescription]);
 
   const handleDescriptionChange = (event) => {
     setDescription(event.target.value);
   };
 
   const handleSave = () => {
-    if (description !== survey.description) {
-      onSave(description, () => setDescription(survey.description));
+    if (description !== savedDescription) {
+      onSave(description, () => setDescription(savedDescription));
     }
     setIsDescriptionEditing(false);
   };

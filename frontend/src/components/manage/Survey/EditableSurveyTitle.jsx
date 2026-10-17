@@ -11,10 +11,11 @@ export const EditableSurveyTitle = ({ survey, onSave, isEditable = true }) => {
   const [title, setTitle] = useState(survey.name);
   const { t } = useTranslation(NAMESPACES.MANAGE);
 
-  // Follow the survey when it changes underneath us — a refetch, a reverted
-  // edit, or a different survey landing in this grid slot. isEditing is read
-  // but deliberately not a dependency: resetting as editing ends would flash
-  // the previous name while the save request is still in flight.
+  // Follow the name when it changes underneath us: a refetch can bring a value
+  // renamed in another session, and the card stays mounted across sorts and
+  // filters (the grid keys by survey.id), so a stale seed would never clear.
+  // isEditing is read but deliberately not a dependency: resetting as editing
+  // ends would flash the previous name while the save is still in flight.
   useEffect(() => {
     if (!isEditing) {
       setTitle(survey.name);
