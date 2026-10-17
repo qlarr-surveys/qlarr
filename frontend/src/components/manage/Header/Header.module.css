@@ -38,3 +38,21 @@
   flex-shrink: 0;
   margin-right: 3.5rem;
 }
+
+/* The page name beside the logo. flex:1 keeps it hugging the logo instead of
+   being centred by the header's space-between. */
+.headerTitle {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 14px;
+  margin-inline-start: 14px;
+  font-size: 14px;
+  color: #4c5474;
+}
+
+.headerTitleDivider {
+  width: 1px;
+  height: 20px;
+  background: #dce0ee;
+}

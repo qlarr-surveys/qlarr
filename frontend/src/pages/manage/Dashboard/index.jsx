@@ -5,13 +5,11 @@ import {
   Button,
   Container,
   Snackbar,
-  Stack,
   TablePagination,
   Typography,
 } from "@mui/material";
 import styles from "./Dashboard.module.css";
 import { HeaderContent } from "~/components/manage/HeaderContent";
-import { isSurveyAdmin } from "~/constants/roles";
 import { setLoading } from "~/state/edit/editState";
 import { useDispatch } from "react-redux";
 
@@ -26,14 +24,10 @@ import LoadingDots from "~/components/common/LoadingDots";
 import { useService } from "~/hooks/use-service";
 import ConfirmActionModal from "~/components/common/ConfirmActionModal";
 import StopSurveyModal from "~/components/manage/StopSurveyModal";
-import {
-  Add,
-  Description,
-  ErrorOutline,
-  FileUpload,
-} from "@mui/icons-material";
-import CustomTooltip from "~/components/common/Tooltip/Tooltip";
+import { Description, ErrorOutline } from "@mui/icons-material";
 import DashboardEmptyState from "~/components/manage/DashboardEmptyState";
+import ActionCards from "~/components/manage/Dashboard/ActionCards";
+import { useDashboardActions } from "~/components/manage/Dashboard/useDashboardActions";
 import {
   localDateToServerDateTime,
   serverDateTimeToLocalDateTime,
@@ -132,6 +126,13 @@ function Dashboard() {
   const handleImportSurveyClick = () => {
     setOpenImportModal(true);
   };
+
+  const actions = useDashboardActions({
+    onCreateSurvey: handleCreateSurveyClick,
+    onImportSurvey: handleImportSurveyClick,
+  });
+  // The subtitle names the assistant only where there is one to name.
+  const hasAiAction = actions.some((action) => action.tone === "ai");
 
   const onDelete = (survey) => {
     setActionType("delete");
@@ -274,61 +275,48 @@ function Dashboard() {
   };
 
   return (
-    <Box className={styles.mainContainer}>
+    <Box
+      className={styles.mainContainer}
+      sx={{
+        "--card-accent": (theme) => theme.palette.primary.main,
+        "--card-accent-ai": (theme) => theme.palette.primary.lighter,
+      }}
+    >
       <Container sx={{ marginBottom: "48px" }}>
         <Box className={styles.content}>
-          {(surveys?.surveys?.length > 0 || status !== "all") && (
-          <Stack
-            className={styles.newSurveysButton}
-            direction="row"
-            spacing={2}
-          >
-            {isSurveyAdmin() && (
-              <CustomTooltip
-                title={t("tooltips.create_new_survey")}
-                showIcon={false}
-              >
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={<Add />}
-                  onClick={handleCreateSurveyClick}
-                >
-                  {t("create_new_survey")}
-                </Button>
-              </CustomTooltip>
-            )}
-            {isSurveyAdmin() && (
-              <CustomTooltip
-                title={t("tooltips.import_survey")}
-                showIcon={false}
-              >
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={<FileUpload />}
-                  onClick={handleImportSurveyClick}
-                >
-                  {t("import_survey")}
-                </Button>
-              </CustomTooltip>
-            )}
-          </Stack>
-          )}
+          <Box className={styles.pageHeading}>
+            <h1 className={styles.heading}>{t("my_surveys")}</h1>
+            <p className={styles.subtitle}>
+              {t(hasAiAction ? "dashboard.subtitle_ai" : "dashboard.subtitle")}
+            </p>
+          </Box>
+
+          <ActionCards actions={actions} />
 
           {(surveys?.surveys?.length > 0 || status != "all") && (
-            <HeaderContent
-              filter={status}
-              onFilterSelected={(el) => {
-                setPage(1);
-                setStatus(el.target.value);
-              }}
-              sort={sortBy}
-              onSortSelected={(el) => {
-                setPage(1);
-                setSortBy(el.target.value);
-              }}
-            />
+            <Box className={styles.listHeading}>
+              <HeaderContent
+                heading={
+                  <h2 className={styles.sectionHeading}>
+                    {t("recent_surveys")}{" "}
+                    <span className={styles.sectionCount}>
+                      &middot;{" "}
+                      {t("survey_count", { count: surveys?.totalCount ?? 0 })}
+                    </span>
+                  </h2>
+                }
+                filter={status}
+                onFilterSelected={(el) => {
+                  setPage(1);
+                  setStatus(el.target.value);
+                }}
+                sort={sortBy}
+                onSortSelected={(el) => {
+                  setPage(1);
+                  setSortBy(el.target.value);
+                }}
+              />
+            </Box>
           )}
 
           <Box className={styles.surveyCardsContainer}>
@@ -363,7 +351,7 @@ function Dashboard() {
                       gridTemplateColumns: {
                         xs: "1fr",
                         sm: "repeat(auto-fit, minmax(280px, 1fr))",
-                        md: "repeat(auto-fit, minmax(330px, 350px))",
+                        md: "repeat(auto-fit, minmax(330px, 1fr))",
                       },
                     }}
                   >
@@ -414,7 +402,8 @@ function Dashboard() {
                   <DashboardEmptyState
                     onCreateSurvey={handleCreateSurveyClick}
                     onImportTemplate={handleImportSurveyClick}
-                    canCreate={isSurveyAdmin()}
+                    canCreate={false}
+                    showWelcome={false}
                   />
                 )}
               </>

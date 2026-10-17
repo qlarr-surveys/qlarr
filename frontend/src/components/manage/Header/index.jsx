@@ -89,6 +89,13 @@ export const Header = ({ headerOptions }) => {
         <img src="/qlarr.png" style={{ height: "40px" }} />
       </Box>
 
+      {headerOptions.titleKey && (
+        <Box className={styles.headerTitle}>
+          <span aria-hidden="true" className={styles.headerTitleDivider} />
+          <span>{t(headerOptions.titleKey)}</span>
+        </Box>
+      )}
+
       <Box className={isRtl ? styles.userInfoRtl : styles.userInfo}>
         <LanguageSelector />
         {headerOptions.showUserMenu !== false && TokenService.isAuthenticated() && (

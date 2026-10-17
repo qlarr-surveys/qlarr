@@ -169,6 +169,11 @@
     "survey_admin": "Survey Admin",
     "survey_dates": "Survey Dates",
     "survey_mode": "Survey Mode",
+    "survey_mode_hint": {
+      "web": "Respondents answer online via a link.",
+      "offline": "Collected on devices without a connection, then synced.",
+      "mixed": "Online by link and offline on devices."
+    },
     "survey_name": "Survey Name",
     "survey_url": "Survey URL",
     "surveyor": "Surveyor",
@@ -205,6 +210,18 @@
     "web": "Web"
   },
   "my_surveys": "Your Surveys",
+  "recent_surveys": "Recent surveys",
+  "survey_count_one": "{{count}} survey",
+  "survey_count_other": "{{count}} surveys",
+  "dashboard": {
+    "subtitle": "Create a survey manually or import an existing definition.",
+    "subtitle_ai": "Create a survey manually, import a definition, or describe it and let the assistant draft it."
+  },
+  "action_cards": {
+    "create": { "description": "Start from an empty survey and add pages and questions yourself." },
+    "import": { "description": "Upload a Qlarr survey definition exported from another workspace." },
+    "ai": { "description": "Describe your survey. The assistant drafts it and stays available while you edit." }
+  },
   "fetch_error": "Couldn't load your surveys. Check your connection and try again.",
   "new_survey": "New Survey",
   "reset_filter": "Reset Survey Filter",

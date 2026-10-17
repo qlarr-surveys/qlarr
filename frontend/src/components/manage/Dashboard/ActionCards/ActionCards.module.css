@@ -1,0 +1,74 @@
+/* auto-fit, not a column count: two cards and three both come out as equal
+   columns, so the hosted fork adds its AI card without touching this file. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  display: block;
+  padding: 20px;
+  text-align: start;
+  font: inherit;
+  color: inherit;
+  background: #fff;
+  border: 1px solid #dce0ee;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  border-color: var(--card-accent);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--card-accent);
+  outline-offset: 1px;
+}
+
+.iconBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid #dce0ee;
+  background: #f6f7fc;
+  color: #3c447a;
+}
+
+.title {
+  display: block;
+  margin-top: 9px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #1b2150;
+}
+
+.description {
+  display: block;
+  margin-top: 3px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #555d7d;
+}
+
+/* Carried here although nothing in this repo sets tone="ai": the fork adds a
+   card, not a stylesheet. --card-accent comes from the page (theme palette). */
+.card[data-tone="ai"] {
+  background: #f7fdff;
+  border-color: #b9e6f8;
+}
+
+.card[data-tone="ai"] .iconBadge {
+  border-color: #b9e6f8;
+  background: #eaf8fe;
+  color: #04698c;
+}
+
+.card[data-tone="ai"]:hover {
+  border-color: var(--card-accent-ai);
+}

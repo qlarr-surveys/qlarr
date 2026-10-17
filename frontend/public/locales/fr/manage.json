@@ -170,6 +170,11 @@
     "survey_admin": "Administrateur de Sondage",
     "survey_dates": "Dates du Sondage",
     "survey_mode": "Mode de Sondage",
+    "survey_mode_hint": {
+      "web": "Les répondants répondent en ligne via un lien.",
+      "offline": "Collecté sur les appareils sans connexion, puis synchronisé.",
+      "mixed": "En ligne par lien et hors ligne sur les appareils."
+    },
     "survey_name": "Nom du Sondage",
     "survey_url": "URL du Sondage",
     "surveyor": "Sondeur",
@@ -206,6 +211,18 @@
     "web": "Web"
   },
   "my_surveys": "Vos Sondages",
+  "recent_surveys": "Sondages récents",
+  "survey_count_one": "{{count}} sondage",
+  "survey_count_other": "{{count}} sondages",
+  "dashboard": {
+    "subtitle": "Créez un sondage manuellement ou importez une définition existante.",
+    "subtitle_ai": "Créez un sondage manuellement, importez une définition, ou décrivez-le et laissez l'assistant le rédiger."
+  },
+  "action_cards": {
+    "create": { "description": "Partez d'un sondage vide et ajoutez vous-même les pages et les questions." },
+    "import": { "description": "Téléversez une définition de sondage Qlarr exportée depuis un autre espace de travail." },
+    "ai": { "description": "Décrivez votre sondage. L'assistant le rédige et reste disponible pendant que vous le modifiez." }
+  },
   "fetch_error": "Impossible de charger vos sondages. Vérifiez votre connexion et réessayez.",
   "new_survey": "Nouveau Sondage",
   "reset_filter": "Réinitialiser le Filtre de Sondage",

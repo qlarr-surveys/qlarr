@@ -13,6 +13,9 @@ function DashboardEmptyState({
   onCreateSurvey,
   onImportTemplate,
   canCreate,
+  // The dashboard renders its own heading and action cards above this, so its
+  // welcome block and CTAs would say the same thing twice.
+  showWelcome = true,
   children,
 }) {
   const { t } = useTranslation(NAMESPACES.MANAGE);
@@ -20,17 +23,19 @@ function DashboardEmptyState({
 
   return (
     <Box>
-      <Box className={styles.welcomeSection}>
-        <Typography variant="h4" fontWeight={700}>
-          {t("empty_state.welcome", {
-            firstName: user?.firstName || "",
-            lastName: user?.lastName || "",
-          })}
-        </Typography>
-        <Typography variant="body1" color="textSecondary" sx={{ mt: 1 }}>
-          {t("empty_state.subtitle")}
-        </Typography>
-      </Box>
+      {showWelcome && (
+        <Box className={styles.welcomeSection}>
+          <Typography variant="h4" fontWeight={700}>
+            {t("empty_state.welcome", {
+              firstName: user?.firstName || "",
+              lastName: user?.lastName || "",
+            })}
+          </Typography>
+          <Typography variant="body1" color="textSecondary" sx={{ mt: 1 }}>
+            {t("empty_state.subtitle")}
+          </Typography>
+        </Box>
+      )}
 
       <Box className={styles.container}>
         <Box className={styles.centerCard}>

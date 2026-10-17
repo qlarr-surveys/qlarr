@@ -7,9 +7,37 @@
   padding-top: 40px;
 }
 
-.newSurveysButton {
-  margin-bottom: 48px;
-  justify-content: flex-start;
+.pageHeading {
+  margin-bottom: 24px;
+}
+
+.heading {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #1b2150;
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: #4c5474;
+}
+
+.sectionHeading {
+  margin: 0;
+  white-space: nowrap;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #1b2150;
+}
+
+.sectionCount {
+  font-weight: 400;
+  color: #6b7194;
 }
 
 .content {
@@ -17,6 +45,11 @@
   flex-direction: column;
   gap: 0.5rem;
   margin-top: 0;
+}
+
+/* The "Recent surveys" row sits well clear of the action cards above it. */
+.listHeading {
+  margin-top: 40px;
 }
 
 .loadingWrapper {

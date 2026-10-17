@@ -190,6 +190,11 @@
     "survey_admin": "Umfrage Admin",
     "survey_dates": "Umfragedaten",
     "survey_mode": "Umfragemodus",
+    "survey_mode_hint": {
+      "web": "Teilnehmende antworten online über einen Link.",
+      "offline": "Wird auf Geräten ohne Verbindung erfasst und später synchronisiert.",
+      "mixed": "Online per Link und offline auf Geräten."
+    },
     "survey_name": "Umfragename",
     "survey_url": "Umfrage-URL",
     "surveyor": "Landvermesser",
@@ -239,6 +244,18 @@
     "web": "Web"
   },
   "my_surveys": "Ihre Umfragen",
+  "recent_surveys": "Letzte Umfragen",
+  "survey_count_one": "{{count}} Umfrage",
+  "survey_count_other": "{{count}} Umfragen",
+  "dashboard": {
+    "subtitle": "Erstellen Sie eine Umfrage manuell oder importieren Sie eine vorhandene Definition.",
+    "subtitle_ai": "Erstellen Sie eine Umfrage manuell, importieren Sie eine Definition oder beschreiben Sie sie und lassen Sie den Assistenten einen Entwurf erstellen."
+  },
+  "action_cards": {
+    "create": { "description": "Beginnen Sie mit einer leeren Umfrage und fügen Sie Seiten und Fragen selbst hinzu." },
+    "import": { "description": "Laden Sie eine aus einem anderen Arbeitsbereich exportierte Qlarr-Umfragedefinition hoch." },
+    "ai": { "description": "Beschreiben Sie Ihre Umfrage. Der Assistent erstellt einen Entwurf und bleibt während der Bearbeitung verfügbar." }
+  },
   "fetch_error": "Ihre Umfragen konnten nicht geladen werden. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
   "new_survey": "Neue Umfrage",
   "ok": "OK",
