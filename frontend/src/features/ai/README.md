@@ -9,8 +9,13 @@ so `useDashboardActions()` yields two cards. The fork replaces the same file and
 returns a card descriptor:
 
 ```js
-{ key, titleKey, descriptionKey, icon, tone: "ai", onClick }
+{ key, titleKey, descriptionKey, icon, tone: "ai", onClick, widget? }
 ```
+
+`widget` is optional: a surface the card opens, which `ActionCards` mounts
+beside the button so the dashboard page itself needs no fork-only markup. It
+**must** portal out of the grid — a Drawer or a Dialog does; anything rendered
+inline would become a grid cell and sit among the cards.
 
 Two rules keep the merge cheap:
 
