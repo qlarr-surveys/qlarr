@@ -57,6 +57,7 @@
     "count": "Zählen",
     "default_survey_url": "Standard-Umfrage-URL",
     "delete_survey": "Möchten Sie {{survey_name}} wirklich löschen?",
+    "survey_deleted": "{{survey_name}} wurde gelöscht",
     "draft_mode": "Umfrage befindet sich noch im Entwurfsmodus",
     "expired_mode": "Das Enddatum der Umfrage ist abgelaufen",
     "export": "Umfrage exportieren",

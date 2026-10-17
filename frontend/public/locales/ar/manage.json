@@ -54,6 +54,7 @@
     "default_survey_url": "عنوان URL الافتراضي للاستطلاع",
     "close_survey": "هل أنت متأكد أنك تريد إغلاق {{survey_name}}؟",
     "delete_survey": "هل أنت متأكد أنك تريد حذف {{survey_name}}؟",
+    "survey_deleted": "تم حذف {{survey_name}}",
     "general": "عام",
     "limit": "حد",
     "limit_responses": "الحد من الردود من قبل المساحين",

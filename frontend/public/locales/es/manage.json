@@ -54,6 +54,7 @@
     "default_survey_url": "URL de encuesta predeterminada",
     "close_survey": "¿Estás seguro de que quieres cerrar {{survey_name}}?",
     "delete_survey": "¿Estás seguro de que quieres eliminar {{survey_name}}?",
+    "survey_deleted": "{{survey_name}} fue eliminada",
     "general": "General",
     "limit": "Límite",
     "limit_responses": "Limitar Respuestas por Encuestadores",

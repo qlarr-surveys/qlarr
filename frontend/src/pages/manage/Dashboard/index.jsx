@@ -60,12 +60,26 @@ function Dashboard() {
   const [openImportModal, setOpenImportModal] = useState(false);
   const [recentlyUpdatedSurveyName, setRecentlyUpdatedSurveyName] =
     useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
+  // One transient message bar for the whole page: survey actions report both
+  // what succeeded and what failed, and only one of them is ever on screen.
+  const [notice, setNotice] = useState(null);
   const [fetchError, setFetchError] = useState(false);
 
   const dispatch = useDispatch();
 
   const { t } = useTranslation(NAMESPACES.MANAGE);
+
+  const showNotice = (message, severity = "error") =>
+    setNotice({ message, severity });
+
+  const showActionError = (processedError) =>
+    showNotice(
+      t(
+        `processed_errors.${
+          processedError?.name ?? PROCESSED_ERRORS.UNIDENTIFIED_ERROR.name
+        }`
+      )
+    );
 
   const processApirror = (e) => {
     setFetchingSurveys(false);
@@ -152,7 +166,7 @@ function Dashboard() {
 
   const handleAction = () => {
     if (actionType === "delete") {
-      deleteSurvey(selectedSurvey.id);
+      deleteSurvey(selectedSurvey);
       setOpen(false);
     }
   };
@@ -167,22 +181,27 @@ function Dashboard() {
           fetchSurveys();
         }
       })
-      .catch((processedError) => {})
+      .catch(showActionError)
       .finally(() => {
         dispatch(setLoading(false));
       });
   };
 
-  const deleteSurvey = (id) => {
+  const deleteSurvey = (survey) => {
     dispatch(setLoading(true));
     surveyService
-      .deleteSurvey(id)
+      .deleteSurvey(survey.id)
       .then(() => {
+        // Informational only. The delete has already cascaded through the
+        // design, the responses and the uploaded files, and there is no
+        // restore endpoint, so there is nothing to offer an undo for.
+        showNotice(
+          t("edit_survey.survey_deleted", { survey_name: survey.name }),
+          "info"
+        );
         fetchSurveys();
       })
-      .catch((e) => {
-        dispatch(setLoading(false));
-      })
+      .catch(showActionError)
       .finally(() => {
         dispatch(setLoading(false));
       });
@@ -190,7 +209,7 @@ function Dashboard() {
 
   const handleSurveyActionError = (processedError) => {
     if (processedError?.name === PROCESSED_ERRORS.INVALID_SURVEY_DATES.name) {
-      setErrorMessage(t(`processed_errors.${processedError.name}`));
+      showActionError(processedError);
     }
   };
 
@@ -484,12 +503,15 @@ function Dashboard() {
         />
       )}
       <Snackbar
-        open={Boolean(errorMessage)}
+        open={Boolean(notice)}
         autoHideDuration={6000}
-        onClose={() => setErrorMessage(null)}
+        onClose={() => setNotice(null)}
       >
-        <Alert onClose={() => setErrorMessage(null)} severity="error">
-          {errorMessage}
+        <Alert
+          onClose={() => setNotice(null)}
+          severity={notice?.severity ?? "error"}
+        >
+          {notice?.message}
         </Alert>
       </Snackbar>
     </Box>

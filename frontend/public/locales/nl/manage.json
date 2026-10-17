@@ -54,6 +54,7 @@
     "default_survey_url": "Standaard enquête URL",
     "close_survey": "Weet je zeker dat je {{survey_name}} wilt sluiten?",
     "delete_survey": "Weet je zeker dat je {{survey_name}} wilt verwijderen?",
+    "survey_deleted": "{{survey_name}} is verwijderd",
     "general": "Algemeen",
     "limit": "Limiet",
     "limit_responses": "Reacties Beperken door Enquêteurs",

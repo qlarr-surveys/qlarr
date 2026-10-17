@@ -54,6 +54,7 @@
     "default_survey_url": "Default survey URL",
     "close_survey": "Are you sure you want to close {{survey_name}}?",
     "delete_survey": "Are you sure you want to delete {{survey_name}}?",
+    "survey_deleted": "Deleted {{survey_name}}",
     "general": "General",
     "limit": "Limit",
     "limit_responses": "Limit Responses by Surveyors",

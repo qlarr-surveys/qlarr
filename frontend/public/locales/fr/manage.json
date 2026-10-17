@@ -54,6 +54,7 @@
     "default_survey_url": "URL de sondage par défaut",
     "close_survey": "Êtes-vous sûr de vouloir fermer {{survey_name}} ?",
     "delete_survey": "Êtes-vous sûr de vouloir supprimer {{survey_name}} ?",
+    "survey_deleted": "{{survey_name}} a été supprimé",
     "general": "Général",
     "limit": "Limite",
     "limit_responses": "Limiter les Réponses par Sondeurs",

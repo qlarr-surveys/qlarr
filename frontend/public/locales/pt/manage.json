@@ -54,6 +54,7 @@
     "default_survey_url": "URL de pesquisa padrão",
     "close_survey": "Tem certeza de que deseja fechar {{survey_name}}?",
     "delete_survey": "Tem certeza de que deseja excluir {{survey_name}}?",
+    "survey_deleted": "{{survey_name}} foi excluída",
     "general": "Geral",
     "limit": "Limite",
     "limit_responses": "Limitar Respostas por Pesquisadores",
