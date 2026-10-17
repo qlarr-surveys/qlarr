@@ -11,6 +11,9 @@ const CustomTooltip = ({
   children,
   showIcon = true,
   placement = "bottom-start",
+  // Merged over the default tooltip styling. The status legend is a five-row
+  // table that needs more width than a one-line tooltip.
+  tooltipSx,
 }) => {
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -58,6 +61,7 @@ const CustomTooltip = ({
           fontSize: "0.875rem",
           border: "1px solid #dadde9",
           padding: 1,
+          ...tooltipSx,
         },
       },
     },

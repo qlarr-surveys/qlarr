@@ -1,4 +1,4 @@
-import { Box, IconButton, TextField, Tooltip, Typography } from "@mui/material";
+import { Box, IconButton, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import styles from "./Survey.module.css";
 import { truncateWithEllipsis } from "~/utils/design/utils";
@@ -53,82 +53,64 @@ export const EditableSurveyDescription = ({
     setIsDescriptionEditing(true);
   };
 
+  const shown = truncateWithEllipsis(description, charLimit);
+  const text = (
+    <Typography
+      variant="caption"
+      onClick={isEditable ? handleEditClick : undefined}
+      className={styles.descriptionText}
+      sx={{
+        color: description ? "inherit" : "gray",
+        cursor: isEditable ? "pointer" : "default",
+      }}
+    >
+      {shown || (isEditable ? t("survey.description_placeholder") : "")}
+    </Typography>
+  );
+
   return (
     <Box className={styles.descriptionContainer}>
-      {isDescriptionEditing ? (
-        <>
-          <TextField
-            sx={{ px: 3 }}
-            value={description}
-            onChange={handleDescriptionChange}
-            onKeyDown={handleKeyDown}
-            onBlur={handleSave}
-            autoFocus
-            variant="standard"
-            fullWidth
-            multiline
-            rows={3}
-          />
-          <IconButton
-            className={`${styles.saveIcon}`}
-            onClick={handleSave}
-            sx={{ ml: 1 }}
-          >
-            <Check sx={{ color: "gray" }} />
-          </IconButton>
-        </>
-      ) : (
-        <>
-          {isEditable && <Box gap={1} pl={1} display="flex" alignItems="center">
-            <CustomTooltip body={t(`tooltips.survey_description`)} />
-          </Box>}
+      {/* The ⓘ and the edit button stay mounted in both states. Swapping the
+          whole row for the textarea was what made the card jump while you
+          typed, and made the ⓘ vanish exactly when the hint was wanted. */}
+      {isEditable && (
+        <Box className={styles.rowInfo}>
+          <CustomTooltip body={t(`tooltips.survey_description`)} />
+        </Box>
+      )}
 
-          {description?.length > charLimit ? (
-            <CustomTooltip body={description}
-            
-            showIcon={false}>
-              <Typography
-                variant="caption"
-                onClick={isEditable ? handleEditClick : undefined}
-                sx={{
-                  pr: 3,
-                  pl: 1,
-                  color: description ? "inherit" : "gray",
-                  flexGrow: 1,
-                  cursor: isEditable ? "pointer" : "default",
-                }}
-                className={styles.truncatedText}
-              >
-                {truncateWithEllipsis(description, charLimit)}
-              </Typography>
-            </CustomTooltip>
+      {isDescriptionEditing ? (
+        <TextField
+          className={styles.descriptionField}
+          value={description}
+          onChange={handleDescriptionChange}
+          onKeyDown={handleKeyDown}
+          onBlur={handleSave}
+          autoFocus
+          variant="standard"
+          fullWidth
+          multiline
+          rows={2}
+        />
+      ) : description?.length > charLimit ? (
+        <CustomTooltip body={description} showIcon={false}>
+          {text}
+        </CustomTooltip>
+      ) : (
+        text
+      )}
+
+      {isEditable && (
+        <IconButton
+          className={styles.descriptionIcon}
+          onClick={isDescriptionEditing ? handleSave : handleEditClick}
+        >
+          {isDescriptionEditing ? (
+            <Check fontSize="small" />
           ) : (
-            <Typography
-              variant="caption"
-              onClick={isEditable ? handleEditClick : undefined}
-              sx={{
-                pr: 3,
-                pl: 1,
-                color: description ? "inherit" : "gray",
-                flexGrow: 1,
-                cursor: isEditable ? "pointer" : "default",
-              }}
-              className={styles.truncatedText}
-            >
-              {truncateWithEllipsis(description, charLimit) ||
-                ( isEditable ? t("survey.description_placeholder") : "")}
-            </Typography>
+            <Edit fontSize="small" />
           )}
-          {isEditable && (
-            <IconButton
-              className={`${styles.descriptionIcon}`}
-              onClick={handleEditClick}
-              sx={{ ml: 1 }}
-            >
-              <Edit sx={{ color: "gray" }} />
-            </IconButton>
-          )}
-        </>
+        </IconButton>
       )}
     </Box>
   );

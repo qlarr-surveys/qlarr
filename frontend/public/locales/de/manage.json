@@ -47,6 +47,7 @@
   "create_survey_with_ai": "Umfrage mit KI erstellen",
   "edit_survey": {
     "add_logo": "Umfrage-Logo hinzufügen",
+    "replace_logo": "Logo ersetzen",
     "active_mode": "Umfrage ist aktiv",
     "can_lock_survey": "Erlauben Sie Vermessern, die Vermessung zu sperren",
     "clone_survey": "Klon-Umfrage",

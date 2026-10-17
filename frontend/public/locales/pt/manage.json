@@ -45,6 +45,7 @@
   "ai_prompt_helper": "Descreva que tipo de pesquisa você deseja criar com o maior detalhe possível",
   "edit_survey": {
     "add_logo": "Adicionar um logótipo ao inquérito",
+    "replace_logo": "Substituir logótipo",
     "export": "Exportar Pesquisa",
     "close_title": "Fechar Pesquisa",
     "can_lock_survey": "Permitir que pesquisadores bloqueiem a pesquisa",

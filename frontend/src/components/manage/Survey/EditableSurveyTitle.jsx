@@ -6,7 +6,14 @@ import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 
-export const EditableSurveyTitle = ({ survey, onSave, isEditable = true }) => {
+export const EditableSurveyTitle = ({
+  survey,
+  onSave,
+  isEditable = true,
+  // Rendered at the end of the row, beside the title. The unpublished-changes
+  // marker belongs next to the name it applies to.
+  badge,
+}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(survey.name);
   const { t } = useTranslation(NAMESPACES.MANAGE);
@@ -51,10 +58,16 @@ export const EditableSurveyTitle = ({ survey, onSave, isEditable = true }) => {
 
   return (
     <Box className={styles.titleContainer}>
+      {/* Kept mounted across both branches so the row does not jump when
+          editing starts. */}
+      <Box className={styles.rowInfo}>
+        <CustomTooltip body={t(`tooltips.survey_title`)} />
+      </Box>
+
       {isEditing ? (
         <>
           <TextField
-            sx={{ px: 3, flexGrow: 1 }}
+            className={styles.titleField}
             value={title}
             onChange={handleTitleChange}
             onKeyDown={handleKeyDown}
@@ -62,48 +75,25 @@ export const EditableSurveyTitle = ({ survey, onSave, isEditable = true }) => {
             autoFocus
             variant="standard"
             fullWidth
-            InputProps={{
-              style: { color: "white" },
-            }}
           />
-          <IconButton
-            className={styles.saveIcon}
-            onClick={handleSave}
-            sx={{ ml: 1 }}
-          >
-            <Check sx={{ color: "white" }} />
+          <IconButton className={styles.saveIcon} onClick={handleSave}>
+            <Check fontSize="small" />
           </IconButton>
         </>
       ) : (
         <>
-          {<Box gap={1} pl={1} display="flex" alignItems="center">
-            <CustomTooltip body={t(`tooltips.survey_title`)} />
-          </Box>}
-
           <Typography
             variant="h5"
             onClick={isEditable ? handleEditClick : undefined}
-            sx={{
-              pr: 3,
-              pl: 1,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              display: "-webkit-box",
-              WebkitLineClamp: "2",
-              WebkitBoxOrient: "vertical",
-              flexGrow: 1,
-              cursor: isEditable ? "pointer" : "default",
-            }}
+            className={styles.titleText}
+            sx={{ cursor: isEditable ? "pointer" : "default" }}
           >
             {title}
           </Typography>
+          {badge}
           {isEditable && (
-            <IconButton
-              className={styles.nameIcon}
-              onClick={handleEditClick}
-              sx={{ ml: 1 }}
-            >
-              <Edit sx={{ color: "white" }} />
+            <IconButton className={styles.nameIcon} onClick={handleEditClick}>
+              <Edit fontSize="small" />
             </IconButton>
           )}
         </>

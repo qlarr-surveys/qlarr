@@ -45,6 +45,7 @@
   "ai_prompt_helper": "Beschrijf wat voor soort enquête je wilt aanmaken in zoveel mogelijk detail",
   "edit_survey": {
     "add_logo": "Een enquêtelogo toevoegen",
+    "replace_logo": "Logo vervangen",
     "export": "Enquête Exporteren",
     "close_title": "Enquête Sluiten",
     "can_lock_survey": "Sta enquêteurs toe om enquête te vergrendelen",

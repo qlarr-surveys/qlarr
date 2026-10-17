@@ -45,6 +45,7 @@
   "ai_prompt_helper": "Describe what kind of survey you want to create in as much detail as possible",
   "edit_survey": {
     "add_logo": "Add a survey logo",
+    "replace_logo": "Replace logo",
     "export": "Export Survey",
     "close_title": "Close Survey",
     "can_lock_survey": "Allow surveyors to lock survey",

@@ -45,6 +45,7 @@
   "ai_prompt_helper": "Décrivez quel type de sondage vous souhaitez créer avec le plus de détails possible",
   "edit_survey": {
     "add_logo": "Ajouter un logo au sondage",
+    "replace_logo": "Remplacer le logo",
     "export": "Exporter le Sondage",
     "close_title": "Fermer le Sondage",
     "can_lock_survey": "Autoriser les sondeurs à verrouiller le sondage",

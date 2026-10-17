@@ -1,371 +1,112 @@
-.surveyHeader {
-  padding: 5px;
-  color: #fff;
-  text-transform: capitalize;
-}
-
-.contentCard {
-  padding: 5px;
-}
-
-.actionBtn {
-  display: flex;
-  justify-content: space-between;
-}
-
+/* ==============================================
+   Card shell
+   ============================================== */
 .card {
-  border-radius: 5px !important;
-  box-shadow: none !important;
-}
-
-.cardContent {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-}
-
-.imageContainer {
-  padding: 1rem;
-  background-color: #f7f8fc;
-  display: flex;
-  justify-content: center;
-}
-
-.surveyContent {
-  display: flex;
-  align-items: center;
-  gap: 7rem;
-  flex: 1;
-  width: 100%;
-}
-
-.surveyTitle {
-  width: 13rem;
-  color: #181735;
-}
-
-.surveyStatus {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  width: 5rem;
-}
-
-.badge {
-  height: 0.5rem;
-  width: 0.5rem;
-  border-radius: 99999px;
-}
-
-.textTransform {
-  text-transform: capitalize;
-}
-
-.surveyResponse {
-  display: flex;
-  align-items: center;
-  width: 9rem;
-  gap: 0.5rem;
-}
-
-.surveyActions {
-  display: flex;
-  flex-direction: row !important;
-  justify-content: flex-start;
-  gap: 0.5rem;
-  margin-right: 1rem;
-  flex: auto;
-  width: 15rem;
-}
-
-.iconButton {
-  border: 0.5px solid #e3dfdf !important;
-  border-radius: 8px !important;
-  padding: 0.5rem !important;
-  height: 32px !important;
-  width: 64px !important;
-  min-width: 32px !important;
-}
-
-.statusAndIcons {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  width: 100%;
-  padding: 0 1.5rem;
-}
-
-.statusBadge {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-width: 5rem;
-}
-
-.statusIcons {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex: 1;
-}
-
-@media only screen and (max-width: 1024px) {
-  .cardContent {
-    flex-direction: column;
-    padding: 0rem 1rem 1rem 1rem;
-  }
-
-  .surveyContent {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
-  }
-
-  .imageContainer {
-    width: 100%;
-  }
-
-  .surveyActions {
-    width: 100%;
-  }
-
-  .statusAndIcons {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-
-@media only screen and (min-width: 1024px) and (max-width: 1440px) {
-  .surveyContent {
-    gap: 2rem;
-  }
-
-  .surveyResponse {
-    width: 7rem;
-  }
-}
-
-.logo {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.logo img {
-  margin: auto;
-  display: block;
-  object-fit: contain;
-}
-
-.logoImageWrapper {
-  position: relative;
-}
-
-.imageOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.3);
-  opacity: 1;
-  transition: opacity 0.3s ease;
-}
-
-.cameraIconWrapper {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 1;
-}
-
-.logoImageWrapper:hover .cameraIconWrapper {
-  opacity: 1;
-}
-
-.cameraIcon {
-  color: white;
-  pointer-events: none;
-}
-
-.logoImageWrapper {
-  position: relative;
-  display: inline-block;
-  flex: 1;
-}
-
-.relativeContainer {
-  position: relative;
-  background-color: rgba(0, 0, 0, 0.4);
-}
-
-.absoluteOverlay {
-  width: 100%;
-  position: absolute;
-  z-index: 99999;
-  bottom: 0;
-  color: white;
-}
-
-.container {
   display: flex;
   flex-direction: column;
-  width: 100%;
-}
-
-.truncatedText {
+  border: 1px solid #dce0ee;
+  border-radius: 12px;
   overflow: hidden;
-  text-overflow: ellipsis;
-  display: inline-block;
-  line-height: 1.5em;
-  max-height: 4.5em;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  white-space: normal;
-  word-wrap: break-word;
-  word-break: break-word;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
+.card:hover {
+  border-color: #b9bff0;
+  box-shadow: 0 4px 14px rgba(27, 33, 80, 0.07);
+}
 
-.titleContainer {
+.cardBody {
+  flex: 1;
   display: flex;
-  align-items: center;
-  width: 100%;
-  justify-content: space-between;
+  flex-direction: column;
+  padding: 16px 20px 20px;
 }
 
-.surveyLink {
-  flex-grow: 1;
-  color: inherit;
-}
-
-.nameIcon {
-  opacity: 0;
-  transition: opacity 0.2s ease-in-out;
-}
-
-.titleContainer:hover .nameIcon {
-  opacity: 1;
-}
-
-.descriptionContainer {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  justify-content: space-between;
+/* ==============================================
+   Cover: logo, replace affordance, status pill
+   ============================================== */
+.cover {
   position: relative;
+  flex: none;
+  height: 118px;
+  overflow: hidden;
+  background: #fff;
 }
 
-.truncatedText {
-  flex-grow: 1;
-  color: inherit;
-}
-
-.descriptionIcon {
-  opacity: 0;
-  transition: opacity 0.2s ease-in-out;
-}
-
-.descriptionContainer:hover .descriptionIcon {
-  opacity: 1;
-}
-
-.photoIcon {
+/* Inset and contained, so a wide logo and a tall one are both shown whole
+   and neither touches the card's edges. The deeper bottom inset keeps a wide
+   logo clear of the status pill rather than running underneath it. */
+.coverLogo {
   position: absolute;
-  top: 5px;
-  right: 5px;
+  inset: 14px 20px 36px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.coverInput {
+  display: none;
+}
+
+/* Hidden until the cover is hovered, focused within, or dragged over. It is a
+   real button, so keyboard users reach it the same way. */
+.coverReplace {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
   opacity: 0;
-  cursor: pointer;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
 }
 
-.logoImageWrapper:hover .photoIcon {
+.cover:hover .coverReplace,
+.cover:focus-within .coverReplace,
+.cover[data-dragover="true"] .coverReplace {
   opacity: 1;
+  background-color: rgba(0, 0, 0, 0.45);
 }
 
-.addLogoCta {
-  opacity: 1;
+.coverReplace:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: -5px;
+}
+
+.coverReplaceIcon {
   display: flex;
   align-items: center;
-  gap: 4px;
-  color: white;
-  cursor: pointer;
-  font-family: 'Rubik', sans-serif;
-  font-size: 0.75rem;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+}
+
+.coverReplaceLabel {
+  font-size: 13px;
   font-weight: 600;
-  white-space: nowrap;
-}
-
-.addLogoIcon {
-  font-size: 16px !important;
-  color: white;
-}
-
-.addLogoLabel {
-  line-height: 1;
-}
-
-.highlight {
-  animation: fadeHighlight 3s ease-in-out;
-  background-color: rgba(
-    245,
-    245,
-    220,
-    0.7
-  ); /* Beige with partial transparency */
-}
-
-@keyframes fadeHighlight {
-  0% {
-    background-color: rgba(
-      245,
-      245,
-      220,
-      0.7
-    ); /* Start with semi-transparent beige */
-  }
-  100% {
-    background-color: rgba(
-      245,
-      245,
-      220,
-      0.2
-    ); /* Fade to even more transparent beige */
-  }
+  line-height: 16px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
 }
 
 /* ==============================================
-   CSS Variables for Survey Card
+   Status pill — the colour key users_manage.statuses_info explains.
+   Changing these silently desyncs that legend.
    ============================================== */
-.surveyCardVars {
-  --color-navy: #16205b;
-  --color-navy-dark: #091133;
-  --color-blue: #2d3cb1;
-  --color-cyan: #04bdf3;
-  --color-orange: #d13e17;
-  --color-gray-light: #B3B7CB;
-  --color-gray-lightest: #EFF1FC;
-  --spacing-card: 1.5rem;
-  --transition-default: all 0.3s ease;
-}
-
-/* ==============================================
-   Survey Meta Section
-   ============================================== */
-.surveyMeta {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-  padding: 0 var(--spacing-card, 1.5rem) 1.25rem;
-  border-bottom: 2px solid var(--color-gray-lightest, #EFF1FC);
-}
-
-/* Status Badge */
 .statusPill {
+  position: absolute;
+  bottom: 12px;
+  inset-inline-end: 12px;
+  z-index: 2;
   padding: 0.4rem 0.9rem;
   border-radius: 20px;
   font-size: 0.75rem;
@@ -375,6 +116,8 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.12);
+  cursor: help;
 }
 
 .statusDot {
@@ -384,14 +127,13 @@
   background-color: currentColor;
 }
 
-/* Status Variants */
 .draft {
-  background: linear-gradient(135deg, #FEE33F 0%, #F0A12F 100%);
-  color: var(--color-navy-dark, #091133);
+  background: linear-gradient(135deg, #fee33f 0%, #f0a12f 100%);
+  color: #091133;
 }
 
 .active {
-  background: linear-gradient(135deg, #69ac3b 0%, #56A034 100%);
+  background: linear-gradient(135deg, #69ac3b 0%, #56a034 100%);
   color: white;
 }
 
@@ -411,84 +153,203 @@
 }
 
 /* ==============================================
-   Survey Icons
+   Title and description rows
    ============================================== */
-.surveyIconsContainer {
+.titleContainer,
+.descriptionContainer {
+  position: relative;
   display: flex;
-  gap: 0.5rem;
-  margin-left: auto;
+  align-items: flex-start;
+  gap: 4px;
 }
 
-.surveyIcon {
-  width: 32px;
-  height: 32px;
-  background: var(--color-gray-lightest, #EFF1FC);
-  border-radius: 8px;
+.titleContainer {
+  min-height: 48px;
+}
+
+.descriptionContainer {
+  margin-top: 4px;
+  min-height: 44px;
+}
+
+/* The ⓘ, mounted in both the reading and the editing state. */
+.rowInfo {
+  display: flex;
+  align-items: center;
+  flex: none;
+  padding-top: 4px;
+}
+
+.titleText {
+  flex: 0 1 auto;
+  min-width: 0;
+  padding: 2px 6px;
+  margin-inline-start: -6px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
+  color: #1b2150;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.titleText:hover {
+  background: #f3f4fa;
+}
+
+.descriptionText {
+  flex: 0 1 auto;
+  min-width: 0;
+  padding: 2px 6px;
+  margin-inline-start: -6px;
+  border-radius: 6px;
+  font-size: 13.5px;
+  line-height: 20px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.descriptionText:hover {
+  background: #f3f4fa;
+}
+
+/* Same inset as the reading state, so the text does not shift sideways by the
+   6px of negative margin when the editor opens. */
+.titleField,
+.descriptionField {
+  flex: 1;
+  min-width: 0;
+  margin-inline-start: -6px;
+}
+
+.titleField :global(.MuiInputBase-input),
+.descriptionField :global(.MuiInputBase-input) {
+  padding-inline: 6px;
+}
+
+.nameIcon,
+.descriptionIcon,
+.saveIcon {
+  flex: none;
+  margin-inline-start: auto;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.saveIcon {
+  opacity: 1;
+}
+
+.titleContainer:hover .nameIcon,
+.titleContainer:focus-within .nameIcon,
+.descriptionContainer:hover .descriptionIcon,
+.descriptionContainer:focus-within .descriptionIcon {
+  opacity: 1;
+}
+
+/* The unpublished-changes marker, beside the name it applies to. */
+.unpublishedBadge {
+  position: relative;
+  flex: none;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-navy, #16205b);
-  transition: var(--transition-default, all 0.3s ease);
+  border-radius: 7px;
+  background: #fffaeb;
+  color: #93370d;
   cursor: pointer;
-  position: relative;
-}
-
-.surveyIcon:hover {
-  background: var(--color-cyan, #04bdf3);
-  color: white;
-  transform: scale(1.1);
 }
 
 /* ==============================================
-   Survey Dates
+   Mode, stats
    ============================================== */
-.surveyDates {
-  display: flex;
-  justify-content: flex-start;
-  gap: 2rem;
-  font-size: 0.8rem;
-  color: var(--color-gray-light, #B3B7CB);
-  margin-bottom: 25px;
-  padding: 0 var(--spacing-card, 1.5rem);
+.cardMeta {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  line-height: 18px;
+  color: #5b6189;
 }
 
-.dateItem {
+.cardStats {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid #eef0f7;
+}
+
+.responsesStat {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  align-items: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: start;
+  cursor: pointer;
+  border-radius: 6px;
 }
 
-.dateLabel {
+.responsesStat:focus-visible {
+  outline: 2px solid var(--card-accent, #16205b);
+  outline-offset: 2px;
+}
+
+.statValue {
+  display: block;
+  font-size: 20px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-size: 0.7rem;
+  line-height: 24px;
+  color: #1b2150;
 }
 
-.dateValue {
-  font-weight: 500;
-  color: var(--color-navy, #16205b);
+.statLabel {
+  display: block;
+  font-size: 12px;
+  color: #5b6189;
+}
+
+.createdStat {
+  flex: none;
+  text-align: end;
+  font-size: 12px;
+  line-height: 17px;
+}
+
+.createdValue {
+  display: block;
+  color: #1b2150;
 }
 
 /* ==============================================
-   Survey Actions
+   Actions
    ============================================== */
-.surveyActionsNew {
+.cardActions {
   display: flex;
   gap: 0.75rem;
-  padding: 0 var(--spacing-card, 1.5rem) var(--spacing-card, 1.5rem);
+  margin-top: 16px;
 }
 
 .actionBtn {
   flex: 1;
   padding: 0.75rem 1rem;
   border-radius: 10px;
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
   font-weight: 600;
   font-size: 0.85rem;
   border: none;
   cursor: pointer;
-  transition: var(--transition-default, all 0.3s ease);
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -496,7 +357,7 @@
 }
 
 .actionBtnPrimary {
-  background: linear-gradient(135deg, var(--color-blue, #2d3cb1) 0%, var(--color-navy, #16205b) 100%);
+  background: linear-gradient(135deg, #2d3cb1 0%, #16205b 100%);
   color: white;
 }
 
@@ -507,29 +368,48 @@
 
 .actionBtnSecondary {
   background: white;
-  color: var(--color-navy, #16205b);
-  border: 2px solid var(--color-gray-lightest, #EFF1FC);
+  color: #16205b;
+  border: 2px solid #eff1fc;
 }
 
 .actionBtnSecondary:hover {
-  border-color: var(--color-cyan, #04bdf3);
-  color: var(--color-cyan, #04bdf3);
+  border-color: #04bdf3;
+  color: #04bdf3;
 }
 
+/* --card-danger is error.dark (#B71D18), set on the card from the theme.
+   error.main is amber, and the old hard-coded #d13e17 was neither. */
 .actionBtnDanger {
   background: white;
-  color: var(--color-orange, #d13e17);
-  border: 2px solid var(--color-gray-lightest, #EFF1FC);
+  color: var(--card-danger, #b71d18);
+  border: 2px solid #eff1fc;
 }
 
 .actionBtnDanger:hover {
-  background: var(--color-orange, #d13e17);
+  background: var(--card-danger, #b71d18);
   color: white;
-  border-color: var(--color-orange, #d13e17);
+  border-color: var(--card-danger, #b71d18);
 }
 
 .actionBtnIconOnly {
   flex: 0 0 auto;
   width: 48px;
   padding: 0.75rem;
+}
+
+/* ==============================================
+   Clone highlight
+   ============================================== */
+.highlight {
+  animation: fadeHighlight 3s ease-in-out;
+  background-color: rgba(245, 245, 220, 0.7);
+}
+
+@keyframes fadeHighlight {
+  0% {
+    background-color: rgba(245, 245, 220, 0.7);
+  }
+  100% {
+    background-color: rgba(245, 245, 220, 0.2);
+  }
 }
