@@ -1,5 +1,6 @@
 {
   "action_btn": {
+    "retry": "Tentar novamente",
     "add": "Adicionar",
     "add_user": "Adicionar Usuário",
     "cancel": "Cancelar",
@@ -205,6 +206,7 @@
     "web": "Web"
   },
   "my_surveys": "Suas Pesquisas",
+  "fetch_error": "Não foi possível carregar suas pesquisas. Verifique sua conexão e tente novamente.",
   "new_survey": "Nova Pesquisa",
   "reset_filter": "Redefinir Filtro de Pesquisa",
   "create_new_survey": "Criar Nova Pesquisa",

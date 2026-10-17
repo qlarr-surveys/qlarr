@@ -1,5 +1,6 @@
 {
   "action_btn": {
+    "retry": "Opnieuw proberen",
     "add": "Toevoegen",
     "add_user": "Gebruiker Toevoegen",
     "cancel": "Annuleren",
@@ -205,6 +206,7 @@
     "web": "Web"
   },
   "my_surveys": "Jouw Enquêtes",
+  "fetch_error": "Je enquêtes konden niet worden geladen. Controleer je verbinding en probeer het opnieuw.",
   "new_survey": "Nieuwe Enquête",
   "reset_filter": "Enquête Filter Resetten",
   "create_new_survey": "Nieuwe Enquête Aanmaken",

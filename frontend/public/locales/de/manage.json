@@ -1,5 +1,6 @@
 {
   "action_btn": {
+    "retry": "Erneut versuchen",
     "add": "Hinzufügen",
     "add_user": "Benutzer hinzufügen",
     "cancel": "Abbrechen",
@@ -238,6 +239,7 @@
     "web": "Web"
   },
   "my_surveys": "Ihre Umfragen",
+  "fetch_error": "Ihre Umfragen konnten nicht geladen werden. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
   "new_survey": "Neue Umfrage",
   "ok": "OK",
   "password_required": "Passwort ist erforderlich",

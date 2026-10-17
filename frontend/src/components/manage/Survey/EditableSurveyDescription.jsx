@@ -1,5 +1,5 @@
 import { Box, IconButton, TextField, Tooltip, Typography } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./Survey.module.css";
 import { truncateWithEllipsis } from "~/utils/design/utils";
 import { Edit, Check } from "@mui/icons-material";
@@ -17,6 +17,14 @@ export const EditableSurveyDescription = ({
   const { t } = useTranslation(NAMESPACES.MANAGE);
 
   const charLimit = 125;
+
+  // See EditableSurveyTitle: follow the survey, and leave isEditing out of the
+  // dependencies so the text does not flash back mid-save.
+  useEffect(() => {
+    if (!isDescriptionEditing) {
+      setDescription(survey.description);
+    }
+  }, [survey.description]);
 
   const handleDescriptionChange = (event) => {
     setDescription(event.target.value);

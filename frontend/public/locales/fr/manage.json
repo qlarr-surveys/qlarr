@@ -1,5 +1,6 @@
 {
   "action_btn": {
+    "retry": "Réessayer",
     "add": "Ajouter",
     "add_user": "Ajouter un Utilisateur",
     "cancel": "Annuler",
@@ -205,6 +206,7 @@
     "web": "Web"
   },
   "my_surveys": "Vos Sondages",
+  "fetch_error": "Impossible de charger vos sondages. Vérifiez votre connexion et réessayez.",
   "new_survey": "Nouveau Sondage",
   "reset_filter": "Réinitialiser le Filtre de Sondage",
   "create_new_survey": "Créer un Nouveau Sondage",

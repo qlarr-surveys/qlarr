@@ -33,7 +33,6 @@ import { useNavigate } from "react-router-dom";
 import { EditableSurveyTitle } from "./EditableSurveyTitle";
 import { EditableSurveyDescription } from "./EditableSurveyDescription";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
-import NumbersIcon from "@mui/icons-material/Numbers";
 import { setDesignModeToDesign } from "~/state/design/designState";
 
 import { STATUS } from "./status";
@@ -241,35 +240,23 @@ const Survey = ({
       setOpenSnackbar(true);
       return;
     }
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      designService
-        .uploadResource(image, survey.id)
-        .then((response) => {
-          surveyService
-            .putSurvey({ image: response.name }, survey.id)
-            .then((result) => {
-              onUpdateImage(survey.id, response.name);
-            })
-            .catch((err) => {
-              setError(t(`processed_errors.${err.name}`));
-              setOpenSnackbar(true);
-            })
-            .finally(() => {
-              dispatch(setLoading(false));
-            });
-        })
-        .catch((err) => {
-          setError(t(`processed_errors.${err.name}`));
-          setOpenSnackbar(true);
-        })
-        .finally(() => {
-          dispatch(setLoading(false));
-        });
-    };
-
-    reader.readAsDataURL(image);
+    dispatch(setLoading(true));
+    designService
+      .uploadResource(image, survey.id)
+      // Spread the survey: the edit endpoint assigns startDate/endDate directly
+      // rather than merging them, so a partial body clears both dates.
+      .then((response) =>
+        surveyService
+          .putSurvey({ ...survey, image: response.name }, survey.id)
+          .then(() => onUpdateImage(survey.id, response.name))
+      )
+      .catch((err) => {
+        setError(t(`processed_errors.${err.name}`));
+        setOpenSnackbar(true);
+      })
+      .finally(() => {
+        dispatch(setLoading(false));
+      });
   };
 
   return (
