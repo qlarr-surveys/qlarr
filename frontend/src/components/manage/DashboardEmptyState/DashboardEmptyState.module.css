@@ -6,11 +6,6 @@
   margin: 40px auto 0;
 }
 
-.welcomeSection {
-  text-align: start;
-  margin-bottom: 32px;
-}
-
 .centerCard {
   display: flex;
   flex-direction: column;

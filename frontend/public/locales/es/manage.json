@@ -616,8 +616,6 @@
     "tour_back": "atrás"
   },
   "empty_state": {
-    "welcome": "Bienvenido {{firstName}} {{lastName}}",
-    "subtitle": "Descubre información más profunda para tomar decisiones más inteligentes.",
     "create_first_survey": "Crea tu primera encuesta en minutos",
     "create_survey_btn": "Crear encuesta",
     "import_template": "Importar plantilla existente",

@@ -616,8 +616,6 @@
     "tour_back": "terug"
   },
   "empty_state": {
-    "welcome": "Welkom {{firstName}} {{lastName}}",
-    "subtitle": "Ontdek diepere inzichten voor slimmere beslissingen.",
     "create_first_survey": "Maak uw eerste enquête in enkele minuten",
     "create_survey_btn": "Enquête aanmaken",
     "import_template": "Bestaand sjabloon importeren",

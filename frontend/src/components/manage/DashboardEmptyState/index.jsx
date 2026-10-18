@@ -6,37 +6,18 @@ import trustResponseIcon from "~/assets/icons/trust-every-respons.svg";
 import ownResultIcon from "~/assets/icons/own-every-result.svg";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
-import TokenService from "~/services/TokenService";
 import styles from "./DashboardEmptyState.module.css";
 
 function DashboardEmptyState({
   onCreateSurvey,
   onImportTemplate,
   canCreate,
-  // The dashboard renders its own heading and action cards above this, so its
-  // welcome block and CTAs would say the same thing twice.
-  showWelcome = true,
   children,
 }) {
   const { t } = useTranslation(NAMESPACES.MANAGE);
-  const user = TokenService.getUser();
 
   return (
     <Box>
-      {showWelcome && (
-        <Box className={styles.welcomeSection}>
-          <Typography variant="h4" fontWeight={700}>
-            {t("empty_state.welcome", {
-              firstName: user?.firstName || "",
-              lastName: user?.lastName || "",
-            })}
-          </Typography>
-          <Typography variant="body1" color="textSecondary" sx={{ mt: 1 }}>
-            {t("empty_state.subtitle")}
-          </Typography>
-        </Box>
-      )}
-
       <Box className={styles.container}>
         <Box className={styles.centerCard}>
         <img src="/empty-state.png" alt="" className={styles.illustration} />

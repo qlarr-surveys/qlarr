@@ -617,8 +617,6 @@
     "tour_back": "zurück"
   },
   "empty_state": {
-    "welcome": "Willkommen {{firstName}} {{lastName}}",
-    "subtitle": "Gewinnen Sie tiefere Einblicke für klügere Entscheidungen.",
     "create_first_survey": "Erstellen Sie Ihre erste Umfrage in Minuten",
     "create_survey_btn": "Umfrage erstellen",
     "import_template": "Vorhandene Vorlage importieren",
