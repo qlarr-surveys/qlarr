@@ -55,3 +55,13 @@ export class InvalidTranslationsCsvException extends HttpException {
     );
   }
 }
+
+/** The uploaded translations CSV isn't UTF-8 (e.g. Excel's Windows-1252 "CSV"). 400. */
+export class TranslationsCsvNotUtf8Exception extends HttpException {
+  constructor() {
+    super(
+      { message: 'Translations CSV is not UTF-8', error: 'TranslationsCsvNotUtf8Exception' },
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+}

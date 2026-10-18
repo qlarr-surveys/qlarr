@@ -1,13 +1,9 @@
 .wrapper {
   display: flex;
   align-items: center;
+  column-gap: 0.4em;
   width: 100%;
   margin-bottom: 0;
   line-height: 16px;
   letter-spacing: 0.3px;
-}
-
-.icon {
-  margin-right: 12px;
-  transform: rotate(180deg);
 }

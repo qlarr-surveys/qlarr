@@ -5,6 +5,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { randomUUID } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import {
   access,
@@ -13,6 +14,7 @@ import {
   mkdir,
   readFile,
   readdir,
+  rename,
   rm,
   stat,
   writeFile,
@@ -34,6 +36,10 @@ import { MediaOptimizer } from './media-optimizer';
 import { SurveyFolder } from './survey-folder';
 
 const METADATA_POSTFIX = '.metadata';
+/** Scratch dir under the storage root for background video re-encodes. It sits
+ * on the same filesystem as the survey folders, so the finished file can be
+ * swapped in with an atomic rename. */
+const TMP_DIR = '.qlarr-tmp';
 
 /**
  * Local-disk `FileHelper` — the open-source storage implementation. Stores each
@@ -47,6 +53,8 @@ const METADATA_POSTFIX = '.metadata';
 export class LocalFileHelper implements FileHelper, OnModuleInit {
   private readonly logger = new Logger(LocalFileHelper.name);
   private readonly root: string;
+  /** Background video re-encodes run one at a time, chained on this promise. */
+  private videoQueue: Promise<void> = Promise.resolve();
 
   constructor(config: ConfigService, private readonly media: MediaOptimizer) {
     this.root = config.getOrThrow<StorageConfig>('storage').rootFolder;
@@ -65,6 +73,9 @@ export class LocalFileHelper implements FileHelper, OnModuleInit {
       await mkdir(this.root, { recursive: true });
       await writeFile(probe, '');
       await rm(probe, { force: true });
+      // Leftovers from re-encodes interrupted by a restart; the originals they
+      // were replacing are still in place.
+      await rm(join(this.root, TMP_DIR), { recursive: true, force: true });
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err);
       throw new Error(
@@ -83,6 +94,11 @@ export class LocalFileHelper implements FileHelper, OnModuleInit {
     folder: SurveyFolder,
     filename: string,
   ): string {
+    // Express URL-decodes params, so `..%2F` arrives as `../` — a filename
+    // must stay a single name.
+    if (/[/\\]/.test(filename)) {
+      throw new BadRequestException('Invalid file path');
+    }
     const path = join(this.root, surveyId, folder.path, filename);
     // resolve() collapses `..`; `+ sep` guards a sibling-prefix bypass
     // (root `/data` must not match `/data-evil`).
@@ -104,29 +120,77 @@ export class LocalFileHelper implements FileHelper, OnModuleInit {
     contentType: string,
     filename: string,
   ): Promise<void> {
-    const bytes = await this.optimizeIfResource(folder, body, contentType, filename);
-    await this.write(this.filePath(surveyId, folder, filename), bytes, contentType);
+    const path = this.filePath(surveyId, folder, filename);
+    if (folder.isResources && this.media.isVideo(contentType)) {
+      // Re-encoding can take minutes, longer than an upload request should
+      // hang (and than proxies allow). Store the original now so it is usable
+      // right away, and swap in the optimized MP4 once it's ready.
+      await this.write(path, body, contentType);
+      this.enqueueVideoOptimization(path);
+      return;
+    }
+    const bytes = await this.optimizeImageIfResource(folder, body, contentType);
+    await this.write(path, bytes, contentType);
   }
 
   /**
-   * Resources get shrunk before storage (images via sharp, video via ffmpeg) —
-   * only for the `resources` folder. The stored content type stays the original
-   * (the download header is unchanged).
+   * Resource images get shrunk (via sharp) before storage — only for the
+   * `resources` folder. The stored content type stays the original (the
+   * download header is unchanged). Videos are handled in the background, see
+   * `optimizeStoredVideo`.
    */
-  private async optimizeIfResource(
+  private async optimizeImageIfResource(
     folder: SurveyFolder,
     body: Buffer,
     contentType: string,
-    filename: string,
   ): Promise<Buffer> {
-    if (!folder.isResources) return body;
-    if (this.media.isSupportedImage(contentType)) {
+    if (folder.isResources && this.media.isSupportedImage(contentType)) {
       return this.media.optimizeImage(body, contentType);
     }
-    if (this.media.isVideo(contentType)) {
-      return this.media.optimizeVideo(body, filename);
-    }
     return body;
+  }
+
+  private enqueueVideoOptimization(path: string): void {
+    this.videoQueue = this.videoQueue
+      .then(() => this.optimizeStoredVideo(path))
+      .catch((err) => {
+        const reason = err instanceof Error ? err.message : String(err);
+        this.logger.warn(`Video optimization failed for ${path}: ${reason}`);
+      });
+  }
+
+  /** Resolves once every queued background video re-encode has finished. */
+  whenVideoOptimizationsSettled(): Promise<void> {
+    return this.videoQueue;
+  }
+
+  /**
+   * Re-encode a stored resource video (via ffmpeg) and atomically replace it
+   * with the MP4. If ffmpeg fails, the original stays in place. Skipped if the
+   * file was deleted or replaced meanwhile, so it is never resurrected or
+   * clobbered.
+   */
+  private async optimizeStoredVideo(path: string): Promise<void> {
+    const before = await stat(path).catch(() => null);
+    if (!before) return;
+    const tmpDir = join(this.root, TMP_DIR);
+    const outPath = join(tmpDir, `${randomUUID()}.mp4`);
+    try {
+      await mkdir(tmpDir, { recursive: true });
+      await this.media.transcodeVideo(path, outPath);
+      const current = await stat(path).catch(() => null);
+      if (
+        !current ||
+        current.mtimeMs !== before.mtimeMs ||
+        current.size !== before.size
+      ) {
+        return;
+      }
+      await rename(outPath, path);
+      await this.writeMetadata(path, 'video/mp4');
+    } finally {
+      await rm(outPath, { force: true });
+    }
   }
 
   async upload(
@@ -162,11 +226,16 @@ export class LocalFileHelper implements FileHelper, OnModuleInit {
   ): Promise<void> {
     await mkdir(dirname(path), { recursive: true });
     await writeFile(path, body);
+    await this.writeMetadata(path, contentType);
+  }
+
+  /** (Re)write the `.metadata` sidecar from the file currently at `path`. */
+  private async writeMetadata(path: string, contentType: string): Promise<void> {
     const st = await stat(path);
     const etag = `${Math.floor(st.mtimeMs)}-${st.size}`;
     await writeFile(
       `${path}${METADATA_POSTFIX}`,
-      `Content-Type: ${contentType}\netag: ${etag}\nContent-Length: ${body.length}`,
+      `Content-Type: ${contentType}\netag: ${etag}\nContent-Length: ${st.size}`,
     );
   }
 
@@ -463,10 +532,11 @@ const toFileInfo = (e: {
 
 const MB = 1024 * 1024;
 /**
- * Decompression budget for an imported ZIP. The multipart layer only caps the
- * *compressed* upload (100MB), which a zip bomb inflates far past in heap. yauzl
- * streams entry-by-entry (`lazyEntries`), so we bound three things: the entry
- * count, the size of any single entry, and the total across the archive. Sizes
+ * Decompression budget for an imported ZIP. The import route's multipart cap
+ * (`uploadLimits(MAX_UPLOAD_BYTES)`) only bounds the *compressed* upload
+ * (100MB), which a zip bomb inflates far past in heap. yauzl streams
+ * entry-by-entry (`lazyEntries`), so we bound three things: the entry count,
+ * the size of any single entry, and the total across the archive. Sizes
  * are enforced against the *actual* decompressed bytes (see
  * `streamToBufferBounded`) — the declared header is only used for an early-out.
  */

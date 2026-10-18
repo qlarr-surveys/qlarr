@@ -74,7 +74,7 @@ class DesignService extends BaseService {
     );
     return response.data;
   }
-  async uploadResource(file, surveyId = null) {
+  async uploadResource(file, surveyId = null, onProgress = null) {
     if (!surveyId) {
       surveyId = sessionStorage.getItem("surveyId");
     }
@@ -84,6 +84,13 @@ class DesignService extends BaseService {
 
     const response = await this.handleRequest(() =>
       authenticatedApi.post(`/survey/${surveyId}/resource`, formData, {
+        onUploadProgress: (progressEvent) => {
+          if (onProgress && progressEvent.total) {
+            onProgress(
+              Math.round((progressEvent.loaded / progressEvent.total) * 100)
+            );
+          }
+        },
         headers: {
           Accept: "application/json",
           "Content-Type": "multipart/form-data",
@@ -119,6 +126,45 @@ class DesignService extends BaseService {
     }
     const response = await authenticatedApi.get(
       `/autocomplete/${surveyId}/${componentId}`
+    );
+    return response.data;
+  }
+
+  async uploadHierarchicalResource(file, componentId, levelCount, surveyId = null) {
+    if (!surveyId) {
+      surveyId = sessionStorage.getItem("surveyId");
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await authenticatedApi.post(
+      `/hierarchical-autocomplete/${surveyId}/${componentId}`,
+      formData,
+      {
+        params: { levels: levelCount },
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  }
+
+  async getHierarchicalCsv(componentId, langs, labels, surveyId = null) {
+    if (!surveyId) {
+      surveyId = sessionStorage.getItem("surveyId");
+    }
+    const response = await authenticatedApi.get(
+      `/hierarchical-autocomplete/${surveyId}/${componentId}`,
+      {
+        params: {
+          langs: Array.isArray(langs) ? langs.join(",") : langs,
+          labels: JSON.stringify(labels || []),
+        },
+        responseType: "blob",
+      }
     );
     return response.data;
   }

@@ -47,13 +47,15 @@ export class SurveyRepository {
   }
 
   /**
-   * Delete a survey and its FK-referencing rows (responses, versions) in one
-   * transaction — the children must go before the survey row.
+   * Delete a survey and its FK-referencing rows (responses, versions,
+   * calculations) in one transaction — the children must go before the survey
+   * row.
    */
   async deleteCascade(id: string): Promise<void> {
     await this.db.manager.transaction(async (tx) => {
       await tx.query('DELETE FROM responses WHERE survey_id = $1', [id]);
       await tx.query('DELETE FROM versions WHERE survey_id = $1', [id]);
+      await tx.query('DELETE FROM survey_calculations WHERE survey_id = $1', [id]);
       await tx.query('DELETE FROM surveys WHERE id = $1', [id]);
     });
   }

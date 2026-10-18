@@ -187,6 +187,37 @@ class SurveyService extends BaseService {
     );
     return response.data;
   }
+
+  async getCalculations(surveyId) {
+    const response = await this.handleRequest(() =>
+      authenticatedApi.get(`/survey/${surveyId}/calculations`)
+    );
+    return response.data;
+  }
+
+  async testCalculations(surveyId) {
+    const response = await this.handleRequest(() =>
+      authenticatedApi.post(`/survey/${surveyId}/calculations/test`)
+    );
+    return response.data;
+  }
+
+  async saveCalculations(surveyId, calculations, revision) {
+    const response = await this.handleRequest(() =>
+      authenticatedApi.put(`/survey/${surveyId}/calculations`, {
+        calculations,
+        revision,
+      })
+    );
+    return response.data;
+  }
+
+  async computeCalculations(surveyId) {
+    const response = await this.handleRequest(() =>
+      authenticatedApi.post(`/survey/${surveyId}/calculations/compute`)
+    );
+    return response.data;
+  }
 }
 
 export default SurveyService;

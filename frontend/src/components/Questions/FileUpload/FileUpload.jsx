@@ -12,6 +12,7 @@ import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import LoadingDots from "~/components/common/LoadingDots";
 import { useService } from "~/hooks/use-service";
 import { fileTypesToMimesArray } from "@qlarr/design-core/state/addInstructions";
+import { MAX_FILE_SIZE_BYTES } from "@qlarr/design-core";
 
 function FileUpload(props) {
   const runService = useService("run");
@@ -27,8 +28,8 @@ function FileUpload(props) {
       props.component.validation?.validation_max_file_size?.max_size) ||
     -1;
 
-  // Limit to validation value or 10MB (10240 KB), whichever is smaller
-  const MAX_FILE_SIZE = 10240; // 10MB
+  // Limit to validation value or the backend cap (in KB), whichever is smaller
+  const MAX_FILE_SIZE = MAX_FILE_SIZE_BYTES / 1024;
   const maxFileSize = validationMaxSize > 0
     ? Math.min(validationMaxSize, MAX_FILE_SIZE)
     : MAX_FILE_SIZE;

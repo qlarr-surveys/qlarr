@@ -19,7 +19,7 @@ import { useRef, useState } from "react";
 import IconSelector from "~/components/design/IconSelector";
 import { rtlLanguage } from "~/utils/common";
 import { useDrag, useDrop } from "react-dnd";
-import { useService } from "~/hooks/use-service";
+import { useResourceUpload } from "~/hooks/useResourceUpload";
 import { buildResourceUrl } from "~/networking/common";
 import DynamicSvg from "~/components/DynamicSvg";
 import { contentEditable, inDesign } from "~/routes";
@@ -46,7 +46,7 @@ function IconChoiceItemDesign({
   // Fixed icon-cell height so the "+" never stretches and roughly matches a typical
   // cell (action-button row + icon + one label line; less when the label is hidden).
   const cellHeight = imageHeight + (hideText ? 52 : 80);
-  const designService = useService("design");
+  const uploadResource = useResourceUpload();
   const dispatch = useDispatch();
   const ref = useRef(null);
   const theme = useTheme();
@@ -86,9 +86,8 @@ function IconChoiceItemDesign({
     // Create a File object to simulate a file upload
     const svgFile = new File([svgBlob], "file.svg", { type: "image/svg+xml" });
 
-    designService
-      .uploadResource(svgFile)
-      .then((response) => {
+    uploadResource(svgFile).then((response) => {
+      if (response) {
         dispatch(
           changeResources({
             code: qualifiedCode,
@@ -96,10 +95,8 @@ function IconChoiceItemDesign({
             value: response.name,
           }),
         );
-      })
-      .catch((error) => {
-        console.error(error.message);
-      });
+      }
+    });
   };
 
   const colIndex = getColByIndex(index);

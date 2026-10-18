@@ -26,6 +26,8 @@ export const questionIconByType = (type, size = "1.25em", color) => {
       return <SurveyIcon name="longText" size={size} color={color} />;
     case "autocomplete":
       return <SurveyIcon name="autocomplete" size={size} color={color} />;
+    case "hierarchical_autocomplete":
+      return <SurveyIcon name="autocomplete" size={size} color={color} />;
     case "barcode":
       return <SurveyIcon name="qrCode" size={size} color={color} />;
     case "number":
@@ -218,6 +220,10 @@ export const QUESTION_TYPES = [
       {
         type: "autocomplete",
         icon: questionIconByType("autocomplete"),
+      },
+      {
+        type: "hierarchical_autocomplete",
+        icon: questionIconByType("hierarchical_autocomplete"),
       },
       {
         type: "scq_array",

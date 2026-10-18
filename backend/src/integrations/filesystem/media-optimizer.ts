@@ -11,6 +11,9 @@ const MAX_DIMENSION = 1920; // images: longest side
 const JPEG_QUALITY = 80;
 const VIDEO_MAX_W = 1920;
 const VIDEO_MAX_H = 1080;
+/** Kill an ffmpeg run that hasn't finished by then, so one bad input can't
+ * wedge the background video queue forever. */
+const VIDEO_TIMEOUT_SECONDS = 30 * 60;
 
 if (ffmpegPath) {
   ffmpeg.setFfmpegPath(ffmpegPath);
@@ -63,7 +66,7 @@ export class MediaOptimizer {
   /**
    * Re-encode video to a web-friendly MP4 (H.264 crf 22 + faststart, AAC 128k),
    * scaled to fit 1920×1080 with even dimensions. Buffers through temp files
-   * because ffmpeg needs real paths.
+   * because ffmpeg needs real paths; `transcodeVideo` is the path-based form.
    */
   async optimizeVideo(input: Buffer, filename: string): Promise<Buffer> {
     const dir = await mkdtemp(join(tmpdir(), 'qlarr-media-'));
@@ -71,22 +74,25 @@ export class MediaOptimizer {
     const outPath = join(dir, `out-${randomUUID()}.mp4`);
     try {
       await writeFile(inPath, input);
-      await this.runFfmpeg(inPath, outPath);
+      await this.transcodeVideo(inPath, outPath);
       return await readFile(outPath);
     } finally {
       await rm(dir, { recursive: true, force: true });
     }
   }
 
-  private runFfmpeg(inPath: string, outPath: string): Promise<void> {
+  /** Re-encode the video at `inPath` into an MP4 at `outPath` (see `optimizeVideo`). */
+  transcodeVideo(inPath: string, outPath: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      ffmpeg(inPath)
+      ffmpeg(inPath, { timeout: VIDEO_TIMEOUT_SECONDS })
         .videoCodec('libx264')
         .audioCodec('aac')
         .audioBitrate('128k')
         .outputOptions([
           '-crf 22',
-          '-preset medium',
+          // veryfast: several times quicker than `medium` for a somewhat larger
+          // file — encode time is what users wait on.
+          '-preset veryfast',
           '-pix_fmt yuv420p',
           '-movflags +faststart',
           // Fit within 1920x1080, keep aspect ratio, force even dimensions.

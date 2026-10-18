@@ -1,5 +1,7 @@
 import { com, kotlin } from '@qlarr/survey-engine';
 import {
+  CalculateOutput,
+  ValidatedCalculation,
   NavigateParams,
   NavigationDirectionJson,
   NavigationIndexJson,
@@ -16,8 +18,8 @@ import {
  * arguments — no Nest, no `this`, no shared state — so it is safe to run on a
  * worker thread and cheap to structured-clone across the boundary.
  *
- * These four ops (`validate` / `process` / `navigate` / `changeCode`) compile and
- * evaluate survey-author JavaScript through the KMP engine, so a malicious or
+ * These ops (`validate` / `process` / `navigate` / `changeCode`, plus the two
+ * calculation ops) compile and evaluate survey-author JavaScript through the KMP engine, so a malicious or
  * buggy design can loop forever or blow the heap. Running them off the main
  * thread is what lets the pool enforce a hard timeout (terminate the worker) and
  * a memory cap without taking the whole server down.
@@ -323,8 +325,54 @@ export function runChangeCode(
   return { ok: true, output: result };
 }
 
+/**
+ * Validate a calculation set against a processed survey. Returns the same
+ * calculations in the same order, each with its `errors` rebuilt (empty means
+ * valid). The engine keeps only `code`, `expression` and `errors`.
+ */
+export function runValidateCalculations(
+  processedSurvey: string,
+  calculations: string,
+): ValidatedCalculation[] {
+  return JSON.parse(
+    quietly(() =>
+      usecase.CalculationUseCaseWrapper.create(processedSurvey).validate(
+        calculations,
+      ),
+    ),
+  );
+}
+
+/**
+ * Evaluate a validated calculation set over responses (`{ responseId: values }`).
+ * The engine does NOT re-validate: it runs every calculation whose `errors` is
+ * empty and skips the rest, so `calculations` must come out of
+ * `runValidateCalculations`.
+ */
+export function runCalculate(
+  processedSurvey: string,
+  calculations: string,
+  responses: string,
+): CalculateOutput {
+  return JSON.parse(
+    quietly(() =>
+      usecase.CalculationUseCaseWrapper.create(processedSurvey).calculate(
+        scriptengine.createCalculationEngine(),
+        calculations,
+        responses,
+      ),
+    ),
+  );
+}
+
 /** The engine operations the pool/worker can run. */
-export type EngineOp = 'validate' | 'navigate' | 'process' | 'changeCode';
+export type EngineOp =
+  | 'validate'
+  | 'navigate'
+  | 'process'
+  | 'changeCode'
+  | 'validateCalculations'
+  | 'calculate';
 
 export type EngineTask =
   | { op: 'validate'; payload: string }
@@ -333,7 +381,15 @@ export type EngineTask =
       op: 'process';
       payload: { state: Record<string, unknown>; savedDesign: Record<string, unknown> };
     }
-  | { op: 'changeCode'; payload: { surveyDesign: string; from: string; to: string } };
+  | { op: 'changeCode'; payload: { surveyDesign: string; from: string; to: string } }
+  | {
+      op: 'validateCalculations';
+      payload: { processedSurvey: string; calculations: string };
+    }
+  | {
+      op: 'calculate';
+      payload: { processedSurvey: string; calculations: string; responses: string };
+    };
 
 /**
  * Single dispatch point shared by the in-process fallback and the worker, so the
@@ -352,6 +408,17 @@ export function dispatch(task: EngineTask): unknown {
         task.payload.surveyDesign,
         task.payload.from,
         task.payload.to,
+      );
+    case 'validateCalculations':
+      return runValidateCalculations(
+        task.payload.processedSurvey,
+        task.payload.calculations,
+      );
+    case 'calculate':
+      return runCalculate(
+        task.payload.processedSurvey,
+        task.payload.calculations,
+        task.payload.responses,
       );
   }
 }

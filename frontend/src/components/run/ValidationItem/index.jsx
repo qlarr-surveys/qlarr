@@ -10,6 +10,7 @@ import { useTheme } from '@emotion/react';
 
 function ValidationItem({ name, validation, componentCode, content }) {
   const theme = useTheme();
+  const { t } = useTranslation(NAMESPACES.RUN);
   if (content && validation?.isCustomErrorActive !== false) {
     return (
       <Box sx={{ color: "error.main", fontSize: `${theme.textStyles.text.size}px` }} className={styles.wrapper}>
@@ -18,7 +19,6 @@ function ValidationItem({ name, validation, componentCode, content }) {
       </Box>
     );
   } else {
-    const { t } = useTranslation(NAMESPACES.RUN);
     var translationKey = name.replace(/[0-9]/g, "");
     const validationMessage = t(translationKey, { ...validation });
     if (validationMessage) {

@@ -27,6 +27,10 @@ export const PROCESSED_ERRORS = {
     name: "autocomplete_malformed_input",
     handleGlobally: false,
   },
+  HIERARCHICAL_AUTOCOMPLETE_MALFORMED_INPUT: {
+    name: "hierarchical_autocomplete_malformed_input",
+    handleGlobally: false,
+  },
   MAX_UPLOAD_SIZE_EXCEEDED: {
     name: "max_upload_size_exceeded",
     handleGlobally: false,
@@ -59,6 +63,16 @@ export const PROCESSED_ERRORS = {
     name: "invalid_translations_csv",
     handleGlobally: false,
   },
+  TRANSLATIONS_CSV_NOT_UTF8: {
+    name: "translations_csv_not_utf8",
+    handleGlobally: false,
+  },
+  CALCULATIONS_CHANGED: { name: "calculations_changed", handleGlobally: false },
+  CALCULATION_RUN_IN_PROGRESS: {
+    name: "calculation_run_in_progress",
+    handleGlobally: false,
+  },
+  NO_CALCULATIONS: { name: "no_calculations", handleGlobally: false },
 };
 
 export const onApiError = ({
@@ -114,6 +128,8 @@ export const processError = (e) => {
         return PROCESSED_ERRORS.WRONG_CREDENTIALS;
       case "AutoCompleteMalformedInputException":
         return PROCESSED_ERRORS.AUTOCOMPLETE_MALFORMED_INPUT;
+      case "HierarchicalAutoCompleteMalformedInputException":
+        return PROCESSED_ERRORS.HIERARCHICAL_AUTOCOMPLETE_MALFORMED_INPUT;
       case "MaxUploadSizeExceededException":
         return PROCESSED_ERRORS.MAX_UPLOAD_SIZE_EXCEEDED;
       case "SizeLimitExceededException":
@@ -169,6 +185,14 @@ export const processError = (e) => {
         return PROCESSED_ERRORS.DUPLICATE_TO_CODE;
       case "InvalidTranslationsCsvException":
         return PROCESSED_ERRORS.INVALID_TRANSLATIONS_CSV;
+      case "TranslationsCsvNotUtf8Exception":
+        return PROCESSED_ERRORS.TRANSLATIONS_CSV_NOT_UTF8;
+      case "CalculationsRevisionConflictException":
+        return PROCESSED_ERRORS.CALCULATIONS_CHANGED;
+      case "CalculationRunInProgressException":
+        return PROCESSED_ERRORS.CALCULATION_RUN_IN_PROGRESS;
+      case "NoCalculationsException":
+        return PROCESSED_ERRORS.NO_CALCULATIONS;
       default:
         return PROCESSED_ERRORS.UNIDENTIFIED_ERROR;
     }

@@ -20,6 +20,7 @@ import SCQIconArrayDesign from "../Questions/SCQArray/SCQIconArrayDesign";
 import { RHFSelect } from "../hook-form";
 import ArrayDesign from "~/components/Questions/SCQArray/ArrayDesign";
 import AutoCompleteDesign from "../Questions/AutoComplete/AutoCompleteDesign";
+import HierarchicalAutoCompleteDesign from "../Questions/HierarchicalAutoComplete/HierarchicalAutoCompleteDesign";
 
 function QuestionDesignBody({ code, type, t, langInfo, designMode }) {
   const onMainLang = langInfo.onMainLang;
@@ -161,6 +162,17 @@ function QuestionDesignBody({ code, type, t, langInfo, designMode }) {
           t={t}
           key={code}
           code={code}
+          onMainLang={onMainLang}
+        />
+      );
+    case "hierarchical_autocomplete":
+      return (
+        <HierarchicalAutoCompleteDesign
+          t={t}
+          key={code}
+          code={code}
+          designMode={designMode}
+          langInfo={langInfo}
           onMainLang={onMainLang}
         />
       );

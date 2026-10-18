@@ -34,6 +34,105 @@ export const autoCompleteSearch = (runService, uuid, query) => {
   }
 };
 
+export const hierarchicalSearch = (
+  runService,
+  filename,
+  level,
+  prefix,
+  query,
+  lang,
+  defaultLang
+) => {
+  if (window["Android"]) {
+    return new Promise((resolve, reject) => {
+      window["Android"].searchHierarchicalAutoComplete(
+        filename,
+        level,
+        JSON.stringify(prefix),
+        query,
+        lang,
+        defaultLang
+      );
+      window["searchHierarchicalAutoComplete"] = (res) => {
+        resolve(res);
+      };
+    });
+  } else {
+    return runService.searchHierarchical(
+      filename,
+      level,
+      prefix,
+      query,
+      lang,
+      defaultLang
+    );
+  }
+};
+
+const hierarchicalListResolvers = {};
+let hierarchicalListRequestId = 0;
+
+export const hierarchicalList = (
+  runService,
+  filename,
+  level,
+  prefix,
+  lang,
+  defaultLang
+) => {
+  if (window["Android"]) {
+    return new Promise((resolve, reject) => {
+      const requestId = ++hierarchicalListRequestId;
+      hierarchicalListResolvers[requestId] = resolve;
+      window["listHierarchicalAutoCompleteLevel"] = (resRequestId, res) => {
+        const resolveRequest = hierarchicalListResolvers[resRequestId];
+        delete hierarchicalListResolvers[resRequestId];
+        if (resolveRequest) resolveRequest(res);
+      };
+      window["Android"].listHierarchicalAutoCompleteLevel(
+        requestId,
+        filename,
+        level,
+        JSON.stringify(prefix),
+        lang,
+        defaultLang
+      );
+    });
+  } else {
+    return runService.listHierarchical(
+      filename,
+      level,
+      prefix,
+      lang,
+      defaultLang
+    );
+  }
+};
+
+export const hierarchicalRow = (
+  runService,
+  filename,
+  path,
+  lang,
+  defaultLang
+) => {
+  if (window["Android"]) {
+    return new Promise((resolve, reject) => {
+      window["Android"].hierarchicalAutoCompleteRow(
+        filename,
+        JSON.stringify(path),
+        lang,
+        defaultLang
+      );
+      window["hierarchicalAutoCompleteRow"] = (res) => {
+        resolve(res);
+      };
+    });
+  } else {
+    return runService.hierarchicalRow(filename, path, lang, defaultLang);
+  }
+};
+
 export const continueNavigation = (
   runService,
   payload,

@@ -230,6 +230,16 @@ const SetupComponent = React.memo(({ code, rule, t, isQuickOptions }) => {
           code={code}
         />
       );
+    case "hierarchicalDropdown":
+      return (
+        <ToggleValue
+          key={code + rule}
+          t={t}
+          label={"hierarchical_dropdown"}
+          rule={rule}
+          code={code}
+        />
+      );
     case "convert_question_type":
       return <ConvertQuestionType key={code + rule} code={code} t={t} />;
     case "scq_default_value":

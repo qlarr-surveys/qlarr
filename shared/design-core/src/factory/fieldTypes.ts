@@ -3,6 +3,7 @@ const QUESTION_TYPE_TO_FIELD_TYPE = {
   // Text-based questions
   text: 'text',
   autocomplete: 'text',
+  hierarchical_autocomplete: 'text',
   email: 'text',
   barcode: 'text',
   paragraph: 'text',

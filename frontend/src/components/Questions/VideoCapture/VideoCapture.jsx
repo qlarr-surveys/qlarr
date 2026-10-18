@@ -9,6 +9,7 @@ import { getFileFromPath } from "~/networking/common";
 import { useService } from "~/hooks/use-service";
 import { Button } from "@mui/material";
 import VideocamIcon from "@mui/icons-material/Videocam";
+import { MAX_VIDEO_FILE_SIZE_BYTES } from "@qlarr/design-core";
 
 function VideoCapture(props) {
   const runService = useService("run");
@@ -34,8 +35,8 @@ function VideoCapture(props) {
         component.validation?.validation_max_file_size?.max_size) ||
       -1;
 
-    // Limit to validation value or 30MB (30720 KB), whichever is smaller
-    const VIDEO_MAX_SIZE_KB = 30720; // 30MB
+    // Limit to validation value or the backend cap (in KB), whichever is smaller
+    const VIDEO_MAX_SIZE_KB = MAX_VIDEO_FILE_SIZE_BYTES / 1024;
     const maxFileSize = validationMaxSize > 0
       ? Math.min(validationMaxSize, VIDEO_MAX_SIZE_KB)
       : VIDEO_MAX_SIZE_KB;

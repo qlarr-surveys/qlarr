@@ -2,6 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { Readable } from 'node:stream';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
+import { MAX_UPLOAD_BYTES } from '../src/common/upload';
 import { FILE_HELPER } from '../src/integrations/filesystem/file-helper';
 import { bearer, startTestApp, TestApp } from './harness';
 
@@ -97,6 +98,23 @@ describe('Survey resource endpoints', () => {
         .post(`/survey/${S_OPEN}/resource`)
         .attach('file', Buffer.from('x'), 'a.png')
         .expect(401));
+
+    it('rejects a file one byte over the upload cap with 413, before storing it', async () => {
+      // Resources have no per-type size check in the service, so only the
+      // route's own multer limit stands between this body and the heap (a
+      // MulterModule registered in AppModule never reached SurveysModule).
+      const res = await request(server())
+        .post(`/survey/${S_OPEN}/resource`)
+        .set('Authorization', BEARER)
+        .attach('file', Buffer.alloc(MAX_UPLOAD_BYTES + 1), 'big.png')
+        .expect(413);
+
+      expect(res.body).toEqual({
+        message: 'File too large',
+        error: 'MaxUploadSizeExceededException',
+      });
+      expect(fileHelper.upload).not.toHaveBeenCalled();
+    });
   });
 
   describe('GET /survey/:id/resource/:file (public download)', () => {

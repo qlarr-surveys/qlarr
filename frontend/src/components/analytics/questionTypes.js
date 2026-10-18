@@ -14,6 +14,7 @@ const QUESTION_TYPE_KEYS = {
   EMAIL: 'analytics.question_type_email',
   MULTIPLE_TEXT: 'analytics.question_type_multiple_text',
   AUTOCOMPLETE: 'analytics.question_type_autocomplete',
+  HIERARCHICAL_AUTOCOMPLETE: 'analytics.question_type_hierarchical_autocomplete',
   ICON_SCQ: 'analytics.question_type_icon_scq',
   ICON_MCQ: 'analytics.question_type_icon_mcq',
   SCQ_ARRAY: 'analytics.question_type_scq_array',

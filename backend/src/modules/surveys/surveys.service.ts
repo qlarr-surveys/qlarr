@@ -1,9 +1,15 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { nowUtcString } from '../../common/datetime';
 import { EngineService } from '../../engine/engine.service';
+import { Calculation } from '../../engine/engine.types';
 import { FILE_HELPER, FileHelper } from '../../integrations/filesystem/file-helper';
 import { SurveyFolder } from '../../integrations/filesystem/survey-folder';
+import {
+  MAX_CALCULATIONS,
+  MAX_EXPRESSION_LENGTH,
+} from '../calculations/calculations.constants';
+import { CalculationsRepository } from '../calculations/calculations.repository';
 import { DesignService } from '../design/design.service';
 import { VersionRepository } from '../design/version.repository';
 import { AutoCompleteRepository } from './autocomplete.repository';
@@ -42,10 +48,13 @@ const isValidName = (name: string): boolean => {
 
 @Injectable()
 export class SurveysService {
+  private readonly logger = new Logger(SurveysService.name);
+
   constructor(
     private readonly surveys: SurveyRepository,
     private readonly versions: VersionRepository,
     private readonly autoComplete: AutoCompleteRepository,
+    private readonly calculations: CalculationsRepository,
     private readonly engine: EngineService,
     private readonly design: DesignService,
     @Inject(FILE_HELPER) private readonly files: FileHelper,
@@ -103,7 +112,7 @@ export class SurveysService {
     return surveyToDto(entity);
   }
 
-  /** Clone a survey: copy the row, resources, latest design, and autocomplete. */
+  /** Clone a survey: copy the row, resources, latest design, autocomplete and calculations. */
   async clone(surveyId: string): Promise<SurveyDTO> {
     const survey = await this.findEntity(surveyId);
     const cloned = this.surveys.create({
@@ -123,6 +132,7 @@ export class SurveysService {
       await this.files.cloneResources(surveyId, cloned.id);
       await this.copyDesign(surveyId, cloned.id);
       await this.autoComplete.copyToSurvey(surveyId, cloned.id);
+      await this.calculations.copyToSurvey(surveyId, cloned.id);
     } catch (err) {
       await this.surveys.deleteCascade(cloned.id).catch(() => undefined);
       await this.files.deleteSurveyFiles(cloned.id).catch(() => undefined);
@@ -139,7 +149,11 @@ export class SurveysService {
     return this.files.exportSurvey(surveyId, String(latest.version), surveyDataJson);
   }
 
-  /** The `survey.json` payload: normalized metadata (version reset to 1) + autocomplete. */
+  /**
+   * The `survey.json` payload: normalized metadata (version reset to 1),
+   * autocomplete and calculations. Calculations are exported without their
+   * `errors`, since import re-validates them anyway.
+   */
   private async getSurveyDataJson(
     surveyId: string,
     latest: VersionEntity,
@@ -154,9 +168,14 @@ export class SurveysService {
     };
     const autoCompleteResources =
       await this.autoComplete.listResources(surveyId);
+    const calculationsRow = await this.calculations.find(surveyId);
+    const calculations = (calculationsRow?.calculations ?? []).map(
+      ({ code, label, expression }) => ({ code, label, expression }),
+    );
     return JSON.stringify({
       survey: simpleSurveyFromEntity(survey, normalized, 0, 0),
       autoCompleteResources,
+      calculations,
     });
   }
 
@@ -165,7 +184,7 @@ export class SurveysService {
    * `survey.json` and `design.json`, save the survey row +
    * version, then upload design/resources and rebuild autocomplete. If the file
    * upload half fails, the just-created survey (row + files) is rolled back
-   * before rethrowing.
+   * before rethrowing. Calculations are imported last and never fail the import.
    */
   async importSurvey(zip: Buffer): Promise<SurveyDTO> {
     const imported = await this.files.extractImportZip(zip);
@@ -184,7 +203,41 @@ export class SurveysService {
       await this.files.deleteSurveyFiles(dto.id).catch(() => undefined);
       throw err;
     }
+    await this.importCalculations(
+      dto.id,
+      imported.designFile.toString('utf8'),
+      exported.calculations,
+    );
     return dto;
+  }
+
+  /**
+   * Import the zip's calculations. They come from outside, so we always
+   * validate them ourselves against the imported design (`design.json` is the
+   * processed survey), ignoring any `errors` in the file, and store them all
+   * with their fresh `errors` (invalid ones never run or show). Entries without
+   * the expected shape or with an expression over the length limit are
+   * dropped, and only the first MAX_CALCULATIONS are kept. If validation or
+   * storing fails, the calculations are skipped and the rest of the import
+   * stands.
+   */
+  private async importCalculations(
+    surveyId: string,
+    processedSurvey: string,
+    raw: unknown,
+  ): Promise<void> {
+    const candidates = wellFormedCalculations(raw).slice(0, MAX_CALCULATIONS);
+    if (candidates.length === 0) return;
+    try {
+      await this.calculations.insertImported(
+        surveyId,
+        await this.engine.validateCalculations(processedSurvey, candidates),
+      );
+    } catch (err) {
+      this.logger.warn(
+        `Skipped importing calculations for survey ${surveyId}: ${String(err)}`,
+      );
+    }
   }
 
   /** Persist an imported survey's metadata as a fresh DRAFT + version 1. */
@@ -352,7 +405,7 @@ export class SurveysService {
     // leaving a survey that still shows on the dashboard and 500s on open. A
     // broken, user-visible survey is worse than an invisible leak, so we prefer
     // the leak.
-    // Responses and versions FK-reference the survey, so deleteCascade clears
+    // Responses, versions and calculations FK-reference the survey, so deleteCascade clears
     // them before the survey row (all within its own transaction).
     await this.surveys.deleteCascade(id);
     await this.files.deleteSurveyFiles(id);
@@ -394,4 +447,24 @@ function mapCreateRequestToEntity(
     backgroundAudio: true,
     recordGps: true,
   };
+}
+
+/**
+ * The entries of an imported `calculations` field that have the expected shape
+ * (string `code`, `label` and `expression`, the expression within the length
+ * limit), reduced to those fields. Anything else, including any imported
+ * `errors`, is dropped.
+ */
+function wellFormedCalculations(raw: unknown): Calculation[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.flatMap((item: unknown) => {
+    const c = item as Partial<Record<keyof Calculation, unknown>> | null;
+    return c &&
+      typeof c.code === 'string' &&
+      typeof c.label === 'string' &&
+      typeof c.expression === 'string' &&
+      c.expression.length <= MAX_EXPRESSION_LENGTH
+      ? [{ code: c.code, label: c.label, expression: c.expression }]
+      : [];
+  });
 }

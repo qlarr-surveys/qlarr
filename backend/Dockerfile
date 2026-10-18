@@ -47,7 +47,7 @@ COPY backend/package*.json ./backend/
 WORKDIR /app/backend
 # design-core has no install/prepare script, so --omit=dev just symlinks it;
 # ffmpeg-static / sharp install scripts still run to fetch their binaries.
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm ci --omit=dev --maxsockets 1 && npm cache clean --force
 
 COPY --from=builder /app/backend/dist ./dist
 
