@@ -215,8 +215,7 @@
   "survey_count_one": "{{count}} enquête",
   "survey_count_other": "{{count}} enquêtes",
   "dashboard": {
-    "subtitle": "Maak een enquête handmatig of importeer een bestaande definitie.",
-    "subtitle_ai": "Maak een enquête handmatig, importeer een definitie, of beschrijf hem en laat de assistent een opzet maken."
+    "subtitle": "Maak een enquête handmatig of importeer een bestaande definitie."
   },
   "action_cards": {
     "create": { "description": "Begin met een lege enquête en voeg zelf pagina's en vragen toe." },

@@ -215,8 +215,7 @@
   "survey_count_one": "{{count}} encuesta",
   "survey_count_other": "{{count}} encuestas",
   "dashboard": {
-    "subtitle": "Crea una encuesta manualmente o importa una definición existente.",
-    "subtitle_ai": "Crea una encuesta manualmente, importa una definición o descríbela y deja que el asistente la redacte."
+    "subtitle": "Crea una encuesta manualmente o importa una definición existente."
   },
   "action_cards": {
     "create": { "description": "Empieza con una encuesta vacía y añade las páginas y preguntas tú mismo." },

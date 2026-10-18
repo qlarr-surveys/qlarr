@@ -132,8 +132,6 @@ function Dashboard() {
     onCreateSurvey: handleCreateSurveyClick,
     onImportSurvey: handleImportSurveyClick,
   });
-  // The subtitle names the assistant only where there is one to name.
-  const hasAiAction = actions.some((action) => action.tone === "ai");
 
   // The first-run empty state carries its own welcome and CTAs, so the page
   // heading and action cards above it would say the same thing twice. Mirrors
@@ -290,7 +288,6 @@ function Dashboard() {
       className={styles.mainContainer}
       sx={{
         "--card-accent": (theme) => theme.palette.primary.main,
-        "--card-accent-ai": (theme) => theme.palette.primary.lighter,
       }}
     >
       <Container sx={{ marginBottom: "48px" }}>
@@ -299,11 +296,7 @@ function Dashboard() {
             <>
               <Box className={styles.pageHeading}>
                 <h1 className={styles.heading}>{t("my_surveys")}</h1>
-                <p className={styles.subtitle}>
-                  {t(
-                    hasAiAction ? "dashboard.subtitle_ai" : "dashboard.subtitle"
-                  )}
-                </p>
+                <p className={styles.subtitle}>{t("dashboard.subtitle")}</p>
               </Box>
 
               <ActionCards actions={actions} />

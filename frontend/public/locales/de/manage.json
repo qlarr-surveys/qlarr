@@ -248,8 +248,7 @@
   "survey_count_one": "{{count}} Umfrage",
   "survey_count_other": "{{count}} Umfragen",
   "dashboard": {
-    "subtitle": "Erstellen Sie eine Umfrage manuell oder importieren Sie eine vorhandene Definition.",
-    "subtitle_ai": "Erstellen Sie eine Umfrage manuell, importieren Sie eine Definition oder beschreiben Sie sie und lassen Sie den Assistenten einen Entwurf erstellen."
+    "subtitle": "Erstellen Sie eine Umfrage manuell oder importieren Sie eine vorhandene Definition."
   },
   "action_cards": {
     "create": { "description": "Beginnen Sie mit einer leeren Umfrage und fügen Sie Seiten und Fragen selbst hinzu." },

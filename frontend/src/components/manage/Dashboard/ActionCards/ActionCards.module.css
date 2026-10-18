@@ -1,5 +1,5 @@
-/* auto-fit, not a column count: two cards and three both come out as equal
-   columns, so the hosted fork adds its AI card without touching this file. */
+/* auto-fit, not a column count: whatever the role allows comes out as equal
+   columns from the same rule. */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -54,21 +54,4 @@
   font-size: 12.5px;
   line-height: 1.45;
   color: #555d7d;
-}
-
-/* Carried here although nothing in this repo sets tone="ai": the fork adds a
-   card, not a stylesheet. --card-accent comes from the page (theme palette). */
-.card[data-tone="ai"] {
-  background: #f7fdff;
-  border-color: #b9e6f8;
-}
-
-.card[data-tone="ai"] .iconBadge {
-  border-color: #b9e6f8;
-  background: #eaf8fe;
-  color: #04698c;
-}
-
-.card[data-tone="ai"]:hover {
-  border-color: var(--card-accent-ai);
 }

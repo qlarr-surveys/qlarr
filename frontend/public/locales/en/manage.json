@@ -214,8 +214,7 @@
   "survey_count_one": "{{count}} survey",
   "survey_count_other": "{{count}} surveys",
   "dashboard": {
-    "subtitle": "Create a survey manually or import an existing definition.",
-    "subtitle_ai": "Create a survey manually, import a definition, or describe it and let the assistant draft it."
+    "subtitle": "Create a survey manually or import an existing definition."
   },
   "action_cards": {
     "create": { "description": "Start from an empty survey and add pages and questions yourself." },

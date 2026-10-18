@@ -215,8 +215,7 @@
   "survey_count_one": "{{count}} pesquisa",
   "survey_count_other": "{{count}} pesquisas",
   "dashboard": {
-    "subtitle": "Crie uma pesquisa manualmente ou importe uma definição existente.",
-    "subtitle_ai": "Crie uma pesquisa manualmente, importe uma definição, ou descreva-a e deixe o assistente redigi-la."
+    "subtitle": "Crie uma pesquisa manualmente ou importe uma definição existente."
   },
   "action_cards": {
     "create": { "description": "Comece com uma pesquisa vazia e adicione as páginas e perguntas você mesmo." },

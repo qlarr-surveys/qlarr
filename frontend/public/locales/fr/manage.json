@@ -215,8 +215,7 @@
   "survey_count_one": "{{count}} sondage",
   "survey_count_other": "{{count}} sondages",
   "dashboard": {
-    "subtitle": "Créez un sondage manuellement ou importez une définition existante.",
-    "subtitle_ai": "Créez un sondage manuellement, importez une définition, ou décrivez-le et laissez l'assistant le rédiger."
+    "subtitle": "Créez un sondage manuellement ou importez une définition existante."
   },
   "action_cards": {
     "create": { "description": "Partez d'un sondage vide et ajoutez vous-même les pages et les questions." },
