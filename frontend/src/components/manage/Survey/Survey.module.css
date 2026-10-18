@@ -34,11 +34,12 @@
 }
 
 /* Inset and contained, so a wide logo and a tall one are both shown whole
-   and neither touches the card's edges. The deeper bottom inset keeps a wide
-   logo clear of the status pill rather than running underneath it. */
+   and neither touches the card's edges. The bottom inset is the pill's own
+   height plus the 12px it sits above the edge, so a wide logo stops exactly
+   where the pill starts instead of running underneath it. */
 .coverLogo {
   position: absolute;
-  inset: 14px 20px 36px;
+  inset: 14px 20px 44px;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -101,55 +102,71 @@
 /* ==============================================
    Status pill — the colour key users_manage.statuses_info explains.
    Changing these silently desyncs that legend.
+
+   The redesign's pill is a tinted chip, not a saturated one: a pale wash of
+   the status colour carrying that colour as text, with the dot as the one
+   piece at full strength. Five solid gradients competed with the cover behind
+   them and with each other; a wash lets the dot do the signalling.
    ============================================== */
 .statusPill {
   position: absolute;
   bottom: 12px;
   inset-inline-end: 12px;
   z-index: 2;
-  padding: 0.4rem 0.9rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 8px;
+  height: 32px;
+  /* The dot's side gets the wider padding, so the gap before the label and
+     the space after it look even. Logical, because Arabic mirrors the card. */
+  padding-inline: 16px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
   box-shadow: 0 1px 3px rgba(16, 24, 40, 0.12);
   cursor: help;
 }
 
+/* The dot carries its own colour rather than the label's: for Draft and
+   Expired the redesign deliberately parts the two, so the text stays readable
+   while the dot keeps the saturation that makes it scannable down a grid. */
 .statusDot {
-  width: 6px;
-  height: 6px;
+  flex: none;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background-color: currentColor;
+  background-color: var(--status-dot, currentColor);
 }
 
 .draft {
-  background: linear-gradient(135deg, #fee33f 0%, #f0a12f 100%);
-  color: #091133;
-}
-
-.active {
-  background: linear-gradient(135deg, #69ac3b 0%, #56a034 100%);
-  color: white;
-}
-
-.closed {
-  background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
-  color: white;
-}
-
-.expired {
-  background: linear-gradient(135deg, #9d4435 0%, #7f3b2e 100%);
-  color: white;
+  background: #f9fafb;
+  color: #121926;
+  --status-dot: #4d5761;
 }
 
 .scheduled {
-  background: linear-gradient(135deg, #607d8b 0%, #455a64 100%);
-  color: white;
+  background: #eff8ff;
+  color: #1849a9;
+  --status-dot: #1849a9;
+}
+
+.active {
+  background: #ecfdf3;
+  color: #085d3a;
+  --status-dot: #085d3a;
+}
+
+.expired {
+  background: #fef3f2;
+  color: #912018;
+  --status-dot: #dc2626;
+}
+
+.closed {
+  background: #fffaeb;
+  color: #93370d;
+  --status-dot: #93370d;
 }
 
 /* ==============================================
