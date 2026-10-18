@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Tooltip, Button } from "@mui/material";
-import HelpOutline from "@mui/icons-material/HelpOutline";
-import { useTheme } from "@emotion/react";
+import { Info } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import styles from "./Tooltip.module.css";
 
 const CustomTooltip = ({
@@ -14,10 +15,25 @@ const CustomTooltip = ({
   // Merged over the default tooltip styling. The status legend is a five-row
   // table that needs more width than a one-line tooltip.
   tooltipSx,
+  // What the trigger announces. Callers that can say what the ⓘ is about
+  // ("About the survey description") should; the generic label is the floor,
+  // not the target.
+  iconLabel,
 }) => {
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const triggerRef = useRef(null);
-  const theme = useTheme();
+  const { t } = useTranslation();
+
+  // Bound to no namespace, and resolved against both of the ones that hold the
+  // key, because this renders under the manage routes and inside the design
+  // editor, which load different bundles. Naming them in useTranslation would
+  // suspend whichever route has not loaded the other.
+  const triggerLabel =
+    iconLabel ||
+    t("tooltips.more_info", {
+      ns: [NAMESPACES.MANAGE, NAMESPACES.DESIGN_CORE],
+      defaultValue: "More information",
+    });
 
   useEffect(() => {
     if (!tooltipOpen || !showIcon) return;
@@ -71,22 +87,21 @@ const CustomTooltip = ({
     return (
       <div ref={triggerRef} className={styles.tooltipContainer}>
         <Tooltip {...commonTooltipProps} open={tooltipOpen}>
-          <HelpOutline
+          {/* A real button, not an icon carrying onClick: the tooltip opens on
+              click, so without one there is no keyboard path to the help at
+              all. It also gives the 24px target the redesign draws. */}
+          <button
+            type="button"
             className={styles.iconButton}
-            sx={{
-              fontSize: "16px",
-              transition: "background-color 0.3s ease, color 0.3s ease",
-              backgroundColor: tooltipOpen ? theme.palette.primary.main : "#fff",
-              color: tooltipOpen ? "#fff" : "#1a2052",
-              "&:hover": {
-                backgroundColor: theme.palette.primary.main,
-              },
-            }}
+            aria-label={triggerLabel}
+            aria-expanded={tooltipOpen}
             onClick={(e) => {
               e.stopPropagation();
               setTooltipOpen((prev) => !prev);
             }}
-          />
+          >
+            <Info size={14} strokeWidth={1.4} />
+          </button>
         </Tooltip>
       </div>
     );

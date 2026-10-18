@@ -574,5 +574,8 @@
   "err_nested_repeatable": "A repeatable can't be placed inside another repeatable. Remove the repeat from this item or its container.",
   "err_repeatable_with_relevance": "A repeatable can't also have its own relevance condition — its show logic is the repeat condition.",
   "err_repeat_relevance": "Repeat condition error",
-  "err_skip_inside_repeatable": "Skip logic isn't allowed inside a repeatable."
+  "err_skip_inside_repeatable": "Skip logic isn't allowed inside a repeatable.",
+  "tooltips": {
+    "more_info": "More information"
+  }
 }

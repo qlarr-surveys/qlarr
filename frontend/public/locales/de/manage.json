@@ -87,7 +87,9 @@
     "background_audio": "Hintergrundaudio",
     "record_gps": "GPS aufzeichnen",
     "save_ip": "IP speichern",
-    "save_timings": "Zeiten speichern"
+    "save_timings": "Zeiten speichern",
+    "edit_name": "Umfragenamen bearbeiten",
+    "edit_description": "Umfragebeschreibung bearbeiten"
   },
   "edit_user": {
     "title": "Benutzer bearbeiten"
@@ -572,7 +574,8 @@
     "survey_description": "Interne Beschreibung, die von Ihrem Team verwendet wird, um Kontext über die Umfrage bereitzustellen. Diese Beschreibung wird den Befragten nicht angezeigt.",
     "survey_mode": "Wählen Sie den Modus für Ihre Umfrage:<ul><li>Online-Umfragen sind über Webbrowser zugänglich</li><li>Offline-Umfragen können ohne Internetverbindung durchgeführt werden</li></ul>",
     "survey_title": "Interner Titel, der von Ihrem Team verwendet wird, um die Umfrage zu identifizieren. Dieser Titel wird den Befragten nicht angezeigt.",
-    "survey_url": "Teilen Sie diesen Link, um auf die Umfrage zuzugreifen"
+    "survey_url": "Teilen Sie diesen Link, um auf die Umfrage zuzugreifen",
+    "more_info": "Weitere Informationen"
   },
   "translations": {
     "design_language": "Design-Sprache",

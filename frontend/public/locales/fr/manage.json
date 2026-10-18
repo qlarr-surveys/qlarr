@@ -85,7 +85,9 @@
       "last_modified": "Dernière Modification",
       "start_date": "Date de Début",
       "end_date": "Date de Fin"
-    }
+    },
+    "edit_name": "Modifier le nom du sondage",
+    "edit_description": "Modifier la description du sondage"
   },
   "edit_user": {
     "title": "Modifier l'Utilisateur"
@@ -574,7 +576,8 @@
     "import_survey": "Importer un sondage existant (qui a été exporté précédemment) à partir d'un fichier ZIP",
     "create_survey_with_ai": "Créer un nouveau sondage automatiquement en utilisant l'assistance IA",
     "survey_title": "Titre interne utilisé par votre équipe pour identifier le sondage. Ce titre n'est pas affiché aux répondants.",
-    "survey_description": "Description interne utilisée par votre équipe pour fournir le contexte sur le sondage. Cette description n'est pas affichée aux répondants."
+    "survey_description": "Description interne utilisée par votre équipe pour fournir le contexte sur le sondage. Cette description n'est pas affichée aux répondants.",
+    "more_info": "Plus d'informations"
   },
   "translations": {
     "title": "Traductions",

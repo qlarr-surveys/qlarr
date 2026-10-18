@@ -85,7 +85,9 @@
       "last_modified": "Última Modificação",
       "start_date": "Data de Início",
       "end_date": "Data de Finalização"
-    }
+    },
+    "edit_name": "Editar o nome da pesquisa",
+    "edit_description": "Editar a descrição da pesquisa"
   },
   "edit_user": {
     "title": "Editar Usuário"
@@ -574,7 +576,8 @@
     "import_survey": "Importar uma pesquisa existente (que foi exportada anteriormente) de um arquivo ZIP",
     "create_survey_with_ai": "Criar uma nova pesquisa automaticamente usando assistência de IA",
     "survey_title": "Título interno usado por sua equipe para identificar a pesquisa. Este título não é mostrado aos respondentes.",
-    "survey_description": "Descrição interna usada por sua equipe para fornecer contexto sobre a pesquisa. Esta descrição não é mostrada aos respondentes."
+    "survey_description": "Descrição interna usada por sua equipe para fornecer contexto sobre a pesquisa. Esta descrição não é mostrada aos respondentes.",
+    "more_info": "Mais informações"
   },
   "translations": {
     "title": "Traduções",

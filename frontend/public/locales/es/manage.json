@@ -85,7 +85,9 @@
       "last_modified": "Última Modificación",
       "start_date": "Fecha de Inicio",
       "end_date": "Fecha de Finalización"
-    }
+    },
+    "edit_name": "Editar el nombre de la encuesta",
+    "edit_description": "Editar la descripción de la encuesta"
   },
   "edit_user": {
     "title": "Editar Usuario"
@@ -574,7 +576,8 @@
     "import_survey": "Importar una encuesta existente (que fue exportada anteriormente) desde un archivo ZIP",
     "create_survey_with_ai": "Crear una nueva encuesta automáticamente usando asistencia de IA",
     "survey_title": "Título interno usado por tu equipo para identificar la encuesta. Este título no se muestra a los encuestados.",
-    "survey_description": "Descripción interna usada por tu equipo para proporcionar contexto sobre la encuesta. Esta descripción no se muestra a los encuestados."
+    "survey_description": "Descripción interna usada por tu equipo para proporcionar contexto sobre la encuesta. Esta descripción no se muestra a los encuestados.",
+    "more_info": "Más información"
   },
   "translations": {
     "title": "Traducciones",

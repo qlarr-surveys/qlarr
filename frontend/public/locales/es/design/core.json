@@ -574,5 +574,8 @@
   "err_nested_repeatable": "Un elemento repetible no se puede colocar dentro de otro repetible. Quita la repetición de este elemento o de su contenedor.",
   "err_repeatable_with_relevance": "Un elemento repetible no puede tener también su propia condición de relevancia: su lógica de visualización es la condición de repetición.",
   "err_repeat_relevance": "Error en la condición de repetición",
-  "err_skip_inside_repeatable": "La lógica de salto no está permitida dentro de un elemento repetible."
+  "err_skip_inside_repeatable": "La lógica de salto no está permitida dentro de un elemento repetible.",
+  "tooltips": {
+    "more_info": "Más información"
+  }
 }

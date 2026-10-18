@@ -85,7 +85,9 @@
       "last_modified": "Laatst Gewijzigd",
       "start_date": "Startdatum",
       "end_date": "Einddatum"
-    }
+    },
+    "edit_name": "Enquêtenaam bewerken",
+    "edit_description": "Enquêtebeschrijving bewerken"
   },
   "edit_user": {
     "title": "Gebruiker Bewerken"
@@ -574,7 +576,8 @@
     "import_survey": "Importeer een bestaande enquête (die eerder is geëxporteerd) vanuit een ZIP bestand",
     "create_survey_with_ai": "Maak automatisch een nieuwe enquête met AI ondersteuning",
     "survey_title": "Interne titel gebruikt door je team om de enquête te identificeren. Deze titel wordt niet getoond aan respondenten.",
-    "survey_description": "Interne beschrijving gebruikt door je team om context over de enquête te geven. Deze beschrijving wordt niet getoond aan respondenten."
+    "survey_description": "Interne beschrijving gebruikt door je team om context over de enquête te geven. Deze beschrijving wordt niet getoond aan respondenten.",
+    "more_info": "Meer informatie"
   },
   "translations": {
     "title": "Vertalingen",

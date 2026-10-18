@@ -262,9 +262,35 @@
   align-items: center;
   justify-content: center;
   border-radius: 7px;
+  padding: 0;
+  border: 0;
   background: #fffaeb;
   color: #93370d;
   cursor: pointer;
+}
+
+.unpublishedBadge:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+/* Read-only for anyone who cannot publish. */
+.unpublishedBadgeStatic {
+  cursor: default;
+}
+
+/* The pencil says "edited", the dot says "not published yet". The ring is the
+   badge's own background, so the dot reads as sitting on top of the pencil
+   rather than being part of it. */
+.unpublishedDot {
+  position: absolute;
+  top: 3px;
+  inset-inline-end: 3px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #dc6803;
+  border: 1.5px solid #fffaeb;
 }
 
 /* ==============================================

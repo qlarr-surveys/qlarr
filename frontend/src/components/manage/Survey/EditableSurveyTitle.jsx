@@ -92,7 +92,11 @@ export const EditableSurveyTitle = ({
           </Typography>
           {badge}
           {isEditable && (
-            <IconButton className={styles.nameIcon} onClick={handleEditClick}>
+            <IconButton
+              className={styles.nameIcon}
+              aria-label={t("edit_survey.edit_name")}
+              onClick={handleEditClick}
+            >
               <Pencil size={16} strokeWidth={1.5} />
             </IconButton>
           )}

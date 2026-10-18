@@ -85,7 +85,9 @@
       "last_modified": "Last Modified",
       "start_date": "Start Date",
       "end_date": "End Date"
-    }
+    },
+    "edit_name": "Edit survey name",
+    "edit_description": "Edit survey description"
   },
   "edit_user": {
     "title": "Edit User"
@@ -574,7 +576,8 @@
     "import_survey": "Import an existing survey (that was exported earlier) from a ZIP file",
     "create_survey_with_ai": "Create a new survey automatically using AI assistance",
     "survey_title": "Internal title used by your team to identify the survey. This title is not shown to respondents.",
-    "survey_description": "Internal description used by your team to provide context about the survey. This description is not shown to respondents."
+    "survey_description": "Internal description used by your team to provide context about the survey. This description is not shown to respondents.",
+    "more_info": "More information"
   },
   "translations": {
     "title": "Translations",

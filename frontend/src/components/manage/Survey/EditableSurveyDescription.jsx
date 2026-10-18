@@ -103,6 +103,9 @@ export const EditableSurveyDescription = ({
       {isEditable && (
         <IconButton
           className={styles.descriptionIcon}
+          aria-label={t(
+            isDescriptionEditing ? "action_btn.save" : "edit_survey.edit_description"
+          )}
           onClick={isDescriptionEditing ? handleSave : handleEditClick}
         >
           {isDescriptionEditing ? (

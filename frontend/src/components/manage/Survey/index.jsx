@@ -1,5 +1,5 @@
 import { Card, Snackbar, Alert } from "@mui/material";
-import { Copy, Eye, Lock, Table2, Trash2, TriangleAlert } from "lucide-react";
+import { Copy, Eye, Lock, Pencil, Table2, Trash2 } from "lucide-react";
 import styles from "./Survey.module.css";
 import { serverDateTimeToLocalDateTime } from "~/utils/DateUtils";
 import { useTranslation } from "react-i18next";
@@ -63,8 +63,16 @@ const ActionButton = ({ tooltip, onClick, variant, iconOnly, children }) => {
     .filter(Boolean)
     .join(" ");
 
+  // An icon-only button has no text to name it, and the tooltip cannot stand in
+  // for one: CustomTooltip hands MUI a node, so MUI only wires aria-describedby
+  // while the tooltip is open. Without this the button is announced as "button".
   const button = (
-    <button type="button" className={classNames} onClick={onClick}>
+    <button
+      type="button"
+      className={classNames}
+      aria-label={iconOnly ? tooltip : undefined}
+      onClick={onClick}
+    >
       {children}
     </button>
   );
@@ -75,6 +83,40 @@ const ActionButton = ({ tooltip, onClick, variant, iconOnly, children }) => {
     </CustomTooltip>
   ) : (
     button
+  );
+};
+
+/**
+ * The unpublished-changes marker: a pencil with a status dot, per the
+ * redesign. The dot is what distinguishes "edited" from "edited and not yet
+ * live", and it is decorative -- `label` carries that meaning for everyone.
+ */
+const UnpublishedBadge = ({ label, onEdit }) => {
+  const content = (
+    <>
+      <Pencil {...ICON_INLINE} />
+      <span aria-hidden="true" className={styles.unpublishedDot} />
+    </>
+  );
+
+  return onEdit ? (
+    <button
+      type="button"
+      className={styles.unpublishedBadge}
+      aria-label={label}
+      onClick={onEdit}
+    >
+      {content}
+    </button>
+  ) : (
+    <span
+      role="img"
+      tabIndex={0}
+      aria-label={label}
+      className={`${styles.unpublishedBadge} ${styles.unpublishedBadgeStatic}`}
+    >
+      {content}
+    </span>
   );
 };
 
@@ -218,19 +260,23 @@ const Survey = ({
                   title={t("label.unpublished_changes")}
                   showIcon={false}
                 >
-                  <div
-                    className={styles.unpublishedBadge}
-                    style={isAdmin ? undefined : { cursor: "default" }}
-                    {...(isAdmin && {
-                      onClick: (e) => {
-                        e.stopPropagation();
-                        dispatch(setDesignModeToDesign());
-                        navigate(`/edit-survey/${survey.id}`);
-                      },
-                    })}
-                  >
-                    <TriangleAlert {...ICON_INLINE} />
-                  </div>
+                  {/* A button for an admin, who can act on it, and a plain
+                      focusable marker for everyone else, who can only read it.
+                      Either way it takes focus, so the tooltip -- the only
+                      place that says what the dot means -- is reachable
+                      without a mouse. */}
+                  <UnpublishedBadge
+                    label={t("label.unpublished_changes")}
+                    onEdit={
+                      isAdmin
+                        ? (e) => {
+                            e.stopPropagation();
+                            dispatch(setDesignModeToDesign());
+                            navigate(`/edit-survey/${survey.id}`);
+                          }
+                        : undefined
+                    }
+                  />
                 </CustomTooltip>
               )
             }
