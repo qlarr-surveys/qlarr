@@ -606,7 +606,6 @@
     "title_edit": "Bearbeiten",
     "users": "Benutzer",
     "learn_about_roles": "Mehr über Benutzerrollen erfahren",
-    "statuses_info": "<strong>Entwurf</strong> — Die Umfrage wurde noch nicht veröffentlicht. Nur zur Vorschau verfügbar.<br/><br/><strong>Geplant</strong> — Die Umfrage ist veröffentlicht, aber das Startdatum liegt in der Zukunft. Sie wird automatisch aktiv.<br/><br/><strong>Aktiv</strong> — Die Umfrage ist live und nimmt Antworten entgegen.<br/><br/><strong>Abgelaufen</strong> — Das Enddatum der Umfrage ist überschritten. Es können keine neuen Antworten gesammelt werden. Sie können sie durch Ändern der Daten reaktivieren.<br/><br/><strong>Geschlossen</strong> — Die Umfrage wurde dauerhaft geschlossen. Sie können nur Daten exportieren oder sie duplizieren.",
     "roles_info": "<strong>Super-Admin</strong> — Vollzugriff auf alle Funktionen einschließlich Benutzerverwaltung, Umfrageerstellung und Systemeinstellungen.<br/><br/><strong>Umfrage-Admin</strong> — Kann Umfragen erstellen und verwalten, Zugriff auf Umfragedesign, Einstellungen, Antworten und Analysen.<br/><br/><strong>Analyst</strong> — Kann Umfrageantworten und Analysen einsehen sowie Umfragen in der Vorschau anzeigen.<br/><br/><strong>Interviewer</strong> — Kann Umfrageantworten über die mobile App erfassen und Umfragen in der Vorschau anzeigen."
   },
   "preview_page": {
@@ -793,5 +792,12 @@
     "question_type_text_display": "Textanzeige",
     "question_type_image_display": "Bildanzeige",
     "question_type_video_display": "Videoanzeige"
+  },
+  "status_info": {
+    "draft": "Die Umfrage wurde noch nicht veröffentlicht. Nur zur Vorschau verfügbar.",
+    "scheduled": "Die Umfrage ist veröffentlicht, aber das Startdatum liegt in der Zukunft. Sie wird automatisch aktiv.",
+    "active": "Die Umfrage ist live und nimmt Antworten entgegen.",
+    "expired": "Das Enddatum der Umfrage ist überschritten. Es können keine neuen Antworten gesammelt werden. Sie können sie durch Ändern der Daten reaktivieren.",
+    "closed": "Die Umfrage wurde dauerhaft geschlossen. Sie können nur Daten exportieren oder sie duplizieren."
   }
 }

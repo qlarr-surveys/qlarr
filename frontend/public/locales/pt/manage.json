@@ -538,7 +538,6 @@
     "active": "Ativo",
     "invitation_sent": "Convite Enviado",
     "learn_about_roles": "Saiba mais sobre os papéis de usuário",
-    "statuses_info": "<strong>Rascunho</strong> — A pesquisa ainda não foi publicada. Disponível apenas para pré-visualização.<br/><br/><strong>Agendada</strong> — A pesquisa está publicada mas a data de início é futura. Será ativada automaticamente.<br/><br/><strong>Ativa</strong> — A pesquisa está no ar e aceitando respostas.<br/><br/><strong>Expirada</strong> — A data de término passou. Não é possível coletar novas respostas. Você pode reativá-la alterando as datas.<br/><br/><strong>Fechada</strong> — A pesquisa foi encerrada permanentemente. Você só pode exportar dados ou duplicá-la.",
     "roles_info": "<strong>Super Admin</strong> — Acesso total a todos os recursos, incluindo gerenciamento de usuários, criação de pesquisas e configurações do sistema.<br/><br/><strong>Admin de Pesquisas</strong> — Pode criar e gerenciar pesquisas, acessar design, configurações, respostas e análises.<br/><br/><strong>Analista</strong> — Pode visualizar respostas e análises de pesquisas, e pré-visualizar pesquisas.<br/><br/><strong>Pesquisador</strong> — Pode coletar respostas de pesquisas pelo aplicativo móvel, e pré-visualizar pesquisas."
   },
   "launch": {
@@ -792,5 +791,12 @@
     "question_type_text_display": "Exibição de Texto",
     "question_type_image_display": "Exibição de Imagem",
     "question_type_video_display": "Exibição de Vídeo"
+  },
+  "status_info": {
+    "draft": "A pesquisa ainda não foi publicada. Disponível apenas para pré-visualização.",
+    "scheduled": "A pesquisa está publicada mas a data de início é futura. Será ativada automaticamente.",
+    "active": "A pesquisa está no ar e aceitando respostas.",
+    "expired": "A data de término passou. Não é possível coletar novas respostas. Você pode reativá-la alterando as datas.",
+    "closed": "A pesquisa foi encerrada permanentemente. Você só pode exportar dados ou duplicá-la."
   }
 }

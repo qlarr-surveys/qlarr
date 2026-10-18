@@ -51,14 +51,21 @@ const CustomTooltip = ({
 
   const tooltipContent = (
     <div>
-      {title && <span  dangerouslySetInnerHTML={{ __html: `<strong>${title}</strong>` }} />}
+      {title && (
+        <strong
+          className={styles.tooltipTitle}
+          dangerouslySetInnerHTML={{ __html: title }}
+        />
+      )}
       {body && <p className={styles.textPreLine} dangerouslySetInnerHTML={{ __html: body }} />}
       {url && (
         <Button
           variant="text"
           href={url}
           target="_blank"
-          sx={{ padding: 0, textTransform: "none" }}
+          // The link sits on the dark card now, where the theme's primary blue
+          // is all but invisible.
+          sx={{ padding: 0, textTransform: "none", color: "#c7cbf0" }}
         >
           Read more...
         </Button>
@@ -71,12 +78,18 @@ const CustomTooltip = ({
     placement,
     componentsProps: {
       tooltip: {
+        // The redesign's tooltip is a dark card, not a bordered white one:
+        // these float over cards that are themselves white, where a white
+        // tooltip with a hairline border reads as part of the page.
         sx: {
-          backgroundColor: "#fff",
-          color: "#1a2052",
-          fontSize: "0.875rem",
-          border: "1px solid #dadde9",
-          padding: 1,
+          maxWidth: 280,
+          padding: "9px 11px",
+          borderRadius: "8px",
+          backgroundColor: "#1b2150",
+          color: "#fff",
+          fontSize: "12.5px",
+          lineHeight: "18px",
+          boxShadow: "0 8px 22px rgba(20, 24, 52, 0.22)",
           ...tooltipSx,
         },
       },

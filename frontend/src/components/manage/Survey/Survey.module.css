@@ -100,8 +100,8 @@
 }
 
 /* ==============================================
-   Status pill — the colour key users_manage.statuses_info explains.
-   Changing these silently desyncs that legend.
+   Status pill — the colour key the status_info.* strings explain.
+   Changing these silently desyncs what the tooltip says they mean.
 
    The redesign's pill is a tinted chip, not a saturated one: a pale wash of
    the status colour carrying that colour as text, with the dot as the one

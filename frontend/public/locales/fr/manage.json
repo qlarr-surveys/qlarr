@@ -538,7 +538,6 @@
     "active": "Actif",
     "invitation_sent": "Invitation Envoyée",
     "learn_about_roles": "En savoir plus sur les rôles utilisateur",
-    "statuses_info": "<strong>Brouillon</strong> — Le sondage n'a pas encore été publié. Disponible uniquement en aperçu.<br/><br/><strong>Programmé</strong> — Le sondage est publié mais la date de début est dans le futur. Il deviendra actif automatiquement.<br/><br/><strong>Actif</strong> — Le sondage est en ligne et accepte les réponses.<br/><br/><strong>Expiré</strong> — La date de fin du sondage est passée. Aucune nouvelle réponse ne peut être collectée. Vous pouvez le réactiver en modifiant les dates.<br/><br/><strong>Fermé</strong> — Le sondage a été fermé définitivement. Vous pouvez uniquement exporter les données ou le dupliquer.",
     "roles_info": "<strong>Super Admin</strong> — Accès complet à toutes les fonctionnalités, y compris la gestion des utilisateurs, la création de sondages et les paramètres système.<br/><br/><strong>Admin de Sondages</strong> — Peut créer et gérer des sondages, accéder à la conception, aux paramètres, aux réponses et aux analyses.<br/><br/><strong>Analyste</strong> — Peut consulter les réponses et analyses des sondages, et prévisualiser les sondages.<br/><br/><strong>Enquêteur</strong> — Peut collecter les réponses de sondages via l'application mobile, et prévisualiser les sondages."
   },
   "launch": {
@@ -792,5 +791,12 @@
     "question_type_text_display": "Affichage de Texte",
     "question_type_image_display": "Affichage d'Image",
     "question_type_video_display": "Affichage de Vidéo"
+  },
+  "status_info": {
+    "draft": "Le sondage n'a pas encore été publié. Disponible uniquement en aperçu.",
+    "scheduled": "Le sondage est publié mais la date de début est dans le futur. Il deviendra actif automatiquement.",
+    "active": "Le sondage est en ligne et accepte les réponses.",
+    "expired": "La date de fin du sondage est passée. Aucune nouvelle réponse ne peut être collectée. Vous pouvez le réactiver en modifiant les dates.",
+    "closed": "Le sondage a été fermé définitivement. Vous pouvez uniquement exporter les données ou le dupliquer."
   }
 }

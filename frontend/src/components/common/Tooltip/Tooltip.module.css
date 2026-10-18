@@ -37,3 +37,12 @@
   white-space: pre-line;
   word-break: break-word;
 }
+/* A heading line above the body, as the redesign sets it. */
+.tooltipTitle {
+  display: block;
+  font-weight: 600;
+}
+
+.tooltipTitle + .textPreLine {
+  margin: 2px 0 0;
+}

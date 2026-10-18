@@ -102,8 +102,8 @@ export function SurveyCover({ survey, surveyStatus, isEditable, onUpload }) {
       <CustomTooltip
         showIcon={false}
         placement="top-end"
-        body={statusLegend(t, survey)}
-        tooltipSx={{ maxWidth: 360 }}
+        title={t(`status.${surveyStatus}`)}
+        body={statusDetail(t, survey, surveyStatus)}
       >
         <div className={`${styles.statusPill} ${styles[surveyStatus]}`}>
           <span className={styles.statusDot} />
@@ -115,13 +115,17 @@ export function SurveyCover({ survey, surveyStatus, isEditable, onUpload }) {
 }
 
 /**
- * The five-status legend, plus this survey's own dates when it has them.
+ * What this survey's status means, plus its own dates when it has them.
+ *
+ * Only the status the pill is showing: the other four say nothing about the
+ * survey in front of you, and reading past them to find the one that does is
+ * work the tooltip should have saved.
  *
  * The card no longer lists start and end dates, so without this a scheduled or
  * expiring survey would lose the only place that said when.
  */
-function statusLegend(t, survey) {
-  const legend = t("users_manage.statuses_info");
+function statusDetail(t, survey, surveyStatus) {
+  const meaning = t(`status_info.${surveyStatus}`);
   const dates = [];
 
   // Whatever dates the survey carries, whatever its status. Gating these on
@@ -138,7 +142,9 @@ function statusLegend(t, survey) {
     );
   }
 
-  return dates.length ? `${legend}<p>${dates.join(" &middot; ")}</p>` : legend;
+  return dates.length
+    ? `${meaning}<p>${dates.join(" &middot; ")}</p>`
+    : meaning;
 }
 
 const fLocal = (serverDate) => fDate(serverDateTimeToLocalDateTime(serverDate));

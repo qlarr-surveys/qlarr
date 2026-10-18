@@ -538,7 +538,6 @@
     "active": "Active",
     "invitation_sent": "Invitation Sent",
     "learn_about_roles": "Learn about user roles",
-    "statuses_info": "<strong>Draft</strong> — Survey has not been published yet. Only available for preview.<br/><br/><strong>Scheduled</strong> — Survey is published but the start date is in the future. It will become active automatically.<br/><br/><strong>Active</strong> — Survey is live and accepting responses.<br/><br/><strong>Expired</strong> — Survey end date has passed. No new responses can be collected. You can reactivate it by changing the dates.<br/><br/><strong>Closed</strong> — Survey has been permanently closed. You can only export data or duplicate it.",
     "roles_info": "<strong>Super Admin</strong> — Full access to all features including user management, survey creation, and system settings.<br/><br/><strong>Survey Admin</strong> — Can create and manage surveys, access survey design, settings, responses, and analytics.<br/><br/><strong>Analyst</strong> — Can view survey responses, analytics, and preview surveys.<br/><br/><strong>Surveyor</strong> — Can collect survey responses via the mobile app, and preview surveys."
   },
   "launch": {
@@ -792,5 +791,12 @@
     "feature_own": "Own every result.",
     "need_help": "Need help getting started?",
     "contact_support": "contact support"
+  },
+  "status_info": {
+    "draft": "Survey has not been published yet. Only available for preview.",
+    "scheduled": "Survey is published but the start date is in the future. It will become active automatically.",
+    "active": "Survey is live and accepting responses.",
+    "expired": "Survey end date has passed. No new responses can be collected. You can reactivate it by changing the dates.",
+    "closed": "Survey has been permanently closed. You can only export data or duplicate it."
   }
 }
