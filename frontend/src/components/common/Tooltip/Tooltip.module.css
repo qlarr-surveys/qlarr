@@ -33,7 +33,11 @@
   outline-offset: 1px;
 }
 
+/* The <p>'s own margins would otherwise pad the card unevenly: a tooltip with
+   no title is all body, and the browser's 1em top margin pushes it off
+   centre inside the 9px the card is padded with. */
 .textPreLine{
+  margin: 0;
   white-space: pre-line;
   word-break: break-word;
 }

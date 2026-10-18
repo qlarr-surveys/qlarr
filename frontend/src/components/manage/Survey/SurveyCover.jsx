@@ -99,10 +99,11 @@ export function SurveyCover({ survey, surveyStatus, isEditable, onUpload }) {
         </>
       )}
 
+      {/* No title: it would name the status the pill it is attached to is
+          already showing. */}
       <CustomTooltip
         showIcon={false}
         placement="top-end"
-        title={t(`status.${surveyStatus}`)}
         body={statusDetail(t, survey, surveyStatus)}
       >
         <div className={`${styles.statusPill} ${styles[surveyStatus]}`}>
