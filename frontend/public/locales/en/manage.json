@@ -32,7 +32,7 @@
   "confirm_password_required": "You must repeat password",
   "create_survey": {
     "title": "Create Survey",
-    "empty_state_message": "No surveys available.",
+    "empty_state_message": "No surveys match this status.",
     "or": "or",
     "empty_state_cta_copy": "to get started!"
   },
@@ -231,7 +231,7 @@
   },
   "fetch_error": "Couldn't load your surveys. Check your connection and try again.",
   "new_survey": "New Survey",
-  "reset_filter": "Reset Survey Filter",
+  "reset_filter": "Show all surveys",
   "create_new_survey": "Create New Survey",
   "import_survey": "Import a survey",
   "upload_zip_folder": "Upload Zip Folder",

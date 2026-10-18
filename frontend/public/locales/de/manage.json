@@ -41,7 +41,7 @@
   "create_new_survey": "Neue Umfrage erstellen",
   "create_survey": {
     "empty_state_cta_copy": "um loszulegen!",
-    "empty_state_message": "Keine Umfragen verfügbar.",
+    "empty_state_message": "Keine Umfragen mit diesem Status.",
     "or": "oder",
     "title": "Umfrage erstellen"
   },
@@ -311,7 +311,7 @@
     "title": "Profil"
   },
   "registered": "eingetragen",
-  "reset_filter": "Umfrage-Filter zurücksetzen",
+  "reset_filter": "Alle Umfragen anzeigen",
   "reset_password": {
     "reset": "Zurücksetzen",
     "title": "Passwort Zurücksetzen"

@@ -32,7 +32,7 @@
   "confirm_password_required": "Vous devez répéter le mot de passe",
   "create_survey": {
     "title": "Créer un Sondage",
-    "empty_state_message": "Aucun sondage disponible.",
+    "empty_state_message": "Aucun sondage ne correspond à ce statut.",
     "or": "ou",
     "empty_state_cta_copy": "pour commencer !"
   },
@@ -232,7 +232,7 @@
   },
   "fetch_error": "Impossible de charger vos sondages. Vérifiez votre connexion et réessayez.",
   "new_survey": "Nouveau Sondage",
-  "reset_filter": "Réinitialiser le Filtre de Sondage",
+  "reset_filter": "Afficher tous les sondages",
   "create_new_survey": "Créer un Nouveau Sondage",
   "import_survey": "Importer un sondage",
   "upload_zip_folder": "Télécharger un Dossier ZIP",

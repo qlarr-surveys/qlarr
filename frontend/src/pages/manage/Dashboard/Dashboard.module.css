@@ -98,6 +98,52 @@
 }
 
 /* ==============================================
+   Filtered to nothing
+
+   A dashed outline around empty space, which is the redesign's way of saying
+   the space is empty rather than broken. The button is its secondary one: the
+   way back is an offer, not the page's main action.
+   ============================================== */
+.filterEmpty {
+  margin-top: 24px;
+  padding: 28px;
+  border: 1.5px dashed #cfd5e8;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.filterEmptyText {
+  margin: 0;
+  font-family: "Rubik", sans-serif;
+  font-size: 14px;
+  color: #4c5474;
+}
+
+.filterEmptyAction {
+  margin-top: 14px;
+  height: 38px;
+  padding: 0 16px;
+  border: 1px solid #cfd5e8;
+  border-radius: 7px;
+  background: #fff;
+  font-family: "Rubik", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1b2150;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.filterEmptyAction:hover {
+  background: #f4f6fc;
+}
+
+.filterEmptyAction:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+/* ==============================================
    Pagination
 
    MUI's own look for TablePagination is a bare label, a borderless select and

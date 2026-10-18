@@ -32,7 +32,7 @@
   "confirm_password_required": "Debes repetir la contraseña",
   "create_survey": {
     "title": "Crear Encuesta",
-    "empty_state_message": "No hay encuestas disponibles.",
+    "empty_state_message": "Ninguna encuesta coincide con este estado.",
     "or": "o",
     "empty_state_cta_copy": "¡para comenzar!"
   },
@@ -232,7 +232,7 @@
   },
   "fetch_error": "No se pudieron cargar tus encuestas. Comprueba tu conexión e inténtalo de nuevo.",
   "new_survey": "Nueva Encuesta",
-  "reset_filter": "Restablecer Filtro de Encuesta",
+  "reset_filter": "Mostrar todas las encuestas",
   "create_new_survey": "Crear Nueva Encuesta",
   "import_survey": "Importar una encuesta",
   "upload_zip_folder": "Subir Carpeta ZIP",

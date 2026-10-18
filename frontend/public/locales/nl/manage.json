@@ -32,7 +32,7 @@
   "confirm_password_required": "Je moet het wachtwoord herhalen",
   "create_survey": {
     "title": "Enquête Aanmaken",
-    "empty_state_message": "Geen enquêtes beschikbaar.",
+    "empty_state_message": "Geen enquêtes met deze status.",
     "or": "of",
     "empty_state_cta_copy": "om te beginnen!"
   },
@@ -232,7 +232,7 @@
   },
   "fetch_error": "Je enquêtes konden niet worden geladen. Controleer je verbinding en probeer het opnieuw.",
   "new_survey": "Nieuwe Enquête",
-  "reset_filter": "Enquête Filter Resetten",
+  "reset_filter": "Alle enquêtes tonen",
   "create_new_survey": "Nieuwe Enquête Aanmaken",
   "import_survey": "Een enquête importeren",
   "upload_zip_folder": "ZIP Map Uploaden",

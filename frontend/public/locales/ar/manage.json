@@ -32,7 +32,7 @@
   "confirm_password_required": "يجب عليك تكرار كلمة المرور",
   "create_survey": {
     "title": "إنشاء الاستبيان",
-    "empty_state_message": "لا توجد استبيانات متاحة.",
+    "empty_state_message": "لا توجد استطلاعات بهذه الحالة.",
     "or": "أو",
     "empty_state_cta_copy": "للبدء!"
   },
@@ -236,7 +236,7 @@
   },
   "fetch_error": "تعذّر تحميل استبياناتك. تحقق من اتصالك وحاول مرة أخرى.",
   "new_survey": "استبيان جديد",
-  "reset_filter": "إعادة تعيين فلتر الاستطلاع",
+  "reset_filter": "عرض كل الاستطلاعات",
   "create_new_survey": "إنشاء استطلاع جديد",
   "import_survey": "تحميل استطلاع",
   "upload_zip_folder": "تحميل مجلد مضغوط",

@@ -32,7 +32,7 @@
   "confirm_password_required": "Você deve repetir a senha",
   "create_survey": {
     "title": "Criar Pesquisa",
-    "empty_state_message": "Nenhuma pesquisa disponível.",
+    "empty_state_message": "Nenhuma pesquisa com este status.",
     "or": "ou",
     "empty_state_cta_copy": "para começar!"
   },
@@ -232,7 +232,7 @@
   },
   "fetch_error": "Não foi possível carregar suas pesquisas. Verifique sua conexão e tente novamente.",
   "new_survey": "Nova Pesquisa",
-  "reset_filter": "Redefinir Filtro de Pesquisa",
+  "reset_filter": "Mostrar todas as pesquisas",
   "create_new_survey": "Criar Nova Pesquisa",
   "import_survey": "Importar uma pesquisa",
   "upload_zip_folder": "Enviar Pasta ZIP",

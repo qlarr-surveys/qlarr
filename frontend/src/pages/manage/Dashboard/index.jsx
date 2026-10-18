@@ -15,7 +15,6 @@ import { useDispatch } from "react-redux";
 
 import CreateSurvey from "~/components/manage/CreateSurvey/CreateSurvey";
 import { PROCESSED_ERRORS } from "~/utils/errorsProcessor";
-import FilterAltOffIcon from "@mui/icons-material/FilterAltOff";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 
@@ -24,7 +23,7 @@ import LoadingDots from "~/components/common/LoadingDots";
 import { useService } from "~/hooks/use-service";
 import ConfirmActionModal from "~/components/common/ConfirmActionModal";
 import StopSurveyModal from "~/components/manage/StopSurveyModal";
-import { Description, ErrorOutline } from "@mui/icons-material";
+import { ErrorOutline } from "@mui/icons-material";
 import DashboardEmptyState from "~/components/manage/DashboardEmptyState";
 import ActionCards from "~/components/manage/Dashboard/ActionCards";
 import { useDashboardActions } from "~/components/manage/Dashboard/useDashboardActions";
@@ -384,27 +383,26 @@ function Dashboard() {
                     })}
                   </Box>
                 ) : status !== "all" ? (
-                  <div className={styles.noSurveys}>
-                    <Description sx={{ fontSize: 48, color: "#ccc" }} />
-                    <Typography
-                      variant="h6"
-                      color="textSecondary"
-                      sx={{ mt: 2 }}
-                    >
+                  /* Nothing is missing here -- a filter is simply hiding it.
+                     A dashed panel says "this space is empty by your choice",
+                     where the grey icon and the filled button of a real empty
+                     state said something had gone wrong. role="status" so the
+                     filter change is announced rather than silently emptying
+                     the list. */
+                  <div className={styles.filterEmpty} role="status">
+                    <p className={styles.filterEmptyText}>
                       {t("create_survey.empty_state_message")}
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        sx={{ mx: 1 }}
-                        startIcon={<FilterAltOffIcon />}
-                        onClick={() => {
-                          setPage(1);
-                          setStatus("all");
-                        }}
-                      >
-                        {t("reset_filter")}
-                      </Button>
-                    </Typography>
+                    </p>
+                    <button
+                      type="button"
+                      className={styles.filterEmptyAction}
+                      onClick={() => {
+                        setPage(1);
+                        setStatus("all");
+                      }}
+                    >
+                      {t("reset_filter")}
+                    </button>
                   </div>
                 ) : (
                   <DashboardEmptyState
