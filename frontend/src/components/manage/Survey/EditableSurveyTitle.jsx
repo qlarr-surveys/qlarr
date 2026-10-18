@@ -124,8 +124,10 @@ export const EditableSurveyTitle = ({
         </span>
       )}
 
-      {/* Holds the badge at the end of the row whatever the name's length. */}
-      <span className={styles.rowSpacer} />
+      {/* Holds the badge at the end of the row whatever the name's length --
+          but only while reading. The open field claims the row's free space,
+          and a spacer that still grew would take half of it. */}
+      {!isEditing && <span className={styles.rowSpacer} />}
       {badge}
     </Box>
   );
