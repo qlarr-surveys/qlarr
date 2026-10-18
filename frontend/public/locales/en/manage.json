@@ -774,6 +774,8 @@
     "tour_back": "back"
   },
   "empty_state": {
+    "welcome": "Welcome {{firstName}} {{lastName}}",
+    "subtitle": "Unlock deeper insights that drive smarter decisions.",
     "create_first_survey": "Create your first survey in minutes",
     "create_survey_btn": "Create Survey",
     "import_template": "Import Existing Template",

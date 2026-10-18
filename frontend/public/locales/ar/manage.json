@@ -624,6 +624,8 @@
     "tour_back": "رجوع"
   },
   "empty_state": {
+    "welcome": "مرحباً {{firstName}} {{lastName}}",
+    "subtitle": "اكتشف رؤى أعمق تدفع قرارات أذكى.",
     "create_first_survey": "أنشئ استبيانك الأول في دقائق",
     "create_survey_btn": "إنشاء استبيان",
     "import_template": "استيراد قالب موجود",

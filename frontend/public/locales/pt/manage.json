@@ -616,6 +616,8 @@
     "tour_back": "voltar"
   },
   "empty_state": {
+    "welcome": "Bem-vindo {{firstName}} {{lastName}}",
+    "subtitle": "Descubra insights mais profundos para decisões mais inteligentes.",
     "create_first_survey": "Crie sua primeira pesquisa em minutos",
     "create_survey_btn": "Criar pesquisa",
     "import_template": "Importar modelo existente",

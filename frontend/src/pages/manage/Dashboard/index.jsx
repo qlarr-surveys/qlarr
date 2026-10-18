@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import styles from "./Dashboard.module.css";
 import { HeaderContent } from "~/components/manage/HeaderContent";
+import { isSurveyAdmin } from "~/constants/roles";
 import { setLoading } from "~/state/edit/editState";
 import { useDispatch } from "react-redux";
 
@@ -133,6 +134,16 @@ function Dashboard() {
   });
   // The subtitle names the assistant only where there is one to name.
   const hasAiAction = actions.some((action) => action.tone === "ai");
+
+  // The first-run empty state carries its own welcome and CTAs, so the page
+  // heading and action cards above it would say the same thing twice. Mirrors
+  // the branch that renders it, filters included: a filtered-to-empty list
+  // keeps the shell.
+  const showEmptyState =
+    !fetchingSurveys &&
+    !fetchError &&
+    status === "all" &&
+    !(surveys?.surveys?.length > 0);
 
   const onDelete = (survey) => {
     setActionType("delete");
@@ -284,14 +295,20 @@ function Dashboard() {
     >
       <Container sx={{ marginBottom: "48px" }}>
         <Box className={styles.content}>
-          <Box className={styles.pageHeading}>
-            <h1 className={styles.heading}>{t("my_surveys")}</h1>
-            <p className={styles.subtitle}>
-              {t(hasAiAction ? "dashboard.subtitle_ai" : "dashboard.subtitle")}
-            </p>
-          </Box>
+          {!showEmptyState && (
+            <>
+              <Box className={styles.pageHeading}>
+                <h1 className={styles.heading}>{t("my_surveys")}</h1>
+                <p className={styles.subtitle}>
+                  {t(
+                    hasAiAction ? "dashboard.subtitle_ai" : "dashboard.subtitle"
+                  )}
+                </p>
+              </Box>
 
-          <ActionCards actions={actions} />
+              <ActionCards actions={actions} />
+            </>
+          )}
 
           {(surveys?.surveys?.length > 0 || status != "all") && (
             <Box className={styles.listHeading}>
@@ -402,7 +419,7 @@ function Dashboard() {
                   <DashboardEmptyState
                     onCreateSurvey={handleCreateSurveyClick}
                     onImportTemplate={handleImportSurveyClick}
-                    canCreate={false}
+                    canCreate={isSurveyAdmin()}
                   />
                 )}
               </>
