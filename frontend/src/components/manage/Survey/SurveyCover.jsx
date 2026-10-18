@@ -8,7 +8,9 @@ import { serverDateTimeToLocalDateTime } from "~/utils/DateUtils";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import styles from "./Survey.module.css";
 
-const DEFAULT_LOGO = "/placehoder-logo.png";
+// The clean brand logo, not /placehoder-logo.png: that one is tiled with a
+// "Qlarr" watermark meant for image placeholders, not for a survey's cover.
+const DEFAULT_LOGO = "/qlarr.png";
 
 /**
  * The card's cover: the survey logo, the status pill, and — for an admin — a
