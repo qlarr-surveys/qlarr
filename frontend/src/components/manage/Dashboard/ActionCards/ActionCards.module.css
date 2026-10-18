@@ -6,8 +6,13 @@
   gap: 16px;
 }
 
+/* Icon in its own column, text beside it. flex-start, not centre: the title
+   should sit level with the icon however many lines the description runs to,
+   and these cards do not all have the same amount to say. */
 .card {
-  display: block;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
   padding: 20px;
   text-align: start;
   font: inherit;
@@ -28,21 +33,29 @@
   outline-offset: 1px;
 }
 
+/* Larger than it was stacked above the title: beside a two- or three-line
+   block, a 26px badge reads as a bullet rather than the card's mark. */
 .iconBadge {
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 32px;
+  height: 32px;
   border-radius: 6px;
   border: 1px solid #dce0ee;
   background: #f6f7fc;
   color: #3c447a;
 }
 
+/* min-width: 0 so a long unbroken word wraps instead of widening the column
+   and pushing the icon out of the card. */
+.body {
+  min-width: 0;
+}
+
 .title {
   display: block;
-  margin-top: 9px;
   font-size: 14.5px;
   font-weight: 600;
   color: #1b2150;

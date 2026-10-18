@@ -35,12 +35,17 @@ function ActionCards({ actions }) {
               <span aria-hidden="true" className={styles.iconBadge}>
                 <Icon fontSize="small" />
               </span>
-              <Typography component="span" className={styles.title}>
-                {t(titleKey)}
-              </Typography>
-              <Typography component="span" className={styles.description}>
-                {t(descriptionKey)}
-              </Typography>
+              {/* The text is its own column beside the icon, not a stack under
+                  it, so the icon anchors the whole card and the description
+                  wraps against the title rather than under the badge. */}
+              <span className={styles.body}>
+                <Typography component="span" className={styles.title}>
+                  {t(titleKey)}
+                </Typography>
+                <Typography component="span" className={styles.description}>
+                  {t(descriptionKey)}
+                </Typography>
+              </span>
             </button>
             {/* An action may carry its own surface - a drawer or dialog the
                 card opens. Nothing in this repo does; the hosted fork's AI
