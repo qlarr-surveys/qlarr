@@ -40,6 +40,13 @@ class DesignService extends BaseService {
     );
     return response.data;
   }
+  async getQuotaStatus(surveyId = null) {
+    const id = surveyId || sessionStorage.getItem("surveyId");
+    const response = await this.handleRequest(() =>
+      authenticatedApi.get(`/survey/${id}/quotas`)
+    );
+    return response.data;
+  }
 
   async exportTranslations() {
     const surveyId = sessionStorage.getItem("surveyId");

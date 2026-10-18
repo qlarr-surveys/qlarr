@@ -160,3 +160,24 @@
     ); /* Fade to even more transparent beige */
   }
 }
+
+.quotaSwitcher {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 1rem 10px;
+  border-bottom: 1px solid var(--qlarr-shadow-color);
+}
+
+.quotaChipLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.quotaMissingDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}

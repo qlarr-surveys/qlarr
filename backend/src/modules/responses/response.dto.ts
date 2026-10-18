@@ -77,6 +77,7 @@ export interface UploadResponseRequestData {
 export interface ResponseCountDto {
   completeResponseCount: number;
   userResponsesCount: number;
+  quotaCounts: Record<string, number>;
 }
 
 /**
