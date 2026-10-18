@@ -47,6 +47,9 @@ export const EditableSurveyTitle = ({
 
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
+      // The field is two rows now, so without this Enter would insert a line
+      // break into the name on its way to saving.
+      event.preventDefault();
       handleSave();
     }
   };
@@ -66,6 +69,8 @@ export const EditableSurveyTitle = ({
 
       {isEditing ? (
         <>
+          {/* Two rows, like the reading state's two clamped lines, so a long
+              name does not change the row's height when the editor opens. */}
           <TextField
             className={styles.titleField}
             value={title}
@@ -74,7 +79,10 @@ export const EditableSurveyTitle = ({
             onBlur={handleSave}
             autoFocus
             variant="standard"
+            InputProps={{ disableUnderline: true }}
             fullWidth
+            multiline
+            rows={2}
           />
           <IconButton className={styles.saveIcon} onClick={handleSave}>
             <Check size={16} strokeWidth={1.5} />

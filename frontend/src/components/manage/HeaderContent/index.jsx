@@ -1,8 +1,40 @@
-import { Box, css, Stack, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
+import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import { STATUS } from "../Survey/status";
-import { RHFSelect } from "~/components/hook-form";
+import styles from "./HeaderContent.module.css";
+
+/**
+ * One filter: a label above a native select, with the chevron drawn over it.
+ *
+ * Native rather than a MUI Select because the redesign draws a plain 34px box
+ * and the options are a short flat list -- a popover adds nothing here, and
+ * the native control is what mobile users already know.
+ */
+const FilterSelect = ({ label, value, onChange, options, minWidth, t }) => (
+  <label className={styles.field}>
+    {label}
+    <select
+      className={styles.select}
+      style={{ minWidth }}
+      value={value}
+      onChange={onChange}
+    >
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {t(option.label)}
+        </option>
+      ))}
+    </select>
+    <ChevronDown
+      aria-hidden="true"
+      size={12}
+      strokeWidth={1.6}
+      className={styles.chevron}
+    />
+  </label>
+);
 
 export const HeaderContent = ({
   sort,
@@ -30,54 +62,31 @@ export const HeaderContent = ({
   const { t } = useTranslation(NAMESPACES.MANAGE);
 
   return (
-    <Box
-      rowGap={2.5}
-      columnGap={2}
-      display="grid"
-      gridTemplateColumns={{ xs: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }}
-    >
+    <div className={styles.listHeader}>
       {heading ?? (
         <Typography variant="h3" flex="1" textTransform="uppercase">
           {t("my_surveys")}
         </Typography>
       )}
 
-      <Stack
-        width="100%"
-        spacing={2.5}
-        direction={{ xs: "column", md: "row" }}
-        alignItems={{ xs: "stretch", md: "flex-end" }}
-        justifyContent="flex-end"
-      >
-        <RHFSelect
-          onChange={onSortSelected}
-          native
-          value={sort}
-          backgroundColor="white"
-          name="Status"
+      <div className={styles.filters}>
+        <FilterSelect
           label={t("label.sort_by")}
-        >
-          {sort_options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {t(option.label)}
-            </option>
-          ))}
-        </RHFSelect>
-        <RHFSelect
-          onChange={onFilterSelected}
-          native
-          value={filter}
-          backgroundColor="white"
-          name="Status"
+          value={sort}
+          onChange={onSortSelected}
+          options={sort_options}
+          minWidth={220}
+          t={t}
+        />
+        <FilterSelect
           label={t("edit_survey.status")}
-        >
-          {filter_options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {t(option.label)}
-            </option>
-          ))}
-        </RHFSelect>
-      </Stack>
-    </Box>
+          value={filter}
+          onChange={onFilterSelected}
+          options={filter_options}
+          minWidth={150}
+          t={t}
+        />
+      </div>
+    </div>
   );
 };

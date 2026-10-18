@@ -88,6 +88,7 @@ export const EditableSurveyDescription = ({
           onBlur={handleSave}
           autoFocus
           variant="standard"
+          InputProps={{ disableUnderline: true }}
           fullWidth
           multiline
           rows={2}

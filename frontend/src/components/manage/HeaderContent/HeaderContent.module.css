@@ -6,7 +6,7 @@
   justify-content: space-between;
 }
 
-/* 
+/*
 @media only screen and (max-width: 1024px) {
   .headerContent.headerContent {
     flex-direction: column;
@@ -36,4 +36,87 @@
 
 .searchInputField.Mui-focused .MuiOutlinedInput-notchedOutline {
   border: 1px solid #3f51b5 !important;
+}
+
+/* ==============================================
+   Heading and filters
+
+   The heading and the filters sit on one baseline and wrap together, so a
+   narrow window drops the filters under the heading rather than squeezing
+   them.
+   ============================================== */
+.listHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.filters {
+  display: flex;
+  gap: 10px;
+}
+
+/* ==============================================
+   Filter select
+
+   The redesign's select: the label sits above the control rather than
+   floating in its border, so the control is a plain 34px box. `position:
+   relative` is what the chevron is placed against.
+   ============================================== */
+.field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-family: "Rubik", sans-serif;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #555d7d;
+}
+
+/* The end padding is the chevron's room. Logical properties, not left/right:
+   this screen is mirrored in Arabic. */
+.select {
+  height: 34px;
+  padding-block: 0;
+  padding-inline: 12px 36px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  background: #fff;
+  font-family: "Rubik", sans-serif;
+  font-size: 13.5px;
+  color: #1b2150;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.select:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+/* Decorative, and the select underneath owns the clicks. */
+.chevron {
+  position: absolute;
+  inset-inline-end: 12px;
+  bottom: 11px;
+  color: #4c5474;
+  pointer-events: none;
+}
+
+@media only screen and (max-width: 768px) {
+  .filters {
+    width: 100%;
+  }
+
+  .field {
+    flex: 1;
+  }
+
+  .select {
+    width: 100%;
+  }
 }

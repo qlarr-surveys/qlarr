@@ -433,6 +433,7 @@ function Dashboard() {
 
           {surveys?.totalCount > MIN_ROWS_PER_PAGE ? (
             <TablePagination
+              className={styles.pagination}
               rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
               component="div"
               labelDisplayedRows={({ from, to, count, page }) => {

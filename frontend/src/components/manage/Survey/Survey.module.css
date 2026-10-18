@@ -227,9 +227,46 @@
   margin-inline-start: -6px;
 }
 
+/* The redesign's field: the reading text boxed in the focus colour, at the
+   same size and weight it had a moment ago. MUI's standard underline is off,
+   so the border here is the only one -- the control is the box, not a line
+   under it. The heights match .titleContainer and .descriptionContainer, which
+   is what keeps the card from resizing as the editor opens and closes. */
+.titleField :global(.MuiInputBase-root),
+.descriptionField :global(.MuiInputBase-root) {
+  box-sizing: border-box;
+  border: 1.5px solid #3a46d8;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.titleField :global(.MuiInputBase-root) {
+  height: 48px;
+  padding: 1px 6px;
+}
+
+.descriptionField :global(.MuiInputBase-root) {
+  height: 44px;
+  padding: 1px 8px;
+}
+
 .titleField :global(.MuiInputBase-input),
 .descriptionField :global(.MuiInputBase-input) {
-  padding-inline: 6px;
+  padding: 0;
+  overflow-y: auto;
+}
+
+.titleField :global(.MuiInputBase-input) {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
+  color: #1b2150;
+}
+
+.descriptionField :global(.MuiInputBase-input) {
+  font-size: 13.5px;
+  line-height: 20px;
+  color: #4c5474;
 }
 
 .nameIcon,

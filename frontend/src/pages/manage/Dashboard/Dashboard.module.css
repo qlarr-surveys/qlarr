@@ -84,3 +84,91 @@
 .noSurveys {
   text-align: center;
 }
+
+/* ==============================================
+   Pagination
+
+   MUI's own look for TablePagination is a bare label, a borderless select and
+   two round icon buttons. The redesign draws the same three parts as bordered
+   controls on one line, so this restyles them in place rather than rebuilding
+   the pager: the select is still a real MUI Select, with its popover and
+   keyboard handling intact.
+   ============================================== */
+.pagination {
+  margin-top: 24px;
+  font-family: "Rubik", sans-serif;
+  font-size: 13.5px;
+  color: #4c5474;
+}
+
+.pagination :global(.MuiTablePagination-toolbar) {
+  min-height: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+/* MUI spaces these with its own margins, which fight the row's gap. */
+.pagination :global(.MuiTablePagination-selectLabel),
+.pagination :global(.MuiTablePagination-displayedRows) {
+  margin: 0;
+  font: inherit;
+}
+
+.pagination :global(.MuiTablePagination-displayedRows) {
+  min-width: 70px;
+  text-align: center;
+  color: #1b2150;
+}
+
+.pagination :global(.MuiTablePagination-input) {
+  margin: 0;
+  min-width: 76px;
+  height: 32px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  background: #fff;
+  font: inherit;
+  color: #1b2150;
+}
+
+.pagination :global(.MuiTablePagination-select) {
+  display: flex;
+  align-items: center;
+  padding-block: 0;
+  padding-inline: 12px 32px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.pagination :global(.MuiTablePagination-selectIcon) {
+  inset-inline-end: 8px;
+  color: #4c5474;
+}
+
+.pagination :global(.MuiTablePagination-actions) {
+  margin: 0;
+  display: flex;
+  gap: 6px;
+}
+
+.pagination :global(.MuiTablePagination-actions) button {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid #cfd5e8;
+  border-radius: 7px;
+  background: #fff;
+  color: #4c5474;
+}
+
+.pagination :global(.MuiTablePagination-actions) button:hover {
+  background: #f4f6fc;
+}
+
+.pagination :global(.MuiTablePagination-actions) button:disabled {
+  color: #b6bbd2;
+}
