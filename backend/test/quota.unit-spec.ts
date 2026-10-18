@@ -67,6 +67,7 @@ describe('quota helpers', () => {
         'Q1.value': 'male',
         'Survey.quota_QT1': true,
         'Survey.quota_QT1_full': false,
+        'Survey.is_quota_met_QT1': false,
         'Survey.var_custom': true,
         'Survey.lang': 'en',
       }),
@@ -75,8 +76,8 @@ describe('quota helpers', () => {
 
   it('marks full quotas as engine input values', () => {
     expect(fullQuotaValues(['QT1', 'QT2'])).toEqual({
-      'Survey.quota_QT1_full': true,
-      'Survey.quota_QT2_full': true,
+      'Survey.is_quota_met_QT1': true,
+      'Survey.is_quota_met_QT2': true,
     });
   });
 
@@ -174,7 +175,7 @@ describe('quota engine binding', () => {
     expect(out.navigationIndex.name).toBe('end');
     expect(out.toSave['Survey.disqualified']).toBe(true);
     expect(out.toSave['Survey.quota_QT1']).toBe(true);
-    expect(out.toSave['Survey.quota_QT1_full']).toBeUndefined();
+    expect(out.toSave['Survey.is_quota_met_QT1']).toBeUndefined();
     expect(out.toSave['Survey.screened_out_by_quota']).toBe('QT1');
   });
 
@@ -189,7 +190,7 @@ describe('quota engine binding', () => {
   });
 
   it('only treats a JSON boolean true as full', async () => {
-    const out = await next([], { 'Survey.quota_QT1_full': 'true' });
+    const out = await next([], { 'Survey.is_quota_met_QT1': 'true' });
     expect(out.toSave['Survey.disqualified']).toBe(false);
   });
 
@@ -332,7 +333,7 @@ describe('navigation quota enforcement', () => {
       },
       processedSurvey: processed,
       navigationDirection: { name: 'NEXT' },
-      values: { 'Q1.value': 'male', 'Survey.quota_QT1': false, 'Survey.quota_QT1_full': false },
+      values: { 'Q1.value': 'male', 'Survey.quota_QT1': false, 'Survey.is_quota_met_QT1': false },
       preview: false,
       surveyMode: 'ONLINE',
     } as any);
@@ -340,7 +341,7 @@ describe('navigation quota enforcement', () => {
     const params = engineNavigate.mock.calls[0][0];
     expect(JSON.parse(params.values)).toEqual({
       'Q1.value': 'male',
-      'Survey.quota_QT1_full': true,
+      'Survey.is_quota_met_QT1': true,
     });
     expect(result.screenedOutQuota).toBe('QT1');
   });

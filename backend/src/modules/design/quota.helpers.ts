@@ -1,8 +1,8 @@
 // Survey variables and quotas never come from the client: calculated ones come from the engine, inputs from us.
-const ENGINE_OWNED_PREFIXES = ['Survey.var_', 'Survey.quota_'];
+const ENGINE_OWNED_PREFIXES = ['Survey.var_', 'Survey.quota_', 'Survey.is_quota_met_'];
 const isEngineOwnedKey = (key: string) => ENGINE_OWNED_PREFIXES.some((prefix) => key.startsWith(prefix));
 /** Passed in on every navigation, never saved: whether the quota is full. */
-export const quotaFullKey = (code: string) => `Survey.quota_${code}_full`;
+export const quotaMetKey = (code: string) => `Survey.is_quota_met_${code}`;
 const QUOTA_CODE_RE = /^[A-Za-z0-9][A-Za-z0-9_]*$/;
 
 export interface QuotaDefinition {
@@ -47,7 +47,7 @@ export function stripQuotaKeys(values: Record<string, unknown>): Record<string, 
 
 /** Engine input values marking the given quotas as full. */
 export function fullQuotaValues(fullQuotas: string[]): Record<string, true> {
-  return Object.fromEntries(fullQuotas.map((code) => [quotaFullKey(code), true]));
+  return Object.fromEntries(fullQuotas.map((code) => [quotaMetKey(code), true]));
 }
 
 export function withComputedQuotaKeys(
