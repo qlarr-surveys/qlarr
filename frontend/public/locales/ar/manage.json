@@ -86,7 +86,7 @@
       "start_date": "تاريخ البدء",
       "end_date": "تاريخ الانتهاء"
     },
-    "edit_name": "تعديل اسم الاستطلاع",
+    "edit_name": "تعديل اسم الاستطلاع: {{name}}",
     "edit_description": "تعديل وصف الاستطلاع"
   },
   "edit_user": {
@@ -189,7 +189,8 @@
     "quota": "الحد: {{count}}",
     "no_quota": "لا يوجد حد",
     "survey_dates": "تواريخ الاستبيان",
-    "survey_url": "رابط الاستبيان"
+    "survey_url": "رابط الاستبيان",
+    "survey_description": "وصف الاستطلاع"
   },
   "language": {
     "ar": "عربي",

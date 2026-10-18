@@ -86,7 +86,7 @@
       "start_date": "Data de Início",
       "end_date": "Data de Finalização"
     },
-    "edit_name": "Editar o nome da pesquisa",
+    "edit_name": "Editar o nome da pesquisa: {{name}}",
     "edit_description": "Editar a descrição da pesquisa"
   },
   "edit_user": {
@@ -189,7 +189,8 @@
     "unpublished_changes": "Tem Alterações Não Publicadas",
     "responses": "Respostas Completas : {{count}}",
     "quota": "Cota: {{count}}",
-    "no_quota": "Sem Cota"
+    "no_quota": "Sem Cota",
+    "survey_description": "Descrição da Pesquisa"
   },
   "language": {
     "ar": "Árabe",

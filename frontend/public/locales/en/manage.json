@@ -86,7 +86,7 @@
       "start_date": "Start Date",
       "end_date": "End Date"
     },
-    "edit_name": "Edit survey name",
+    "edit_name": "Edit survey name: {{name}}",
     "edit_description": "Edit survey description"
   },
   "edit_user": {
@@ -188,7 +188,8 @@
     "unpublished_changes": "Has Unpublished Changes",
     "responses": "Complete Responses : {{count}}",
     "quota": "Quota: {{count}}",
-    "no_quota": "No Quota"
+    "no_quota": "No Quota",
+    "survey_description": "Survey Description"
   },
   "language": {
     "ar": "Arabic",

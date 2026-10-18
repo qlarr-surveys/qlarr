@@ -177,45 +177,74 @@
   display: flex;
   align-items: center;
   flex: none;
-  padding-top: 4px;
 }
 
-.titleText {
-  flex: 0 1 auto;
-  min-width: 0;
-  padding: 2px 6px;
-  margin-inline-start: -6px;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 22px;
-  color: #1b2150;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+/* The redesign's title ⓘ is 2px larger than the one beside the description and
+   rides 2px higher, to sit against a 22px line rather than a 20px one. */
+.titleContainer .rowInfo > button {
+  width: 26px;
+  height: 26px;
+  margin-top: -2px;
 }
 
-.titleText:hover {
-  background: #f3f4fa;
-}
-
+/* The reading state is the control: a button wearing the text's own type, so
+   the only thing hover and focus add is a tint and a ring. The resets are what
+   stop it looking like a button -- the redesign shows no chrome until the
+   pointer is on it. `text-align: start` and not `left`: Arabic mirrors. */
+.titleText,
 .descriptionText {
   flex: 0 1 auto;
   min-width: 0;
   padding: 2px 6px;
   margin-inline-start: -6px;
+  border: 0;
   border-radius: 6px;
-  font-size: 13.5px;
-  line-height: 20px;
+  background: none;
+  font-family: inherit;
+  text-align: start;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.descriptionText:hover {
+button.titleText,
+button.descriptionText {
+  cursor: pointer;
+}
+
+button.titleText:hover,
+button.descriptionText:hover {
   background: #f3f4fa;
+}
+
+button.titleText:focus-visible,
+button.descriptionText:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.titleText {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
+  color: #1b2150;
+}
+
+.descriptionText {
+  font-size: 13.5px;
+  line-height: 20px;
+  color: #4c5474;
+}
+
+/* The prompt to write one, not a description. */
+.descriptionEmpty {
+  color: #8a90ad;
+}
+
+/* Pushes the unpublished badge to the end of the title row. */
+.rowSpacer {
+  flex: 1;
 }
 
 /* Same inset as the reading state, so the text does not shift sideways by the
@@ -267,26 +296,6 @@
   font-size: 13.5px;
   line-height: 20px;
   color: #4c5474;
-}
-
-.nameIcon,
-.descriptionIcon,
-.saveIcon {
-  flex: none;
-  margin-inline-start: auto;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-.saveIcon {
-  opacity: 1;
-}
-
-.titleContainer:hover .nameIcon,
-.titleContainer:focus-within .nameIcon,
-.descriptionContainer:hover .descriptionIcon,
-.descriptionContainer:focus-within .descriptionIcon {
-  opacity: 1;
 }
 
 /* The unpublished-changes marker, beside the name it applies to. */

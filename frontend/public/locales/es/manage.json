@@ -86,7 +86,7 @@
       "start_date": "Fecha de Inicio",
       "end_date": "Fecha de Finalización"
     },
-    "edit_name": "Editar el nombre de la encuesta",
+    "edit_name": "Editar el nombre de la encuesta: {{name}}",
     "edit_description": "Editar la descripción de la encuesta"
   },
   "edit_user": {
@@ -189,7 +189,8 @@
     "unpublished_changes": "Tiene Cambios No Publicados",
     "responses": "Respuestas Completas : {{count}}",
     "quota": "Cuota: {{count}}",
-    "no_quota": "Sin Cuota"
+    "no_quota": "Sin Cuota",
+    "survey_description": "Descripción de la Encuesta"
   },
   "language": {
     "ar": "Árabe",

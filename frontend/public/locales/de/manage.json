@@ -88,7 +88,7 @@
     "record_gps": "GPS aufzeichnen",
     "save_ip": "IP speichern",
     "save_timings": "Zeiten speichern",
-    "edit_name": "Umfragenamen bearbeiten",
+    "edit_name": "Umfragenamen bearbeiten: {{name}}",
     "edit_description": "Umfragebeschreibung bearbeiten"
   },
   "edit_user": {
@@ -205,7 +205,8 @@
     "surveyor_admin": "Surveyor-Administrator",
     "to": "Zu",
     "total_responses_limit": "Beantwortungslimit insgesamt: ",
-    "unpublished_changes": "Nicht veröffentlichte Änderungen vorhanden"
+    "unpublished_changes": "Nicht veröffentlichte Änderungen vorhanden",
+    "survey_description": "Umfragebeschreibung"
   },
   "language": {
     "ar": "Arabisch",

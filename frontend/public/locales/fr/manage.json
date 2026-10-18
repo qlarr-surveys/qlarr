@@ -86,7 +86,7 @@
       "start_date": "Date de Début",
       "end_date": "Date de Fin"
     },
-    "edit_name": "Modifier le nom du sondage",
+    "edit_name": "Modifier le nom du sondage : {{name}}",
     "edit_description": "Modifier la description du sondage"
   },
   "edit_user": {
@@ -189,7 +189,8 @@
     "unpublished_changes": "A des Modifications Non Publiées",
     "responses": "Réponses Complètes : {{count}}",
     "quota": "Quota : {{count}}",
-    "no_quota": "Pas de Quota"
+    "no_quota": "Pas de Quota",
+    "survey_description": "Description du Sondage"
   },
   "language": {
     "ar": "Arabe",

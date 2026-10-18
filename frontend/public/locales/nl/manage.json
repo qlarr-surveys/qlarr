@@ -86,7 +86,7 @@
       "start_date": "Startdatum",
       "end_date": "Einddatum"
     },
-    "edit_name": "Enquêtenaam bewerken",
+    "edit_name": "Enquêtenaam bewerken: {{name}}",
     "edit_description": "Enquêtebeschrijving bewerken"
   },
   "edit_user": {
@@ -189,7 +189,8 @@
     "unpublished_changes": "Heeft Ongepubliceerde Wijzigingen",
     "responses": "Volledige Reacties : {{count}}",
     "quota": "Quota: {{count}}",
-    "no_quota": "Geen Quota"
+    "no_quota": "Geen Quota",
+    "survey_description": "Enquête Beschrijving"
   },
   "language": {
     "ar": "Arabisch",
