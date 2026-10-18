@@ -332,69 +332,88 @@
 }
 
 /* ==============================================
-   Actions
+   Actions — one 36px row: a filled primary and square icon buttons beside it.
+   The sizes, radii and colours here are the redesign's; changing one without
+   the others puts the icon buttons out of line with the primary.
    ============================================== */
 .cardActions {
   display: flex;
-  gap: 0.75rem;
+  gap: 8px;
   margin-top: 16px;
 }
 
+/* The transparent border is load-bearing: the outlined variants add a 1px
+   border, so without it the primary would be 2px shorter than its neighbours. */
 .actionBtn {
   flex: 1;
-  padding: 0.75rem 1rem;
-  border-radius: 10px;
-  font-family: "Rubik", sans-serif;
-  font-weight: 600;
-  font-size: 0.85rem;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  padding: 0 1rem;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font-family: "Rubik", sans-serif;
+  font-weight: 600;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.actionBtn:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
 }
 
 .actionBtnPrimary {
-  background: linear-gradient(135deg, #2d3cb1 0%, #16205b 100%);
-  color: white;
+  background: #1b2559;
+  color: #fff;
 }
 
 .actionBtnPrimary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(45, 60, 177, 0.3);
+  background: #242f6d;
 }
 
 .actionBtnSecondary {
-  background: white;
-  color: #16205b;
-  border: 2px solid #eff1fc;
+  background: #fff;
+  color: #3c447a;
+  border-color: #dce0ee;
 }
 
 .actionBtnSecondary:hover {
-  border-color: #04bdf3;
-  color: #04bdf3;
+  background: #f4f6fc;
 }
 
 /* --card-danger is error.dark (#B71D18), set on the card from the theme.
-   error.main is amber, and the old hard-coded #d13e17 was neither. */
+   error.main is amber, and the old hard-coded #d13e17 was neither.
+   Hover tints rather than filling solid red: at 36px square a filled red
+   block next to the primary reads as the card's main action. */
 .actionBtnDanger {
-  background: white;
+  background: #fff;
   color: var(--card-danger, #b71d18);
-  border: 2px solid #eff1fc;
+  border-color: #dce0ee;
 }
 
 .actionBtnDanger:hover {
-  background: var(--card-danger, #b71d18);
-  color: white;
-  border-color: var(--card-danger, #b71d18);
+  background: #fdf1f0;
+  border-color: #f0c9c6;
+}
+
+.actionBtnDanger:focus-visible {
+  outline-color: #b3261e;
 }
 
 .actionBtnIconOnly {
   flex: 0 0 auto;
-  width: 48px;
-  padding: 0.75rem;
+  width: 36px;
+  padding: 0;
+}
+
+/* Square buttons sit tight to the card edge, so the ring hugs them. */
+.actionBtnIconOnly:focus-visible {
+  outline-offset: 1px;
 }
 
 /* ==============================================

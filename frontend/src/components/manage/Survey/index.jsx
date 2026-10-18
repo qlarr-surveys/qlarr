@@ -1,7 +1,6 @@
 import { Card, Snackbar, Alert } from "@mui/material";
 import { Cancel } from "@mui/icons-material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import ArticleIcon from "@mui/icons-material/Article";
 import styles from "./Survey.module.css";
 import { serverDateTimeToLocalDateTime } from "~/utils/DateUtils";
 import { useTranslation } from "react-i18next";
@@ -54,7 +53,7 @@ const status = (survey) => {
 };
 
 const ICON_SIZE = { fontSize: 16 };
-const ICON_SIZE_ACTION = { fontSize: 18 };
+const ICON_SIZE_ACTION = { fontSize: 17 };
 
 const ActionButton = ({ tooltip, onClick, variant, iconOnly, children }) => {
   const classNames = [
@@ -277,6 +276,10 @@ const Survey = ({
           <div className={styles.cardActions}>
             {isAdmin ? (
               <>
+                {/* No icon: in the redesign the card's main action is the
+                    only full-width button in the row, so the label alone
+                    carries it and the icons stay the mark of the square
+                    secondary buttons beside it. */}
                 <ActionButton
                   variant="Primary"
                   onClick={(e) => {
@@ -285,7 +288,6 @@ const Survey = ({
                     navigate(`/design-survey/${survey.id}`);
                   }}
                 >
-                  <ArticleIcon sx={ICON_SIZE_ACTION} />
                   {t("edit_survey.title")}
                 </ActionButton>
 
