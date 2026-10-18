@@ -2,7 +2,7 @@ import { Box, IconButton, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import styles from "./Survey.module.css";
 import { truncateWithEllipsis } from "~/utils/design/utils";
-import { Edit, Check } from "@mui/icons-material";
+import { Check, Pencil } from "lucide-react";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
@@ -106,9 +106,9 @@ export const EditableSurveyDescription = ({
           onClick={isDescriptionEditing ? handleSave : handleEditClick}
         >
           {isDescriptionEditing ? (
-            <Check fontSize="small" />
+            <Check size={16} strokeWidth={1.5} />
           ) : (
-            <Edit fontSize="small" />
+            <Pencil size={16} strokeWidth={1.5} />
           )}
         </IconButton>
       )}

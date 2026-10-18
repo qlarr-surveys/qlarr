@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { FileUploadOutlined } from "@mui/icons-material";
+import { Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import { buildResourceUrl } from "~/networking/common";
@@ -78,7 +78,7 @@ export function SurveyCover({ survey, surveyStatus, isEditable, onUpload }) {
             aria-label={uploadLabel}
           >
             <span aria-hidden="true" className={styles.coverReplaceIcon}>
-              <FileUploadOutlined fontSize="small" />
+              <Upload size={16} strokeWidth={1.5} />
             </span>
             <span aria-hidden="true" className={styles.coverReplaceLabel}>
               {uploadLabel}

@@ -1,7 +1,7 @@
 import { Box, IconButton, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import styles from "./Survey.module.css";
-import { Edit, Check } from "@mui/icons-material";
+import { Check, Pencil } from "lucide-react";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
@@ -77,7 +77,7 @@ export const EditableSurveyTitle = ({
             fullWidth
           />
           <IconButton className={styles.saveIcon} onClick={handleSave}>
-            <Check fontSize="small" />
+            <Check size={16} strokeWidth={1.5} />
           </IconButton>
         </>
       ) : (
@@ -93,7 +93,7 @@ export const EditableSurveyTitle = ({
           {badge}
           {isEditable && (
             <IconButton className={styles.nameIcon} onClick={handleEditClick}>
-              <Edit fontSize="small" />
+              <Pencil size={16} strokeWidth={1.5} />
             </IconButton>
           )}
         </>

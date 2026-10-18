@@ -1,16 +1,11 @@
 import { Card, Snackbar, Alert } from "@mui/material";
-import { Cancel } from "@mui/icons-material";
-import VisibilityIcon from "@mui/icons-material/Visibility";
+import { Copy, Eye, Lock, Table2, Trash2, TriangleAlert } from "lucide-react";
 import styles from "./Survey.module.css";
 import { serverDateTimeToLocalDateTime } from "~/utils/DateUtils";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import SavingSurvey from "~/components/design/SavingSurvey";
 import { fDate } from "~/utils/format-time";
-import TableRowsIcon from "@mui/icons-material/TableRows";
-import WarningIcon from "@mui/icons-material/Warning";
-import FileCopyIcon from "@mui/icons-material/FileCopy";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { isSurveyAdmin, isUserAnalyst } from "~/constants/roles";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -52,8 +47,12 @@ const status = (survey) => {
   }
 };
 
-const ICON_SIZE = { fontSize: 16 };
-const ICON_SIZE_ACTION = { fontSize: 17 };
+// Lucide draws on the rendered pixel grid rather than MUI's 24px one, so the
+// size is the icon's real size and the stroke is set with it: scale one
+// without the other and the glyph thickens or thins against its neighbours.
+// 17/1.5 and 16/1.5 are the redesign's own values for these two positions.
+const ICON_ACTION = { size: 17, strokeWidth: 1.5 };
+const ICON_INLINE = { size: 16, strokeWidth: 1.5 };
 
 const ActionButton = ({ tooltip, onClick, variant, iconOnly, children }) => {
   const classNames = [
@@ -230,7 +229,7 @@ const Survey = ({
                       },
                     })}
                   >
-                    <WarningIcon sx={ICON_SIZE} />
+                    <TriangleAlert {...ICON_INLINE} />
                   </div>
                 </CustomTooltip>
               )
@@ -298,7 +297,7 @@ const Survey = ({
                     iconOnly
                     onClick={() => onClose(survey.id)}
                   >
-                    <Cancel sx={ICON_SIZE_ACTION} />
+                    <Lock {...ICON_ACTION} />
                   </ActionButton>
                 )}
 
@@ -308,7 +307,7 @@ const Survey = ({
                   iconOnly
                   onClick={onClone}
                 >
-                  <FileCopyIcon sx={ICON_SIZE_ACTION} />
+                  <Copy {...ICON_ACTION} />
                 </ActionButton>
 
                 {survey.status !== STATUS.ACTIVE && (
@@ -318,7 +317,7 @@ const Survey = ({
                     iconOnly
                     onClick={() => onDelete(survey.id)}
                   >
-                    <DeleteIcon sx={ICON_SIZE_ACTION} />
+                    <Trash2 {...ICON_ACTION} />
                   </ActionButton>
                 )}
               </>
@@ -326,7 +325,7 @@ const Survey = ({
               <>
                 {isUserAnalyst() && (
                   <ActionButton variant="Primary" onClick={openResponses}>
-                    <TableRowsIcon sx={ICON_SIZE_ACTION} />
+                    <Table2 {...ICON_ACTION} />
                     {t("edit_survey.responses")}
                   </ActionButton>
                 )}
@@ -338,7 +337,7 @@ const Survey = ({
                     window.open(`/preview/${survey.id}`, "_blank");
                   }}
                 >
-                  <VisibilityIcon sx={ICON_SIZE_ACTION} />
+                  <Eye {...ICON_ACTION} />
                   {t("preview")}
                 </ActionButton>
               </>
