@@ -362,19 +362,7 @@ function Dashboard() {
                     </Typography>
                   </div>
                 ) : surveys?.surveys?.length > 0 ? (
-                  <Box
-                    sx={{
-                      mt: 3,
-                      columnGap: 2,
-                      display: "grid",
-                      rowGap: { xs: 4, md: 5 },
-                      gridTemplateColumns: {
-                        xs: "1fr",
-                        sm: "repeat(auto-fit, minmax(280px, 1fr))",
-                        md: "repeat(auto-fit, minmax(330px, 1fr))",
-                      },
-                    }}
-                  >
+                  <Box className={styles.surveyGrid}>
                     {surveys?.surveys?.map((survey) => {
                       return (
                         <Suspense key={survey.id} fallback={<LoadingDots />}>

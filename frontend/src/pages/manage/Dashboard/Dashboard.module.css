@@ -81,6 +81,18 @@
   padding-top: 0;
 }
 
+/* auto-fill, not auto-fit. auto-fit collapses the tracks it has no card for
+   and hands their width to the cards it does have, so one survey on its own
+   stretched the whole width of the page. auto-fill keeps the empty tracks, so
+   a lone card is the width of one card. */
+.surveyGrid {
+  margin-top: 24px;
+  display: grid;
+  /* min() so the 300px floor cannot push the track wider than the viewport. */
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  gap: 20px;
+}
+
 .noSurveys {
   text-align: center;
 }
