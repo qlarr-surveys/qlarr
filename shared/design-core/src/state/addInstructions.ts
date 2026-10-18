@@ -1262,6 +1262,29 @@ export const quotaInstruction = (quota, state) => {
   return { code: quotaInstructionCode(quota.code), text, isActive: true, returnType: "boolean" };
 };
 
+const logicVars = (logic, vars = []) => {
+  if (Array.isArray(logic)) {
+    logic.forEach((el) => logicVars(el, vars));
+  } else if (logic && typeof logic === "object") {
+    Object.entries(logic).forEach(([key, value]) => {
+      if (key === "var" && typeof value === "string") {
+        vars.push(value);
+      } else {
+        logicVars(value, vars);
+      }
+    });
+  }
+  return vars;
+};
+
+// Whether any quota condition reads the given question.
+export const quotaRefersToQuestion = (state, questionCode) =>
+  (state.Survey?.quotas || []).some((quota) =>
+    logicVars(quota.condition?.logic).some(
+      (code) => code.match(/^Q[a-z0-9_]+/)?.[0] === questionCode,
+    ),
+  );
+
 // Quotas the engine rejected (their instruction has errors).
 export const brokenQuotaCodes = (state) => {
   const survey = state?.Survey;

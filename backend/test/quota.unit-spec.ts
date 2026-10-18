@@ -216,6 +216,25 @@ describe('quota engine binding', () => {
       'Qgender.value == "male"',
     );
   });
+
+  it('leaves codes that merely start with the renamed code alone', () => {
+    const survey = design();
+    survey.groups[0].questions.push({
+      code: 'Q10',
+      type: 'text',
+      instructionList: [{ code: 'value', text: '', returnType: 'string', isActive: false }],
+    });
+    survey.quotas[0].condition = {
+      logic: { and: [{ '==': [{ var: 'Q1.value' }, 'male'] }, { '==': [{ var: 'Q10.value' }, 'x'] }] },
+    };
+    const result = runChangeCode(JSON.stringify(runValidate(JSON.stringify(survey))), 'Q1', 'Qgender');
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const condition = JSON.stringify((result.output.survey as { quotas: { condition: unknown }[] }).quotas[0].condition);
+    expect(condition).toContain('Qgender.value');
+    expect(condition).toContain('Q10.value');
+    expect(condition).not.toContain('Qgender0');
+  });
 });
 
 describe('quota on a deleted question', () => {

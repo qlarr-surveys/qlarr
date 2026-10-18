@@ -54,6 +54,7 @@ import {
   isQuotaInstruction,
   processValidation,
   quotaInstruction,
+  quotaRefersToQuestion,
   removeInstruction,
   updateRandomByRule,
   updatePriorityByRule,
@@ -285,7 +286,11 @@ export function quotaMessageRevealed(state) {
 // An unchanged instruction is kept so it keeps the errors the backend reported on it.
 const refreshQuotaInstructions = (state) => {
   const survey = state.Survey;
-  if (!survey) {
+  if (
+    !survey ||
+    (!survey.quotas?.length &&
+      !survey.instructionList?.some((instruction) => isQuotaInstruction(instruction.code)))
+  ) {
     return;
   }
   const previous = new Map();
@@ -410,7 +415,6 @@ export function cloneQuestion(state, payload) {
   );
   setup(state, { code: newQuestionId, rules: setupOptions(newQuestion.type) });
   cleanupRandomRules(group);
-  refreshQuotaInstructions(state);
   state.index = buildCodeIndex(state);
   state.focus = newQuestionId;
 }
@@ -961,7 +965,6 @@ export function deleteGroup(state, payload) {
   delete state[groupCode];
   cleanupRandomRules(survey);
   cleanupSkipDestinations(state, groupCode);
-  refreshQuotaInstructions(state);
 }
 
 export function deleteQuestion(state, payload) {
@@ -991,7 +994,6 @@ export function deleteQuestion(state, payload) {
   cleanupRandomRules(group);
   cleanupSkipDestinations(state, questionCode);
   resyncSourceDependents(state, questionCode);
-  refreshQuotaInstructions(state);
 }
 
 export function convertQuestion(state, payload) {
@@ -1063,7 +1065,9 @@ export function convertQuestion(state, payload) {
     severCarryForwardTargets(state, questionCode);
   }
   resyncSourceDependents(state, questionCode);
-  refreshQuotaInstructions(state);
+  if (quotaRefersToQuestion(state, questionCode)) {
+    refreshQuotaInstructions(state);
+  }
 }
 
 export function changeContent(state, payload) {
@@ -1369,17 +1373,14 @@ export function onDrag(state, payload) {
   switch (payload.type) {
     case "reorder_questions":
       reorderQuestions(state, state.Survey, payload);
-      refreshQuotaInstructions(state);
       state.index = buildCodeIndex(state);
       break;
     case "reparent_question":
       reparentQuestion(state, state.Survey, payload);
-      refreshQuotaInstructions(state);
       state.index = buildCodeIndex(state);
       break;
     case "reorder_groups":
       reorderGroups(state.Survey, payload);
-      refreshQuotaInstructions(state);
       state.index = buildCodeIndex(state);
       state.skipScroll = false;
       state.lastAddedComponent = { type: "group", index: payload.toIndex };

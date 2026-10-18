@@ -170,7 +170,10 @@ function replaceInField(
 ): void {
   const obj = node[field];
   if (obj && typeof obj === 'object') {
-    node[field] = JSON.parse(JSON.stringify(obj).split(from).join(to));
+    // Whole codes only: renaming Q1 must not touch Q10 or Q1_x.
+    const escaped = from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const code = new RegExp(`${escaped}(?![a-z0-9_])`, 'g');
+    node[field] = JSON.parse(JSON.stringify(obj).replace(code, () => to));
   }
 }
 

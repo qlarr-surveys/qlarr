@@ -182,6 +182,23 @@ describe("quotas", () => {
     expect(quotaInstructions(state)[0].text).toContain("filter");
   });
 
+  it("leaves quota instructions alone when an unrelated question changes type", () => {
+    const [code] = addQuotas(1);
+    updateQuota(state, { code, changes: { condition } });
+    const before = state.Survey.instructionList;
+
+    convertQuestion(state, { questionCode: CHOICE, newType: "mcq" });
+
+    expect(state.Survey.instructionList).toBe(before);
+  });
+
+  it("drops the last quota's instruction when it is removed", () => {
+    const [code] = addQuotas(1);
+    updateQuota(state, { code, changes: { condition } });
+    removeQuota(state, code);
+    expect(quotaInstructions(state)).toEqual([]);
+  });
+
   it("restores quota instructions on refreshDsl", () => {
     const [code] = addQuotas(1);
     updateQuota(state, { code, changes: { condition } });
