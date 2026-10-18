@@ -10,7 +10,8 @@
     "save": "يحفظ",
     "create": "إنشاء",
     "export": "تصدير",
-    "download": "تحميل"
+    "download": "تحميل",
+    "delete_survey": "حذف الاستطلاع"
   },
   "add_user": {
     "cancel": "يلغي",
@@ -53,7 +54,7 @@
     "count": "عدد",
     "default_survey_url": "عنوان URL الافتراضي للاستطلاع",
     "close_survey": "هل أنت متأكد أنك تريد إغلاق {{survey_name}}؟",
-    "delete_survey": "هل أنت متأكد أنك تريد حذف {{survey_name}}؟",
+    "delete_survey": "يُحذف الاستطلاع مع ردوده وملفاته المرفوعة. لا يمكن التراجع عن هذا.",
     "survey_deleted": "تم حذف {{survey_name}}",
     "general": "عام",
     "limit": "حد",
@@ -87,7 +88,8 @@
       "end_date": "تاريخ الانتهاء"
     },
     "edit_name": "تعديل اسم الاستطلاع: {{name}}",
-    "edit_description": "تعديل وصف الاستطلاع"
+    "edit_description": "تعديل وصف الاستطلاع",
+    "delete_survey_title": "حذف “{{survey_name}}”؟"
   },
   "edit_user": {
     "title": "تحرير العضو"

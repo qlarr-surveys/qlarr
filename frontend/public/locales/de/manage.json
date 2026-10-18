@@ -10,7 +10,8 @@
     "delete": "Löschen",
     "download": "Download",
     "export": "Export",
-    "save": "Speichern"
+    "save": "Speichern",
+    "delete_survey": "Umfrage löschen"
   },
   "add_user": {
     "cancel": "Abbrechen",
@@ -56,7 +57,7 @@
     "closed_mode": "Umfrage wurde geschlossen",
     "count": "Zählen",
     "default_survey_url": "Standard-Umfrage-URL",
-    "delete_survey": "Möchten Sie {{survey_name}} wirklich löschen?",
+    "delete_survey": "Die Umfrage wird zusammen mit ihren Antworten und hochgeladenen Dateien gelöscht. Das lässt sich nicht rückgängig machen.",
     "survey_deleted": "{{survey_name}} wurde gelöscht",
     "draft_mode": "Umfrage befindet sich noch im Entwurfsmodus",
     "expired_mode": "Das Enddatum der Umfrage ist abgelaufen",
@@ -89,7 +90,8 @@
     "save_ip": "IP speichern",
     "save_timings": "Zeiten speichern",
     "edit_name": "Umfragenamen bearbeiten: {{name}}",
-    "edit_description": "Umfragebeschreibung bearbeiten"
+    "edit_description": "Umfragebeschreibung bearbeiten",
+    "delete_survey_title": "„{{survey_name}}“ löschen?"
   },
   "edit_user": {
     "title": "Benutzer bearbeiten"

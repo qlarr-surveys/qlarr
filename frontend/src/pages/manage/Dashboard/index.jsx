@@ -130,7 +130,7 @@ function Dashboard() {
   const [actionType, setActionType] = useState("");
   const [selectedSurvey, setSelectedSurvey] = useState(null);
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState(t("action_btn.delete"));
+  const [title, setTitle] = useState("");
   const [openCreateModal, setOpenCreateModal] = useState(false);
 
   const handleCreateSurveyClick = () => {
@@ -150,11 +150,12 @@ function Dashboard() {
 
   const onDelete = (survey) => {
     setActionType("delete");
-    setTitle(t("action_btn.delete"));
+    // The question names the survey and the body says what goes with it, as
+    // the redesign writes its confirmations. The title used to be the word
+    // "Delete" on its own, which asked nothing.
+    setTitle(t("edit_survey.delete_survey_title", { survey_name: survey.name }));
     setSelectedSurvey(survey);
-    setDescription(
-      t("edit_survey.delete_survey", { survey_name: survey.name })
-    );
+    setDescription(t("edit_survey.delete_survey"));
     setOpen(true);
   };
 
@@ -482,7 +483,7 @@ function Dashboard() {
           onConfirm={handleAction}
           title={title}
           cancelLabel={t("action_btn.cancel")}
-          confirmLabel={t("action_btn.delete")}
+          confirmLabel={t("action_btn.delete_survey")}
         />
       )}
       {actionType === "close" && (

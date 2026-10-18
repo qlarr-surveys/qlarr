@@ -10,7 +10,8 @@
     "save": "Save",
     "create": "Create",
     "export": "Export",
-    "download": "Download"
+    "download": "Download",
+    "delete_survey": "Delete survey"
   },
   "add_user": {
     "cancel": "Cancel",
@@ -53,7 +54,7 @@
     "count": "Count",
     "default_survey_url": "Default survey URL",
     "close_survey": "Are you sure you want to close {{survey_name}}?",
-    "delete_survey": "Are you sure you want to delete {{survey_name}}?",
+    "delete_survey": "The survey, its responses and its uploaded files are removed with it. This can’t be undone.",
     "survey_deleted": "Deleted {{survey_name}}",
     "general": "General",
     "limit": "Limit",
@@ -87,7 +88,8 @@
       "end_date": "End Date"
     },
     "edit_name": "Edit survey name: {{name}}",
-    "edit_description": "Edit survey description"
+    "edit_description": "Edit survey description",
+    "delete_survey_title": "Delete “{{survey_name}}”?"
   },
   "edit_user": {
     "title": "Edit User"

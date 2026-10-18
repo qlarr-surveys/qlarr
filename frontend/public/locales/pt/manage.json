@@ -10,7 +10,8 @@
     "save": "Salvar",
     "create": "Criar",
     "export": "Exportar",
-    "download": "Baixar"
+    "download": "Baixar",
+    "delete_survey": "Excluir pesquisa"
   },
   "add_user": {
     "cancel": "Cancelar",
@@ -53,7 +54,7 @@
     "count": "Quantidade",
     "default_survey_url": "URL de pesquisa padrão",
     "close_survey": "Tem certeza de que deseja fechar {{survey_name}}?",
-    "delete_survey": "Tem certeza de que deseja excluir {{survey_name}}?",
+    "delete_survey": "A pesquisa é excluída junto com suas respostas e seus arquivos enviados. Não é possível desfazer.",
     "survey_deleted": "{{survey_name}} foi excluída",
     "general": "Geral",
     "limit": "Limite",
@@ -87,7 +88,8 @@
       "end_date": "Data de Finalização"
     },
     "edit_name": "Editar o nome da pesquisa: {{name}}",
-    "edit_description": "Editar a descrição da pesquisa"
+    "edit_description": "Editar a descrição da pesquisa",
+    "delete_survey_title": "Excluir “{{survey_name}}”?"
   },
   "edit_user": {
     "title": "Editar Usuário"

@@ -10,7 +10,8 @@
     "save": "Guardar",
     "create": "Crear",
     "export": "Exportar",
-    "download": "Descargar"
+    "download": "Descargar",
+    "delete_survey": "Eliminar encuesta"
   },
   "add_user": {
     "cancel": "Cancelar",
@@ -53,7 +54,7 @@
     "count": "Cantidad",
     "default_survey_url": "URL de encuesta predeterminada",
     "close_survey": "¿Estás seguro de que quieres cerrar {{survey_name}}?",
-    "delete_survey": "¿Estás seguro de que quieres eliminar {{survey_name}}?",
+    "delete_survey": "La encuesta se elimina junto con sus respuestas y sus archivos subidos. Esto no se puede deshacer.",
     "survey_deleted": "{{survey_name}} fue eliminada",
     "general": "General",
     "limit": "Límite",
@@ -87,7 +88,8 @@
       "end_date": "Fecha de Finalización"
     },
     "edit_name": "Editar el nombre de la encuesta: {{name}}",
-    "edit_description": "Editar la descripción de la encuesta"
+    "edit_description": "Editar la descripción de la encuesta",
+    "delete_survey_title": "¿Eliminar “{{survey_name}}”?"
   },
   "edit_user": {
     "title": "Editar Usuario"

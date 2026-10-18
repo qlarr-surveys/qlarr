@@ -1,27 +1,113 @@
+/* The redesign's confirm dialog. Every destructive confirmation in the app
+   comes through this component, so these values are the app's, not the
+   dashboard's. */
 .modalBox {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 480px;
-    max-width: calc(100% - 32px);
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(16, 24, 40, 0.18);
-    padding: 32px;
-    text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* 16px of breathing room on a phone, which is the overlay padding the
+     redesign draws around the card. */
+  width: min(440px, calc(100% - 32px));
+  background-color: #fff;
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(20, 24, 52, 0.28);
+  padding: 24px;
+  /* Not `left`: this dialog is mirrored in Arabic. */
+  text-align: start;
 }
 
-/* .deleteButton.deleteButton {
-    background-color: #16205b;
-    color: white;
-    padding: 8px 22px;
+.title.title {
+  margin: 0;
+  font-family: "Rubik", sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 24px;
+  color: #1b2150;
 }
 
-.goBackButton.goBackButton {
-    color: black;
-    background-color: transparent;
-    padding: 8px 22px;
-    box-shadow: none;
+.description.description {
+  margin: 8px 0 0;
+  font-family: "Rubik", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 21px;
+  color: #4c5474;
+  overflow-wrap: break-word;
+}
 
-} */
+/* The way out sits first and the destructive action last, where the eye
+   finishes — the redesign puts both at the end of the row rather than
+   centred. */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.button.button {
+  height: 38px;
+  min-width: 0;
+  padding: 0 16px;
+  border-radius: 7px;
+  font-family: "Rubik", sans-serif;
+  font-size: 14px;
+  text-transform: none;
+  box-shadow: none;
+}
+
+.cancelButton.cancelButton {
+  border: 1px solid #cfd5e8;
+  background: #fff;
+  font-weight: 500;
+  color: #1b2150;
+}
+
+.cancelButton.cancelButton:hover {
+  background: #f4f6fc;
+}
+
+.cancelButton.cancelButton:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.confirmButton.confirmButton {
+  font-weight: 600;
+  color: #fff;
+}
+
+/* The ring is the dialog's own ink, not the button's, so it reads against the
+   filled red rather than disappearing into it. */
+.confirmButton.confirmButton:focus-visible {
+  outline: 2px solid #1b2150;
+  outline-offset: 2px;
+}
+
+.destructiveButton.destructiveButton {
+  background: #b3261e;
+}
+
+.destructiveButton.destructiveButton:hover {
+  background: #991f18;
+}
+
+/* The acknowledgement variant: a released survey needs more than a glance
+   before it is changed. The redesign has no drawing of it, so it keeps the
+   warning palette it had and only follows the dialog's new alignment. */
+.warningIcon {
+  margin-bottom: 16px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}

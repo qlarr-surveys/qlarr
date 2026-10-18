@@ -10,7 +10,8 @@
     "save": "Enregistrer",
     "create": "Créer",
     "export": "Exporter",
-    "download": "Télécharger"
+    "download": "Télécharger",
+    "delete_survey": "Supprimer le sondage"
   },
   "add_user": {
     "cancel": "Annuler",
@@ -53,7 +54,7 @@
     "count": "Nombre",
     "default_survey_url": "URL de sondage par défaut",
     "close_survey": "Êtes-vous sûr de vouloir fermer {{survey_name}} ?",
-    "delete_survey": "Êtes-vous sûr de vouloir supprimer {{survey_name}} ?",
+    "delete_survey": "Le sondage est supprimé avec ses réponses et ses fichiers téléversés. Cette action est irréversible.",
     "survey_deleted": "{{survey_name}} a été supprimé",
     "general": "Général",
     "limit": "Limite",
@@ -87,7 +88,8 @@
       "end_date": "Date de Fin"
     },
     "edit_name": "Modifier le nom du sondage : {{name}}",
-    "edit_description": "Modifier la description du sondage"
+    "edit_description": "Modifier la description du sondage",
+    "delete_survey_title": "Supprimer « {{survey_name}} » ?"
   },
   "edit_user": {
     "title": "Modifier l'Utilisateur"

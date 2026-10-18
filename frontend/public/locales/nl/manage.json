@@ -10,7 +10,8 @@
     "save": "Opslaan",
     "create": "Aanmaken",
     "export": "Exporteren",
-    "download": "Downloaden"
+    "download": "Downloaden",
+    "delete_survey": "Enquête verwijderen"
   },
   "add_user": {
     "cancel": "Annuleren",
@@ -53,7 +54,7 @@
     "count": "Aantal",
     "default_survey_url": "Standaard enquête URL",
     "close_survey": "Weet je zeker dat je {{survey_name}} wilt sluiten?",
-    "delete_survey": "Weet je zeker dat je {{survey_name}} wilt verwijderen?",
+    "delete_survey": "De enquête wordt samen met haar antwoorden en geüploade bestanden verwijderd. Dit kan niet ongedaan worden gemaakt.",
     "survey_deleted": "{{survey_name}} is verwijderd",
     "general": "Algemeen",
     "limit": "Limiet",
@@ -87,7 +88,8 @@
       "end_date": "Einddatum"
     },
     "edit_name": "Enquêtenaam bewerken: {{name}}",
-    "edit_description": "Enquêtebeschrijving bewerken"
+    "edit_description": "Enquêtebeschrijving bewerken",
+    "delete_survey_title": "“{{survey_name}}” verwijderen?"
   },
   "edit_user": {
     "title": "Gebruiker Bewerken"

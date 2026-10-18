@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Modal,
   Box,
@@ -8,9 +8,12 @@ import {
   FormControlLabel,
 } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
-import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
+import { TriangleAlert } from "lucide-react";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import styles from "./ConfirmActionModal.module.css";
+
+const TITLE_ID = "confirm-action-modal";
+const DESCRIPTION_ID = "confirm-action-modal-description";
 
 const ConfirmActionModal = ({
   open,
@@ -28,6 +31,7 @@ const ConfirmActionModal = ({
   acknowledgementTooltipBody = "",
 }) => {
   const [acknowledged, setAcknowledged] = useState(false);
+  const cancelRef = useRef(null);
 
   // Reset the checkbox every time the modal (re)opens — this instance is reused
   // across many destructive actions, so a prior acknowledgement must not carry over.
@@ -35,56 +39,63 @@ const ConfirmActionModal = ({
     if (open) setAcknowledged(false);
   }, [open]);
 
+  // Open on the way out, not on the way through with it. MUI would otherwise
+  // focus the first thing it finds, which for the acknowledgement variant is
+  // the checkbox that arms the destructive button.
+  useEffect(() => {
+    if (!open) return;
+    const id = setTimeout(() => cancelRef.current?.focus(), 40);
+    return () => clearTimeout(id);
+  }, [open]);
+
   const handleClose = (event, reason) => {
     if (isLoading) return;
     onClose?.(event, reason);
   };
 
+  // The redesign's red is the dialog's own. Any other colour is a caller
+  // asking for something non-destructive, which keeps the theme palette.
+  const isDestructive = confirmColor === "error";
+  const confirmClassName = [
+    styles.button,
+    styles.confirmButton,
+    isDestructive && styles.destructiveButton,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <Modal
       open={open}
       onClose={handleClose}
-      aria-labelledby="confirm-action-modal"
+      aria-labelledby={TITLE_ID}
+      aria-describedby={description ? DESCRIPTION_ID : undefined}
       sx={{
         ".MuiBackdrop-root": {
-          backgroundColor: "rgba(0, 0, 0, 0.3)",
+          backgroundColor: "rgba(20, 24, 52, 0.42)",
         },
       }}
     >
-      <Box className={styles.modalBox}>
+      {/* alertdialog, not dialog: everything that opens this interrupts to ask
+          about something it is about to do. */}
+      <Box className={styles.modalBox} role="alertdialog" aria-modal="true">
         {requireAcknowledgement && (
           <Box
+            className={styles.warningIcon}
             sx={{
-              mx: "auto",
-              mb: 2,
-              width: 56,
-              height: 56,
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
               backgroundColor: "warning.lighter",
               color: "warning.dark",
             }}
           >
-            <WarningAmberRoundedIcon sx={{ fontSize: 32 }} />
+            <TriangleAlert size={28} strokeWidth={1.5} />
           </Box>
         )}
 
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 0.5,
-          }}
-        >
+        <Box className={styles.titleRow}>
           <Typography
-            id="confirm-action-modal"
-            variant="h6"
-            fontWeight={600}
+            id={TITLE_ID}
             component="h2"
-            textAlign="center"
+            className={styles.title}
           >
             {title}
           </Typography>
@@ -100,10 +111,9 @@ const ConfirmActionModal = ({
 
         {description && (
           <Typography
-            id="modal-description"
-            variant="body2"
-            color="text.secondary"
-            sx={{ mt: 1, overflowWrap: "break-word" }}
+            id={DESCRIPTION_ID}
+            component="p"
+            className={styles.description}
           >
             {description}
           </Typography>
@@ -153,20 +163,16 @@ const ConfirmActionModal = ({
           </Box>
         )}
 
-        <Box display="flex" justifyContent="center" mt={3} gap={1}>
+        <Box className={styles.actions}>
           <Button
-            variant="text"
-            size="medium"
+            ref={cancelRef}
+            variant="outlined"
             disabled={isLoading}
+            className={`${styles.button} ${styles.cancelButton}`}
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
               onClose?.();
-            }}
-            sx={{
-              textTransform: "capitalize",
-              color: "text.secondary",
-              "&:hover": { backgroundColor: "action.hover" },
             }}
           >
             {cancelLabel}
@@ -174,20 +180,22 @@ const ConfirmActionModal = ({
           <LoadingButton
             variant="contained"
             color={confirmColor}
-            size="medium"
             type="submit"
             loading={isLoading}
             disabled={isLoading || (requireAcknowledgement && !acknowledged)}
+            className={confirmClassName}
+            sx={
+              isDestructive
+                ? undefined
+                : {
+                    backgroundColor: `${confirmColor}.dark`,
+                    "&:hover": { backgroundColor: `${confirmColor}.darker` },
+                  }
+            }
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
               onConfirm?.();
-            }}
-            sx={{
-              textTransform: "capitalize",
-              backgroundColor: `${confirmColor}.dark`,
-              color: "common.white",
-              "&:hover": { backgroundColor: `${confirmColor}.darker` },
             }}
           >
             {confirmLabel}
