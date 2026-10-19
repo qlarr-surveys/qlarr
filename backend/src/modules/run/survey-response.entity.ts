@@ -68,6 +68,12 @@ export class SurveyResponseEntity {
   @Column({ type: 'jsonb', nullable: true })
   values: Record<string, unknown> | null;
 
+  // Calculated-field results from the last Compute (code → value or "#ERROR").
+  // Shown only while the survey's calculations status is `completed`. Written
+  // only by CalculationsRepository, so a normal save never overwrites them.
+  @Column({ type: 'jsonb', nullable: true, update: false })
+  computations: Record<string, unknown> | null;
+
   // Assigned by the assign_survey_response_index() trigger — read-only.
   @Column({
     name: 'survey_response_index',

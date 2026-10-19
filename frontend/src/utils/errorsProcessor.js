@@ -69,6 +69,12 @@ export const PROCESSED_ERRORS = {
   },
   SNAPSHOT_NOT_FOUND: { name: "snapshot_not_found", handleGlobally: false },
   NOTHING_TO_REVERT: { name: "nothing_to_revert", handleGlobally: false },
+  CALCULATIONS_CHANGED: { name: "calculations_changed", handleGlobally: false },
+  CALCULATION_RUN_IN_PROGRESS: {
+    name: "calculation_run_in_progress",
+    handleGlobally: false,
+  },
+  NO_CALCULATIONS: { name: "no_calculations", handleGlobally: false },
 };
 
 export const onApiError = ({
@@ -187,6 +193,12 @@ export const processError = (e) => {
         return PROCESSED_ERRORS.SNAPSHOT_NOT_FOUND;
       case "NothingToRevertException":
         return PROCESSED_ERRORS.NOTHING_TO_REVERT;
+      case "CalculationsRevisionConflictException":
+        return PROCESSED_ERRORS.CALCULATIONS_CHANGED;
+      case "CalculationRunInProgressException":
+        return PROCESSED_ERRORS.CALCULATION_RUN_IN_PROGRESS;
+      case "NoCalculationsException":
+        return PROCESSED_ERRORS.NO_CALCULATIONS;
       default:
         return PROCESSED_ERRORS.UNIDENTIFIED_ERROR;
     }

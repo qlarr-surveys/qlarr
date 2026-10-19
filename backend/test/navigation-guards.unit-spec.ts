@@ -21,6 +21,7 @@ describe('navigation direction guards (allowJump / allowPrevious)', () => {
   const svc = new NavigationService(
     { completedCount } as any,
     {} as any,
+    {} as any,
   );
 
   const navigate = (navData: Record<string, unknown>, name: string) =>
@@ -81,7 +82,7 @@ describe('navigation direction guards (allowJump / allowPrevious)', () => {
 describe('navigation resume-expiry guard (allowIncomplete / resumeExpiryMillis)', () => {
   const REACHED = 'reached-completedCount';
   const completedCount = jest.fn();
-  const svc = new NavigationService({ completedCount } as any, {} as any);
+  const svc = new NavigationService({ completedCount } as any, {} as any, {} as any);
 
   const navigate = (
     navData: Record<string, unknown>,

@@ -1,4 +1,5 @@
 import { NavigationIndexJson } from '../../engine/engine.types';
+import { CalculatedValue } from '../calculations/calculation-values';
 
 /** Response filter status. Unknown → ALL. */
 export type ResponseStatus = 'ALL' | 'COMPLETE' | 'INCOMPLETE' | 'PREVIEW';
@@ -76,6 +77,7 @@ export interface UploadResponseRequestData {
 export interface ResponseCountDto {
   completeResponseCount: number;
   userResponsesCount: number;
+  quotaCounts: Record<string, number>;
 }
 
 /**
@@ -105,6 +107,8 @@ export interface ResponseDto {
   version: number;
   events: unknown[];
   ipAddress: string | null;
+  /** Every calculation, in the set's order; empty for incomplete responses. */
+  calculations: CalculatedValue[];
 }
 
 /** One timeline event; `responseValue` is set only for value-timing events. */

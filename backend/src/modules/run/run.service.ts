@@ -188,6 +188,7 @@ function toRunDto(
     lang: result.lang,
     additionalLang: result.additionalLang,
     saveTimings: survey.saveTimings,
+    screenedOutQuota: result.screenedOutQuota,
   };
 }
 

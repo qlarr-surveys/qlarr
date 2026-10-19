@@ -21,8 +21,10 @@ import {
   setDesignModeToLang,
   setDesignModeToTheme,
   refreshDsl,
+  showQuotaMessage,
 } from "~/state/design/designState";
 import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
+import { QUOTA_MESSAGE_PARAM } from "@qlarr/design-core/constants/design";
 
 const ContentPanel = React.lazy(() =>
   import("~/components/design/ContentPanel")
@@ -81,6 +83,21 @@ function DesignSurvey() {
       dispatch(setDesignModeToDesign());
     }
   }, []);
+
+  useEffect(() => {
+    if (!designStateReceived || !searchParams.has(QUOTA_MESSAGE_PARAM)) {
+      return;
+    }
+    dispatch(setDesignModeToDesign());
+    dispatch(
+      showQuotaMessage({
+        code: searchParams.get(QUOTA_MESSAGE_PARAM),
+        reveal: true,
+      }),
+    );
+    searchParams.delete(QUOTA_MESSAGE_PARAM);
+    setSearchParams(searchParams, { replace: true });
+  }, [designStateReceived]);
 
   useEffect(() => {
     if (designStateReceived && searchParams.get("refresh") === "true") {

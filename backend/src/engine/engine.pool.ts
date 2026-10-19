@@ -17,7 +17,7 @@ export interface EnginePoolOptions {
 }
 
 /**
- * Runs the four author-JS-executing engine ops off the main event loop on a
+ * Runs the author-JS-executing engine ops off the main event loop on a
  * Piscina worker pool, with a hard timeout and a per-worker memory cap. This is
  * the isolation boundary: a survey design that loops forever or allocates without
  * bound can, at worst, kill its own worker thread — the pool terminates it and

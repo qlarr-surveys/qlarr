@@ -81,6 +81,9 @@ export interface ExportedAutoCompleteResource {
 export interface ExportedSimpleSurvey {
   survey: SimpleSurveyDto;
   autoCompleteResources: ExportedAutoCompleteResource[];
+  /** Absent in zips exported before calculated fields. Never trusted: import
+   *  re-validates them and drops invalid ones. */
+  calculations?: unknown;
 }
 
 /** ≈ OfflineSurveyDto. */
@@ -98,6 +101,7 @@ export interface OfflineSurveyDto {
   surveyQuota: number;
   userResponsesCount: number;
   completeResponseCount: number;
+  quotaCounts: Record<string, number>;
   latestVersion: VersionDto;
   navigationData: SurveyNavigationData;
   saveTimings: boolean;

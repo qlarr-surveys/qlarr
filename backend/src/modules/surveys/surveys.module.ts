@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { FilesystemModule } from '../../integrations/filesystem/filesystem.module';
+import { CalculationsModule } from '../calculations/calculations.module';
 import { DesignModule } from '../design/design.module';
 import {
   AutoCompleteAdminController,
@@ -25,6 +26,7 @@ import { VersionEntity } from './version.entity';
     TypeOrmModule.forFeature([SurveyEntity, VersionEntity]),
     FilesystemModule,
     DesignModule,
+    CalculationsModule,
   ],
   // Static/specific routes register before SurveyController's /survey/:surveyId
   // so they aren't captured as a (non-UUID) surveyId: DashboardController
