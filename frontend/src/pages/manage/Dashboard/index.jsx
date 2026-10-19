@@ -404,7 +404,6 @@ function Dashboard() {
                     onCreateSurvey={handleCreateSurveyClick}
                     onImportTemplate={handleImportSurveyClick}
                     canCreate={false}
-                    showWelcome={false}
                   />
                 )}
               </>
