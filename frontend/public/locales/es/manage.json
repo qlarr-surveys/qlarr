@@ -170,6 +170,11 @@
     "survey_admin": "Administrador de Encuesta",
     "survey_dates": "Fechas de la Encuesta",
     "survey_mode": "Modo de Encuesta",
+    "survey_mode_hint": {
+      "web": "Los participantes responden en línea mediante un enlace.",
+      "offline": "Se recoge en dispositivos sin conexión y luego se sincroniza.",
+      "mixed": "En línea por enlace y sin conexión en dispositivos."
+    },
     "survey_name": "Nombre de la Encuesta",
     "survey_url": "URL de la Encuesta",
     "surveyor": "Encuestador",
@@ -206,6 +211,17 @@
     "web": "Web"
   },
   "my_surveys": "Tus Encuestas",
+  "recent_surveys": "Encuestas recientes",
+  "survey_count_one": "{{count}} encuesta",
+  "survey_count_other": "{{count}} encuestas",
+  "dashboard": {
+    "subtitle": "Crea una encuesta manualmente o importa una definición existente."
+  },
+  "action_cards": {
+    "create": { "description": "Empieza con una encuesta vacía y añade las páginas y preguntas tú mismo." },
+    "import": { "description": "Sube una definición de encuesta de Qlarr exportada desde otro espacio de trabajo." },
+    "ai": { "description": "Describe tu encuesta. El asistente la redacta y sigue disponible mientras la editas." }
+  },
   "fetch_error": "No se pudieron cargar tus encuestas. Comprueba tu conexión e inténtalo de nuevo.",
   "new_survey": "Nueva Encuesta",
   "reset_filter": "Restablecer Filtro de Encuesta",

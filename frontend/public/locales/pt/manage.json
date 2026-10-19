@@ -170,6 +170,11 @@
     "survey_admin": "Administrador de Pesquisa",
     "survey_dates": "Datas da Pesquisa",
     "survey_mode": "Modo de Pesquisa",
+    "survey_mode_hint": {
+      "web": "Os respondentes respondem online através de um link.",
+      "offline": "Recolhido em dispositivos sem ligação e depois sincronizado.",
+      "mixed": "Online por link e offline em dispositivos."
+    },
     "survey_name": "Nome da Pesquisa",
     "survey_url": "URL da Pesquisa",
     "surveyor": "Pesquisador",
@@ -206,6 +211,17 @@
     "web": "Web"
   },
   "my_surveys": "Suas Pesquisas",
+  "recent_surveys": "Pesquisas recentes",
+  "survey_count_one": "{{count}} pesquisa",
+  "survey_count_other": "{{count}} pesquisas",
+  "dashboard": {
+    "subtitle": "Crie uma pesquisa manualmente ou importe uma definição existente."
+  },
+  "action_cards": {
+    "create": { "description": "Comece com uma pesquisa vazia e adicione as páginas e perguntas você mesmo." },
+    "import": { "description": "Carregue uma definição de pesquisa Qlarr exportada de outro espaço de trabalho." },
+    "ai": { "description": "Descreva sua pesquisa. O assistente a redige e continua disponível enquanto você edita." }
+  },
   "fetch_error": "Não foi possível carregar suas pesquisas. Verifique sua conexão e tente novamente.",
   "new_survey": "Nova Pesquisa",
   "reset_filter": "Redefinir Filtro de Pesquisa",

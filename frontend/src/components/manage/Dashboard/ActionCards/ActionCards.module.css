@@ -1,0 +1,57 @@
+/* auto-fit, not a column count: whatever the role allows comes out as equal
+   columns from the same rule. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  display: block;
+  padding: 20px;
+  text-align: start;
+  font: inherit;
+  color: inherit;
+  background: #fff;
+  border: 1px solid #dce0ee;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  border-color: var(--card-accent);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--card-accent);
+  outline-offset: 1px;
+}
+
+.iconBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid #dce0ee;
+  background: #f6f7fc;
+  color: #3c447a;
+}
+
+.title {
+  display: block;
+  margin-top: 9px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #1b2150;
+}
+
+.description {
+  display: block;
+  margin-top: 3px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #555d7d;
+}

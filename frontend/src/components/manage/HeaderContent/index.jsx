@@ -9,6 +9,7 @@ export const HeaderContent = ({
   filter,
   onFilterSelected,
   onSortSelected,
+  heading,
 }) => {
   const sort_options = [
     { value: "responses_desc", label: "survey_sort_options.responses_desc" },
@@ -35,19 +36,18 @@ export const HeaderContent = ({
       display="grid"
       gridTemplateColumns={{ xs: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }}
     >
-      <Typography
-        variant="h3"
-        flex="1"
-        textTransform="uppercase"
-      >
-        {t("my_surveys")}
-      </Typography>
+      {heading ?? (
+        <Typography variant="h3" flex="1" textTransform="uppercase">
+          {t("my_surveys")}
+        </Typography>
+      )}
 
       <Stack
         width="100%"
         spacing={2.5}
         direction={{ xs: "column", md: "row" }}
-        alignItems="center"
+        alignItems={{ xs: "stretch", md: "flex-end" }}
+        justifyContent="flex-end"
       >
         <RHFSelect
           onChange={onSortSelected}

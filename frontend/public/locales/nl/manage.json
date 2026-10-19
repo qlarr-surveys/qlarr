@@ -170,6 +170,11 @@
     "survey_admin": "Enquête Beheerder",
     "survey_dates": "Enquête Datums",
     "survey_mode": "Enquête Modus",
+    "survey_mode_hint": {
+      "web": "Respondenten antwoorden online via een link.",
+      "offline": "Wordt op apparaten zonder verbinding verzameld en later gesynchroniseerd.",
+      "mixed": "Online via een link en offline op apparaten."
+    },
     "survey_name": "Enquête Naam",
     "survey_url": "Enquête URL",
     "surveyor": "Enquêteur",
@@ -206,6 +211,17 @@
     "web": "Web"
   },
   "my_surveys": "Jouw Enquêtes",
+  "recent_surveys": "Recente enquêtes",
+  "survey_count_one": "{{count}} enquête",
+  "survey_count_other": "{{count}} enquêtes",
+  "dashboard": {
+    "subtitle": "Maak een enquête handmatig of importeer een bestaande definitie."
+  },
+  "action_cards": {
+    "create": { "description": "Begin met een lege enquête en voeg zelf pagina's en vragen toe." },
+    "import": { "description": "Upload een Qlarr-enquêtedefinitie die uit een andere werkruimte is geëxporteerd." },
+    "ai": { "description": "Beschrijf je enquête. De assistent maakt een opzet en blijft beschikbaar terwijl je bewerkt." }
+  },
   "fetch_error": "Je enquêtes konden niet worden geladen. Controleer je verbinding en probeer het opnieuw.",
   "new_survey": "Nieuwe Enquête",
   "reset_filter": "Enquête Filter Resetten",
