@@ -2,7 +2,7 @@ import { SetData } from "~/networking/design";
 import { designStateReceived, setSaving, setUpdating } from "./designState";
 import { onError } from "../edit/editState";
 import { onApiError } from "~/utils/errorsProcessor";
-import { isEquivalent } from "~/utils/design/utils";
+import { designChanges } from "@qlarr/design-core";
 
 let saveTimer;
 let buffer = [];
@@ -16,7 +16,7 @@ const saveDebounce = (store) => {
 
   saveTimer = setTimeout(() => {
     const state = store.getState();
-    const diff = getDiff(state.designState, state.designState.latest);
+    const diff = designChanges(state.designState, state.designState.latest);
     // Nothing changed. Saving anyway would open a new version of a published survey.
     if (Object.keys(diff).length === 0) {
       rollbackState = null;
@@ -92,6 +92,9 @@ const MUTATING = [
   "designState/onDrag",
   "designState/setDefaultValue",
   "designState/convertQuestion",
+  "designState/addQuota",
+  "designState/updateQuota",
+  "designState/removeQuota",
   "designState/enableCarryForward",
   "designState/updateCarryForward",
   "designState/disableCarryForward",
@@ -146,40 +149,3 @@ const setError = (store, error) => {
   // Clear buffer on error to prevent applying failed changes
   buffer = [];
 };
-
-const reservedKeys = [
-  "skipScroll",
-  "langInfo",
-  "reorder_refresh_code",
-  "setup",
-  "latest",
-  "lastAddedComponent",
-  "isUpdating",
-  "isSaving",
-  "index",
-  "focus",
-  "state",
-  "designMode",
-  "componentIndex",
-  "designStateReceived",
-  "versionDto",
-  "globalSetup",
-];
-
-function getDiff(currentState, latestState) {
-  const changes = {};
-
-  // Get all keys from both objects and filter out reserved keys
-  const allKeys = new Set([
-    ...Object.keys(currentState).filter((key) => !reservedKeys.includes(key)),
-    ...Object.keys(latestState).filter((key) => !reservedKeys.includes(key)),
-  ]);
-
-  for (const key of allKeys) {
-    if (!isEquivalent(currentState[key], latestState[key])) {
-      changes[key] = currentState[key];
-    }
-  }
-
-  return changes;
-}

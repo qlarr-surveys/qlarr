@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Box, Button, Typography, Select, MenuItem, FormControl, Dialog, IconButton, DialogContent, DialogTitle } from "@mui/material";
 import styles from "./Launch.module.css";
 import SurveyIcon from "~/components/common/SurveyIcons/SurveyIcon";
@@ -20,6 +20,8 @@ import { sharingUrl } from "~/networking/common";
 import QRCode from "react-qr-code";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@emotion/react";
+import { brokenQuotaCodes } from "@qlarr/design-core";
+import ConfirmActionModal from "~/components/common/ConfirmActionModal";
 
 function LaunchPage({ onPublish }) {
   const { t } = useTranslation(NAMESPACES.MANAGE);
@@ -37,6 +39,7 @@ function LaunchPage({ onPublish }) {
   const [surveyDateError, setSurveyDateError] = useState("");
   const [isQRDialogOpen, setQRDialogOpen] = useState(false);
   const [copy, setCopy] = useState(false);
+  const [confirmBrokenQuotas, setConfirmBrokenQuotas] = useState(false);
 
   const hasFatalErrors = useSelector((state) => {
     return (
@@ -44,6 +47,14 @@ function LaunchPage({ onPublish }) {
       state.designState.Survey.errors.length > 0
     );
   });
+
+  const designState = useSelector((state) => state.designState);
+  const brokenQuotaLabels = useMemo(() => {
+    const broken = brokenQuotaCodes(designState);
+    return (designState.Survey?.quotas || [])
+      .filter((quota) => broken.has(quota.code))
+      .map((quota) => quota.label || quota.code);
+  }, [designState]);
 
   const params = new URLSearchParams([
     ["version", versionDto?.version],
@@ -186,7 +197,10 @@ function LaunchPage({ onPublish }) {
                   color="primary"
                   className={styles.actionButton}
                   onClick={() => {
-                    if (!hasFatalErrors) {
+                    if (hasFatalErrors) return;
+                    if (brokenQuotaLabels.length > 0) {
+                      setConfirmBrokenQuotas(true);
+                    } else {
                       publish();
                     }
                   }}
@@ -352,6 +366,19 @@ function LaunchPage({ onPublish }) {
           </Button>
         </DialogContent>
       </Dialog>
+      <ConfirmActionModal
+        open={confirmBrokenQuotas}
+        title={t("launch.broken_quotas_title")}
+        description={t("launch.broken_quotas", { quotas: brokenQuotaLabels.join(", ") })}
+        cancelLabel={t("action_btn.cancel")}
+        confirmLabel={t("launch.publish_anyway")}
+        confirmColor="warning"
+        onClose={() => setConfirmBrokenQuotas(false)}
+        onConfirm={() => {
+          setConfirmBrokenQuotas(false);
+          publish();
+        }}
+      />
     </Box>
   );
 }

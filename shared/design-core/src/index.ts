@@ -10,7 +10,7 @@ export * from "./state/mutations";
 export * from "./state/repetition";
 
 // Pure helpers consumed by the frontend and AI directly.
-export { instructionByCode } from "./state/addInstructions";
+export { instructionByCode, brokenQuotaCodes } from "./state/addInstructions";
 export {
   replaceFormatInstructions,
   getAllFormatInstructions,
