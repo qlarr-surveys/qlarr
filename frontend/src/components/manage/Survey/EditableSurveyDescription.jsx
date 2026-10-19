@@ -66,8 +66,7 @@ export const EditableSurveyDescription = ({
     }
   };
 
-  const handleEditClick = (event) => {
-    event.stopPropagation();
+  const handleEditClick = () => {
     setIsDescriptionEditing(true);
   };
 

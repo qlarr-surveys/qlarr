@@ -212,8 +212,7 @@ const Survey = ({
       });
   };
 
-  const openResponses = (e) => {
-    e.stopPropagation();
+  const openResponses = () => {
     dispatch(setDesignModeToDesign());
     navigate(`/responses/${survey.id}`);
   };
@@ -281,18 +280,19 @@ const Survey = ({
           </p>
 
           <div className={styles.cardStats}>
-            <button
-              type="button"
-              className={styles.responsesStat}
-              onClick={openResponses}
-            >
+            {/* A reading, not a control. It used to navigate to the responses
+                page, which made a number in the middle of the card a second
+                way out of it; the redesign has it as plain text and leaves
+                going places to the action row. An analyst still gets a
+                Responses button there, which is their way in. */}
+            <div className={styles.responsesStat}>
               <span className={styles.statValue}>
                 {survey.completeResponseCount}
               </span>
               <span className={styles.statLabel}>
                 {t("edit_survey.responses")}
               </span>
-            </button>
+            </div>
             <div className={styles.createdStat}>
               <span className={styles.statLabel}>
                 {t("edit_survey.metadata.created")}
@@ -312,9 +312,8 @@ const Survey = ({
                     secondary buttons beside it. */}
                 <ActionButton
                   variant="Primary"
-                  onClick={(e) => {
+                  onClick={() => {
                     dispatch(setDesignModeToDesign());
-                    e.stopPropagation();
                     navigate(`/design-survey/${survey.id}`);
                   }}
                 >
@@ -362,9 +361,8 @@ const Survey = ({
                 )}
                 <ActionButton
                   variant="Primary"
-                  onClick={(e) => {
+                  onClick={() => {
                     dispatch(setDesignModeToDesign());
-                    e.stopPropagation();
                     window.open(`/preview/${survey.id}`, "_blank");
                   }}
                 >

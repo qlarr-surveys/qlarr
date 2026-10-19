@@ -72,8 +72,7 @@ export const EditableSurveyTitle = ({
     }
   };
 
-  const handleEditClick = (event) => {
-    event.stopPropagation();
+  const handleEditClick = () => {
     setIsEditing(true);
   };
 

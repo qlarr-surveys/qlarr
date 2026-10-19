@@ -506,17 +506,7 @@ button.descriptionText:focus-visible {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 0;
-  border: 0;
-  background: none;
   text-align: start;
-  cursor: pointer;
-  border-radius: 6px;
-}
-
-.responsesStat:focus-visible {
-  outline: 2px solid var(--card-accent, #16205b);
-  outline-offset: 2px;
 }
 
 .statValue {
