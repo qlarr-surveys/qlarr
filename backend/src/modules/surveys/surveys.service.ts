@@ -102,7 +102,7 @@ export class SurveysService {
         entity.id,
         JSON.parse(this.engine.newSurvey(req.name)) as Record<string, unknown>,
         1,
-        true,
+        { sampleSurvey: true },
       );
     } catch (err) {
       await this.surveys.deleteCascade(entity.id).catch(() => undefined);

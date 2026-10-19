@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   Param,
+  ParseUUIDPipe,
   Post,
   Query,
   Res,
@@ -13,6 +14,8 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
+import { CurrentUser } from '../../auth/current-user.decorator';
+import { CurrentUserPrincipal } from '../../auth/jwt.types';
 import { Role } from '../../auth/role.enum';
 import { Roles } from '../../auth/roles.decorator';
 import { MAX_TRANSLATIONS_UPLOAD_BYTES, uploadLimits } from '../../common/upload';
@@ -20,6 +23,7 @@ import {
   DesignDiffDto,
   DesignDto,
   PublishInfo,
+  SnapshotListDto,
   VersionDto,
 } from './design.dto';
 import { DesignService } from './design.service';
@@ -61,8 +65,11 @@ export class DesignController {
     @Param('surveyId') surveyId: string,
     @Body() design: Record<string, unknown>,
     @Query('version') version: string,
+    @CurrentUser() user: CurrentUserPrincipal,
   ): Promise<DesignDto> {
-    return this.design.setDesign(surveyId, design, parseInt(version, 10));
+    return this.design.setDesign(surveyId, design, parseInt(version, 10), {
+      userId: user.userId,
+    });
   }
 
   @Post(':surveyId/change_code')
@@ -71,8 +78,9 @@ export class DesignController {
     @Param('surveyId') surveyId: string,
     @Query('from') from: string,
     @Query('to') to: string,
+    @CurrentUser() user: CurrentUserPrincipal,
   ): Promise<DesignDto> {
-    return this.design.changeCode(surveyId, from, to);
+    return this.design.changeCode(surveyId, from, to, user.userId);
   }
 
   @Post(':surveyId/design/publish')
@@ -83,6 +91,33 @@ export class DesignController {
     @Query('sub_version') subVersion: string,
   ): Promise<VersionDto> {
     return this.design.publish(surveyId, parseInt(version, 10), parseInt(subVersion, 10));
+  }
+
+  @Get(':surveyId/design/snapshots')
+  @Roles(Role.SUPER_ADMIN, Role.SURVEY_ADMIN)
+  listSnapshots(@Param('surveyId') surveyId: string): Promise<SnapshotListDto> {
+    return this.design.listSnapshots(surveyId);
+  }
+
+  @Post(':surveyId/design/snapshots/:snapshotId/restore')
+  @Roles(Role.SUPER_ADMIN, Role.SURVEY_ADMIN)
+  restoreSnapshot(
+    @Param('surveyId') surveyId: string,
+    @Param('snapshotId', ParseUUIDPipe) snapshotId: string,
+    @Query('version') version: string,
+    @CurrentUser() user: CurrentUserPrincipal,
+  ): Promise<DesignDto> {
+    return this.design.restoreSnapshot(surveyId, snapshotId, parseInt(version, 10), user.userId);
+  }
+
+  @Post(':surveyId/design/restore_published')
+  @Roles(Role.SUPER_ADMIN, Role.SURVEY_ADMIN)
+  restorePublished(
+    @Param('surveyId') surveyId: string,
+    @Query('version') version: string,
+    @CurrentUser() user: CurrentUserPrincipal,
+  ): Promise<DesignDto> {
+    return this.design.restorePublished(surveyId, parseInt(version, 10), user.userId);
   }
 
   @Get(':surveyId/translations/export')
@@ -105,8 +140,14 @@ export class DesignController {
     @Param('surveyId') surveyId: string,
     @UploadedFile() file: { buffer: Buffer } | undefined,
     @Query('override_main_lang') overrideMainLang: string,
+    @CurrentUser() user: CurrentUserPrincipal,
   ): Promise<{ updated: number; design: DesignDto }> {
     if (!file) throw new BadRequestException('file is required');
-    return this.design.importTranslations(surveyId, file.buffer, overrideMainLang === 'true');
+    return this.design.importTranslations(
+      surveyId,
+      file.buffer,
+      overrideMainLang === 'true',
+      user.userId,
+    );
   }
 }

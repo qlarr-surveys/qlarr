@@ -20,8 +20,9 @@ import { sharingUrl } from "~/networking/common";
 import QRCode from "react-qr-code";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@emotion/react";
-import { brokenQuotaCodes } from "@qlarr/design-core";
 import ConfirmActionModal from "~/components/common/ConfirmActionModal";
+import { useDesignRestore } from "~/hooks/useDesignRestore";
+import { brokenQuotaCodes } from "@qlarr/design-core";
 
 function LaunchPage({ onPublish }) {
   const { t } = useTranslation(NAMESPACES.MANAGE);
@@ -39,6 +40,8 @@ function LaunchPage({ onPublish }) {
   const [surveyDateError, setSurveyDateError] = useState("");
   const [isQRDialogOpen, setQRDialogOpen] = useState(false);
   const [copy, setCopy] = useState(false);
+  const [isDiscardOpen, setDiscardOpen] = useState(false);
+  const { busy, restoring: discarding, restore } = useDesignRestore();
   const [confirmBrokenQuotas, setConfirmBrokenQuotas] = useState(false);
 
   const hasFatalErrors = useSelector((state) => {
@@ -75,12 +78,18 @@ function LaunchPage({ onPublish }) {
       });
   };
 
+  const discardChanges = () =>
+    restore(designService.restorePublished(versionDto?.version)).finally(() =>
+      setDiscardOpen(false)
+    );
+
   useEffect(() => {
     const newSurveyMode = survey?.usage || "";
     setSurveyMode(newSurveyMode);
   }, [survey]);
 
   const isDisabled = !isSurveyAdmin() || survey?.status == SURVEY_STATUS.CLOSED;
+  const canDiscard = !published && versionDto?.version > 1 && !isDisabled;
 
   const getUserTimezone = () => {
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -171,10 +180,17 @@ function LaunchPage({ onPublish }) {
             backgroundColor: theme.palette.warning.lighter,
             padding: '1rem',
             borderRadius: '8px',
-            border: `1px solid ${theme.palette.warning.light}`
+            border: `1px solid ${theme.palette.warning.light}`,
+            flexWrap: 'wrap'
           }}
         >
-          <Typography variant="subtitle1" sx={{ color: theme.palette.warning.dark }}>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              color: theme.palette.warning.dark,
+              flex: canDiscard ? '1 1 180px' : undefined,
+            }}
+          >
             {versionDto?.status === "draft" 
               ? t("launch.draft_text")
               : t("launch.unpublished_text")}
@@ -216,6 +232,17 @@ function LaunchPage({ onPublish }) {
                 </Button>
               </span>
             </CustomTooltip>
+            {canDiscard && (
+              <Button
+                variant="outlined"
+                color="primary"
+                disabled={busy || discarding}
+                onClick={() => setDiscardOpen(true)}
+                sx={{ whiteSpace: "nowrap", flexShrink: 0 }}
+              >
+                {t("launch.discard_changes")}
+              </Button>
+            )}
           </>
         </Box>
       )}
@@ -331,6 +358,17 @@ function LaunchPage({ onPublish }) {
           </Button>
         </Box>
       </Box>
+
+      <ConfirmActionModal
+        open={isDiscardOpen}
+        title={t("launch.discard_title")}
+        description={t("launch.discard_description")}
+        cancelLabel={t("action_btn.cancel")}
+        confirmLabel={t("launch.discard_changes")}
+        isLoading={discarding}
+        onClose={() => setDiscardOpen(false)}
+        onConfirm={discardChanges}
+      />
 
       <Dialog
         open={isQRDialogOpen}

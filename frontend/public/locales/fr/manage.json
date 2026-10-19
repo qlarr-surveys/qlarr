@@ -83,7 +83,8 @@
       "last_modified": "Dernière Modification",
       "start_date": "Date de Début",
       "end_date": "Date de Fin"
-    }
+    },
+    "version_history": "Historique des versions"
   },
   "edit_user": {
     "title": "Modifier l'Utilisateur"
@@ -237,7 +238,9 @@
     "wrong_confirmation_token": "Ce Jeton de Confirmation est incorrect, Veuillez Vous Inscrire à Nouveau",
     "survey_quota": "Désolé, ce sondage n'accepte plus de réponses.",
     "invalid_translations_csv": "Ce n'est pas un CSV de traductions.",
-    "translations_csv_not_utf8": "Ce fichier n'est pas encodé en UTF-8. Dans Excel, utilisez Fichier → Enregistrer sous → « CSV UTF-8 (délimité par des virgules) » puis importez-le à nouveau."
+    "translations_csv_not_utf8": "Ce fichier n'est pas encodé en UTF-8. Dans Excel, utilisez Fichier → Enregistrer sous → « CSV UTF-8 (délimité par des virgules) » puis importez-le à nouveau.",
+    "snapshot_not_found": "Cette version n'existe plus. Rechargez la page et réessayez.",
+    "nothing_to_revert": "Aucune modification non publiée à annuler."
   },
   "processed_successes": {
     "copied": "Copié dans le presse-papiers",
@@ -530,7 +533,10 @@
     "broken_quotas_title": "Certains quotas ne seront pas appliqués",
     "broken_quotas": "Ces quotas font référence à des questions ou options qui n'existent plus, ils ne compteront ni n'excluront aucun répondant : {{quotas}}. Corrigez leurs conditions dans Quotas, ou publiez quand même.",
     "publish_anyway": "Publier quand même",
-    "download_qr_code": "Télécharger le code QR"
+    "download_qr_code": "Télécharger le code QR",
+    "discard_changes": "Annuler les modifications non publiées",
+    "discard_title": "Annuler les modifications non publiées ?",
+    "discard_description": "Le design revient à la dernière version publiée. Le design actuel est conservé dans l'historique des versions pour que vous puissiez le restaurer plus tard."
   },
   "email": {
     "check": "Vérifiez votre E-mail",
@@ -769,6 +775,22 @@
     "question_type_text_display": "Affichage de Texte",
     "question_type_image_display": "Affichage d'Image",
     "question_type_video_display": "Affichage de Vidéo"
+  },
+  "version_history": {
+    "description": "Points de restauration de vos modifications non publiées, enregistrés automatiquement pendant l'édition. L'historique est effacé à chaque publication.",
+    "empty": "Aucun point de restauration pour l'instant.",
+    "restore": "Restaurer",
+    "restore_title": "Restaurer cette version ?",
+    "restore_description": "Le design revient à son état du {{date}}. Le design actuel est conservé dans l'historique des versions pour que vous puissiez le restaurer plus tard.",
+    "reason": {
+      "timer": "Sauvegarde automatique",
+      "delete": "Avant la suppression de {{codes}}",
+      "change_code": "Avant le renommage {{from}} → {{to}}",
+      "translations_import_one": "Avant l'import des traductions ({{count}} champ)",
+      "translations_import_other": "Avant l'import des traductions ({{count}} champs)",
+      "restore": "Avant la restauration d'une version précédente",
+      "discard": "Avant l'annulation des modifications non publiées"
+    }
   },
   "group_quotas": {
     "title": "Quotas par groupe",

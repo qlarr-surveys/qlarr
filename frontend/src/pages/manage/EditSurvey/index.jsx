@@ -18,6 +18,7 @@ import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import NavigationSettings from "~/components/manage/NavigationSettings";
 import SurveyOffline from '../SurveyOffline';
 import SurveyPrivacy from '../SurveyPrivacy';
+import VersionHistory from "~/components/manage/VersionHistory";
 import { isSurveyAdmin } from "~/constants/roles";
 import { SURVEY_STATUS } from "~/constants/survey";
 
@@ -43,6 +44,11 @@ function EditSurvey({ onPublish }) {
   ];
 
   const sections = [
+    {
+      id: "version_history",
+      title: t("edit_survey.version_history"),
+      component: <VersionHistory />,
+    },
     {
       id: "navigation",
       title: t("edit_survey.navigation"),

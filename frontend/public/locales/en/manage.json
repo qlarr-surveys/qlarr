@@ -83,7 +83,8 @@
       "last_modified": "Last Modified",
       "start_date": "Start Date",
       "end_date": "End Date"
-    }
+    },
+    "version_history": "Version History"
   },
   "edit_user": {
     "title": "Edit User"
@@ -237,7 +238,9 @@
     "wrong_confirmation_token": "This Confirmation Token is incorrect, Please Register Once more",
     "survey_quota": "Sorry, this survey is no longer accepting responses.",
     "invalid_translations_csv": "Not a translations CSV.",
-    "translations_csv_not_utf8": "This file isn't UTF-8. In Excel, use File → Save As → 'CSV UTF-8 (Comma delimited)' and import again."
+    "translations_csv_not_utf8": "This file isn't UTF-8. In Excel, use File → Save As → 'CSV UTF-8 (Comma delimited)' and import again.",
+    "snapshot_not_found": "This version no longer exists. Reload the page and try again.",
+    "nothing_to_revert": "There are no unpublished changes to discard."
   },
   "processed_successes": {
     "copied": "Copied to clipboard",
@@ -530,7 +533,10 @@
     "broken_quotas_title": "Some quotas won't be enforced",
     "broken_quotas": "These quotas reference questions or options that no longer exist, so no respondent will be counted or screened out by them: {{quotas}}. Fix their conditions in Quotas, or publish anyway.",
     "publish_anyway": "Publish anyway",
-    "download_qr_code": "Download QR Code"
+    "download_qr_code": "Download QR Code",
+    "discard_changes": "Discard unpublished changes",
+    "discard_title": "Discard unpublished changes?",
+    "discard_description": "The design goes back to the last published version. The current design is kept in the version history, so you can restore it later."
   },
   "email": {
     "check": "Check Your Email",
@@ -769,6 +775,22 @@
     "feature_own": "Own every result.",
     "need_help": "Need help getting started?",
     "contact_support": "contact support"
+  },
+  "version_history": {
+    "description": "Restore points for your unpublished changes, kept automatically while you edit. The history is cleared each time you publish.",
+    "empty": "No restore points yet.",
+    "restore": "Restore",
+    "restore_title": "Restore this version?",
+    "restore_description": "The design goes back to how it was on {{date}}. The current design is kept in the version history, so you can restore it later.",
+    "reason": {
+      "timer": "Autosave",
+      "delete": "Before deleting {{codes}}",
+      "change_code": "Before renaming {{from}} → {{to}}",
+      "translations_import_one": "Before importing translations ({{count}} field)",
+      "translations_import_other": "Before importing translations ({{count}} fields)",
+      "restore": "Before restoring a previous version",
+      "discard": "Before discarding unpublished changes"
+    }
   },
   "group_quotas": {
     "title": "Group quotas",
