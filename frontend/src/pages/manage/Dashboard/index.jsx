@@ -144,8 +144,6 @@ function Dashboard() {
     onCreateSurvey: handleCreateSurveyClick,
     onImportSurvey: handleImportSurveyClick,
   });
-  // The subtitle names the assistant only where there is one to name.
-  const hasAiAction = actions.some((action) => action.tone === "ai");
 
   const onDelete = (survey) => {
     setActionType("delete");
@@ -298,16 +296,13 @@ function Dashboard() {
       className={styles.mainContainer}
       sx={{
         "--card-accent": (theme) => theme.palette.primary.main,
-        "--card-accent-ai": (theme) => theme.palette.primary.lighter,
       }}
     >
       <Container sx={{ marginBottom: "48px" }}>
         <Box className={styles.content}>
           <Box className={styles.pageHeading}>
             <h1 className={styles.heading}>{t("my_surveys")}</h1>
-            <p className={styles.subtitle}>
-              {t(hasAiAction ? "dashboard.subtitle_ai" : "dashboard.subtitle")}
-            </p>
+            <p className={styles.subtitle}>{t("dashboard.subtitle")}</p>
           </Box>
 
           <ActionCards actions={actions} />

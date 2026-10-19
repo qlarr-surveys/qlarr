@@ -172,7 +172,10 @@ function replaceInField(
 ): void {
   const obj = node[field];
   if (obj && typeof obj === 'object') {
-    node[field] = JSON.parse(JSON.stringify(obj).split(from).join(to));
+    // Whole codes only: renaming Q1 must not touch Q10 or Q1_x.
+    const escaped = from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const code = new RegExp(`${escaped}(?![a-z0-9_])`, 'g');
+    node[field] = JSON.parse(JSON.stringify(obj).replace(code, () => to));
   }
 }
 
@@ -305,6 +308,17 @@ export function runChangeCode(
       applyToPath(result.survey, path, (n) =>
         replaceInField(n, 'skip_logic', from, to),
       );
+    }
+  }
+
+  if (ext.isGroupCode(from) || ext.isQuestionCode(from)) {
+    const quotas = result.survey['quotas'];
+    if (Array.isArray(quotas)) {
+      for (const quota of quotas) {
+        if (quota && typeof quota === 'object') {
+          replaceInField(quota as Record<string, unknown>, 'condition', from, to);
+        }
+      }
     }
   }
 

@@ -1,8 +1,7 @@
 .mainContainer {
-  margin: auto;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 12px;
 }
 
 .boxContainer {
@@ -10,19 +9,4 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.tableBodyCell {
-  color: "#1a2052";
-  font-weight: 500;
-}
-.tableHeaderCell {
-  color: "#1a2052";
-}
-
-.flexContainer {
-  width: 100%;
-  display: flex;
-  align-items: flex-end;
-  gap: 1rem;
 }
