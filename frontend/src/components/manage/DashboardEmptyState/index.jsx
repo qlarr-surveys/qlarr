@@ -20,17 +20,18 @@ function DashboardEmptyState({
 
   return (
     <Box>
-        <Box className={styles.welcomeSection}>
-          <Typography variant="h4" fontWeight={700}>
-            {t("empty_state.welcome", {
-              firstName: user?.firstName || "",
-              lastName: user?.lastName || "",
-            })}
-          </Typography>
-          <Typography variant="body1" color="textSecondary" sx={{ mt: 1 }}>
-            {t("empty_state.subtitle")}
-          </Typography>
-        </Box>
+      <Box className={styles.welcomeSection}>
+        <Typography variant="h4" fontWeight={700}>
+          {t("empty_state.welcome", {
+            firstName: user?.firstName || "",
+            lastName: user?.lastName || "",
+          })}
+        </Typography>
+        <Typography variant="body1" color="textSecondary" sx={{ mt: 1 }}>
+          {t("empty_state.subtitle")}
+        </Typography>
+      </Box>
+
       <Box className={styles.container}>
         <Box className={styles.centerCard}>
         <img src="/empty-state.png" alt="" className={styles.illustration} />
