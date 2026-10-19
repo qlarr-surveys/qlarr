@@ -8,9 +8,11 @@ import { serverDateTimeToLocalDateTime } from "~/utils/DateUtils";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import styles from "./Survey.module.css";
 
-// The clean brand logo, not /placehoder-logo.png: that one is tiled with a
-// "Qlarr" watermark meant for image placeholders, not for a survey's cover.
-const DEFAULT_LOGO = "/qlarr.png";
+// The watermarked placeholder the card has always used, not the clean
+// /qlarr.png: the tiled "Qlarr" says "this is not your image yet", which is
+// exactly what a survey with no logo of its own needs to say. The add-logo
+// overlay stays up over it, so the two read as one invitation.
+const DEFAULT_LOGO = "/placehoder-logo.png";
 
 /**
  * The card's cover: the survey logo, the status pill, and — for an admin — a
@@ -19,19 +21,22 @@ const DEFAULT_LOGO = "/qlarr.png";
  * The replace affordance is a real `<button>` over a hidden input rather than
  * the old `<Box onClick>` that called `getElementById(...).click()`: that was
  * unreachable by keyboard. CSS reveals it on `:hover`, `:focus-within` and
- * while a file is dragged over.
+ * while a file is dragged over — and keeps it up with no hover at all on a
+ * survey still wearing the placeholder, so the one card that has something to
+ * fix is the one card that says so.
  */
 export function SurveyCover({ survey, surveyStatus, isEditable, onUpload }) {
   const { t } = useTranslation(NAMESPACES.MANAGE);
   const inputRef = useRef(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
-  const logoUrl = survey.image
+  const hasLogo = Boolean(survey.image);
+  const logoUrl = hasLogo
     ? buildResourceUrl(survey.image, survey.id)
     : DEFAULT_LOGO;
   // "Add" reuses the existing key; only "Replace" is new copy.
   const uploadLabel = t(
-    survey.image ? "edit_survey.replace_logo" : "edit_survey.add_logo"
+    hasLogo ? "edit_survey.replace_logo" : "edit_survey.add_logo"
   );
 
   const handleFile = (file) => {
@@ -52,6 +57,7 @@ export function SurveyCover({ survey, surveyStatus, isEditable, onUpload }) {
     <div
       className={styles.cover}
       data-dragover={isDragOver ? "true" : undefined}
+      data-needs-logo={!hasLogo && isEditable ? "true" : undefined}
       onDragEnter={allowDrop}
       onDragOver={allowDrop}
       onDragLeave={() => setIsDragOver(false)}

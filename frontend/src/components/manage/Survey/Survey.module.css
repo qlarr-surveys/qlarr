@@ -50,7 +50,12 @@
 }
 
 /* Hidden until the cover is hovered, focused within, or dragged over. It is a
-   real button, so keyboard users reach it the same way. */
+   real button, so keyboard users reach it the same way.
+
+   Its ink travels as three custom properties rather than as three overrides
+   per state, because the overlay has two looks -- white on a scrim, and the
+   card's own ink on bare placeholder -- and the icon and the label have to
+   change together with the label text or one of them ends up invisible. */
 .coverReplace {
   position: absolute;
   inset: 0;
@@ -63,10 +68,39 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: #fff;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.15s ease, background-color 0.15s ease;
+  --cover-ink: #fff;
+  --cover-ink-fill: rgba(0, 0, 0, 0.35);
+  --cover-ink-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+  color: var(--cover-ink);
+  transition: opacity 0.15s ease, background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+/* A placeholder is faded back so that the upload affordance sitting on top of
+   it stays the figure: at full strength the ring around the icon lands in the
+   middle of the wordmark and the two read as one damaged glyph. */
+.cover[data-needs-logo="true"] .coverLogo {
+  opacity: 0.2;
+}
+
+/* A placeholder is not a cover, so on a survey still wearing one the overlay
+   never hides: the only way to give the card a real logo should not be
+   something you have to hover to find. At rest it is drawn in the card's own
+   ink straight onto that faded placeholder, not as a scrim -- a dark wash
+   sitting permanently on every logo-less card would read as a row of disabled
+   cards rather than a row of invitations. Hover, focus and drag still flip it
+   to the white-on-scrim treatment below.
+
+   This rule must stay above that hover block: the two match with equal
+   specificity, so source order is what lets hovering a placeholder deepen it
+   instead of the resting look winning back. */
+.cover[data-needs-logo="true"] .coverReplace {
+  opacity: 1;
+  --cover-ink: #5b6189;
+  --cover-ink-fill: transparent;
+  --cover-ink-shadow: none;
 }
 
 .cover:hover .coverReplace,
@@ -74,10 +108,13 @@
 .cover[data-dragover="true"] .coverReplace {
   opacity: 1;
   background-color: rgba(0, 0, 0, 0.45);
+  --cover-ink: #fff;
+  --cover-ink-fill: rgba(0, 0, 0, 0.35);
+  --cover-ink-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
 }
 
 .coverReplace:focus-visible {
-  outline: 3px solid #fff;
+  outline: 3px solid var(--cover-ink);
   outline-offset: -5px;
 }
 
@@ -88,15 +125,15 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  background: var(--cover-ink-fill);
+  border: 1.5px solid currentColor;
 }
 
 .coverReplaceLabel {
   font-size: 13px;
   font-weight: 600;
   line-height: 16px;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+  text-shadow: var(--cover-ink-shadow);
 }
 
 /* ==============================================
