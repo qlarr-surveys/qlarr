@@ -207,7 +207,8 @@
     "surveyor_admin": "Surveyor-Administrator",
     "to": "Zu",
     "total_responses_limit": "Beantwortungslimit insgesamt",
-    "unpublished_changes": "Nicht veröffentlichte Änderungen vorhanden",
+    "unpublished_changes": "Hat unveröffentlichte Änderungen",
+    "unpublished_changes_info": "Änderungen seit der letzten Veröffentlichung sind noch nicht live. Veröffentlichen Sie, um zu aktualisieren, was die Teilnehmenden sehen.",
     "survey_description": "Umfragebeschreibung"
   },
   "language": {

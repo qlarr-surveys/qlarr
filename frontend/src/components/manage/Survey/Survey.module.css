@@ -460,17 +460,11 @@ button.descriptionText:focus-visible {
   border: 0;
   background: #fffaeb;
   color: #93370d;
-  cursor: pointer;
 }
 
 .unpublishedBadge:focus-visible {
   outline: 2px solid #3a46d8;
   outline-offset: 1px;
-}
-
-/* Read-only for anyone who cannot publish. */
-.unpublishedBadgeStatic {
-  cursor: default;
 }
 
 /* The pencil says "edited", the dot says "not published yet". The ring is the

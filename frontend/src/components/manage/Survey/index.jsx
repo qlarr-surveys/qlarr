@@ -91,44 +91,32 @@ const ActionButton = ({ tooltip, onClick, variant, iconOnly, children }) => {
  * redesign. The dot is what distinguishes "edited" from "edited and not yet
  * live", and it is decorative -- `label` carries that meaning for everyone.
  *
+ * A marker, not a control. It used to navigate an admin to the editor, which
+ * made the card a second place that opened the survey: "Edit survey" is the
+ * card's action, and the badge is there to explain the dot, not to compete
+ * with the button for the same click. The redesign draws it the same way --
+ * a focusable span with a tooltip and nothing to press.
+ *
  * `forwardRef`, and the rest of the props passed straight through, because
  * this is a tooltip's only child: MUI reaches the trigger through a ref and
  * hangs its hover and focus handlers on it as props. Without both, the
  * tooltip that says what the dot means never opened at all -- not on hover,
- * not on focus -- and React said so on every render.
+ * not on focus -- and React said so on every render. It still takes focus, so
+ * that tooltip stays reachable without a mouse.
  */
-const UnpublishedBadge = forwardRef(({ label, onEdit, ...props }, ref) => {
-  const content = (
-    <>
-      <Pencil {...ICON_INLINE} />
-      <span aria-hidden="true" className={styles.unpublishedDot} />
-    </>
-  );
-
-  return onEdit ? (
-    <button
-      {...props}
-      ref={ref}
-      type="button"
-      className={styles.unpublishedBadge}
-      aria-label={label}
-      onClick={onEdit}
-    >
-      {content}
-    </button>
-  ) : (
-    <span
-      {...props}
-      ref={ref}
-      role="img"
-      tabIndex={0}
-      aria-label={label}
-      className={`${styles.unpublishedBadge} ${styles.unpublishedBadgeStatic}`}
-    >
-      {content}
-    </span>
-  );
-});
+const UnpublishedBadge = forwardRef(({ label, ...props }, ref) => (
+  <span
+    {...props}
+    ref={ref}
+    role="img"
+    tabIndex={0}
+    aria-label={label}
+    className={styles.unpublishedBadge}
+  >
+    <Pencil {...ICON_INLINE} />
+    <span aria-hidden="true" className={styles.unpublishedDot} />
+  </span>
+));
 
 const Survey = ({
   survey,
@@ -268,24 +256,11 @@ const Survey = ({
               survey.latestVersion.published === false && (
                 <CustomTooltip
                   title={t("label.unpublished_changes")}
+                  body={t("label.unpublished_changes_info")}
                   showIcon={false}
                 >
-                  {/* A button for an admin, who can act on it, and a plain
-                      focusable marker for everyone else, who can only read it.
-                      Either way it takes focus, so the tooltip -- the only
-                      place that says what the dot means -- is reachable
-                      without a mouse. */}
                   <UnpublishedBadge
                     label={t("label.unpublished_changes")}
-                    onEdit={
-                      isAdmin
-                        ? (e) => {
-                            e.stopPropagation();
-                            dispatch(setDesignModeToDesign());
-                            navigate(`/edit-survey/${survey.id}`);
-                          }
-                        : undefined
-                    }
                   />
                 </CustomTooltip>
               )

@@ -187,6 +187,7 @@
     "total_responses_limit": "حد الردود الإجمالي",
     "sort_by": "ترتيب حسب",
     "unpublished_changes": "هناك تغييرات غير منشورة",
+    "unpublished_changes_info": "التعديلات التي تمت منذ آخر نشر ليست مباشرة بعد. انشر لتحديث ما يراه المشاركون.",
     "responses": "الردود المكتملة: {{count}}",
     "quota": "الحد: {{count}}",
     "no_quota": "لا يوجد حد",
