@@ -799,5 +799,9 @@
     "active": "Die Umfrage ist live und nimmt Antworten entgegen.",
     "expired": "Das Enddatum der Umfrage ist überschritten. Es können keine neuen Antworten gesammelt werden. Sie können sie durch Ändern der Daten reaktivieren.",
     "closed": "Die Umfrage wurde dauerhaft geschlossen. Sie können nur Daten exportieren oder sie duplizieren."
+  },
+  "status_legend": {
+    "title": "Umfragestatus",
+    "this_survey": "diese Umfrage"
   }
 }

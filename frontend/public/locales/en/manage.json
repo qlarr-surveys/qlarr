@@ -798,5 +798,9 @@
     "active": "Survey is live and accepting responses.",
     "expired": "Survey end date has passed. No new responses can be collected. You can reactivate it by changing the dates.",
     "closed": "Survey has been permanently closed. You can only export data or duplicate it."
+  },
+  "status_legend": {
+    "title": "Survey statuses",
+    "this_survey": "this survey"
   }
 }

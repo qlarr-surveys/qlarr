@@ -33,16 +33,25 @@
   background: #fff;
 }
 
-/* Inset and contained, so a wide logo and a tall one are both shown whole
-   and neither touches the card's edges. The bottom inset is the pill's own
-   height plus the 12px it sits above the edge, so a wide logo stops exactly
-   where the pill starts instead of running underneath it. */
+/* A survey's own logo is inset and contained, so a wide one and a tall one
+   are both shown whole and neither touches the card's edges. The bottom inset
+   is the pill's own height plus the 12px it sits above the edge, so a wide
+   logo stops exactly where the pill starts instead of running underneath it. */
 .coverLogo {
   position: absolute;
   inset: 14px 20px 44px;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
+}
+
+/* The placeholder is not a logo, so it is not treated as one: the redesign
+   bleeds it to the edges and crops it, as a cover photo, under the scrim the
+   upload prompt sits on. Nothing is lost by cropping a mark the survey did
+   not choose. */
+.cover[data-needs-logo="true"] .coverLogo {
+  inset: 0;
+  background-size: cover;
 }
 
 .coverInput {
@@ -52,10 +61,8 @@
 /* Hidden until the cover is hovered, focused within, or dragged over. It is a
    real button, so keyboard users reach it the same way.
 
-   Its ink travels as three custom properties rather than as three overrides
-   per state, because the overlay has two looks -- white on a scrim, and the
-   card's own ink on bare placeholder -- and the icon and the label have to
-   change together with the label text or one of them ends up invisible. */
+   Top-aligned rather than centred, as the redesign draws it: the status pill
+   owns the bottom of the cover, and a centred prompt would sit against it. */
 .coverReplace {
   position: absolute;
   inset: 0;
@@ -63,58 +70,39 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  padding: 12px 0 0;
   gap: 6px;
-  padding: 0;
   border: 0;
-  background: transparent;
+  background-color: transparent;
+  color: #fff;
   cursor: pointer;
   opacity: 0;
-  --cover-ink: #fff;
-  --cover-ink-fill: rgba(0, 0, 0, 0.35);
-  --cover-ink-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
-  color: var(--cover-ink);
-  transition: opacity 0.15s ease, background-color 0.15s ease,
-    color 0.15s ease;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
 }
 
-/* A placeholder is faded back so that the upload affordance sitting on top of
-   it stays the figure: at full strength the ring around the icon lands in the
-   middle of the wordmark and the two read as one damaged glyph. */
-.cover[data-needs-logo="true"] .coverLogo {
-  opacity: 0.2;
-}
-
-/* A placeholder is not a cover, so on a survey still wearing one the overlay
+/* A placeholder is not a cover, so on a survey still wearing one the prompt
    never hides: the only way to give the card a real logo should not be
-   something you have to hover to find. At rest it is drawn in the card's own
-   ink straight onto that faded placeholder, not as a scrim -- a dark wash
-   sitting permanently on every logo-less card would read as a row of disabled
-   cards rather than a row of invitations. Hover, focus and drag still flip it
-   to the white-on-scrim treatment below.
+   something you have to hover to find. Its scrim is the heavier of the two,
+   and hovering lightens it rather than darkening it -- the prompt is already
+   being read, so the hover's job is to show more of what is under it.
 
-   This rule must stay above that hover block: the two match with equal
-   specificity, so source order is what lets hovering a placeholder deepen it
-   instead of the resting look winning back. */
+   This must stay above the hover block: the two match with equal specificity,
+   so source order is what lets the hover win. */
 .cover[data-needs-logo="true"] .coverReplace {
   opacity: 1;
-  --cover-ink: #5b6189;
-  --cover-ink-fill: transparent;
-  --cover-ink-shadow: none;
+  background-color: rgba(0, 0, 0, 0.7);
 }
 
 .cover:hover .coverReplace,
 .cover:focus-within .coverReplace,
 .cover[data-dragover="true"] .coverReplace {
   opacity: 1;
-  background-color: rgba(0, 0, 0, 0.45);
-  --cover-ink: #fff;
-  --cover-ink-fill: rgba(0, 0, 0, 0.35);
-  --cover-ink-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+  background-color: rgba(0, 0, 0, 0.4);
 }
 
 .coverReplace:focus-visible {
-  outline: 3px solid var(--cover-ink);
+  outline: 3px solid #fff;
   outline-offset: -5px;
 }
 
@@ -125,15 +113,15 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--cover-ink-fill);
-  border: 1.5px solid currentColor;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
 }
 
 .coverReplaceLabel {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  line-height: 16px;
-  text-shadow: var(--cover-ink-shadow);
+  line-height: 18px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 /* ==============================================
@@ -204,6 +192,112 @@
   background: #fffaeb;
   color: #93370d;
   --status-dot: #93370d;
+}
+
+/* ==============================================
+   Status legend — the five statuses and what each one means, inside the
+   tooltip the pill opens, drawn as the redesign draws it.
+
+   The dots are NOT the pills' --status-dot values. Those were picked to sit
+   on a pale wash; on the tooltip's dark #1b2150 card a #4d5761 draft dot or a
+   #085d3a active dot is all but invisible. These are the redesign's own
+   lifted pairs for the dark card, each ringed in white so a dot reads as a
+   dot and not as a smudge. Changing one without the other desyncs the key
+   from the pills it is a key to.
+   ============================================== */
+.legendTitle {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #c7cbf0;
+}
+
+.legend {
+  margin: 0;
+  padding: 0;
+}
+
+/* The negative inline margin lets the current row's highlight run to the
+   card's padding edge while the text still lines up with the title above. */
+.legendRow {
+  display: flex;
+  gap: 9px;
+  margin: 0 -8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.legendRow[data-current="true"] {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.legendDot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  margin-top: 5px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
+}
+
+.legendDot.draft {
+  background: #9aa3ad;
+}
+
+.legendDot.scheduled {
+  background: #53b1fd;
+}
+
+.legendDot.active {
+  background: #32d583;
+}
+
+.legendDot.expired {
+  background: #f97066;
+}
+
+.legendDot.closed {
+  background: #fdb022;
+}
+
+.legendName {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+/* "· this survey", on the one row that is about the card you are hovering.
+   Lighter than the status name it follows, because it is an aside about which
+   row to read first, not part of the name. */
+.legendHere {
+  font-weight: 400;
+  color: #c7cbf0;
+}
+
+.legendMeaning {
+  display: block;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 17px;
+  color: #dfe2f7;
+}
+
+/* The survey's own dates, under the legend and ruled off from it: everything
+   above is about statuses in general, this is about this survey. The card no
+   longer lists them, so without this a scheduled or expiring survey would
+   lose the only place that said when. */
+.legendDates {
+  margin: 10px -8px 0;
+  padding: 9px 8px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  font-size: 12px;
+  line-height: 17px;
+  color: #dfe2f7;
 }
 
 /* ==============================================

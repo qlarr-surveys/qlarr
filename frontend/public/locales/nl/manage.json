@@ -798,5 +798,9 @@
     "active": "De enquête is live en accepteert reacties.",
     "expired": "De einddatum van de enquête is verstreken. Er kunnen geen nieuwe reacties worden verzameld. U kunt deze reactiveren door de datums te wijzigen.",
     "closed": "De enquête is permanent gesloten. U kunt alleen gegevens exporteren of dupliceren."
+  },
+  "status_legend": {
+    "title": "Enquêtestatussen",
+    "this_survey": "deze enquête"
   }
 }

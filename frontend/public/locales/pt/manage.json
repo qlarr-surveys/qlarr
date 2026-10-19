@@ -798,5 +798,9 @@
     "active": "A pesquisa está no ar e aceitando respostas.",
     "expired": "A data de término passou. Não é possível coletar novas respostas. Você pode reativá-la alterando as datas.",
     "closed": "A pesquisa foi encerrada permanentemente. Você só pode exportar dados ou duplicá-la."
+  },
+  "status_legend": {
+    "title": "Estados do inquérito",
+    "this_survey": "este inquérito"
   }
 }

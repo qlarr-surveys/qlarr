@@ -57,7 +57,18 @@ const CustomTooltip = ({
           dangerouslySetInnerHTML={{ __html: title }}
         />
       )}
-      {body && <p className={styles.textPreLine} dangerouslySetInnerHTML={{ __html: body }} />}
+      {/* A string is markup, as every caller but the status legend passes;
+          a node is rendered as itself, because a legend of coloured pills is
+          not something to spell out as an HTML string. */}
+      {body &&
+        (typeof body === "string" ? (
+          <p
+            className={styles.textPreLine}
+            dangerouslySetInnerHTML={{ __html: body }}
+          />
+        ) : (
+          <div className={styles.tooltipBody}>{body}</div>
+        ))}
       {url && (
         <Button
           variant="text"

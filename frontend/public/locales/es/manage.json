@@ -798,5 +798,9 @@
     "active": "La encuesta está en línea y aceptando respuestas.",
     "expired": "La fecha de finalización ha pasado. No se pueden recopilar nuevas respuestas. Puedes reactivarla cambiando las fechas.",
     "closed": "La encuesta ha sido cerrada permanentemente. Solo puedes exportar datos o duplicarla."
+  },
+  "status_legend": {
+    "title": "Estados de la encuesta",
+    "this_survey": "esta encuesta"
   }
 }

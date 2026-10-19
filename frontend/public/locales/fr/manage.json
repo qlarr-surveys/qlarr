@@ -798,5 +798,9 @@
     "active": "Le sondage est en ligne et accepte les réponses.",
     "expired": "La date de fin du sondage est passée. Aucune nouvelle réponse ne peut être collectée. Vous pouvez le réactiver en modifiant les dates.",
     "closed": "Le sondage a été fermé définitivement. Vous pouvez uniquement exporter les données ou le dupliquer."
+  },
+  "status_legend": {
+    "title": "Statuts du sondage",
+    "this_survey": "ce sondage"
   }
 }

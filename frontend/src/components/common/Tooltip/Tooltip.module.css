@@ -47,6 +47,13 @@
   font-weight: 600;
 }
 
-.tooltipTitle + .textPreLine {
+.tooltipTitle + .textPreLine,
+.tooltipTitle + .tooltipBody {
   margin: 2px 0 0;
+}
+
+/* A node body brings its own layout; all this owes it is the same margin
+   reset the text body gets, so the card stays padded by its own 9px. */
+.tooltipBody {
+  margin: 0;
 }
