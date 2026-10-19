@@ -7,7 +7,7 @@ import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import SavingSurvey from "~/components/design/SavingSurvey";
 import { fDate } from "~/utils/format-time";
 import { isSurveyAdmin, isUserAnalyst } from "~/constants/roles";
-import { useState } from "react";
+import { forwardRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setLoading } from "~/state/edit/editState";
 import { useService } from "~/hooks/use-service";
@@ -90,8 +90,14 @@ const ActionButton = ({ tooltip, onClick, variant, iconOnly, children }) => {
  * The unpublished-changes marker: a pencil with a status dot, per the
  * redesign. The dot is what distinguishes "edited" from "edited and not yet
  * live", and it is decorative -- `label` carries that meaning for everyone.
+ *
+ * `forwardRef`, and the rest of the props passed straight through, because
+ * this is a tooltip's only child: MUI reaches the trigger through a ref and
+ * hangs its hover and focus handlers on it as props. Without both, the
+ * tooltip that says what the dot means never opened at all -- not on hover,
+ * not on focus -- and React said so on every render.
  */
-const UnpublishedBadge = ({ label, onEdit }) => {
+const UnpublishedBadge = forwardRef(({ label, onEdit, ...props }, ref) => {
   const content = (
     <>
       <Pencil {...ICON_INLINE} />
@@ -101,6 +107,8 @@ const UnpublishedBadge = ({ label, onEdit }) => {
 
   return onEdit ? (
     <button
+      {...props}
+      ref={ref}
       type="button"
       className={styles.unpublishedBadge}
       aria-label={label}
@@ -110,6 +118,8 @@ const UnpublishedBadge = ({ label, onEdit }) => {
     </button>
   ) : (
     <span
+      {...props}
+      ref={ref}
       role="img"
       tabIndex={0}
       aria-label={label}
@@ -118,7 +128,7 @@ const UnpublishedBadge = ({ label, onEdit }) => {
       {content}
     </span>
   );
-};
+});
 
 const Survey = ({
   survey,
