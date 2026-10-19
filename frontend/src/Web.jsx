@@ -213,7 +213,7 @@ function Web() {
         element={
           <Suspense fallback={<LoadingIndicator />}>
             <PrivateComponent>
-              <ManagePageWrapper headerOptions={HEADER_OPTIONS.DASHBOARD}>
+              <ManagePageWrapper headerOptions={HEADER_OPTIONS.GENERAL}>
                 <Dashboard />
               </ManagePageWrapper>
             </PrivateComponent>
