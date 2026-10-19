@@ -1,5 +1,5 @@
 import { Box, IconButton, TextField, Typography } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./Survey.module.css";
 import { Edit, Check } from "@mui/icons-material";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
@@ -10,6 +10,18 @@ export const EditableSurveyTitle = ({ survey, onSave, isEditable = true }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(survey.name);
   const { t } = useTranslation(NAMESPACES.MANAGE);
+
+  // Follow the name when it changes underneath us: a refetch can bring a value
+  // renamed in another session, and the card stays mounted across sorts and
+  // filters (the grid keys by survey.id), so a stale seed would never clear.
+  // isEditing is read but deliberately not a dependency: resetting as editing
+  // ends would flash the previous name while the save is still in flight.
+  useEffect(() => {
+    if (!isEditing) {
+      setTitle(survey.name);
+    }
+  }, [survey.name]);
+
   const handleTitleChange = (event) => {
     const newTitle = event.target.value;
     if (newTitle.length <= 50) {

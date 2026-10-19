@@ -1,5 +1,6 @@
 {
   "action_btn": {
+    "retry": "Retry",
     "add": "Add",
     "add_user": "Add User",
     "cancel": "Cancel",
@@ -204,6 +205,7 @@
     "web": "Web"
   },
   "my_surveys": "Your Surveys",
+  "fetch_error": "Couldn't load your surveys. Check your connection and try again.",
   "new_survey": "New Survey",
   "reset_filter": "Reset Survey Filter",
   "create_new_survey": "Create New Survey",

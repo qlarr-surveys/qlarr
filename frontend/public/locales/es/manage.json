@@ -1,5 +1,6 @@
 {
   "action_btn": {
+    "retry": "Reintentar",
     "add": "Agregar",
     "add_user": "Agregar Usuario",
     "cancel": "Cancelar",
@@ -205,6 +206,7 @@
     "web": "Web"
   },
   "my_surveys": "Tus Encuestas",
+  "fetch_error": "No se pudieron cargar tus encuestas. Comprueba tu conexión e inténtalo de nuevo.",
   "new_survey": "Nueva Encuesta",
   "reset_filter": "Restablecer Filtro de Encuesta",
   "create_new_survey": "Crear Nueva Encuesta",

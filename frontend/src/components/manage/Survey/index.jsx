@@ -33,7 +33,6 @@ import { useNavigate } from "react-router-dom";
 import { EditableSurveyTitle } from "./EditableSurveyTitle";
 import { EditableSurveyDescription } from "./EditableSurveyDescription";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
-import NumbersIcon from "@mui/icons-material/Numbers";
 import { setDesignModeToDesign } from "~/state/design/designState";
 
 import { STATUS } from "./status";
@@ -190,6 +189,19 @@ const Survey = ({
   const isAdmin = isSurveyAdmin();
   const isDefaultLogo = !survey.image;
 
+  // Every failed card action surfaces the same way. An error we don't recognise
+  // still says something rather than nothing.
+  const showError = (processedError) => {
+    setError(
+      t(
+        `processed_errors.${
+          processedError?.name ?? PROCESSED_ERRORS.UNIDENTIFIED_ERROR.name
+        }`
+      )
+    );
+    setOpenSnackbar(true);
+  };
+
   const handleChangeTitle = (newTitle, revertTitle) => {
     dispatch(setLoading(true));
     surveyService
@@ -197,28 +209,30 @@ const Survey = ({
       .then(() => {
         onUpdateTitle(survey.id, newTitle);
       })
+      // Revert on any failure, not just a duplicate name: the card used to keep
+      // showing a title the server never stored.
       .catch((processedError) => {
-        if (
-          processedError.name == PROCESSED_ERRORS.DUPLICATE_SURVEY_NAME.name
-        ) {
-          setError(t(`processed_errors.${processedError.name}`));
-          setOpenSnackbar(true);
-          revertTitle();
-        }
+        showError(processedError);
+        revertTitle();
       })
       .finally(() => {
         dispatch(setLoading(false));
       });
   };
 
-  const handleChangeDescription = (newDescription) => {
+  const handleChangeDescription = (newDescription, revertDescription) => {
     dispatch(setLoading(true));
     surveyService
       .putSurvey({ ...survey, description: newDescription }, survey.id)
       .then(() => {
         onUpdateDescription(survey.id, newDescription);
       })
-      .catch((processedError) => {})
+      // The revert callback the editor passes was dropped here, and the catch
+      // was empty, so a failed save was silent and left unsaved text on screen.
+      .catch((processedError) => {
+        showError(processedError);
+        revertDescription();
+      })
       .finally(() => {
         dispatch(setLoading(false));
       });
@@ -241,35 +255,20 @@ const Survey = ({
       setOpenSnackbar(true);
       return;
     }
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      designService
-        .uploadResource(image, survey.id)
-        .then((response) => {
-          surveyService
-            .putSurvey({ image: response.name }, survey.id)
-            .then((result) => {
-              onUpdateImage(survey.id, response.name);
-            })
-            .catch((err) => {
-              setError(t(`processed_errors.${err.name}`));
-              setOpenSnackbar(true);
-            })
-            .finally(() => {
-              dispatch(setLoading(false));
-            });
-        })
-        .catch((err) => {
-          setError(t(`processed_errors.${err.name}`));
-          setOpenSnackbar(true);
-        })
-        .finally(() => {
-          dispatch(setLoading(false));
-        });
-    };
-
-    reader.readAsDataURL(image);
+    dispatch(setLoading(true));
+    designService
+      .uploadResource(image, survey.id)
+      // Spread the survey: the edit endpoint assigns startDate/endDate directly
+      // rather than merging them, so a partial body clears both dates.
+      .then((response) =>
+        surveyService
+          .putSurvey({ ...survey, image: response.name }, survey.id)
+          .then(() => onUpdateImage(survey.id, response.name))
+      )
+      .catch(showError)
+      .finally(() => {
+        dispatch(setLoading(false));
+      });
   };
 
   return (

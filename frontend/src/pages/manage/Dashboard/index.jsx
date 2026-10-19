@@ -26,7 +26,12 @@ import LoadingDots from "~/components/common/LoadingDots";
 import { useService } from "~/hooks/use-service";
 import ConfirmActionModal from "~/components/common/ConfirmActionModal";
 import StopSurveyModal from "~/components/manage/StopSurveyModal";
-import { Add, Description, FileUpload } from "@mui/icons-material";
+import {
+  Add,
+  Description,
+  ErrorOutline,
+  FileUpload,
+} from "@mui/icons-material";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import DashboardEmptyState from "~/components/manage/DashboardEmptyState";
 import {
@@ -36,6 +41,12 @@ import {
 
 const Survey = lazy(() => import("~/components/manage/Survey"));
 const DASHBOARD_FILTERS_KEY = "dashboard_filters";
+const ROWS_PER_PAGE_OPTIONS = [6, 12, 18, 24];
+// The pager only earns its space once the smallest page size would split the
+// list. Below that every option shows everything, so there is nothing to pick.
+// It must not key off the current perPage: the rows-per-page selector lives
+// inside the pager, so hiding it at perPage 24 strands you on 24.
+const MIN_ROWS_PER_PAGE = Math.min(...ROWS_PER_PAGE_OPTIONS);
 
 function Dashboard() {
   const surveyService = useService("survey");
@@ -46,7 +57,7 @@ function Dashboard() {
     sessionStorage.getItem(DASHBOARD_FILTERS_KEY) || "{}"
   );
   const [page, setPage] = useState(savedFilters.page || 1);
-  const [perPage, setPerPage] = useState(savedFilters.perPage || 6);
+  const [perPage, setPerPage] = useState(savedFilters.perPage || MIN_ROWS_PER_PAGE);
   const [status, setStatus] = useState(savedFilters.status || "all");
   const [sortBy, setSortBy] = useState(
     savedFilters.sortBy || "last_modified_desc"
@@ -56,6 +67,7 @@ function Dashboard() {
   const [recentlyUpdatedSurveyName, setRecentlyUpdatedSurveyName] =
     useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [fetchError, setFetchError] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -63,10 +75,12 @@ function Dashboard() {
 
   const processApirror = (e) => {
     setFetchingSurveys(false);
+    setFetchError(true);
   };
 
   const fetchSurveys = () => {
     setFetchingSurveys(true);
+    setFetchError(false);
     surveyService
       .getAllSurveys(page, perPage, status, sortBy)
       .then((data) => {
@@ -86,6 +100,14 @@ function Dashboard() {
 
     fetchSurveys();
   }, [page, perPage, sortBy, status]);
+
+  // .highlight animates for 3s and then keeps its background colour, so drop
+  // the marker once the animation is done.
+  useEffect(() => {
+    if (!recentlyUpdatedSurveyName) return undefined;
+    const timer = setTimeout(() => setRecentlyUpdatedSurveyName(null), 3000);
+    return () => clearTimeout(timer);
+  }, [recentlyUpdatedSurveyName]);
 
   const handleSurveyStatusChange = (id, newStatus) => {
     setSurveys((prevState) => ({
@@ -312,7 +334,26 @@ function Dashboard() {
           <Box className={styles.surveyCardsContainer}>
             {!fetchingSurveys ? (
               <>
-                {surveys?.surveys?.length > 0 ? (
+                {fetchError ? (
+                  <div className={styles.noSurveys}>
+                    <ErrorOutline sx={{ fontSize: 48, color: "error.dark" }} />
+                    <Typography
+                      variant="h6"
+                      color="textSecondary"
+                      sx={{ mt: 2 }}
+                    >
+                      {t("fetch_error")}
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        sx={{ mx: 1 }}
+                        onClick={fetchSurveys}
+                      >
+                        {t("action_btn.retry")}
+                      </Button>
+                    </Typography>
+                  </div>
+                ) : surveys?.surveys?.length > 0 ? (
                   <Box
                     sx={{
                       mt: 3,
@@ -335,7 +376,6 @@ function Dashboard() {
                             highlight={
                               survey.name === recentlyUpdatedSurveyName
                             }
-                            onStatusChange={handleSurveyStatusChange}
                             onClone={() => onClone(survey)}
                             onDelete={() => onDelete(survey)}
                             onClose={() => onCloseSurvey(survey)}
@@ -383,9 +423,9 @@ function Dashboard() {
             )}
           </Box>
 
-          {surveys?.totalCount > 6 ? (
+          {surveys?.totalCount > MIN_ROWS_PER_PAGE ? (
             <TablePagination
-              rowsPerPageOptions={[6, 12, 18, 24]}
+              rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
               component="div"
               labelDisplayedRows={({ from, to, count, page }) => {
                 return t("responses.label_displayed_rows", { from, to, count });
