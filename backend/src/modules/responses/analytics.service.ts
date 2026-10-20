@@ -18,6 +18,9 @@ import {
 
 export const DEFAULT_MAX_RESPONSES = 5000;
 
+/** SQL: the response isn't disqualified. Analytics and crosstabs leave those out. */
+export const NOT_DISQUALIFIED = `COALESCE("values" ->> 'Survey.disqualified', 'false') <> 'true'`;
+
 const CHOICE_TYPES = new Set([
   'SCQ', 'MCQ', 'RANKING', 'IMAGE_RANKING', 'AUTOCOMPLETE',
   'ICON_SCQ', 'ICON_MCQ', 'IMAGE_SCQ', 'IMAGE_MCQ', 'NPS',
@@ -78,9 +81,10 @@ export class AnalyticsService {
       .filter((q): q is AnalyticsQuestion => q != null);
 
     const [counts] = await this.db.manager.query(
-      `SELECT COUNT(CASE WHEN submit_date IS NOT NULL AND preview = false THEN 1 END) AS "completedCount",
-              COUNT(CASE WHEN submit_date IS NULL AND preview = false THEN 1 END) AS "incompleteCount"
-       FROM responses WHERE survey_id = $1`,
+      `SELECT COUNT(CASE WHEN submit_date IS NOT NULL THEN 1 END) AS "completedCount",
+              COUNT(CASE WHEN submit_date IS NULL THEN 1 END) AS "incompleteCount"
+       FROM responses
+       WHERE survey_id = $1 AND preview = false AND ${NOT_DISQUALIFIED}`,
       [surveyId],
     );
     const completed = Number(counts.completedCount);
@@ -241,6 +245,7 @@ export async function buildAnalyticsContext(
     const rows: Array<{ values: string }> = await db.manager.query(
       `SELECT CAST("values" AS TEXT) AS values FROM responses
        WHERE survey_id = $1 AND submit_date IS NOT NULL AND preview = false
+         AND ${NOT_DISQUALIFIED}
        ORDER BY survey_response_index ASC LIMIT $2`,
       [surveyId, maxResponses],
     );

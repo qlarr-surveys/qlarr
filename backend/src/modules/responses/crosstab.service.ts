@@ -11,6 +11,7 @@ import {
   MATRIX_TYPES,
   MCQ_ARRAY,
   MULTI_CHOICE_TYPES,
+  NOT_DISQUALIFIED,
   NPS_TYPE,
   SINGLE_CHOICE_TYPES,
   toAnalyticsOptions,
@@ -531,7 +532,8 @@ export class CrosstabService {
   private async countCompleted(surveyId: string): Promise<number> {
     const [row] = await this.db.manager.query(
       `SELECT COUNT(*) AS c FROM responses
-       WHERE survey_id = $1 AND submit_date IS NOT NULL AND preview = false`,
+       WHERE survey_id = $1 AND submit_date IS NOT NULL AND preview = false
+         AND ${NOT_DISQUALIFIED}`,
       [surveyId],
     );
     return Number(row.c);

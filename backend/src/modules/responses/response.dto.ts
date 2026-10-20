@@ -1,8 +1,12 @@
 import { NavigationIndexJson } from '../../engine/engine.types';
 import { CalculatedValue } from '../calculations/calculation-values';
 
-/** Response filter status. Unknown → ALL. */
-export type ResponseStatus = 'ALL' | 'COMPLETE' | 'INCOMPLETE' | 'PREVIEW';
+/**
+ * Response filter status. Unknown → ALL. A non-preview response is in exactly
+ * one of COMPLETE, INCOMPLETE and DISQUALIFIED: disqualified ones are only
+ * DISQUALIFIED, whether submitted or not.
+ */
+export type ResponseStatus = 'ALL' | 'COMPLETE' | 'INCOMPLETE' | 'DISQUALIFIED' | 'PREVIEW';
 
 export function responseStatusFrom(input?: string): ResponseStatus {
   switch ((input ?? '').toUpperCase()) {
@@ -10,11 +14,25 @@ export function responseStatusFrom(input?: string): ResponseStatus {
       return 'COMPLETE';
     case 'INCOMPLETE':
       return 'INCOMPLETE';
+    case 'DISQUALIFIED':
+      return 'DISQUALIFIED';
     case 'PREVIEW':
       return 'PREVIEW';
     default:
       return 'ALL';
   }
+}
+
+/** The non-preview statuses an export can pick from (see `ResponseStatus`). */
+export type ExportStatus = 'COMPLETE' | 'INCOMPLETE' | 'DISQUALIFIED';
+
+const EXPORT_STATUSES: readonly ExportStatus[] = ['COMPLETE', 'INCOMPLETE', 'DISQUALIFIED'];
+
+/** A comma-separated `status` list (unknown names dropped); all when absent. */
+export function exportStatusesFrom(input?: string): ExportStatus[] {
+  if (input === undefined) return [...EXPORT_STATUSES];
+  const picked = input.split(',').map((s) => s.trim().toUpperCase());
+  return EXPORT_STATUSES.filter((s) => picked.includes(s));
 }
 
 /** One row in the response list. Dates are "yyyy-MM-dd HH:mm:ss" wall clocks;
