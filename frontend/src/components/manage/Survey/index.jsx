@@ -236,6 +236,13 @@ const Survey = ({
           // :hover and :focus-visible, where sx cannot reach.
           "--card-accent": (theme) => theme.palette.primary.main,
           "--card-danger": (theme) => theme.palette.error.dark,
+          // The card is flat until pointed at, and .card:hover supplies the
+          // shadow. MUI's Card carries a theme elevation whose selector has
+          // the same specificity as .card, so the stylesheet cannot turn it
+          // off from the resting state -- it only outranks it under :hover,
+          // which left the card casting a heavier shadow at rest than when
+          // hovered. sx wins on specificity, so the rest state lands here.
+          boxShadow: "none",
         }}
       >
         <SurveyCover
