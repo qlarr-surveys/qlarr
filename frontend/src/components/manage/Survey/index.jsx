@@ -1,5 +1,13 @@
 import { Card, Snackbar, Alert } from "@mui/material";
-import { Copy, Eye, Lock, Pencil, Table2, Trash2 } from "lucide-react";
+import {
+  Copy,
+  Download,
+  Eye,
+  Lock,
+  Pencil,
+  Table2,
+  Trash2,
+} from "lucide-react";
 import styles from "./Survey.module.css";
 import { serverDateTimeToLocalDateTime } from "~/utils/DateUtils";
 import { useTranslation } from "react-i18next";
@@ -19,6 +27,7 @@ import { EditableSurveyDescription } from "./EditableSurveyDescription";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import { setDesignModeToDesign } from "~/state/design/designState";
 import { SurveyCover } from "./SurveyCover";
+import ResponsesExport from "~/components/manage/ResponsesExport";
 
 import { STATUS } from "./status";
 
@@ -51,6 +60,12 @@ const status = (survey) => {
 // size is the icon's real size and the stroke is set with it: scale one
 // without the other and the glyph thickens or thins against its neighbours.
 // 17/1.5 and 16/1.5 are the redesign's own values for these two positions.
+// Closing stops a survey that is collecting, or could still start collecting,
+// so it is offered on exactly the statuses where that is true. A draft has
+// nothing to stop and a closed survey is already stopped; the redesign leaves
+// the action off both.
+const CLOSEABLE = [STATUS.SCHEDULED, STATUS.ACTIVE, STATUS.EXPIRED];
+
 const ICON_ACTION = { size: 17, strokeWidth: 1.5 };
 const ICON_INLINE = { size: 16, strokeWidth: 1.5 };
 
@@ -217,9 +232,27 @@ const Survey = ({
     navigate(`/responses/${survey.id}`);
   };
 
+  // Opened here rather than on the responses page, which is what the button
+  // says it does: the admin stays on the dashboard and can export a second
+  // survey without walking back. No range is passed with it -- the card knows
+  // how many responses there are but not which numbers they carry, and the
+  // dialog finds that out for itself.
+  const [exportOpen, setExportOpen] = useState(false);
+
   return (
     <>
       <SavingSurvey />
+      {/* Mounted only while open: the dashboard draws a card per survey, and
+          each one carrying an idle dialog with its own form would be a form
+          per survey on screen for a button most of them never show. */}
+      {exportOpen && (
+        <ResponsesExport
+          open
+          onClose={() => setExportOpen(false)}
+          surveyId={survey.id}
+          t={t}
+        />
+      )}
       <Snackbar
         open={openSnackbar}
         autoHideDuration={6000}
@@ -327,7 +360,35 @@ const Survey = ({
                   {t("edit_survey.title")}
                 </ActionButton>
 
-                {survey.status === "active" && (
+                {/* The order is the redesign's and it is the same on every
+                    status, so a button never moves under the pointer as a
+                    survey goes from scheduled to active to closed: duplicate,
+                    then export, then whichever of close or delete applies.
+                    Each test reads surveyStatus, not survey.status, because
+                    the server calls a scheduled and an expired survey
+                    "active" too and only the derived status tells them
+                    apart. */}
+                <ActionButton
+                  tooltip={t("edit_survey.clone_survey")}
+                  variant="Secondary"
+                  iconOnly
+                  onClick={onClone}
+                >
+                  <Copy {...ICON_ACTION} />
+                </ActionButton>
+
+                {surveyStatus === STATUS.ACTIVE && (
+                  <ActionButton
+                    tooltip={t("responses.export")}
+                    variant="Secondary"
+                    iconOnly
+                    onClick={() => setExportOpen(true)}
+                  >
+                    <Download {...ICON_ACTION} />
+                  </ActionButton>
+                )}
+
+                {CLOSEABLE.includes(surveyStatus) && (
                   <ActionButton
                     tooltip={t("edit_survey.close_title")}
                     variant="Secondary"
@@ -338,16 +399,10 @@ const Survey = ({
                   </ActionButton>
                 )}
 
-                <ActionButton
-                  tooltip={t("edit_survey.clone_survey")}
-                  variant="Secondary"
-                  iconOnly
-                  onClick={onClone}
-                >
-                  <Copy {...ICON_ACTION} />
-                </ActionButton>
-
-                {survey.status !== STATUS.ACTIVE && (
+                {/* Only a draft. A closed survey keeps its responses, and the
+                    redesign leaves it duplicable and readable but not
+                    removable from here. */}
+                {surveyStatus === STATUS.DRAFT && (
                   <ActionButton
                     tooltip={t("action_btn.delete")}
                     variant="Danger"
