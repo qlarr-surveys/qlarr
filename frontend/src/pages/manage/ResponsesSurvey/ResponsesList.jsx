@@ -354,14 +354,17 @@ function ResponsesList({ refreshKey }) {
   }, [page, rowsPerPage, status, surveyor]);
 
   // Refetch the page and the open response when the parent asks (refreshKey
-  // changes; 0 is the first render, already fetched above).
+  // changes; 0 is the first render, already fetched above). The page fetch
+  // may deselect the response meanwhile; only replace it if still open.
   useEffect(() => {
     if (!refreshKey) return;
     fetchResponses();
     if (!responseId) return;
     surveyService
       .getResponseById(responseId)
-      .then(setSelected)
+      .then((data) =>
+        setSelected((prev) => (prev?.id == data?.id ? data : prev))
+      )
       .catch((err) => console.error(err));
   }, [refreshKey]);
 
