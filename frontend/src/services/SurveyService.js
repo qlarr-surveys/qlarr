@@ -85,15 +85,14 @@ class SurveyService extends BaseService {
 
   async exportResponses(
     surveyId,
-    { format = "csv", from, to, dbValues = true, complete, timezone }
+    { format = "csv", from, to, dbValues = true, statuses, timezone }
   ) {
     const base = `/survey/${surveyId}/response/export/${format}/${from}/${to}`;
-    const shouldAddComplete = complete === true || complete === false;
     const tz = encodeURIComponent(timezone);
 
     const url =
       `${base}?db_values=${dbValues}&timezone=${tz}` +
-      `${shouldAddComplete ? `&complete=${complete}` : ""}`;
+      `&status=${statuses.join(",")}`;
 
     const response = await this.handleRequest(() =>
       authenticatedApi.get(url, { responseType: "blob" })

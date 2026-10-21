@@ -20,7 +20,11 @@ import {
   CrosstabResultDto,
 } from './crosstab.dto';
 import { CrosstabService } from './crosstab.service';
-import { responseStatusFrom, ResponsesSummaryDto } from './response.dto';
+import {
+  exportStatusesFrom,
+  responseStatusFrom,
+  ResponsesSummaryDto,
+} from './response.dto';
 import {
   exportContentType,
   responseFormatFrom,
@@ -105,14 +109,14 @@ export class ResponseController {
     @Param('format') format: string,
     @Param('from') from: string,
     @Param('to') to: string,
-    @Query('complete') complete: string | undefined,
+    @Query('status') status: string | undefined,
     @Query('db_values') dbValues: string | undefined,
     @Res() res: Response,
   ): Promise<void> {
     const fmt = responseFormatFrom(format);
     // db_values=false → the human-readable text export (labels + masked values);
     // anything else (default/true) → the raw DB-value export.
-    const args = [surveyId, toBool(complete), fmt, toInt(from) ?? 0, toInt(to) ?? 0] as const;
+    const args = [surveyId, exportStatusesFrom(status), fmt, toInt(from) ?? 0, toInt(to) ?? 0] as const;
     const buffer =
       toBool(dbValues) === false
         ? await this.responses.exportTextResponses(...args)

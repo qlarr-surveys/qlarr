@@ -2,6 +2,8 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { FILE_HELPER } from '../src/integrations/filesystem/file-helper';
+import { ExportStatus } from '../src/modules/responses/response.dto';
+import { ResponseRepository } from '../src/modules/responses/response.repository';
 import { bearer, startTestApp, TestApp } from './harness';
 
 const ADMIN = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
@@ -98,17 +100,44 @@ describe('Response summary + delete', () => {
         expect(r.body.canExportFiles).toBe(false);
       }));
 
-    it('COMPLETE returns submitted non-preview responses', () =>
-      summary('?status=complete').expect(200).expect((r) => expect(r.body.totalCount).toBe(2)));
+    it('COMPLETE returns submitted non-preview responses, disqualified ones aside', () =>
+      summary('?status=complete').expect(200).expect((r) => {
+        expect(r.body.responses.map((x: { id: string }) => x.id)).toEqual([R_COMPLETE]);
+      }));
 
     it('INCOMPLETE returns unsubmitted non-preview responses', () =>
       summary('?status=incomplete').expect(200).expect((r) => expect(r.body.totalCount).toBe(1)));
+
+    it('DISQUALIFIED returns disqualified non-preview responses', () =>
+      summary('?status=disqualified').expect(200).expect((r) => {
+        expect(r.body.responses.map((x: { id: string }) => x.id)).toEqual([R_DISQ]);
+      }));
 
     it('PREVIEW returns preview responses', () =>
       summary('?status=preview').expect(200).expect((r) => expect(r.body.totalCount).toBe(1)));
 
     it('filters by surveyor (wins over status)', () =>
       summary(`?surveyor=${SVR}`).expect(200).expect((r) => expect(r.body.totalCount).toBe(3)));
+  });
+
+  describe('export filter', () => {
+    const exported = async (statuses: ExportStatus[]) =>
+      (await app.get(ResponseRepository).findInIndexRange(SURVEY, statuses, 0, 1_000_000))
+        .map((r) => r.id)
+        .sort();
+
+    it('takes the picked statuses; each response is in one, previews in none', async () => {
+      expect(await exported(['COMPLETE'])).toEqual([R_COMPLETE]);
+      expect(await exported(['INCOMPLETE'])).toEqual([R_INCOMPLETE]);
+      expect(await exported(['DISQUALIFIED'])).toEqual([R_DISQ]);
+      expect(await exported(['COMPLETE', 'DISQUALIFIED'])).toEqual(
+        [R_COMPLETE, R_DISQ].sort(),
+      );
+      expect(
+        await exported(['COMPLETE', 'INCOMPLETE', 'DISQUALIFIED']),
+      ).toEqual([R_COMPLETE, R_INCOMPLETE, R_DISQ].sort());
+      expect(await exported([])).toEqual([]);
+    });
   });
 
   describe('GET summary — canExportFiles', () => {
@@ -145,7 +174,7 @@ describe('Response summary + delete', () => {
 
   describe('GET summary — shape + pagination', () => {
     it('maps surveyor name, dates and the disqualified flag', async () => {
-      const res = await summary('?status=complete').expect(200);
+      const res = await summary('?status=disqualified').expect(200);
       const disq = res.body.responses.find((x: { id: string }) => x.id === R_DISQ);
       expect(disq).toMatchObject({
         surveyor: SVR,

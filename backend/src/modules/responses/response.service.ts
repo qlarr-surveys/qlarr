@@ -20,6 +20,7 @@ import { CalculationsRepository } from "../calculations/calculations.repository"
 import { DesignService } from "../design/design.service";
 import { ResponseDetailRow, ResponseRepository } from "./response.repository";
 import {
+  ExportStatus,
   ResponseDto,
   ResponseEventDto,
   ResponseStatus,
@@ -103,14 +104,14 @@ export class ResponseService {
    */
   async exportResponses(
     surveyId: string,
-    complete: boolean | undefined,
+    statuses: ExportStatus[],
     format: ResponseFormat,
     from: number,
     to: number,
   ): Promise<Buffer | null> {
     const responses = await this.responses.findInIndexRange(
       surveyId,
-      complete,
+      statuses,
       from,
       to,
     );
@@ -124,7 +125,7 @@ export class ResponseService {
     const finalCols = [
       ...ADDITIONAL_COL_NAMES,
       ...colNames,
-      ...calculated.columns.map((c) => c.code),
+      ...calculated.columns.map((c) => c.label),
     ];
     const rows = responses.map((r) => [
       r.index,
@@ -146,14 +147,14 @@ export class ResponseService {
 
   async exportTextResponses(
     surveyId: string,
-    complete: boolean | undefined,
+    statuses: ExportStatus[],
     format: ResponseFormat,
     from: number,
     to: number,
   ): Promise<Buffer | null> {
     const responses = await this.responses.findInIndexRange(
       surveyId,
-      complete,
+      statuses,
       from,
       to,
     );

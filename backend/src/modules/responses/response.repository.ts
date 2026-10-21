@@ -4,6 +4,7 @@ import { UUID_RE } from '../../common/validation';
 import { DbContext } from '../../database/db-context';
 import { SurveyResponseEntity } from '../run/survey-response.entity';
 import {
+  ExportStatus,
   ResponseStatus,
   ResponseSummary,
   ResponseUploadFile,
@@ -108,7 +109,7 @@ export class ResponseRepository {
   /** Non-preview responses in the index range [from,to], optional completeness. */
   findInIndexRange(
     surveyId: string,
-    complete: boolean | undefined,
+    statuses: ExportStatus[],
     from: number,
     to: number,
   ): Promise<ResponseExportRow[]> {
@@ -119,7 +120,7 @@ export class ResponseRepository {
               to_char(submit_date, 'YYYY-MM-DD HH24:MI:SS') AS "submitDate",
               lang, "values", computations
        FROM responses
-       WHERE survey_id = $1 AND preview = false ${completeClause(complete)}
+       WHERE survey_id = $1 AND preview = false ${exportClause(statuses)}
          AND survey_response_index BETWEEN $2 AND $3
        ORDER BY survey_response_index ASC`,
       [surveyId, lower, upper],
@@ -291,6 +292,29 @@ export class ResponseRepository {
 }
 
 /** Non-preview completeness fragment shared by the index-range queries. */
+/** SQL: the response is disqualified. `t` is the table alias prefix, e.g. `r.`. */
+function disqualified(t = ''): string {
+  return `COALESCE(${t}"values" ->> 'Survey.disqualified', 'false') = 'true'`;
+}
+
+/** SQL: the response has this status (see `ResponseStatus`); previews aside. */
+function statusCondition(status: ExportStatus, t = ''): string {
+  switch (status) {
+    case 'COMPLETE':
+      return `(${t}submit_date IS NOT NULL AND NOT ${disqualified(t)})`;
+    case 'INCOMPLETE':
+      return `(${t}submit_date IS NULL AND NOT ${disqualified(t)})`;
+    case 'DISQUALIFIED':
+      return disqualified(t);
+  }
+}
+
+/** The export's statuses as an `AND ...` clause. */
+function exportClause(statuses: ExportStatus[]): string {
+  if (statuses.length === 0) return 'AND FALSE';
+  return `AND (${statuses.map((s) => statusCondition(s)).join(' OR ')})`;
+}
+
 function completeClause(complete: boolean | undefined): string {
   if (complete === undefined) return '';
   return complete ? 'AND submit_date IS NOT NULL' : 'AND submit_date IS NULL';
@@ -313,13 +337,10 @@ function buildSummaryWhere(
     case 'PREVIEW':
       return { clause: `${base} AND r.preview = TRUE`, params: [surveyId] };
     case 'COMPLETE':
-      return {
-        clause: `${base} AND r.preview = FALSE AND r.submit_date IS NOT NULL`,
-        params: [surveyId],
-      };
     case 'INCOMPLETE':
+    case 'DISQUALIFIED':
       return {
-        clause: `${base} AND r.preview = FALSE AND r.submit_date IS NULL`,
+        clause: `${base} AND r.preview = FALSE AND ${statusCondition(status, 'r.')}`,
         params: [surveyId],
       };
     default:

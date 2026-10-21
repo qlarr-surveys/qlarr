@@ -346,7 +346,7 @@ describe('Calculations', () => {
 
       // Before Compute: not computed.
       let lines = await exportCsv(id, true);
-      expect(lines[0].endsWith(',double,fixed')).toBe(true);
+      expect(lines[0].endsWith(',Double,Fixed')).toBe(true);
       expect(lines.find((l) => l.includes(r1))!.endsWith('#NOT_COMPUTED,#NOT_COMPUTED')).toBe(true);
 
       await compute(id).expect(200);

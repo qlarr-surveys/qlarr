@@ -80,7 +80,7 @@ function ClampTwoLines({ children, sx }) {
   );
 }
 
-function ResponsesList() {
+function ResponsesList({ refreshKey }) {
   const surveyService = useService("survey");
   const { t } = useTranslation(NAMESPACES.MANAGE);
   const { surveyId } = useParams();
@@ -353,6 +353,21 @@ function ResponsesList() {
     fetchResponses();
   }, [page, rowsPerPage, status, surveyor]);
 
+  // Refetch the page and the open response when the parent asks (refreshKey
+  // changes; 0 is the first render, already fetched above). The page fetch
+  // may deselect the response meanwhile; only replace it if still open.
+  useEffect(() => {
+    if (!refreshKey) return;
+    fetchResponses();
+    if (!responseId) return;
+    surveyService
+      .getResponseById(responseId)
+      .then((data) =>
+        setSelected((prev) => (prev?.id == data?.id ? data : prev))
+      )
+      .catch((err) => console.error(err));
+  }, [refreshKey]);
+
   useEffect(() => {
     if (!responseId || !allResponse || selected?.id == responseId) return;
     surveyService
@@ -575,6 +590,9 @@ function ResponsesList() {
                       <MenuItem value="incomplete">
                         {t("responses.filter_completed_show_incomplete")}
                       </MenuItem>
+                      <MenuItem value="disqualified">
+                        {t("responses.filter_completed_show_disqualified")}
+                      </MenuItem>
                     </RHFSelect>
                   </FormControl>
                 </Grid>
@@ -650,6 +668,13 @@ function ResponsesList() {
                                   size="small"
                                   variant="outlined"
                                   label={t("responses.preview")}
+                                />
+                              ) : r.disqualified ? (
+                                <Chip
+                                  size="small"
+                                  variant="outlined"
+                                  color="error"
+                                  label={t("responses.disqualified")}
                                 />
                               ) : r.submitDate ? (
                                 <Typography
@@ -824,9 +849,17 @@ function ResponsesList() {
                   <InfoItem
                     label={t("responses.disqualified")}
                     value={
-                      selected.disqualified
-                        ? t("responses.yes")
-                        : t("responses.no")
+                      selected.disqualified ? (
+                        <Typography
+                          variant="body2"
+                          color="error.main"
+                          fontWeight={500}
+                        >
+                          {t("responses.yes")}
+                        </Typography>
+                      ) : (
+                        t("responses.no")
+                      )
                     }
                   />
                   <InfoItem
@@ -957,13 +990,10 @@ function ResponsesList() {
                             <Table size="small">
                               <TableHead>
                                 <TableRow>
-                                  <TableCell sx={{ width: "40%", backgroundColor: "#212B36", color: "white" }}>
+                                  <TableCell sx={{ width: "50%", backgroundColor: "#212B36", color: "white" }}>
                                     {t("calculations.label", "Label")}
                                   </TableCell>
-                                  <TableCell sx={{ width: "20%", backgroundColor: "#212B36", color: "white" }}>
-                                    {t("calculations.code", "Code")}
-                                  </TableCell>
-                                  <TableCell sx={{ width: "40%", backgroundColor: "#212B36", color: "white" }}>
+                                  <TableCell sx={{ width: "50%", backgroundColor: "#212B36", color: "white" }}>
                                     {t("calculations.value", "Value")}
                                   </TableCell>
                                 </TableRow>
@@ -974,11 +1004,6 @@ function ResponsesList() {
                                     <TableCell sx={{ verticalAlign: "top" }}>
                                       <Typography variant="body2" color="text.secondary">
                                         {calc.label}
-                                      </Typography>
-                                    </TableCell>
-                                    <TableCell sx={{ verticalAlign: "top" }}>
-                                      <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
-                                        {calc.code}
                                       </Typography>
                                     </TableCell>
                                     <TableCell sx={{ verticalAlign: "top" }}>

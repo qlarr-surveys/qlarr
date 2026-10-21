@@ -12,16 +12,29 @@ import {
   FormLabel,
   RadioGroup,
   FormControlLabel,
+  FormGroup,
   Radio,
+  Checkbox,
   FormHelperText,
 } from "@mui/material";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import FormProvider from "~/components/hook-form";
 import FileSaver from "file-saver";
 import { useService } from "~/hooks/use-service";
 import { useParams } from "react-router-dom";
+
+/**
+ * The statuses an export can include. Each non-preview response is in exactly
+ * one: a disqualified response is only "disqualified", submitted or not.
+ */
+const EXPORT_STATUSES = [
+  { value: "complete", label: "responses.status_complete" },
+  { value: "incomplete", label: "responses.status_incomplete" },
+  { value: "disqualified", label: "responses.disqualified" },
+];
+const ALL_STATUSES = EXPORT_STATUSES.map((s) => s.value);
 
 export default function ResponsesExport({ 
   open, 
@@ -52,7 +65,7 @@ export default function ResponsesExport({
         if (typeof from !== "number" || typeof value !== "number") return false;
         return value >= from;
       }),
-    filter: yup.string().oneOf(["all", "complete", "incomplete"]).required(),
+    statuses: yup.array().of(yup.string().oneOf(ALL_STATUSES)).min(1),
     format: yup.string().oneOf(["csv", "xlsx", "ods"]).required(),
     mode: yup.string().oneOf(["database", "text"]).required(),
   });
@@ -63,7 +76,7 @@ export default function ResponsesExport({
     defaultValues: {
       from: currentFrom,
       to: currentTo,
-      filter: "all",
+      statuses: ALL_STATUSES,
       format: "csv",
       mode: "database",
     },
@@ -75,13 +88,14 @@ export default function ResponsesExport({
     reset,
     formState: { errors },
   } = methods;
+  const statuses = useWatch({ control, name: "statuses" });
 
   useEffect(() => {
     if (open) {
       reset({
         from: currentFrom,
         to: currentTo,
-        filter: "all",
+        statuses: ALL_STATUSES,
         format: "csv",
         mode: "database",
       });
@@ -91,8 +105,6 @@ export default function ResponsesExport({
   const onSubmit = handleSubmit(async (data) => {
     const from = Number(data.from);
     const to = Number(data.to);
-    const complete =
-      data.filter === "all" ? null : data.filter === "complete" ? true : false;
     const dbValues = data.mode === "database";
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 
@@ -102,7 +114,7 @@ export default function ResponsesExport({
         from,
         to,
         dbValues,
-        complete,
+        statuses: data.statuses,
         timezone,
       });
 
@@ -168,29 +180,40 @@ export default function ResponsesExport({
           </Box>
 
           <FormControl>
-            <FormLabel>{t("responses.responses_type")}</FormLabel>
             <Controller
-              name="filter"
+              name="statuses"
               control={control}
-              render={({ field }) => (
-                <RadioGroup row {...field}>
-                  <FormControlLabel
-                    value="all"
-                    control={<Radio />}
-                    label={t("responses.filter_completed_show_all")}
-                  />
-                  <FormControlLabel
-                    value="complete"
-                    control={<Radio />}
-                    label={t("responses.complete_responses")}
-                  />
-                  <FormControlLabel
-                    value="incomplete"
-                    control={<Radio />}
-                    label={t("responses.incomplete_responses")}
-                  />
-                </RadioGroup>
-              )}
+              render={({ field }) => {
+                const picked = field.value;
+                // Kept in EXPORT_STATUSES order.
+                const toggle = (value) =>
+                  field.onChange(
+                    picked.includes(value)
+                      ? picked.filter((v) => v !== value)
+                      : ALL_STATUSES.filter(
+                          (v) => v === value || picked.includes(v)
+                        )
+                  );
+                return (
+                  <>
+                    <FormLabel>{t("responses.responses_type")}</FormLabel>
+                    <FormGroup row>
+                      {EXPORT_STATUSES.map(({ value, label }) => (
+                        <FormControlLabel
+                          key={value}
+                          control={
+                            <Checkbox
+                              checked={picked.includes(value)}
+                              onChange={() => toggle(value)}
+                            />
+                          }
+                          label={t(label)}
+                        />
+                      ))}
+                    </FormGroup>
+                  </>
+                );
+              }}
             />
             <FormHelperText sx={{ color: "warning.main" ,ml:0 }}>
               {t("responses.preview_not_exportable")}
@@ -249,7 +272,11 @@ export default function ResponsesExport({
 
         <DialogActions>
           <Button onClick={onClose}>{t("action_btn.cancel")}</Button>
-          <Button type="submit" variant="contained">
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={!statuses?.length}
+          >
             {t("action_btn.export")}
           </Button>
         </DialogActions>

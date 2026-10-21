@@ -11,6 +11,7 @@ import {
   Chip,
   IconButton,
   Paper,
+  Snackbar,
   Stack,
   Table,
   TableBody,
@@ -30,7 +31,6 @@ import { useService } from "~/hooks/use-service";
 import FormProvider, { RHFTextField } from "~/components/hook-form";
 import LoadingDots from "~/components/common/LoadingDots";
 import CalculationValue from "~/components/manage/CalculationValue";
-import { ALLOWED_CODE_CHARS_REGEX } from "~/utils/design/codeUtils";
 import { PROCESSED_ERRORS } from "~/utils/errorsProcessor";
 import ExpressionHelp from "./ExpressionHelp";
 
@@ -38,10 +38,18 @@ const MAX_CALCULATIONS = 10;
 const MAX_EXPRESSION_LENGTH = 500;
 const POLL_INTERVAL_MS = 2000;
 
+/**
+ * A calculation's internal code: the key its values are stored under. Authors
+ * never see it; it's set once when the calculation is added and kept after,
+ * so editing a calculation doesn't orphan its computed values. Fits the
+ * engine's rule (a lowercase letter, then lowercase letters, digits and _).
+ */
+const newCalculationCode = () =>
+  `c${Math.random().toString(36).slice(2, 10).padEnd(8, "0")}`;
+
 const schema = Yup.object().shape({
   calculations: Yup.array().of(
     Yup.object().shape({
-      code: Yup.string().required("calculations.code_required"),
       label: Yup.string().required("calculations.label_required"),
       expression: Yup.string().required("calculations.expression_required"),
     })
@@ -85,6 +93,11 @@ function CalculationsSurvey({ onDirtyChange }) {
   const [conflict, setConflict] = useState(false);
   const [busy, setBusy] = useState(null); // "save" | "test" | "compute"
   const [helpOpen, setHelpOpen] = useState(false);
+  const [computeDone, setComputeDone] = useState(false);
+  // Status seen last, and whether this session started a run, so the success
+  // notice shows only for a run that finishes here, not on first load.
+  const prevStatus = useRef(null);
+  const computeRequested = useRef(false);
 
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -139,6 +152,21 @@ function CalculationsSurvey({ onDirtyChange }) {
     return () => clearInterval(timer);
   }, [running, load]);
 
+  // Notify when a run finishes: running → completed, or a Compute that
+  // completed straight away.
+  useEffect(() => {
+    const status = state?.status;
+    if (!status) return;
+    if (
+      status === "completed" &&
+      (prevStatus.current === "running" || computeRequested.current)
+    ) {
+      setComputeDone(true);
+    }
+    if (status !== "running") computeRequested.current = false;
+    prevStatus.current = status;
+  }, [state]);
+
   // Report unsaved edits (the tab switch asks before leaving), and warn on unload.
   useEffect(() => {
     onDirtyChange?.(isDirty);
@@ -189,10 +217,14 @@ function CalculationsSurvey({ onDirtyChange }) {
 
   const onCompute = () => {
     setBusy("compute");
+    computeRequested.current = true;
     surveyService
       .computeCalculations(surveyId)
       .then((next) => applyState(next, { resetForm: false }))
-      .catch(handleError)
+      .catch((error) => {
+        computeRequested.current = false;
+        handleError(error);
+      })
       .finally(() => setBusy(null));
   };
 
@@ -271,7 +303,12 @@ function CalculationsSurvey({ onDirtyChange }) {
               <Button
                 startIcon={<AddIcon />}
                 onClick={() =>
-                  append({ code: "", label: "", expression: "", errors: [] })
+                  append({
+                    code: newCalculationCode(),
+                    label: "",
+                    expression: "",
+                    errors: [],
+                  })
                 }
                 disabled={running || fields.length >= MAX_CALCULATIONS}
               >
@@ -314,12 +351,29 @@ function CalculationsSurvey({ onDirtyChange }) {
           />
         )}
       </Stack>
+
+      <Snackbar
+        open={computeDone}
+        autoHideDuration={4000}
+        onClose={() => setComputeDone(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setComputeDone(false)}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          {t("calculations.compute_success", "Computation finished.")}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
 
 /** The one banner for the current status. */
 function StatusBanner({ state, t }) {
+  // No saved calculations: Compute is disabled, so don't prompt for it.
+  if (state.calculations.length === 0 && state.status !== "running") return null;
   switch (state.status) {
     case "idle":
       return (
@@ -360,45 +414,14 @@ function StatusBanner({ state, t }) {
   }
 }
 
-/** One calculation: code, label, expression, remove, and its stored errors. */
+/** One calculation: label, expression, remove, and its stored errors. */
 function CalculationCard({ index, control, errors, disabled, onRemove, t }) {
-  const codeErrors = errors.filter(
-    (e) => e.name === "InvalidCode" || e.name === "DuplicateCode"
-  );
   const scriptErrors = errors.filter((e) => e.name === "ScriptError");
 
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
       <Stack spacing={2}>
         <Stack direction="row" spacing={2} alignItems="flex-start">
-          <Controller
-            name={`calculations.${index}.code`}
-            control={control}
-            render={({ field, fieldState: { error } }) => (
-              <TextField
-                {...field}
-                label={t("calculations.code", "Code")}
-                size="small"
-                disabled={disabled}
-                onChange={(event) =>
-                  field.onChange(
-                    event.target.value
-                      .toLowerCase()
-                      .replace(ALLOWED_CODE_CHARS_REGEX, "")
-                  )
-                }
-                error={!!error || codeErrors.length > 0}
-                helperText={
-                  error
-                    ? t(error.message)
-                    : codeErrors
-                        .map((e) => t(`calculations.error_${e.name}`))
-                        .join(" ")
-                }
-                sx={{ width: 220 }}
-              />
-            )}
-          />
           <RHFTextField
             name={`calculations.${index}.label`}
             label={t("calculations.label", "Label")}
