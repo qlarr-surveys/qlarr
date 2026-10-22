@@ -19,8 +19,6 @@ export const designState = createSlice({
       core.buildDesignState(state, action.payload),
     setup: (state, action) => core.setup(state, action.payload),
     clearHighlighted: (state) => core.clearHighlighted(state),
-    setShowAdvanced: (state, action) =>
-      core.setShowAdvanced(state, action.payload),
     newVersionReceived: (state, action) =>
       core.newVersionReceived(state, action.payload),
     changeValidationValue: (state, action) =>
@@ -144,7 +142,6 @@ export const {
   removeAnswer,
   setup,
   clearHighlighted,
-  setShowAdvanced,
   resetSetup,
   changeValidationValue,
   updateRandom,
