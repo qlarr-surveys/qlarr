@@ -92,6 +92,15 @@ function Dashboard() {
       .getAllSurveys(page, perPage, status, sortBy)
       .then((data) => {
         if (data) {
+          // A page past the end of the list comes back empty even though the
+          // dashboard has surveys -- a saved page restored after surveys were
+          // deleted, say. Fall back to the first page instead of handing an
+          // empty page to the first-run empty state, which would greet a full
+          // dashboard with "create your first survey".
+          if (page > 1 && data.totalCount > 0 && !data.surveys?.length) {
+            setPage(1);
+            return;
+          }
           setFetchingSurveys(false);
           setSurveys(data);
         }
