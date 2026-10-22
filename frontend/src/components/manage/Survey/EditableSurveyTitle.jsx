@@ -73,6 +73,10 @@ export const EditableSurveyTitle = ({
   };
 
   const handleEditClick = () => {
+    // Clear a discard left over from an Escape: Firefox and Safari do not blur
+    // a focused field they remove from the page, so handleSave never ran to
+    // clear the flag, and this edit would be dropped when it committed.
+    discardRef.current = false;
     setIsEditing(true);
   };
 

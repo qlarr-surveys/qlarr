@@ -67,6 +67,9 @@ export const EditableSurveyDescription = ({
   };
 
   const handleEditClick = () => {
+    // See EditableSurveyTitle: a discard from an earlier Escape can outlive it,
+    // because not every browser blurs a field it removes from the page.
+    discardRef.current = false;
     setIsDescriptionEditing(true);
   };
 
