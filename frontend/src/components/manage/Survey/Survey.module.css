@@ -25,41 +25,63 @@
 /* ==============================================
    Cover: logo, replace affordance, status pill
    ============================================== */
+/* The grey the band shows either side of a logo that does not fill it, and
+   behind one saved with transparency. It is production's: a 40% black wash
+   over the white card, which lands here. The 30% scrim that sits over it is
+   on .coverLogo, so the two compose to the #6b6b6b production shows. */
 .cover {
   position: relative;
   flex: none;
   height: 118px;
   overflow: hidden;
-  background: #fff;
+  background: #999;
 }
 
-/* A survey's own logo is inset and contained, so a wide one and a tall one
-   are both shown whole and neither touches the card's edges. The bottom inset
-   is the pill's own height plus the 12px it sits above the edge, so a wide
-   logo stops exactly where the pill starts instead of running underneath it. */
+/* Contained and bled to the edges, as production draws it: the image spans
+   the full width of the card and is scaled to fit the band whole, never
+   cropped. A wide logo therefore reaches both edges; a tall one stands full
+   height with the band's grey either side of it.
+
+   Nothing is inset. The old 14/20/44px inset shrank a tall logo to a 60px
+   thumbnail floating on white, which read as a gap in the card rather than as
+   its cover. Cropping it to fill instead would have cut the ends off a
+   wordmark, which is the one thing a logo cannot lose.
+
+   The status pill sits over the bottom-end corner of this. It is an opaque
+   chip with its own shadow, so it holds up over a logo wide enough to reach
+   it.
+
+   The placeholder is fitted the same way, with no case of its own -- as
+   production fits its own. At 2.33:1 against this band's 3.03:1 it stands
+   full height with grey either side, exactly as production stands it.
+
+   `::after` is production's 30% scrim, over the image and the grey alike and
+   on every cover, whether the survey has a logo or not. It is what keeps the
+   band one even tone instead of a bright photo sitting in a grey hole, and
+   what the white upload prompt is legible against. It is inside .coverLogo so
+   that it paints under the prompt and the status pill, which are its
+   siblings, rather than over them. */
 .coverLogo {
   position: absolute;
-  inset: 14px 20px 44px;
+  inset: 0;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
 }
 
-/* The placeholder is not a logo, so it is not treated as one: the redesign
-   bleeds it to the edges and crops it, as a cover photo, under the scrim the
-   upload prompt sits on. Nothing is lost by cropping a mark the survey did
-   not choose. */
-.cover[data-needs-logo="true"] .coverLogo {
+.coverLogo::after {
+  content: "";
+  position: absolute;
   inset: 0;
-  background-size: cover;
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 .coverInput {
   display: none;
 }
 
-/* Hidden until the cover is hovered, focused within, or dragged over. It is a
-   real button, so keyboard users reach it the same way.
+/* Hidden until the cover is hovered or focused within. It is a real button,
+   so keyboard users reach it the same way.
 
    Top-aligned rather than centred, as the redesign draws it: the status pill
    owns the bottom of the cover, and a centred prompt would sit against it. */
@@ -83,20 +105,19 @@
 
 /* A placeholder is not a cover, so on a survey still wearing one the prompt
    never hides: the only way to give the card a real logo should not be
-   something you have to hover to find. Its scrim is the heavier of the two,
-   and hovering lightens it rather than darkening it -- the prompt is already
-   being read, so the hover's job is to show more of what is under it.
+   something you have to hover to find.
 
-   This must stay above the hover block: the two match with equal specificity,
-   so source order is what lets the hover win. */
+   It adds no wash of its own, as production adds none: a logo-less card is
+   lit exactly like every other card, and the white prompt reads against the
+   30% scrim they all carry. A heavier wash here made a row of logo-less cards
+   look like a row of disabled ones. Hover still darkens, the same 40% a card
+   with a logo gets. */
 .cover[data-needs-logo="true"] .coverReplace {
   opacity: 1;
-  background-color: rgba(0, 0, 0, 0.7);
 }
 
 .cover:hover .coverReplace,
-.cover:focus-within .coverReplace,
-.cover[data-dragover="true"] .coverReplace {
+.cover:focus-within .coverReplace {
   opacity: 1;
   background-color: rgba(0, 0, 0, 0.4);
 }

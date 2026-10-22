@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
@@ -9,28 +9,27 @@ import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import { STATUS } from "./status";
 import styles from "./Survey.module.css";
 
-// The clean brand mark, as the redesign's own cover uses: cropped to the
-// edges under the upload prompt's scrim, it reads as a cover photo waiting to
-// be replaced. /placehoder-logo.png, tiled with a "Qlarr" watermark, is for
-// image slots inside the editor; here the prompt already says the cover is
-// not the survey's yet, so the watermark would only repeat it in grey.
-const DEFAULT_LOGO = "/qlarr.png";
+// The watermarked placeholder production uses on a survey with no logo of
+// its own. Tiled with a faint "Qlarr", it says the cover is not the survey's
+// yet in the image as well as in the prompt over it -- which is what lets the
+// card carry the same 30% scrim as every other card rather than a heavier
+// wash to mark itself out.
+const DEFAULT_LOGO = "/placehoder-logo.png";
 
 /**
  * The card's cover: the survey logo, the status pill, and — for an admin — a
- * way to replace the logo by clicking, keyboard, or dropping a file on it.
+ * way to replace the logo by clicking or by keyboard.
  *
  * The replace affordance is a real `<button>` over a hidden input rather than
  * the old `<Box onClick>` that called `getElementById(...).click()`: that was
- * unreachable by keyboard. CSS reveals it on `:hover`, `:focus-within` and
- * while a file is dragged over — and keeps it up with no hover at all on a
- * survey still wearing the placeholder, so the one card that has something to
- * fix is the one card that says so.
+ * unreachable by keyboard. CSS reveals it on `:hover` and `:focus-within` —
+ * and keeps it up with no hover at all on a survey still wearing the
+ * placeholder, so the one card that has something to fix is the one card that
+ * says so.
  */
 export function SurveyCover({ survey, surveyStatus, isEditable, onUpload }) {
   const { t } = useTranslation(NAMESPACES.MANAGE);
   const inputRef = useRef(null);
-  const [isDragOver, setIsDragOver] = useState(false);
 
   const hasLogo = Boolean(survey.image);
   const logoUrl = hasLogo
@@ -41,34 +40,10 @@ export function SurveyCover({ survey, surveyStatus, isEditable, onUpload }) {
     hasLogo ? "edit_survey.replace_logo" : "edit_survey.add_logo"
   );
 
-  const handleFile = (file) => {
-    if (file) {
-      onUpload(file);
-    }
-  };
-
-  // Without preventDefault on both enter and over, the browser navigates away
-  // to the dropped file.
-  const allowDrop = (event) => {
-    if (!isEditable) return;
-    event.preventDefault();
-    setIsDragOver(true);
-  };
-
   return (
     <div
       className={styles.cover}
-      data-dragover={isDragOver ? "true" : undefined}
       data-needs-logo={!hasLogo && isEditable ? "true" : undefined}
-      onDragEnter={allowDrop}
-      onDragOver={allowDrop}
-      onDragLeave={() => setIsDragOver(false)}
-      onDrop={(event) => {
-        if (!isEditable) return;
-        event.preventDefault();
-        setIsDragOver(false);
-        handleFile(event.dataTransfer.files?.[0]);
-      }}
     >
       {/* Decorative: the survey name is right below it. */}
       <div
@@ -101,7 +76,9 @@ export function SurveyCover({ survey, surveyStatus, isEditable, onUpload }) {
               const file = event.target.files[0];
               // Clear it so picking the same file again still fires onChange.
               event.target.value = "";
-              handleFile(file);
+              if (file) {
+                onUpload(file);
+              }
             }}
           />
         </>
