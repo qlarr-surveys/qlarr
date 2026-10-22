@@ -69,7 +69,6 @@ import {
 // Designer-only state: never saved, kept on reload. Add any new UI-only key here.
 export const UI_STATE_KEYS = [
   "setup",
-  "advancedByCode",
   "langInfo",
   "reorder_refresh_code",
   "state",
@@ -179,12 +178,6 @@ export function clearHighlighted(state) {
   if (state.setup) {
     delete state.setup.highlighted;
   }
-}
-
-export function setShowAdvanced(state, payload) {
-  const { code, value } = payload;
-  if (!state.advancedByCode) state.advancedByCode = {};
-  state.advancedByCode[code] = value;
 }
 
 export function newVersionReceived(state, payload) {

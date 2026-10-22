@@ -1,5 +1,6 @@
 import React from "react";
 import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
@@ -17,7 +18,7 @@ import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 
 function DateTimeQuestion(props) {
   const theme = useTheme();
-  const { i18n } = useTranslation(NAMESPACES.RUN);
+  const { t, i18n } = useTranslation(NAMESPACES.RUN);
 
   // Adapt the picker popup to the survey theme so its text stays legible on both
   // light and dark survey themes (instead of a hardcoded white background).
@@ -177,6 +178,9 @@ function DateTimeQuestion(props) {
           />
         )}
       </LocalizationProvider>
+      <Button variant="outlined" onClick={() => handleDateChange(dayjs().startOf("minute"))}>
+        {props.component.type == "date" ? t("today") : t("now")}
+      </Button>
     </div>
   );
 }
