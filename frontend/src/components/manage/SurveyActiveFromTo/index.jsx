@@ -76,14 +76,15 @@ export const SurveyActiveFromTo = ({
   };
 
   const handleSaveChanges = () => {
-    const fromChanged = dayjs(surveyActiveFrom).toDate();
-    const toChanged = dayjs(surveyActiveTo).toDate();
+    const toDateOrNull = (value) => (value ? dayjs(value).toDate() : null);
+    const fromChanged = toDateOrNull(surveyActiveFrom);
+    const toChanged = toDateOrNull(surveyActiveTo);
 
-    if (surveyActiveFrom && !isEqualDates(fromChanged, dayjs(initialSurveyActiveFrom).toDate())) {
+    if (!isEqualDates(fromChanged, toDateOrNull(initialSurveyActiveFrom))) {
       onSurveyActiveFromChanged(fromChanged);
     }
 
-    if (surveyActiveTo && !isEqualDates(toChanged, dayjs(initialSurveyActiveTo).toDate())) {
+    if (!isEqualDates(toChanged, toDateOrNull(initialSurveyActiveTo))) {
       onSurveyActiveToChanged(toChanged);
     }
 
