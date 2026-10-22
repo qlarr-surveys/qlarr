@@ -536,7 +536,7 @@ button.descriptionText:focus-visible {
   flex-direction: column;
   align-items: flex-start;
   text-align: start;
-  /* Set here rather than on .statLabel, which the created block shares and
+  /* Set here rather than on .statLabel, which the date block shares and
      feeds its own 17px by inheritance. Without it the label inherits the
      card's leading and sits four pixels lower than the redesign draws it,
      which the whole card below inherits as well. */
@@ -557,14 +557,14 @@ button.descriptionText:focus-visible {
   color: #5b6189;
 }
 
-.createdStat {
+.dateStat {
   flex: none;
   text-align: end;
   font-size: 12px;
   line-height: 17px;
 }
 
-.createdValue {
+.dateValue {
   display: block;
   color: #1b2150;
 }

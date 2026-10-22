@@ -3,10 +3,9 @@ import { Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import { buildResourceUrl } from "~/networking/common";
-import { fDate } from "~/utils/format-time";
-import { serverDateTimeToLocalDateTime } from "~/utils/DateUtils";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import { STATUS } from "./status";
+import { fLocal } from "./dates";
 import styles from "./Survey.module.css";
 
 // The watermarked placeholder production uses on a survey with no logo of
@@ -129,16 +128,16 @@ const LEGEND_ORDER = [
  * and named "· this survey" — so that the second question is still answered
  * by a glance rather than a read.
  *
- * The card no longer lists start and end dates, so without the line under the
- * legend a scheduled or expiring survey would lose the only place that said
- * when.
+ * The card's stat slot shows whichever single date the status is waiting on,
+ * so the line under the legend is where both dates are read together -- and
+ * the only place the other one is read at all.
  */
 function StatusLegend({ t, survey, surveyStatus }) {
   const dates = [];
 
-  // Whatever dates the survey carries, whatever its status. Gating these on
-  // status would hide the dates of a draft that has them, which the old card
-  // did show.
+  // Whatever dates the survey carries, whatever its status. The card's own
+  // slot picks one by status; this line is the full record, so gating it the
+  // same way would leave the other date nowhere to be read.
   if (survey.startDate) {
     dates.push(
       `${t("edit_survey.metadata.start_date")}: ${fLocal(survey.startDate)}`
@@ -193,5 +192,3 @@ function StatusLegend({ t, survey, surveyStatus }) {
     </>
   );
 }
-
-const fLocal = (serverDate) => fDate(serverDateTimeToLocalDateTime(serverDate));

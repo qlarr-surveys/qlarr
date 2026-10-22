@@ -30,6 +30,7 @@ import { SurveyCover } from "./SurveyCover";
 import ResponsesExport from "~/components/manage/ResponsesExport";
 
 import { STATUS } from "./status";
+import { cardDate, fLocal } from "./dates";
 
 const status = (survey) => {
   switch (survey.status) {
@@ -145,6 +146,10 @@ const Survey = ({
 }) => {
   const { t } = useTranslation(NAMESPACES.MANAGE);
   const surveyStatus = status(survey);
+  const { labelKey: dateLabelKey, value: dateValue } = cardDate(
+    survey,
+    surveyStatus
+  );
   const surveyService = useService("survey");
   const uploadResource = useResourceUpload();
 
@@ -333,13 +338,12 @@ const Survey = ({
                 {t("edit_survey.responses")}
               </span>
             </div>
-            <div className={styles.createdStat}>
-              <span className={styles.statLabel}>
-                {t("edit_survey.metadata.created")}
-              </span>
-              <span className={styles.createdValue}>
-                {fDate(survey.creationDate)}
-              </span>
+            {/* Not always the creation date: the slot follows the status,
+                so a scheduled survey says when it starts and a collecting
+                one when it stops. See cardDate. */}
+            <div className={styles.dateStat}>
+              <span className={styles.statLabel}>{t(dateLabelKey)}</span>
+              <span className={styles.dateValue}>{fLocal(dateValue)}</span>
             </div>
           </div>
 
