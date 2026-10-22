@@ -13,7 +13,6 @@ import { serverDateTimeToLocalDateTime } from "~/utils/DateUtils";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import SavingSurvey from "~/components/design/SavingSurvey";
-import { fDate } from "~/utils/format-time";
 import { isSurveyAdmin, isUserAnalyst } from "~/constants/roles";
 import { forwardRef, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -321,7 +320,7 @@ const Survey = ({
           <p className={styles.cardMeta}>
             {t(`mode.${survey.usage}`)} &middot;{" "}
             {t("edit_survey.metadata.last_modified")}{" "}
-            {fDate(survey.lastModified)}
+            {fLocal(survey.lastModified)}
           </p>
 
           <div className={styles.cardStats}>
