@@ -145,6 +145,14 @@ function Dashboard() {
     onImportSurvey: handleImportSurveyClick,
   });
 
+  // The first-run empty state is the whole page: it carries its own welcome
+  // heading and both actions, so the page heading and the action cards above
+  // it would only say the same things twice. Until the first response lands
+  // we don't know which way it goes, so they wait with the list rather than
+  // flashing above an empty state that then replaces them.
+  const showPageIntro =
+    fetchError || status !== "all" || Boolean(surveys?.surveys?.length);
+
   const onDelete = (survey) => {
     setActionType("delete");
     // The question names the survey and the body says what goes with it, as
@@ -300,12 +308,16 @@ function Dashboard() {
     >
       <Container sx={{ marginBottom: "48px" }}>
         <Box className={styles.content}>
-          <Box className={styles.pageHeading}>
-            <h1 className={styles.heading}>{t("my_surveys")}</h1>
-            <p className={styles.subtitle}>{t("dashboard.subtitle")}</p>
-          </Box>
+          {showPageIntro && (
+            <>
+              <Box className={styles.pageHeading}>
+                <h1 className={styles.heading}>{t("my_surveys")}</h1>
+                <p className={styles.subtitle}>{t("dashboard.subtitle")}</p>
+              </Box>
 
-          <ActionCards actions={actions} />
+              <ActionCards actions={actions} />
+            </>
+          )}
 
           {(surveys?.surveys?.length > 0 || status != "all") && (
             <Box className={styles.listHeading}>
@@ -403,7 +415,10 @@ function Dashboard() {
                   <DashboardEmptyState
                     onCreateSurvey={handleCreateSurveyClick}
                     onImportTemplate={handleImportSurveyClick}
-                    canCreate={false}
+                    /* Same gate as the action cards, which this now stands in
+                       for: an analyst gets the welcome without actions it
+                       can't carry out. */
+                    canCreate={actions.length > 0}
                   />
                 )}
               </>
