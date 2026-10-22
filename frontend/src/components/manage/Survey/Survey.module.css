@@ -51,9 +51,7 @@
    chip with its own shadow, so it holds up over a logo wide enough to reach
    it.
 
-   The placeholder is fitted the same way, with no case of its own -- as
-   production fits its own. At 2.33:1 against this band's 3.03:1 it stands
-   full height with grey either side, exactly as production stands it.
+   The placeholder gets a case of its own, below.
 
    `::after` is production's 30% scrim, over the image and the grey alike and
    on every cover, whether the survey has a logo or not. It is what keeps the
@@ -74,6 +72,19 @@
   position: absolute;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* The placeholder fills the band instead of fitting inside it, which is the
+   one place following production's rule would not reproduce production's
+   look. There the band is 2.42:1 and the mark is 2.33:1, so contained it all
+   but fills; this band is 3.03:1, so the same rule leaves 41px of grey down
+   each side and the cover reads as a letterboxed picture rather than a cover.
+
+   Filling crops 18px off the top and bottom, which costs a tiled watermark
+   nothing -- unlike a survey's own logo, which stays contained because
+   cropping a wordmark takes its ends off. */
+.cover[data-needs-logo="true"] .coverLogo {
+  background-size: cover;
 }
 
 .coverInput {
