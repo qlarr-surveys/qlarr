@@ -1,5 +1,5 @@
 // ResponsesExport.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -22,61 +22,19 @@ import FormProvider from "~/components/hook-form";
 import FileSaver from "file-saver";
 import { useService } from "~/hooks/use-service";
 import { useParams } from "react-router-dom";
-import styles from "./ResponsesExport.module.css";
 
-export default function ResponsesExport({
-  open,
-  onClose,
-  // The range of response indices to prefill. A caller that has the rows on
-  // screen passes the span it is showing; one that does not -- a dashboard
-  // card -- passes neither and the dialog goes and finds the real span.
-  currentFrom,
-  currentTo,
-  t,
-  // The responses page is on a route that names the survey, so it passes
-  // nothing and the param answers. The dashboard is not -- a card opens this
-  // for one survey out of the many on screen -- so it says which.
-  surveyId: surveyIdProp,
+export default function ResponsesExport({ 
+  open, 
+  onClose, 
+  currentFrom = 1, 
+  currentTo = 1, 
+  t 
 }) {
-  const { surveyId: routeSurveyId } = useParams();
-  const surveyId = surveyIdProp ?? routeSurveyId;
+  const { surveyId } = useParams();
 
   const surveyService = useService("survey");
 
   const min = 1;
-
-  // A response's index is not its position in the count: previews and deleted
-  // responses take numbers too, so a survey showing two responses can hold
-  // #3 and #4. Prefilling 1..count would then export an empty range and hand
-  // back an empty file with nothing to say why, so when the caller does not
-  // know the span we ask for it: 1 is always a safe floor, and the last page
-  // of the summary carries the highest index there is.
-  const [foundRange, setFoundRange] = useState(null);
-  const knowsRange = currentFrom != null && currentTo != null;
-  const from = knowsRange ? currentFrom : foundRange?.from ?? min;
-  const to = knowsRange ? currentTo : foundRange?.to ?? min;
-
-  useEffect(() => {
-    if (!open || knowsRange) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const first = await surveyService.allResponse(surveyId, 1, 1);
-        const total = first?.totalCount ?? 0;
-        if (total < 1) return;
-        const last = await surveyService.allResponse(surveyId, total, 1);
-        const indices = (last?.responses ?? []).map((r) => r.index);
-        if (cancelled || !indices.length) return;
-        setFoundRange({ from: min, to: Math.max(...indices) });
-      } catch {
-        // Leave the prefill alone: the fields are editable and the range is
-        // the one thing in this dialog the person can always set by hand.
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [open, knowsRange, surveyId, surveyService]);
 
   const Schema = yup.object().shape({
     from: yup
@@ -103,8 +61,8 @@ export default function ResponsesExport({
     mode: "onChange",
     resolver: yupResolver(Schema),
     defaultValues: {
-      from,
-      to,
+      from: currentFrom,
+      to: currentTo,
       filter: "all",
       format: "csv",
       mode: "database",
@@ -121,14 +79,14 @@ export default function ResponsesExport({
   useEffect(() => {
     if (open) {
       reset({
-        from,
-        to,
+        from: currentFrom,
+        to: currentTo,
         filter: "all",
         format: "csv",
         mode: "database",
       });
     }
-  }, [open, from, to, reset]);
+  }, [open, currentFrom, currentTo, reset]);
 
   const onSubmit = handleSubmit(async (data) => {
     const from = Number(data.from);
@@ -164,26 +122,18 @@ export default function ResponsesExport({
     }
   });
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth={false}
-      PaperProps={{ className: styles.paper }}
-    >
-      <DialogTitle className={styles.title}>{t("responses.export")}</DialogTitle>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle>{t("responses.export")}</DialogTitle>
 
       <FormProvider methods={methods} onSubmit={onSubmit}>
-        <DialogContent className={styles.content}>
-          <Box className={styles.range}>
+        <DialogContent sx={{ display: "grid", gap: 2 }}>
+          <Box display="flex" gap={2}>
             <Controller
               name="from"
               control={control}
               render={({ field }) => (
                 <TextField
                   {...field}
-                  className={styles.field}
-                  variant="outlined"
-                  size="small"
                   label={t("responses.from")}
                   type="number"
                   inputProps={{ min }}
@@ -203,9 +153,6 @@ export default function ResponsesExport({
               render={({ field }) => (
                 <TextField
                   {...field}
-                  className={styles.field}
-                  variant="outlined"
-                  size="small"
                   label={t("responses.to")}
                   type="number"
                   inputProps={{ min }}
@@ -220,62 +167,56 @@ export default function ResponsesExport({
             />
           </Box>
 
-          <FormControl className={styles.group}>
-            <FormLabel className={styles.groupLabel}>{t("responses.responses_type")}</FormLabel>
+          <FormControl>
+            <FormLabel>{t("responses.responses_type")}</FormLabel>
             <Controller
               name="filter"
               control={control}
               render={({ field }) => (
-                <RadioGroup row className={styles.radioRow} {...field}>
+                <RadioGroup row {...field}>
                   <FormControlLabel
-                    className={styles.radioLabel}
                     value="all"
-                    control={<Radio className={styles.radio} />}
+                    control={<Radio />}
                     label={t("responses.filter_completed_show_all")}
                   />
                   <FormControlLabel
-                    className={styles.radioLabel}
                     value="complete"
-                    control={<Radio className={styles.radio} />}
+                    control={<Radio />}
                     label={t("responses.complete_responses")}
                   />
                   <FormControlLabel
-                    className={styles.radioLabel}
                     value="incomplete"
-                    control={<Radio className={styles.radio} />}
+                    control={<Radio />}
                     label={t("responses.incomplete_responses")}
                   />
                 </RadioGroup>
               )}
             />
-            <FormHelperText className={styles.warning}>
+            <FormHelperText sx={{ color: "warning.main" ,ml:0 }}>
               {t("responses.preview_not_exportable")}
             </FormHelperText>
           </FormControl>
 
-          <FormControl className={styles.group}>
-            <FormLabel className={styles.groupLabel}>{t("responses.export_type")}</FormLabel>
+          <FormControl>
+            <FormLabel>{t("responses.export_type")}</FormLabel>
             <Controller
               name="format"
               control={control}
               render={({ field }) => (
-                <RadioGroup row className={styles.radioRow} {...field}>
+                <RadioGroup row {...field}>
                   <FormControlLabel
-                    className={styles.radioLabel}
                     value="csv"
-                    control={<Radio className={styles.radio} />}
+                    control={<Radio />}
                     label={t("responses_export.format_csv")}
                   />
                   <FormControlLabel
-                    className={styles.radioLabel}
                     value="xlsx"
-                    control={<Radio className={styles.radio} />}
+                    control={<Radio />}
                     label={t("responses_export.format_excel")}
                   />
                   <FormControlLabel
-                    className={styles.radioLabel}
                     value="ods"
-                    control={<Radio className={styles.radio} />}
+                    control={<Radio />}
                     label={t("responses_export.format_ods")}
                   />
                 </RadioGroup>
@@ -283,23 +224,21 @@ export default function ResponsesExport({
             />
           </FormControl>
 
-          <FormControl className={styles.group}>
-            <FormLabel className={styles.groupLabel}>{t("responses.mode")}</FormLabel>
+          <FormControl>
+            <FormLabel>{t("responses.mode")}</FormLabel>
             <Controller
               name="mode"
               control={control}
               render={({ field }) => (
-                <RadioGroup row className={styles.radioRow} {...field}>
+                <RadioGroup row {...field}>
                   <FormControlLabel
-                    className={styles.radioLabel}
                     value="database"
-                    control={<Radio className={styles.radio} />}
+                    control={<Radio />}
                     label={t("responses.database_format")}
                   />
                   <FormControlLabel
-                    className={styles.radioLabel}
                     value="text"
-                    control={<Radio className={styles.radio} />}
+                    control={<Radio />}
                     label={t("responses.text_format")}
                   />
                 </RadioGroup>
@@ -308,18 +247,9 @@ export default function ResponsesExport({
           </FormControl>
         </DialogContent>
 
-        <DialogActions className={styles.actions}>
-          <Button
-            className={`${styles.button} ${styles.cancelButton}`}
-            onClick={onClose}
-          >
-            {t("action_btn.cancel")}
-          </Button>
-          <Button
-            className={`${styles.button} ${styles.submitButton}`}
-            type="submit"
-            variant="contained"
-          >
+        <DialogActions>
+          <Button onClick={onClose}>{t("action_btn.cancel")}</Button>
+          <Button type="submit" variant="contained">
             {t("action_btn.export")}
           </Button>
         </DialogActions>

@@ -1,7 +1,6 @@
 import { Card, Snackbar, Alert } from "@mui/material";
 import {
   Copy,
-  Download,
   Eye,
   Lock,
   Pencil,
@@ -26,7 +25,6 @@ import { EditableSurveyDescription } from "./EditableSurveyDescription";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import { setDesignModeToDesign } from "~/state/design/designState";
 import { SurveyCover } from "./SurveyCover";
-import ResponsesExport from "~/components/manage/ResponsesExport";
 
 import { STATUS } from "./status";
 import { cardDate, fLocal } from "./dates";
@@ -236,27 +234,9 @@ const Survey = ({
     navigate(`/responses/${survey.id}`);
   };
 
-  // Opened here rather than on the responses page, which is what the button
-  // says it does: the admin stays on the dashboard and can export a second
-  // survey without walking back. No range is passed with it -- the card knows
-  // how many responses there are but not which numbers they carry, and the
-  // dialog finds that out for itself.
-  const [exportOpen, setExportOpen] = useState(false);
-
   return (
     <>
       <SavingSurvey />
-      {/* Mounted only while open: the dashboard draws a card per survey, and
-          each one carrying an idle dialog with its own form would be a form
-          per survey on screen for a button most of them never show. */}
-      {exportOpen && (
-        <ResponsesExport
-          open
-          onClose={() => setExportOpen(false)}
-          surveyId={survey.id}
-          t={t}
-        />
-      )}
       <Snackbar
         open={openSnackbar}
         autoHideDuration={6000}
@@ -366,11 +346,10 @@ const Survey = ({
                 {/* The order is the redesign's and it is the same on every
                     status, so a button never moves under the pointer as a
                     survey goes from scheduled to active to closed: duplicate,
-                    then export, then whichever of close or delete applies.
-                    Each test reads surveyStatus, not survey.status, because
-                    the server calls a scheduled and an expired survey
-                    "active" too and only the derived status tells them
-                    apart. */}
+                    then whichever of close or delete applies. Each test reads
+                    surveyStatus, not survey.status, because the server calls a
+                    scheduled and an expired survey "active" too and only the
+                    derived status tells them apart. */}
                 <ActionButton
                   tooltip={t("edit_survey.clone_survey")}
                   variant="Secondary"
@@ -379,17 +358,6 @@ const Survey = ({
                 >
                   <Copy {...ICON_ACTION} />
                 </ActionButton>
-
-                {surveyStatus === STATUS.ACTIVE && (
-                  <ActionButton
-                    tooltip={t("responses.export")}
-                    variant="Secondary"
-                    iconOnly
-                    onClick={() => setExportOpen(true)}
-                  >
-                    <Download {...ICON_ACTION} />
-                  </ActionButton>
-                )}
 
                 {CLOSEABLE.includes(surveyStatus) && (
                   <ActionButton
