@@ -8,7 +8,7 @@
    keeps it from being squeezed by a long one. */
 .iconButton {
   flex: none;
-  width: 24px;
+  width: 18px;
   height: 24px;
   display: flex;
   align-items: center;

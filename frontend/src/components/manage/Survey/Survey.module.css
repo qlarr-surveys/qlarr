@@ -32,7 +32,7 @@
 .cover {
   position: relative;
   flex: none;
-  height: 118px;
+  height: 150px;
   overflow: hidden;
   background: #999;
 }
@@ -104,7 +104,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 12px 0 0;
+  padding: 28px 0 0;
   gap: 6px;
   border: 0;
   background-color: transparent;
@@ -344,16 +344,12 @@
 }
 
 .titleContainer {
-  min-height: 48px;
-  /* Two pixels more than the description row, which the redesign also sets
-     apart: the title's info button is 26px to the description's 24px, so the
-     wider gap keeps the two glyphs on the same optical margin. */
   gap: 6px;
 }
 
 .descriptionContainer {
-  margin-top: 4px;
-  min-height: 44px;
+  margin-bottom: 10px;
+  margin-top: 8px;
 }
 
 /* The ⓘ, mounted in both the reading and the editing state. */
@@ -379,7 +375,7 @@
 .descriptionText {
   flex: 0 1 auto;
   min-width: 0;
-  padding: 2px 6px;
+  padding: 0px 6px;
   margin-inline-start: -6px;
   border: 0;
   border-radius: 6px;
@@ -525,7 +521,7 @@ button.descriptionText:focus-visible {
      live on .cardStats, whose margin-top is auto so the action rows of a row
      of cards line up however long their titles run; auto would eat a fixed
      gap in the packed case, which is exactly the case that needs one. */
-  margin: 10px 0 16px;
+  margin-top: auto;
   font-size: 12.5px;
   line-height: 18px;
   color: #5b6189;
@@ -535,8 +531,7 @@ button.descriptionText:focus-visible {
   display: flex;
   align-items: flex-end;
   gap: 16px;
-  margin-top: auto;
-  padding-top: 14px;
+  padding-top: 4px;
   border-top: 1px solid #eef0f7;
 }
 
