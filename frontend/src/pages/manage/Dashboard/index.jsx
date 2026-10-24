@@ -92,6 +92,15 @@ function Dashboard() {
       .getAllSurveys(page, perPage, status, sortBy)
       .then((data) => {
         if (data) {
+          // A page past the end of the list comes back empty even though the
+          // dashboard has surveys -- a saved page restored after surveys were
+          // deleted, say. Fall back to the first page instead of handing an
+          // empty page to the first-run empty state, which would greet a full
+          // dashboard with "create your first survey".
+          if (page > 1 && data.totalCount > 0 && !data.surveys?.length) {
+            setPage(1);
+            return;
+          }
           setFetchingSurveys(false);
           setSurveys(data);
         }
@@ -144,6 +153,14 @@ function Dashboard() {
     onCreateSurvey: handleCreateSurveyClick,
     onImportSurvey: handleImportSurveyClick,
   });
+
+  // The first-run empty state is the whole page: it carries its own welcome
+  // heading and both actions, so the page heading and the action cards above
+  // it would only say the same things twice. Until the first response lands
+  // we don't know which way it goes, so they wait with the list rather than
+  // flashing above an empty state that then replaces them.
+  const showPageIntro =
+    fetchError || status !== "all" || Boolean(surveys?.surveys?.length);
 
   const onDelete = (survey) => {
     setActionType("delete");
@@ -300,12 +317,16 @@ function Dashboard() {
     >
       <Container sx={{ marginBottom: "48px" }}>
         <Box className={styles.content}>
-          <Box className={styles.pageHeading}>
-            <h1 className={styles.heading}>{t("my_surveys")}</h1>
-            <p className={styles.subtitle}>{t("dashboard.subtitle")}</p>
-          </Box>
+          {showPageIntro && (
+            <>
+              <Box className={styles.pageHeading}>
+                <h1 className={styles.heading}>{t("my_surveys")}</h1>
+                <p className={styles.subtitle}>{t("dashboard.subtitle")}</p>
+              </Box>
 
-          <ActionCards actions={actions} />
+              <ActionCards actions={actions} />
+            </>
+          )}
 
           {(surveys?.surveys?.length > 0 || status != "all") && (
             <Box className={styles.listHeading}>
@@ -403,7 +424,10 @@ function Dashboard() {
                   <DashboardEmptyState
                     onCreateSurvey={handleCreateSurveyClick}
                     onImportTemplate={handleImportSurveyClick}
-                    canCreate={false}
+                    /* Same gate as the action cards, which this now stands in
+                       for: an analyst gets the welcome without actions it
+                       can't carry out. */
+                    canCreate={actions.length > 0}
                   />
                 )}
               </>
