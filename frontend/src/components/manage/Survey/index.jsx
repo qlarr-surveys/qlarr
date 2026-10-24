@@ -63,6 +63,7 @@ const status = (survey) => {
 // nothing to stop and a closed survey is already stopped; the redesign leaves
 // the action off both.
 const CLOSEABLE = [STATUS.SCHEDULED, STATUS.ACTIVE, STATUS.EXPIRED];
+const DELETABLE = [STATUS.DRAFT, STATUS.CLOSED];
 
 const ICON_ACTION = { size: 17, strokeWidth: 1.5 };
 const ICON_INLINE = { size: 16, strokeWidth: 1.5 };
@@ -370,10 +371,10 @@ const Survey = ({
                   </ActionButton>
                 )}
 
-                {/* Only a draft. A closed survey keeps its responses, and the
-                    redesign leaves it duplicable and readable but not
-                    removable from here. */}
-                {surveyStatus === STATUS.DRAFT && (
+                {/* A draft or a closed survey. The dashboard is the only place
+                    a survey can be deleted, so a closed one has to stay
+                    removable here. */}
+                {DELETABLE.includes(surveyStatus) && (
                   <ActionButton
                     tooltip={t("action_btn.delete")}
                     variant="Danger"

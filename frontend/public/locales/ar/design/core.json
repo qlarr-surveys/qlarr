@@ -541,7 +541,8 @@
     "allow_previous": "Allow respondents to go back to previous pages during the survey.",
     "allow_incomplete": "Allow respondents to save their progress and resume the survey later.",
     "allow_jump": "Allow respondents to jump to any page using a survey index/table of contents.",
-    "skip_invalid": "Skip validation errors while navigating and only enforce them when the survey is submitted."
+    "skip_invalid": "Skip validation errors while navigating and only enforce them when the survey is submitted.",
+    "more_info": "مزيد من المعلومات"
   },
   "processed_errors": {
     "unidentified_error": "حدث خطأ غير متوقع ، يرجى إبلاغ support@qlarr.com",
@@ -578,8 +579,5 @@
   "err_nested_repeatable": "لا يمكن وضع عنصر قابل للتكرار داخل عنصر آخر قابل للتكرار. أزل التكرار من هذا العنصر أو من حاويته.",
   "err_repeatable_with_relevance": "لا يمكن أن يكون للعنصر القابل للتكرار شرط ظهور خاص به أيضًا — منطق ظهوره هو شرط التكرار.",
   "err_repeat_relevance": "خطأ في شرط التكرار",
-  "err_skip_inside_repeatable": "منطق التخطي غير مسموح به داخل عنصر قابل للتكرار.",
-  "tooltips": {
-    "more_info": "مزيد من المعلومات"
-  }
+  "err_skip_inside_repeatable": "منطق التخطي غير مسموح به داخل عنصر قابل للتكرار."
 }

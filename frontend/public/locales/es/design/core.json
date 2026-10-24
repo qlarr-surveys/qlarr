@@ -512,7 +512,8 @@
     "allow_previous": "Allow respondents to go back to previous pages during the survey.",
     "allow_incomplete": "Allow respondents to save their progress and resume the survey later.",
     "allow_jump": "Allow respondents to jump to any page using a survey index/table of contents.",
-    "skip_invalid": "Skip validation errors while navigating and only enforce them when the survey is submitted."
+    "skip_invalid": "Skip validation errors while navigating and only enforce them when the survey is submitted.",
+    "more_info": "Más información"
   },
   "processed_errors": {
     "unidentified_error": "Ocurrió un Error Inesperado, por favor reporta a support@qlarr.com",
@@ -578,8 +579,5 @@
   "err_nested_repeatable": "Un elemento repetible no se puede colocar dentro de otro repetible. Quita la repetición de este elemento o de su contenedor.",
   "err_repeatable_with_relevance": "Un elemento repetible no puede tener también su propia condición de relevancia: su lógica de visualización es la condición de repetición.",
   "err_repeat_relevance": "Error en la condición de repetición",
-  "err_skip_inside_repeatable": "La lógica de salto no está permitida dentro de un elemento repetible.",
-  "tooltips": {
-    "more_info": "Más información"
-  }
+  "err_skip_inside_repeatable": "La lógica de salto no está permitida dentro de un elemento repetible."
 }

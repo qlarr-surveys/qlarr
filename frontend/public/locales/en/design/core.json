@@ -541,7 +541,8 @@
     "allow_previous": "Allow respondents to go back to previous pages during the survey.",
     "allow_incomplete": "Allow respondents to save their progress and resume the survey later.",
     "allow_jump": "Allow respondents to jump to any page using a survey index/table of contents.",
-    "skip_invalid": "Skip validation errors while navigating and only enforce them when the survey is submitted."
+    "skip_invalid": "Skip validation errors while navigating and only enforce them when the survey is submitted.",
+    "more_info": "More information"
   },
   "processed_errors": {
     "unidentified_error": "Unexpected Error occurred, please report to support@qlarr.com",
@@ -578,8 +579,5 @@
   "err_nested_repeatable": "A repeatable can't be placed inside another repeatable. Remove the repeat from this item or its container.",
   "err_repeatable_with_relevance": "A repeatable can't also have its own relevance condition — its show logic is the repeat condition.",
   "err_repeat_relevance": "Repeat condition error",
-  "err_skip_inside_repeatable": "Skip logic isn't allowed inside a repeatable.",
-  "tooltips": {
-    "more_info": "More information"
-  }
+  "err_skip_inside_repeatable": "Skip logic isn't allowed inside a repeatable."
 }
