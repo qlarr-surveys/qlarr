@@ -1,41 +1,33 @@
+import { Card, Snackbar, Alert } from "@mui/material";
 import {
-  Card,
-  Stack,
-  Snackbar,
-  Alert,
-  Box,
-  CardMedia,
-  Badge,
-} from "@mui/material";
-import { Cancel } from "@mui/icons-material";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import ArticleIcon from "@mui/icons-material/Article";
+  Copy,
+  Eye,
+  Lock,
+  Pencil,
+  Table2,
+  Trash2,
+} from "lucide-react";
 import styles from "./Survey.module.css";
 import { serverDateTimeToLocalDateTime } from "~/utils/DateUtils";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import SavingSurvey from "~/components/design/SavingSurvey";
-import { fDate } from "~/utils/format-time";
-import TableRowsIcon from "@mui/icons-material/TableRows";
-import WarningIcon from "@mui/icons-material/Warning";
-import FileCopyIcon from "@mui/icons-material/FileCopy";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { isSurveyAdmin, isUserAnalyst } from "~/constants/roles";
-import { useState } from "react";
+import { forwardRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setLoading } from "~/state/edit/editState";
 import { useService } from "~/hooks/use-service";
 import { PROCESSED_ERRORS } from "~/utils/errorsProcessor";
-import { buildResourceUrl } from "~/networking/common";
-import { MAX_RESOURCE_UPLOAD_BYTES } from "~/constants/networking";
-import ImageIcon from "@mui/icons-material/Image";
+import { useResourceUpload } from "~/hooks/useResourceUpload";
 import { useNavigate } from "react-router-dom";
 import { EditableSurveyTitle } from "./EditableSurveyTitle";
 import { EditableSurveyDescription } from "./EditableSurveyDescription";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import { setDesignModeToDesign } from "~/state/design/designState";
+import { SurveyCover } from "./SurveyCover";
 
 import { STATUS } from "./status";
+import { cardDate, fLocal } from "./dates";
 
 const status = (survey) => {
   switch (survey.status) {
@@ -62,84 +54,19 @@ const status = (survey) => {
   }
 };
 
-const PAST_STATUSES = [STATUS.EXPIRED, STATUS.CLOSED];
+// Lucide draws on the rendered pixel grid rather than MUI's 24px one, so the
+// size is the icon's real size and the stroke is set with it: scale one
+// without the other and the glyph thickens or thins against its neighbours.
+// 17/1.5 and 16/1.5 are the redesign's own values for these two positions.
+// Closing stops a survey that is collecting, or could still start collecting,
+// so it is offered on exactly the statuses where that is true. A draft has
+// nothing to stop and a closed survey is already stopped; the redesign leaves
+// the action off both.
+const CLOSEABLE = [STATUS.SCHEDULED, STATUS.ACTIVE, STATUS.EXPIRED];
+const DELETABLE = [STATUS.DRAFT, STATUS.CLOSED];
 
-const getDatesToShow = (survey, surveyStatus) => {
-  const { creationDate, lastModified, startDate, endDate } = survey;
-
-  if (startDate && endDate) {
-    const anchor = PAST_STATUSES.includes(surveyStatus)
-      ? {
-          key: "created",
-          labelKey: "edit_survey.metadata.created",
-          value: creationDate,
-        }
-      : {
-          key: "last_modified",
-          labelKey: "edit_survey.metadata.last_modified",
-          value: lastModified,
-        };
-    return [
-      anchor,
-      {
-        key: "start_date",
-        labelKey: "edit_survey.metadata.start_date",
-        value: startDate,
-      },
-      {
-        key: "end_date",
-        labelKey: "edit_survey.metadata.end_date",
-        value: endDate,
-      },
-    ].filter((d) => d.value);
-  }
-
-  const dates = [
-    {
-      key: "created",
-      labelKey: "edit_survey.metadata.created",
-      value: creationDate,
-    },
-    {
-      key: "last_modified",
-      labelKey: "edit_survey.metadata.last_modified",
-      value: lastModified,
-    },
-  ];
-  if (
-    [STATUS.DRAFT, STATUS.CLOSED, STATUS.SCHEDULED].includes(surveyStatus) &&
-    startDate
-  ) {
-    dates.push({
-      key: "start_date",
-      labelKey: "edit_survey.metadata.start_date",
-      value: startDate,
-    });
-  }
-  if ([STATUS.ACTIVE, STATUS.EXPIRED].includes(surveyStatus) && endDate) {
-    dates.push({
-      key: "end_date",
-      labelKey: "edit_survey.metadata.end_date",
-      value: endDate,
-    });
-  }
-  return dates.filter((d) => d.value);
-};
-
-// Constants
-const ICON_SIZE = { fontSize: 16 };
-const ICON_SIZE_ACTION = { fontSize: 18 };
-const BADGE_SX = {
-  "& .MuiBadge-badge": { fontSize: 10, minWidth: 18, height: 18 },
-};
-
-// Helper Components
-const DateItem = ({ label, value }) => (
-  <div className={styles.dateItem}>
-    <span className={styles.dateLabel}>{label}</span>
-    <span className={styles.dateValue}>{value}</span>
-  </div>
-);
+const ICON_ACTION = { size: 17, strokeWidth: 1.5 };
+const ICON_INLINE = { size: 16, strokeWidth: 1.5 };
 
 const ActionButton = ({ tooltip, onClick, variant, iconOnly, children }) => {
   const classNames = [
@@ -150,8 +77,16 @@ const ActionButton = ({ tooltip, onClick, variant, iconOnly, children }) => {
     .filter(Boolean)
     .join(" ");
 
+  // An icon-only button has no text to name it, and the tooltip cannot stand in
+  // for one: CustomTooltip hands MUI a node, so MUI only wires aria-describedby
+  // while the tooltip is open. Without this the button is announced as "button".
   const button = (
-    <button className={classNames} onClick={onClick}>
+    <button
+      type="button"
+      className={classNames}
+      aria-label={iconOnly ? tooltip : undefined}
+      onClick={onClick}
+    >
       {children}
     </button>
   );
@@ -165,6 +100,38 @@ const ActionButton = ({ tooltip, onClick, variant, iconOnly, children }) => {
   );
 };
 
+/**
+ * The unpublished-changes marker: a pencil with a status dot, per the
+ * redesign. The dot is what distinguishes "edited" from "edited and not yet
+ * live", and it is decorative -- `label` carries that meaning for everyone.
+ *
+ * A marker, not a control. It used to navigate an admin to the editor, which
+ * made the card a second place that opened the survey: "Edit survey" is the
+ * card's action, and the badge is there to explain the dot, not to compete
+ * with the button for the same click. The redesign draws it the same way --
+ * a focusable span with a tooltip and nothing to press.
+ *
+ * `forwardRef`, and the rest of the props passed straight through, because
+ * this is a tooltip's only child: MUI reaches the trigger through a ref and
+ * hangs its hover and focus handlers on it as props. Without both, the
+ * tooltip that says what the dot means never opened at all -- not on hover,
+ * not on focus -- and React said so on every render. It still takes focus, so
+ * that tooltip stays reachable without a mouse.
+ */
+const UnpublishedBadge = forwardRef(({ label, ...props }, ref) => (
+  <span
+    {...props}
+    ref={ref}
+    role="img"
+    tabIndex={0}
+    aria-label={label}
+    className={styles.unpublishedBadge}
+  >
+    <Pencil {...ICON_INLINE} />
+    <span aria-hidden="true" className={styles.unpublishedDot} />
+  </span>
+));
+
 const Survey = ({
   survey,
   highlight,
@@ -177,17 +144,19 @@ const Survey = ({
 }) => {
   const { t } = useTranslation(NAMESPACES.MANAGE);
   const surveyStatus = status(survey);
+  const { labelKey: dateLabelKey, value: dateValue } = cardDate(
+    survey,
+    surveyStatus
+  );
   const surveyService = useService("survey");
-  const designService = useService("design");
+  const uploadResource = useResourceUpload();
 
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Cache role checks
   const isAdmin = isSurveyAdmin();
-  const isDefaultLogo = !survey.image;
 
   // Every failed card action surfaces the same way. An error we don't recognise
   // still says something rather than nothing.
@@ -242,33 +211,28 @@ const Survey = ({
     setOpenSnackbar(false);
   };
 
-  const handleImageUpload = (event) => {
-    const image = event.target.files[0];
-    // Clear the input so picking the same file again (e.g. a retry) still
-    // fires onChange.
-    event.target.value = "";
-    if (!image) return;
-    if (image.size > MAX_RESOURCE_UPLOAD_BYTES) {
-      setError(
-        t(`processed_errors.${PROCESSED_ERRORS.MAX_UPLOAD_SIZE_EXCEEDED.name}`)
-      );
-      setOpenSnackbar(true);
-      return;
-    }
+  const handleImageUpload = (image) => {
     dispatch(setLoading(true));
-    designService
-      .uploadResource(image, survey.id)
-      // Spread the survey: the edit endpoint assigns startDate/endDate directly
-      // rather than merging them, so a partial body clears both dates.
-      .then((response) =>
-        surveyService
+    // The shared hook does the size pre-check and error processing. The
+    // dashboard has no global error dialog, so it reports here instead.
+    uploadResource(image, { surveyId: survey.id, onFailure: showError })
+      .then((response) => {
+        if (!response) return undefined;
+        // Spread the survey: the edit endpoint assigns startDate/endDate
+        // directly rather than merging, so a partial body clears both dates.
+        return surveyService
           .putSurvey({ ...survey, image: response.name }, survey.id)
           .then(() => onUpdateImage(survey.id, response.name))
-      )
-      .catch(showError)
+          .catch(showError);
+      })
       .finally(() => {
         dispatch(setLoading(false));
       });
+  };
+
+  const openResponses = () => {
+    dispatch(setDesignModeToDesign());
+    navigate(`/responses/${survey.id}`);
   };
 
   return (
@@ -284,230 +248,164 @@ const Survey = ({
         </Alert>
       </Snackbar>
       <Card
+        className={`${styles.card} ${highlight ? styles.highlight : ""}`}
         sx={{
-          "&:hover": {
-            boxShadow: (theme) => theme.customShadows.z24,
-          },
+          // Sourced from the theme here so the stylesheet can use them inside
+          // :hover and :focus-visible, where sx cannot reach.
+          "--card-accent": (theme) => theme.palette.primary.main,
+          "--card-danger": (theme) => theme.palette.error.dark,
+          // The card is flat until pointed at, and .card:hover supplies the
+          // shadow. MUI's Card carries a theme elevation whose selector has
+          // the same specificity as .card, so the stylesheet cannot turn it
+          // off from the resting state -- it only outranks it under :hover,
+          // which left the card casting a heavier shadow at rest than when
+          // hovered. sx wins on specificity, so the rest state lands here.
+          boxShadow: "none",
         }}
-        className={`${highlight ? styles.highlight : ""}`}
       >
-        <Stack sx={{ pb: 0 }}>
-          <Stack spacing={0.5} sx={{ mb: 1 }}>
-            <Box className={styles.relativeContainer}>
-              <Box className={styles.absoluteOverlay}>
-                <EditableSurveyTitle
-                  survey={survey}
-                  onSave={handleChangeTitle}
-                  isEditable={isAdmin}
-                />
-              </Box>
+        <SurveyCover
+          survey={survey}
+          surveyStatus={surveyStatus}
+          isEditable={isAdmin}
+          onUpload={handleImageUpload}
+        />
 
-              <Box className={styles.logo}>
-                <Box className={`${styles.logoImageWrapper}`}>
-                  <CardMedia
-                    component="img"
-                    image={
-                      survey.image
-                        ? buildResourceUrl(survey.image, survey.id)
-                        : "/placehoder-logo.png"
-                    }
-                    height="150"
-                  />
-                  <Box className={styles.imageOverlay} />
-
-                  {isAdmin &&
-                    (isDefaultLogo ? (
-                      <Box
-                        className={`${styles.photoIcon} ${styles.addLogoCta}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          document
-                            .getElementById(`imageInput-${survey.id}`)
-                            .click();
-                        }}
-                      >
-                        <ImageIcon className={styles.addLogoIcon} />
-                        <span className={styles.addLogoLabel}>
-                          {t("edit_survey.add_logo")}
-                        </span>
-                      </Box>
-                    ) : (
-                      <Box
-                        className={styles.photoIcon}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          document
-                            .getElementById(`imageInput-${survey.id}`)
-                            .click();
-                        }}
-                      >
-                        <ImageIcon className={styles.cameraIcon} />
-                      </Box>
-                    ))}
-                </Box>
-                <input
-                  id={`imageInput-${survey.id}`}
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  onChange={handleImageUpload}
-                />
-              </Box>
-            </Box>
-
-            <EditableSurveyDescription
-              survey={survey}
-              onSave={handleChangeDescription}
-              isEditable={isAdmin}
-            />
-
-            <div className={styles.surveyMeta}>
-              <CustomTooltip
-                showIcon={false}
-                body={t("users_manage.statuses_info")}
-              >
-                <div className={`${styles.statusPill} ${styles[surveyStatus]}`}>
-                  <span className={styles.statusDot} />
-                  {t(`status.${surveyStatus}`)}
-                </div>
-              </CustomTooltip>
-
-              <div className={styles.surveyIconsContainer}>
-                {survey.status !== "closed" &&
-                  survey.latestVersion.published === false && (
-                    <CustomTooltip
-                      title={t("label.unpublished_changes")}
-                      showIcon={false}
-                    >
-                      <div
-                        className={styles.surveyIcon}
-                        style={isAdmin ? undefined : { cursor: "default" }}
-                        {...(isAdmin && {
-                          onClick: (e) => {
-                            e.stopPropagation();
-                            dispatch(setDesignModeToDesign());
-                            navigate(`/edit-survey/${survey.id}`);
-                          },
-                        })}
-                      >
-                        <WarningIcon sx={ICON_SIZE} />
-                      </div>
-                    </CustomTooltip>
-                  )}
-
+        <div className={styles.cardBody}>
+          <EditableSurveyTitle
+            survey={survey}
+            onSave={handleChangeTitle}
+            isEditable={isAdmin}
+            badge={
+              survey.status !== "closed" &&
+              survey.latestVersion.published === false && (
                 <CustomTooltip
+                  title={t("label.unpublished_changes")}
+                  body={t("label.unpublished_changes_info")}
                   showIcon={false}
-                  title={t("label.responses", {
-                    count: survey.completeResponseCount,
-                  })}
                 >
-                  <div
-                    className={styles.surveyIcon}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      dispatch(setDesignModeToDesign());
-                      navigate(`/responses/${survey.id}`);
-                    }}
-                  >
-                    <Badge
-                      badgeContent={survey.completeResponseCount}
-                      color="primary"
-                      sx={BADGE_SX}
-                    >
-                      <TableRowsIcon sx={ICON_SIZE} />
-                    </Badge>
-                  </div>
+                  <UnpublishedBadge
+                    label={t("label.unpublished_changes")}
+                  />
                 </CustomTooltip>
-              </div>
+              )
+            }
+          />
+
+          <EditableSurveyDescription
+            survey={survey}
+            onSave={handleChangeDescription}
+            isEditable={isAdmin}
+          />
+
+          {/* usage has always been in the list payload and never shown. */}
+          <p className={styles.cardMeta}>
+            {t(`mode.${survey.usage}`)} &middot;{" "}
+            {t("edit_survey.metadata.last_modified")}{" "}
+            {fLocal(survey.lastModified)}
+          </p>
+
+          <div className={styles.cardStats}>
+            {/* A reading, not a control. It used to navigate to the responses
+                page, which made a number in the middle of the card a second
+                way out of it; the redesign has it as plain text and leaves
+                going places to the action row. An analyst still gets a
+                Responses button there, which is their way in. */}
+            <div className={styles.responsesStat}>
+              <span className={styles.statValue}>
+                {survey.completeResponseCount}
+              </span>
+              <span className={styles.statLabel}>
+                {t("edit_survey.responses")}
+              </span>
             </div>
-          </Stack>
-
-          <div className={styles.surveyDates}>
-            {getDatesToShow(survey, surveyStatus).map(
-              ({ key, labelKey, value }) => (
-                <DateItem key={key} label={t(labelKey)} value={fDate(value)} />
-              ),
-            )}
+            {/* Not always the creation date: the slot follows the status,
+                so a scheduled survey says when it starts and a collecting
+                one when it stops. See cardDate. */}
+            <div className={styles.dateStat}>
+              <span className={styles.statLabel}>{t(dateLabelKey)}</span>
+              <span className={styles.dateValue}>{fLocal(dateValue)}</span>
+            </div>
           </div>
-        </Stack>
 
-        <div className={styles.surveyActionsNew}>
-          {isAdmin ? (
-            <>
-              <ActionButton
-                variant="Primary"
-                onClick={(e) => {
-                  dispatch(setDesignModeToDesign());
-                  e.stopPropagation();
-
-                  navigate(`/design-survey/${survey.id}`);
-                }}
-              >
-                <ArticleIcon sx={ICON_SIZE_ACTION} />
-                {t("edit_survey.title")}
-              </ActionButton>
-
-              {survey.status === "active" && (
-                <ActionButton
-                  tooltip={t("edit_survey.close_title")}
-                  variant="Secondary"
-                  iconOnly
-                  onClick={() => onClose(survey.id)}
-                >
-                  <Cancel sx={ICON_SIZE_ACTION} />
-                </ActionButton>
-              )}
-
-              <ActionButton
-                tooltip={t("edit_survey.clone_survey")}
-                variant="Secondary"
-                iconOnly
-                onClick={onClone}
-              >
-                <FileCopyIcon sx={ICON_SIZE_ACTION} />
-              </ActionButton>
-
-              {survey.status !== STATUS.ACTIVE && (
-                <ActionButton
-                  tooltip={t("action_btn.delete")}
-                  variant="Danger"
-                  iconOnly
-                  onClick={() => onDelete(survey.id)}
-                >
-                  <DeleteIcon sx={ICON_SIZE_ACTION} />
-                </ActionButton>
-              )}
-            </>
-          ) : (
-            <>
-              {isUserAnalyst() && (
+          <div className={styles.cardActions}>
+            {isAdmin ? (
+              <>
+                {/* No icon: in the redesign the card's main action is the
+                    only full-width button in the row, so the label alone
+                    carries it and the icons stay the mark of the square
+                    secondary buttons beside it. */}
                 <ActionButton
                   variant="Primary"
-                  onClick={(e) => {
+                  onClick={() => {
                     dispatch(setDesignModeToDesign());
-                    e.stopPropagation();
-                     navigate(`/responses/${survey.id}`);
+                    navigate(`/design-survey/${survey.id}`);
                   }}
                 >
-                  <TableRowsIcon sx={ICON_SIZE_ACTION} />
-
-                  {t("edit_survey.responses")}
+                  {t("edit_survey.title")}
                 </ActionButton>
-              )}
-              <ActionButton
-                variant="Primary"
-                onClick={(e) => {
-                  dispatch(setDesignModeToDesign());
-                  e.stopPropagation();
-                  window.open(`/preview/${survey.id}`, "_blank");
-                }}
-              >
-                <VisibilityIcon sx={ICON_SIZE_ACTION} />
 
-                {t("preview")}
-              </ActionButton>
-            </>
-          )}
+                {/* The order is the redesign's and it is the same on every
+                    status, so a button never moves under the pointer as a
+                    survey goes from scheduled to active to closed: duplicate,
+                    then whichever of close or delete applies. Each test reads
+                    surveyStatus, not survey.status, because the server calls a
+                    scheduled and an expired survey "active" too and only the
+                    derived status tells them apart. */}
+                <ActionButton
+                  tooltip={t("edit_survey.clone_survey")}
+                  variant="Secondary"
+                  iconOnly
+                  onClick={onClone}
+                >
+                  <Copy {...ICON_ACTION} />
+                </ActionButton>
+
+                {CLOSEABLE.includes(surveyStatus) && (
+                  <ActionButton
+                    tooltip={t("edit_survey.close_title")}
+                    variant="Secondary"
+                    iconOnly
+                    onClick={() => onClose(survey.id)}
+                  >
+                    <Lock {...ICON_ACTION} />
+                  </ActionButton>
+                )}
+
+                {/* A draft or a closed survey. The dashboard is the only place
+                    a survey can be deleted, so a closed one has to stay
+                    removable here. */}
+                {DELETABLE.includes(surveyStatus) && (
+                  <ActionButton
+                    tooltip={t("action_btn.delete")}
+                    variant="Danger"
+                    iconOnly
+                    onClick={() => onDelete(survey.id)}
+                  >
+                    <Trash2 {...ICON_ACTION} />
+                  </ActionButton>
+                )}
+              </>
+            ) : (
+              <>
+                {isUserAnalyst() && (
+                  <ActionButton variant="Primary" onClick={openResponses}>
+                    <Table2 {...ICON_ACTION} />
+                    {t("edit_survey.responses")}
+                  </ActionButton>
+                )}
+                <ActionButton
+                  variant="Primary"
+                  onClick={() => {
+                    dispatch(setDesignModeToDesign());
+                    window.open(`/preview/${survey.id}`, "_blank");
+                  }}
+                >
+                  <Eye {...ICON_ACTION} />
+                  {t("preview")}
+                </ActionButton>
+              </>
+            )}
+          </div>
         </div>
       </Card>
     </>

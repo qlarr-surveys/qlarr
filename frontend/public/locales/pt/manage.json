@@ -10,7 +10,8 @@
     "save": "Salvar",
     "create": "Criar",
     "export": "Exportar",
-    "download": "Baixar"
+    "download": "Baixar",
+    "delete_survey": "Excluir pesquisa"
   },
   "add_user": {
     "cancel": "Cancelar",
@@ -31,7 +32,7 @@
   "confirm_password_required": "Você deve repetir a senha",
   "create_survey": {
     "title": "Criar Pesquisa",
-    "empty_state_message": "Nenhuma pesquisa disponível.",
+    "empty_state_message": "Nenhuma pesquisa com este status.",
     "or": "ou",
     "empty_state_cta_copy": "para começar!"
   },
@@ -46,6 +47,7 @@
   "edit_survey": {
     "total_responses": "Total de respostas",
     "add_logo": "Adicionar um logótipo ao inquérito",
+    "replace_logo": "Substituir logótipo",
     "export": "Exportar Pesquisa",
     "close_title": "Fechar Pesquisa",
     "can_lock_survey": "Permitir que pesquisadores bloqueiem a pesquisa",
@@ -53,7 +55,8 @@
     "count": "Quantidade",
     "default_survey_url": "URL de pesquisa padrão",
     "close_survey": "Tem certeza de que deseja fechar {{survey_name}}?",
-    "delete_survey": "Tem certeza de que deseja excluir {{survey_name}}?",
+    "delete_survey": "A pesquisa é excluída junto com suas respostas e seus arquivos enviados. Não é possível desfazer.",
+    "survey_deleted": "{{survey_name}} foi excluída",
     "general": "Geral",
     "limit": "Limite",
     "limit_responses": "Limitar Respostas por Pesquisadores",
@@ -84,7 +87,10 @@
       "last_modified": "Última Modificação",
       "start_date": "Data de Início",
       "end_date": "Data de Finalização"
-    }
+    },
+    "edit_name": "Editar o nome da pesquisa: {{name}}",
+    "edit_description": "Editar a descrição da pesquisa",
+    "delete_survey_title": "Excluir “{{survey_name}}”?"
   },
   "edit_user": {
     "title": "Editar Usuário"
@@ -182,10 +188,12 @@
     "to": "A",
     "total_responses_limit": "Limite Total de Respostas",
     "sort_by": "Ordenar Por",
-    "unpublished_changes": "Tem Alterações Não Publicadas",
+    "unpublished_changes": "Tem alterações não publicadas",
+    "unpublished_changes_info": "As alterações feitas desde a última publicação ainda não estão ativas. Publique para atualizar o que os inquiridos veem.",
     "responses": "Respostas Completas : {{count}}",
     "quota": "Cota: {{count}}",
-    "no_quota": "Sem Cota"
+    "no_quota": "Sem Cota",
+    "survey_description": "Descrição da Pesquisa"
   },
   "language": {
     "ar": "Árabe",
@@ -224,7 +232,7 @@
   },
   "fetch_error": "Não foi possível carregar suas pesquisas. Verifique sua conexão e tente novamente.",
   "new_survey": "Nova Pesquisa",
-  "reset_filter": "Redefinir Filtro de Pesquisa",
+  "reset_filter": "Mostrar todas as pesquisas",
   "create_new_survey": "Criar Nova Pesquisa",
   "import_survey": "Importar uma pesquisa",
   "upload_zip_folder": "Enviar Pasta ZIP",
@@ -530,7 +538,6 @@
     "active": "Ativo",
     "invitation_sent": "Convite Enviado",
     "learn_about_roles": "Saiba mais sobre os papéis de usuário",
-    "statuses_info": "<strong>Rascunho</strong> — A pesquisa ainda não foi publicada. Disponível apenas para pré-visualização.<br/><br/><strong>Agendada</strong> — A pesquisa está publicada mas a data de início é futura. Será ativada automaticamente.<br/><br/><strong>Ativa</strong> — A pesquisa está no ar e aceitando respostas.<br/><br/><strong>Expirada</strong> — A data de término passou. Não é possível coletar novas respostas. Você pode reativá-la alterando as datas.<br/><br/><strong>Fechada</strong> — A pesquisa foi encerrada permanentemente. Você só pode exportar dados ou duplicá-la.",
     "roles_info": "<strong>Super Admin</strong> — Acesso total a todos os recursos, incluindo gerenciamento de usuários, criação de pesquisas e configurações do sistema.<br/><br/><strong>Admin de Pesquisas</strong> — Pode criar e gerenciar pesquisas, acessar design, configurações, respostas e análises.<br/><br/><strong>Analista</strong> — Pode visualizar respostas e análises de pesquisas, e pré-visualizar pesquisas.<br/><br/><strong>Pesquisador</strong> — Pode coletar respostas de pesquisas pelo aplicativo móvel, e pré-visualizar pesquisas."
   },
   "launch": {
@@ -575,7 +582,8 @@
     "import_survey": "Importar uma pesquisa existente (que foi exportada anteriormente) de um arquivo ZIP",
     "create_survey_with_ai": "Criar uma nova pesquisa automaticamente usando assistência de IA",
     "survey_title": "Título interno usado por sua equipe para identificar a pesquisa. Este título não é mostrado aos respondentes.",
-    "survey_description": "Descrição interna usada por sua equipe para fornecer contexto sobre a pesquisa. Esta descrição não é mostrada aos respondentes."
+    "survey_description": "Descrição interna usada por sua equipe para fornecer contexto sobre a pesquisa. Esta descrição não é mostrada aos respondentes.",
+    "more_info": "Mais informações"
   },
   "translations": {
     "title": "Traduções",
@@ -787,6 +795,17 @@
     "question_type_text_display": "Exibição de Texto",
     "question_type_image_display": "Exibição de Imagem",
     "question_type_video_display": "Exibição de Vídeo"
+  },
+  "status_info": {
+    "draft": "A pesquisa ainda não foi publicada. Disponível apenas para pré-visualização.",
+    "scheduled": "A pesquisa está publicada mas a data de início é futura. Será ativada automaticamente.",
+    "active": "A pesquisa está no ar e aceitando respostas.",
+    "expired": "A data de término passou. Não é possível coletar novas respostas. Você pode reativá-la alterando as datas.",
+    "closed": "A pesquisa foi encerrada permanentemente. Você só pode exportar dados ou duplicá-la."
+  },
+  "status_legend": {
+    "title": "Estados do inquérito",
+    "this_survey": "este inquérito"
   },
   "group_quotas": {
     "title": "Cotas por grupo",

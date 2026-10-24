@@ -1,535 +1,678 @@
-.surveyHeader {
-  padding: 5px;
-  color: #fff;
-  text-transform: capitalize;
-}
-
-.contentCard {
-  padding: 5px;
-}
-
-.actionBtn {
-  display: flex;
-  justify-content: space-between;
-}
-
+/* ==============================================
+   Card shell
+   ============================================== */
 .card {
-  border-radius: 5px !important;
-  box-shadow: none !important;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #dce0ee;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.cardContent {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
+.card:hover {
+  border-color: #b9bff0;
+  box-shadow: 0 4px 14px rgba(27, 33, 80, 0.07);
 }
 
-.imageContainer {
-  padding: 1rem;
-  background-color: #f7f8fc;
-  display: flex;
-  justify-content: center;
-}
-
-.surveyContent {
-  display: flex;
-  align-items: center;
-  gap: 7rem;
+.cardBody {
   flex: 1;
-  width: 100%;
-}
-
-.surveyTitle {
-  width: 13rem;
-  color: #181735;
-}
-
-.surveyStatus {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  width: 5rem;
+  flex-direction: column;
+  padding: 16px 20px 20px;
 }
 
-.badge {
-  height: 0.5rem;
-  width: 0.5rem;
-  border-radius: 99999px;
-}
-
-.textTransform {
-  text-transform: capitalize;
-}
-
-.surveyResponse {
-  display: flex;
-  align-items: center;
-  width: 9rem;
-  gap: 0.5rem;
-}
-
-.surveyActions {
-  display: flex;
-  flex-direction: row !important;
-  justify-content: flex-start;
-  gap: 0.5rem;
-  margin-right: 1rem;
-  flex: auto;
-  width: 15rem;
-}
-
-.iconButton {
-  border: 0.5px solid #e3dfdf !important;
-  border-radius: 8px !important;
-  padding: 0.5rem !important;
-  height: 32px !important;
-  width: 64px !important;
-  min-width: 32px !important;
-}
-
-.statusAndIcons {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  width: 100%;
-  padding: 0 1.5rem;
-}
-
-.statusBadge {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-width: 5rem;
-}
-
-.statusIcons {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex: 1;
-}
-
-@media only screen and (max-width: 1024px) {
-  .cardContent {
-    flex-direction: column;
-    padding: 0rem 1rem 1rem 1rem;
-  }
-
-  .surveyContent {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
-  }
-
-  .imageContainer {
-    width: 100%;
-  }
-
-  .surveyActions {
-    width: 100%;
-  }
-
-  .statusAndIcons {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-
-@media only screen and (min-width: 1024px) and (max-width: 1440px) {
-  .surveyContent {
-    gap: 2rem;
-  }
-
-  .surveyResponse {
-    width: 7rem;
-  }
-}
-
-.logo {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.logo img {
-  margin: auto;
-  display: block;
-  object-fit: contain;
-}
-
-.logoImageWrapper {
+/* ==============================================
+   Cover: logo, replace affordance, status pill
+   ============================================== */
+/* The grey the band shows either side of a logo that does not fill it, and
+   behind one saved with transparency. It is production's: a 40% black wash
+   over the white card, which lands here. The 30% scrim that sits over it is
+   on .coverLogo, so the two compose to the #6b6b6b production shows. */
+.cover {
   position: relative;
+  flex: none;
+  height: 150px;
+  overflow: hidden;
+  background: #999;
 }
 
-.imageOverlay {
+/* Contained and bled to the edges, as production draws it: the image spans
+   the full width of the card and is scaled to fit the band whole, never
+   cropped. A wide logo therefore reaches both edges; a tall one stands full
+   height with the band's grey either side of it.
+
+   Nothing is inset. The old 14/20/44px inset shrank a tall logo to a 60px
+   thumbnail floating on white, which read as a gap in the card rather than as
+   its cover. Cropping it to fill instead would have cut the ends off a
+   wordmark, which is the one thing a logo cannot lose.
+
+   The status pill sits over the bottom-end corner of this. It is an opaque
+   chip with its own shadow, so it holds up over a logo wide enough to reach
+   it.
+
+   The placeholder gets a case of its own, below.
+
+   `::after` is production's 30% scrim, over the image and the grey alike and
+   on every cover, whether the survey has a logo or not. It is what keeps the
+   band one even tone instead of a bright photo sitting in a grey hole, and
+   what the white upload prompt is legible against. It is inside .coverLogo so
+   that it paints under the prompt and the status pill, which are its
+   siblings, rather than over them. */
+.coverLogo {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.coverLogo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
   background-color: rgba(0, 0, 0, 0.3);
-  opacity: 1;
-  transition: opacity 0.3s ease;
 }
 
-.cameraIconWrapper {
+/* The placeholder fills the band instead of fitting inside it, which is the
+   one place following production's rule would not reproduce production's
+   look. There the band is 2.42:1 and the mark is 2.33:1, so contained it all
+   but fills; this band is 3.03:1, so the same rule leaves 41px of grey down
+   each side and the cover reads as a letterboxed picture rather than a cover.
+
+   Filling crops 18px off the top and bottom, which costs a tiled watermark
+   nothing -- unlike a survey's own logo, which stays contained because
+   cropping a wordmark takes its ends off. */
+.cover[data-needs-logo="true"] .coverLogo {
+  background-size: cover;
+}
+
+.coverInput {
+  display: none;
+}
+
+/* Hidden until the cover is hovered or focused within. It is a real button,
+   so keyboard users reach it the same way.
+
+   Top-aligned rather than centred, as the redesign draws it: the status pill
+   owns the bottom of the cover, and a centred prompt would sit against it. */
+.coverReplace {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  inset: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 28px 0 0;
+  gap: 6px;
+  border: 0;
+  background-color: transparent;
+  color: #fff;
+  cursor: pointer;
   opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 1;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
 }
 
-.logoImageWrapper:hover .cameraIconWrapper {
+/* A placeholder is not a cover, so on a survey still wearing one the prompt
+   never hides: the only way to give the card a real logo should not be
+   something you have to hover to find.
+
+   It adds no wash of its own, as production adds none: a logo-less card is
+   lit exactly like every other card, and the white prompt reads against the
+   30% scrim they all carry. A heavier wash here made a row of logo-less cards
+   look like a row of disabled ones. Hover still darkens, the same 40% a card
+   with a logo gets. */
+.cover[data-needs-logo="true"] .coverReplace {
   opacity: 1;
 }
 
-.cameraIcon {
-  color: white;
-  pointer-events: none;
-}
-
-.logoImageWrapper {
-  position: relative;
-  display: inline-block;
-  flex: 1;
-}
-
-.relativeContainer {
-  position: relative;
+.cover:hover .coverReplace,
+.cover:focus-within .coverReplace {
+  opacity: 1;
   background-color: rgba(0, 0, 0, 0.4);
 }
 
-.absoluteOverlay {
-  width: 100%;
-  position: absolute;
-  z-index: 99999;
-  bottom: 0;
-  color: white;
+.coverReplace:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: -5px;
 }
 
-.container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-.truncatedText {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: inline-block;
-  line-height: 1.5em;
-  max-height: 4.5em;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  white-space: normal;
-  word-wrap: break-word;
-  word-break: break-word;
-}
-
-
-.titleContainer {
+.coverReplaceIcon {
   display: flex;
   align-items: center;
-  width: 100%;
-  justify-content: space-between;
-}
-
-.surveyLink {
-  flex-grow: 1;
-  color: inherit;
-}
-
-.nameIcon {
-  opacity: 0;
-  transition: opacity 0.2s ease-in-out;
-}
-
-.titleContainer:hover .nameIcon {
-  opacity: 1;
-}
-
-.descriptionContainer {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  justify-content: space-between;
-  position: relative;
-}
-
-.truncatedText {
-  flex-grow: 1;
-  color: inherit;
-}
-
-.descriptionIcon {
-  opacity: 0;
-  transition: opacity 0.2s ease-in-out;
-}
-
-.descriptionContainer:hover .descriptionIcon {
-  opacity: 1;
-}
-
-.photoIcon {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.logoImageWrapper:hover .photoIcon {
-  opacity: 1;
-}
-
-.addLogoCta {
-  opacity: 1;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: white;
-  cursor: pointer;
-  font-family: 'Rubik', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.addLogoIcon {
-  font-size: 16px !important;
-  color: white;
-}
-
-.addLogoLabel {
-  line-height: 1;
-}
-
-.highlight {
-  animation: fadeHighlight 3s ease-in-out;
-  background-color: rgba(
-    245,
-    245,
-    220,
-    0.7
-  ); /* Beige with partial transparency */
-}
-
-@keyframes fadeHighlight {
-  0% {
-    background-color: rgba(
-      245,
-      245,
-      220,
-      0.7
-    ); /* Start with semi-transparent beige */
-  }
-  100% {
-    background-color: rgba(
-      245,
-      245,
-      220,
-      0.2
-    ); /* Fade to even more transparent beige */
-  }
-}
-
-/* ==============================================
-   CSS Variables for Survey Card
-   ============================================== */
-.surveyCardVars {
-  --color-navy: #16205b;
-  --color-navy-dark: #091133;
-  --color-blue: #2d3cb1;
-  --color-cyan: #04bdf3;
-  --color-orange: #d13e17;
-  --color-gray-light: #B3B7CB;
-  --color-gray-lightest: #EFF1FC;
-  --spacing-card: 1.5rem;
-  --transition-default: all 0.3s ease;
-}
-
-/* ==============================================
-   Survey Meta Section
-   ============================================== */
-.surveyMeta {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-  padding: 0 var(--spacing-card, 1.5rem) 1.25rem;
-  border-bottom: 2px solid var(--color-gray-lightest, #EFF1FC);
-}
-
-/* Status Badge */
-.statusPill {
-  padding: 0.4rem 0.9rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.statusDot {
-  width: 6px;
-  height: 6px;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background-color: currentColor;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
 }
 
-/* Status Variants */
+.coverReplaceLabel {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* ==============================================
+   Status pill — the colour key the status_info.* strings explain.
+   Changing these silently desyncs what the tooltip says they mean.
+
+   The redesign's pill is a tinted chip, not a saturated one: a pale wash of
+   the status colour carrying that colour as text, with the dot as the one
+   piece at full strength. Five solid gradients competed with the cover behind
+   them and with each other; a wash lets the dot do the signalling.
+   ============================================== */
+.statusPill {
+  position: absolute;
+  bottom: 12px;
+  inset-inline-end: 12px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  /* The dot's side gets the wider padding, so the gap before the label and
+     the space after it look even. Logical, because Arabic mirrors the card. */
+  padding-inline: 16px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.12);
+  cursor: help;
+}
+
+/* The dot carries its own colour rather than the label's: for Draft and
+   Expired the redesign deliberately parts the two, so the text stays readable
+   while the dot keeps the saturation that makes it scannable down a grid. */
+.statusDot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--status-dot, currentColor);
+}
+
 .draft {
-  background: linear-gradient(135deg, #FEE33F 0%, #F0A12F 100%);
-  color: var(--color-navy-dark, #091133);
-}
-
-.active {
-  background: linear-gradient(135deg, #69ac3b 0%, #56A034 100%);
-  color: white;
-}
-
-.closed {
-  background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
-  color: white;
-}
-
-.expired {
-  background: linear-gradient(135deg, #9d4435 0%, #7f3b2e 100%);
-  color: white;
+  background: #f9fafb;
+  color: #121926;
+  --status-dot: #4d5761;
 }
 
 .scheduled {
-  background: linear-gradient(135deg, #607d8b 0%, #455a64 100%);
-  color: white;
+  background: #eff8ff;
+  color: #1849a9;
+  --status-dot: #1849a9;
+}
+
+.active {
+  background: #ecfdf3;
+  color: #085d3a;
+  --status-dot: #085d3a;
+}
+
+.expired {
+  background: #fef3f2;
+  color: #912018;
+  --status-dot: #dc2626;
+}
+
+.closed {
+  background: #fffaeb;
+  color: #93370d;
+  --status-dot: #93370d;
 }
 
 /* ==============================================
-   Survey Icons
+   Status legend — the five statuses and what each one means, inside the
+   tooltip the pill opens, drawn as the redesign draws it.
+
+   The dots are NOT the pills' --status-dot values. Those were picked to sit
+   on a pale wash; on the tooltip's dark #1b2150 card a #4d5761 draft dot or a
+   #085d3a active dot is all but invisible. These are the redesign's own
+   lifted pairs for the dark card, each ringed in white so a dot reads as a
+   dot and not as a smudge. Changing one without the other desyncs the key
+   from the pills it is a key to.
    ============================================== */
-.surveyIconsContainer {
-  display: flex;
-  gap: 0.5rem;
-  margin-left: auto;
+.legendTitle {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #c7cbf0;
 }
 
-.surveyIcon {
-  width: 32px;
-  height: 32px;
-  background: var(--color-gray-lightest, #EFF1FC);
-  border-radius: 8px;
+.legend {
+  margin: 0;
+  padding: 0;
+}
+
+/* The negative inline margin lets the current row's highlight run to the
+   card's padding edge while the text still lines up with the title above. */
+.legendRow {
+  display: flex;
+  gap: 9px;
+  margin: 0 -8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.legendRow[data-current="true"] {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.legendDot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  margin-top: 5px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
+}
+
+.legendDot.draft {
+  background: #9aa3ad;
+}
+
+.legendDot.scheduled {
+  background: #53b1fd;
+}
+
+.legendDot.active {
+  background: #32d583;
+}
+
+.legendDot.expired {
+  background: #f97066;
+}
+
+.legendDot.closed {
+  background: #fdb022;
+}
+
+.legendName {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+/* "· this survey", on the one row that is about the card you are hovering.
+   Lighter than the status name it follows, because it is an aside about which
+   row to read first, not part of the name. */
+.legendHere {
+  font-weight: 400;
+  color: #c7cbf0;
+}
+
+.legendMeaning {
+  display: block;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 17px;
+  color: #dfe2f7;
+}
+
+/* The survey's own dates, under the legend and ruled off from it: everything
+   above is about statuses in general, this is about this survey. The card no
+   longer lists them, so without this a scheduled or expiring survey would
+   lose the only place that said when. */
+.legendDates {
+  margin: 10px -8px 0;
+  padding: 9px 8px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  font-size: 12px;
+  line-height: 17px;
+  color: #dfe2f7;
+}
+
+/* ==============================================
+   Title and description rows
+   ============================================== */
+.titleContainer,
+.descriptionContainer {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.titleContainer {
+  gap: 6px;
+}
+
+.descriptionContainer {
+  margin-bottom: 10px;
+  margin-top: 8px;
+}
+
+/* The ⓘ, mounted in both the reading and the editing state. */
+.rowInfo {
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+
+/* The redesign's title ⓘ is 2px larger than the one beside the description and
+   rides 2px higher, to sit against a 22px line rather than a 20px one. */
+.titleContainer .rowInfo > button {
+  width: 26px;
+  height: 26px;
+  margin-top: -2px;
+}
+
+/* The reading state is the control: a button wearing the text's own type, so
+   the only thing hover and focus add is a tint and a ring. The resets are what
+   stop it looking like a button -- the redesign shows no chrome until the
+   pointer is on it. `text-align: start` and not `left`: Arabic mirrors. */
+.titleText,
+.descriptionText {
+  flex: 0 1 auto;
+  min-width: 0;
+  padding: 0px 6px;
+  margin-inline-start: -6px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  font-family: inherit;
+  text-align: start;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+button.titleText,
+button.descriptionText {
+  cursor: pointer;
+}
+
+button.titleText:hover,
+button.descriptionText:hover {
+  background: #f3f4fa;
+}
+
+button.titleText:focus-visible,
+button.descriptionText:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.titleText {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
+  color: #1b2150;
+}
+
+.descriptionText {
+  font-size: 13.5px;
+  line-height: 20px;
+  color: #4c5474;
+}
+
+/* The prompt to write one, not a description. */
+.descriptionEmpty {
+  color: #8a90ad;
+}
+
+/* Pushes the unpublished badge to the end of the title row. */
+.rowSpacer {
+  flex: 1;
+}
+
+/* Same inset as the reading state, so the text does not shift sideways by the
+   6px of negative margin when the editor opens. */
+.titleField,
+.descriptionField {
+  flex: 1;
+  min-width: 0;
+  margin-inline-start: -6px;
+}
+
+/* The redesign's field: the reading text boxed in the focus colour, at the
+   same size and weight it had a moment ago. MUI's standard underline is off,
+   so the border here is the only one -- the control is the box, not a line
+   under it. The heights match .titleContainer and .descriptionContainer, which
+   is what keeps the card from resizing as the editor opens and closes. */
+.titleField :global(.MuiInputBase-root),
+.descriptionField :global(.MuiInputBase-root) {
+  box-sizing: border-box;
+  border: 1.5px solid #3a46d8;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.titleField :global(.MuiInputBase-root) {
+  height: 48px;
+  padding: 1px 6px;
+}
+
+.descriptionField :global(.MuiInputBase-root) {
+  height: 44px;
+  padding: 1px 8px;
+}
+
+.titleField :global(.MuiInputBase-input),
+.descriptionField :global(.MuiInputBase-input) {
+  padding: 0;
+  overflow-y: auto;
+}
+
+.titleField :global(.MuiInputBase-input) {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
+  color: #1b2150;
+}
+
+.descriptionField :global(.MuiInputBase-input) {
+  font-size: 13.5px;
+  line-height: 20px;
+  color: #4c5474;
+}
+
+/* The unpublished-changes marker, beside the name it applies to. */
+.unpublishedBadge {
+  position: relative;
+  flex: none;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-navy, #16205b);
-  transition: var(--transition-default, all 0.3s ease);
-  cursor: pointer;
-  position: relative;
+  border-radius: 7px;
+  padding: 0;
+  border: 0;
+  background: #fffaeb;
+  color: #93370d;
 }
 
-.surveyIcon:hover {
-  background: var(--color-cyan, #04bdf3);
-  color: white;
-  transform: scale(1.1);
+.unpublishedBadge:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+/* The pencil says "edited", the dot says "not published yet". The ring is the
+   badge's own background, so the dot reads as sitting on top of the pencil
+   rather than being part of it. */
+.unpublishedDot {
+  position: absolute;
+  top: 3px;
+  inset-inline-end: 3px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #dc6803;
+  border: 1.5px solid #fffaeb;
 }
 
 /* ==============================================
-   Survey Dates
+   Mode, stats
    ============================================== */
-.surveyDates {
-  display: flex;
-  justify-content: flex-start;
-  gap: 2rem;
-  font-size: 0.8rem;
-  color: var(--color-gray-light, #B3B7CB);
-  margin-bottom: 25px;
-  padding: 0 var(--spacing-card, 1.5rem);
+.cardMeta {
+  /* The bottom margin is what holds the stats rule off this line. It cannot
+     live on .cardStats, whose margin-top is auto so the action rows of a row
+     of cards line up however long their titles run; auto would eat a fixed
+     gap in the packed case, which is exactly the case that needs one. */
+  margin-top: auto;
+  font-size: 12.5px;
+  line-height: 18px;
+  color: #5b6189;
 }
 
-.dateItem {
+.cardStats {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  padding-top: 4px;
+  border-top: 1px solid #eef0f7;
+}
+
+.responsesStat {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  align-items: flex-start;
+  text-align: start;
+  /* Set here rather than on .statLabel, which the date block shares and
+     feeds its own 17px by inheritance. Without it the label inherits the
+     card's leading and sits four pixels lower than the redesign draws it,
+     which the whole card below inherits as well. */
+  line-height: normal;
 }
 
-.dateLabel {
+.statValue {
+  display: block;
+  font-size: 20px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-size: 0.7rem;
+  line-height: 24px;
+  color: #1b2150;
+}
+
+.statLabel {
+  display: block;
+  font-size: 12px;
+  color: #5b6189;
+}
+
+.dateStat {
+  flex: none;
+  text-align: end;
+  font-size: 12px;
+  line-height: 17px;
 }
 
 .dateValue {
-  font-weight: 500;
-  color: var(--color-navy, #16205b);
+  display: block;
+  color: #1b2150;
 }
 
 /* ==============================================
-   Survey Actions
+   Actions — one 36px row: a filled primary and square icon buttons beside it.
+   The sizes, radii and colours here are the redesign's; changing one without
+   the others puts the icon buttons out of line with the primary.
    ============================================== */
-.surveyActionsNew {
+.cardActions {
   display: flex;
-  gap: 0.75rem;
-  padding: 0 var(--spacing-card, 1.5rem) var(--spacing-card, 1.5rem);
+  gap: 8px;
+  margin-top: 16px;
 }
 
+/* The transparent border is load-bearing: the outlined variants add a 1px
+   border, so without it the primary would be 2px shorter than its neighbours. */
 .actionBtn {
   flex: 1;
-  padding: 0.75rem 1rem;
-  border-radius: 10px;
-  font-family: 'Rubik', sans-serif;
-  font-weight: 600;
-  font-size: 0.85rem;
-  border: none;
-  cursor: pointer;
-  transition: var(--transition-default, all 0.3s ease);
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  padding: 0 1rem;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font-family: "Rubik", sans-serif;
+  font-weight: 600;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.actionBtn:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
 }
 
 .actionBtnPrimary {
-  background: linear-gradient(135deg, var(--color-blue, #2d3cb1) 0%, var(--color-navy, #16205b) 100%);
-  color: white;
+  background: #1b2559;
+  color: #fff;
 }
 
 .actionBtnPrimary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(45, 60, 177, 0.3);
+  background: #242f6d;
 }
 
 .actionBtnSecondary {
-  background: white;
-  color: var(--color-navy, #16205b);
-  border: 2px solid var(--color-gray-lightest, #EFF1FC);
+  background: #fff;
+  color: #3c447a;
+  border-color: #dce0ee;
 }
 
 .actionBtnSecondary:hover {
-  border-color: var(--color-cyan, #04bdf3);
-  color: var(--color-cyan, #04bdf3);
+  background: #f4f6fc;
 }
 
+/* --card-danger is error.dark (#B71D18), set on the card from the theme.
+   error.main is amber, and the old hard-coded #d13e17 was neither.
+   Hover tints rather than filling solid red: at 36px square a filled red
+   block next to the primary reads as the card's main action. */
 .actionBtnDanger {
-  background: white;
-  color: var(--color-orange, #d13e17);
-  border: 2px solid var(--color-gray-lightest, #EFF1FC);
+  background: #fff;
+  color: var(--card-danger, #b71d18);
+  border-color: #dce0ee;
 }
 
 .actionBtnDanger:hover {
-  background: var(--color-orange, #d13e17);
-  color: white;
-  border-color: var(--color-orange, #d13e17);
+  background: #fdf1f0;
+  border-color: #f0c9c6;
+}
+
+.actionBtnDanger:focus-visible {
+  outline-color: #b3261e;
 }
 
 .actionBtnIconOnly {
   flex: 0 0 auto;
-  width: 48px;
-  padding: 0.75rem;
+  width: 36px;
+  padding: 0;
+}
+
+/* Square buttons sit tight to the card edge, so the ring hugs them. */
+.actionBtnIconOnly:focus-visible {
+  outline-offset: 1px;
+}
+
+/* ==============================================
+   Clone highlight
+   ============================================== */
+.highlight {
+  animation: fadeHighlight 3s ease-in-out;
+  background-color: rgba(245, 245, 220, 0.7);
+}
+
+@keyframes fadeHighlight {
+  0% {
+    background-color: rgba(245, 245, 220, 0.7);
+  }
+  100% {
+    background-color: rgba(245, 245, 220, 0.2);
+  }
 }

@@ -81,6 +81,152 @@
   padding-top: 0;
 }
 
+/* auto-fill, not auto-fit. auto-fit collapses the tracks it has no card for
+   and hands their width to the cards it does have, so one survey on its own
+   stretched the whole width of the page. auto-fill keeps the empty tracks, so
+   a lone card is the width of one card. */
+.surveyGrid {
+  margin-top: 24px;
+  display: grid;
+  /* min() so the 300px floor cannot push the track wider than the viewport. */
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  gap: 20px;
+}
+
 .noSurveys {
   text-align: center;
+}
+
+/* ==============================================
+   Filtered to nothing
+
+   A dashed outline around empty space, which is the redesign's way of saying
+   the space is empty rather than broken. The button is its secondary one: the
+   way back is an offer, not the page's main action.
+   ============================================== */
+.filterEmpty {
+  margin-top: 24px;
+  padding: 28px;
+  border: 1.5px dashed #cfd5e8;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.filterEmptyText {
+  margin: 0;
+  font-family: "Rubik", sans-serif;
+  font-size: 14px;
+  color: #4c5474;
+}
+
+.filterEmptyAction {
+  margin-top: 14px;
+  height: 38px;
+  padding: 0 16px;
+  border: 1px solid #cfd5e8;
+  border-radius: 7px;
+  background: #fff;
+  font-family: "Rubik", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1b2150;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.filterEmptyAction:hover {
+  background: #f4f6fc;
+}
+
+.filterEmptyAction:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+/* ==============================================
+   Pagination
+
+   MUI's own look for TablePagination is a bare label, a borderless select and
+   two round icon buttons. The redesign draws the same three parts as bordered
+   controls on one line, so this restyles them in place rather than rebuilding
+   the pager: the select is still a real MUI Select, with its popover and
+   keyboard handling intact.
+   ============================================== */
+.pagination {
+  margin-top: 24px;
+  font-family: "Rubik", sans-serif;
+  font-size: 13.5px;
+  color: #4c5474;
+}
+
+.pagination :global(.MuiTablePagination-toolbar) {
+  min-height: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+/* MUI spaces these with its own margins, which fight the row's gap. */
+.pagination :global(.MuiTablePagination-selectLabel),
+.pagination :global(.MuiTablePagination-displayedRows) {
+  margin: 0;
+  font: inherit;
+}
+
+.pagination :global(.MuiTablePagination-displayedRows) {
+  min-width: 70px;
+  text-align: center;
+  color: #1b2150;
+}
+
+.pagination :global(.MuiTablePagination-input) {
+  margin: 0;
+  min-width: 76px;
+  height: 32px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  background: #fff;
+  font: inherit;
+  color: #1b2150;
+}
+
+.pagination :global(.MuiTablePagination-select) {
+  display: flex;
+  align-items: center;
+  padding-block: 0;
+  padding-inline: 12px 32px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.pagination :global(.MuiTablePagination-selectIcon) {
+  inset-inline-end: 8px;
+  color: #4c5474;
+}
+
+.pagination :global(.MuiTablePagination-actions) {
+  margin: 0;
+  display: flex;
+  gap: 6px;
+}
+
+.pagination :global(.MuiTablePagination-actions) button {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid #cfd5e8;
+  border-radius: 7px;
+  background: #fff;
+  color: #4c5474;
+}
+
+.pagination :global(.MuiTablePagination-actions) button:hover {
+  background: #f4f6fc;
+}
+
+.pagination :global(.MuiTablePagination-actions) button:disabled {
+  color: #b6bbd2;
 }

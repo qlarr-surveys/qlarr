@@ -10,13 +10,11 @@ import {
 } from "@mui/material";
 import styles from "./Dashboard.module.css";
 import { HeaderContent } from "~/components/manage/HeaderContent";
-import { isSurveyAdmin } from "~/constants/roles";
 import { setLoading } from "~/state/edit/editState";
 import { useDispatch } from "react-redux";
 
 import CreateSurvey from "~/components/manage/CreateSurvey/CreateSurvey";
 import { PROCESSED_ERRORS } from "~/utils/errorsProcessor";
-import FilterAltOffIcon from "@mui/icons-material/FilterAltOff";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 
@@ -25,7 +23,7 @@ import LoadingDots from "~/components/common/LoadingDots";
 import { useService } from "~/hooks/use-service";
 import ConfirmActionModal from "~/components/common/ConfirmActionModal";
 import StopSurveyModal from "~/components/manage/StopSurveyModal";
-import { Description, ErrorOutline } from "@mui/icons-material";
+import { ErrorOutline } from "@mui/icons-material";
 import DashboardEmptyState from "~/components/manage/DashboardEmptyState";
 import ActionCards from "~/components/manage/Dashboard/ActionCards";
 import { useDashboardActions } from "~/components/manage/Dashboard/useDashboardActions";
@@ -61,12 +59,26 @@ function Dashboard() {
   const [openImportModal, setOpenImportModal] = useState(false);
   const [recentlyUpdatedSurveyName, setRecentlyUpdatedSurveyName] =
     useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
+  // One transient message bar for the whole page: survey actions report both
+  // what succeeded and what failed, and only one of them is ever on screen.
+  const [notice, setNotice] = useState(null);
   const [fetchError, setFetchError] = useState(false);
 
   const dispatch = useDispatch();
 
   const { t } = useTranslation(NAMESPACES.MANAGE);
+
+  const showNotice = (message, severity = "error") =>
+    setNotice({ message, severity });
+
+  const showActionError = (processedError) =>
+    showNotice(
+      t(
+        `processed_errors.${
+          processedError?.name ?? PROCESSED_ERRORS.UNIDENTIFIED_ERROR.name
+        }`
+      )
+    );
 
   const processApirror = (e) => {
     setFetchingSurveys(false);
@@ -80,6 +92,15 @@ function Dashboard() {
       .getAllSurveys(page, perPage, status, sortBy)
       .then((data) => {
         if (data) {
+          // A page past the end of the list comes back empty even though the
+          // dashboard has surveys -- a saved page restored after surveys were
+          // deleted, say. Fall back to the first page instead of handing an
+          // empty page to the first-run empty state, which would greet a full
+          // dashboard with "create your first survey".
+          if (page > 1 && data.totalCount > 0 && !data.surveys?.length) {
+            setPage(1);
+            return;
+          }
           setFetchingSurveys(false);
           setSurveys(data);
         }
@@ -117,7 +138,7 @@ function Dashboard() {
   const [actionType, setActionType] = useState("");
   const [selectedSurvey, setSelectedSurvey] = useState(null);
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState(t("action_btn.delete"));
+  const [title, setTitle] = useState("");
   const [openCreateModal, setOpenCreateModal] = useState(false);
 
   const handleCreateSurveyClick = () => {
@@ -133,23 +154,22 @@ function Dashboard() {
     onImportSurvey: handleImportSurveyClick,
   });
 
-  // The first-run empty state carries its own welcome and CTAs, so the page
-  // heading and action cards above it would say the same thing twice. Mirrors
-  // the branch that renders it, filters included: a filtered-to-empty list
-  // keeps the shell.
-  const showEmptyState =
-    !fetchingSurveys &&
-    !fetchError &&
-    status === "all" &&
-    !(surveys?.surveys?.length > 0);
+  // The first-run empty state is the whole page: it carries its own welcome
+  // heading and both actions, so the page heading and the action cards above
+  // it would only say the same things twice. Until the first response lands
+  // we don't know which way it goes, so they wait with the list rather than
+  // flashing above an empty state that then replaces them.
+  const showPageIntro =
+    fetchError || status !== "all" || Boolean(surveys?.surveys?.length);
 
   const onDelete = (survey) => {
     setActionType("delete");
-    setTitle(t("action_btn.delete"));
+    // The question names the survey and the body says what goes with it, as
+    // the redesign writes its confirmations. The title used to be the word
+    // "Delete" on its own, which asked nothing.
+    setTitle(t("edit_survey.delete_survey_title", { survey_name: survey.name }));
     setSelectedSurvey(survey);
-    setDescription(
-      t("edit_survey.delete_survey", { survey_name: survey.name })
-    );
+    setDescription(t("edit_survey.delete_survey"));
     setOpen(true);
   };
 
@@ -161,7 +181,7 @@ function Dashboard() {
 
   const handleAction = () => {
     if (actionType === "delete") {
-      deleteSurvey(selectedSurvey.id);
+      deleteSurvey(selectedSurvey);
       setOpen(false);
     }
   };
@@ -176,22 +196,27 @@ function Dashboard() {
           fetchSurveys();
         }
       })
-      .catch((processedError) => {})
+      .catch(showActionError)
       .finally(() => {
         dispatch(setLoading(false));
       });
   };
 
-  const deleteSurvey = (id) => {
+  const deleteSurvey = (survey) => {
     dispatch(setLoading(true));
     surveyService
-      .deleteSurvey(id)
+      .deleteSurvey(survey.id)
       .then(() => {
+        // Informational only. The delete has already cascaded through the
+        // design, the responses and the uploaded files, and there is no
+        // restore endpoint, so there is nothing to offer an undo for.
+        showNotice(
+          t("edit_survey.survey_deleted", { survey_name: survey.name }),
+          "info"
+        );
         fetchSurveys();
       })
-      .catch((e) => {
-        dispatch(setLoading(false));
-      })
+      .catch(showActionError)
       .finally(() => {
         dispatch(setLoading(false));
       });
@@ -199,7 +224,7 @@ function Dashboard() {
 
   const handleSurveyActionError = (processedError) => {
     if (processedError?.name === PROCESSED_ERRORS.INVALID_SURVEY_DATES.name) {
-      setErrorMessage(t(`processed_errors.${processedError.name}`));
+      showActionError(processedError);
     }
   };
 
@@ -292,7 +317,7 @@ function Dashboard() {
     >
       <Container sx={{ marginBottom: "48px" }}>
         <Box className={styles.content}>
-          {!showEmptyState && (
+          {showPageIntro && (
             <>
               <Box className={styles.pageHeading}>
                 <h1 className={styles.heading}>{t("my_surveys")}</h1>
@@ -352,19 +377,7 @@ function Dashboard() {
                     </Typography>
                   </div>
                 ) : surveys?.surveys?.length > 0 ? (
-                  <Box
-                    sx={{
-                      mt: 3,
-                      columnGap: 2,
-                      display: "grid",
-                      rowGap: { xs: 4, md: 5 },
-                      gridTemplateColumns: {
-                        xs: "1fr",
-                        sm: "repeat(auto-fit, minmax(280px, 1fr))",
-                        md: "repeat(auto-fit, minmax(330px, 1fr))",
-                      },
-                    }}
-                  >
+                  <Box className={styles.surveyGrid}>
                     {surveys?.surveys?.map((survey) => {
                       return (
                         <Suspense key={survey.id} fallback={<LoadingDots />}>
@@ -386,33 +399,35 @@ function Dashboard() {
                     })}
                   </Box>
                 ) : status !== "all" ? (
-                  <div className={styles.noSurveys}>
-                    <Description sx={{ fontSize: 48, color: "#ccc" }} />
-                    <Typography
-                      variant="h6"
-                      color="textSecondary"
-                      sx={{ mt: 2 }}
-                    >
+                  /* Nothing is missing here -- a filter is simply hiding it.
+                     A dashed panel says "this space is empty by your choice",
+                     where the grey icon and the filled button of a real empty
+                     state said something had gone wrong. role="status" so the
+                     filter change is announced rather than silently emptying
+                     the list. */
+                  <div className={styles.filterEmpty} role="status">
+                    <p className={styles.filterEmptyText}>
                       {t("create_survey.empty_state_message")}
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        sx={{ mx: 1 }}
-                        startIcon={<FilterAltOffIcon />}
-                        onClick={() => {
-                          setPage(1);
-                          setStatus("all");
-                        }}
-                      >
-                        {t("reset_filter")}
-                      </Button>
-                    </Typography>
+                    </p>
+                    <button
+                      type="button"
+                      className={styles.filterEmptyAction}
+                      onClick={() => {
+                        setPage(1);
+                        setStatus("all");
+                      }}
+                    >
+                      {t("reset_filter")}
+                    </button>
                   </div>
                 ) : (
                   <DashboardEmptyState
                     onCreateSurvey={handleCreateSurveyClick}
                     onImportTemplate={handleImportSurveyClick}
-                    canCreate={isSurveyAdmin()}
+                    /* Same gate as the action cards, which this now stands in
+                       for: an analyst gets the welcome without actions it
+                       can't carry out. */
+                    canCreate={actions.length > 0}
                   />
                 )}
               </>
@@ -423,6 +438,7 @@ function Dashboard() {
 
           {surveys?.totalCount > MIN_ROWS_PER_PAGE ? (
             <TablePagination
+              className={styles.pagination}
               rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
               component="div"
               labelDisplayedRows={({ from, to, count, page }) => {
@@ -471,7 +487,7 @@ function Dashboard() {
           onConfirm={handleAction}
           title={title}
           cancelLabel={t("action_btn.cancel")}
-          confirmLabel={t("action_btn.delete")}
+          confirmLabel={t("action_btn.delete_survey")}
         />
       )}
       {actionType === "close" && (
@@ -493,12 +509,15 @@ function Dashboard() {
         />
       )}
       <Snackbar
-        open={Boolean(errorMessage)}
+        open={Boolean(notice)}
         autoHideDuration={6000}
-        onClose={() => setErrorMessage(null)}
+        onClose={() => setNotice(null)}
       >
-        <Alert onClose={() => setErrorMessage(null)} severity="error">
-          {errorMessage}
+        <Alert
+          onClose={() => setNotice(null)}
+          severity={notice?.severity ?? "error"}
+        >
+          {notice?.message}
         </Alert>
       </Snackbar>
     </Box>

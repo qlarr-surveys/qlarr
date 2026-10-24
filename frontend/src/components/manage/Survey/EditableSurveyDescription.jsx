@@ -1,8 +1,7 @@
-import { Box, IconButton, TextField, Tooltip, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import { Box, TextField } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
 import styles from "./Survey.module.css";
 import { truncateWithEllipsis } from "~/utils/design/utils";
-import { Edit, Check } from "@mui/icons-material";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
@@ -23,6 +22,10 @@ export const EditableSurveyDescription = ({
 
   const charLimit = 125;
 
+  // See EditableSurveyTitle: Escape blurs, and the blur would otherwise commit
+  // the draft being thrown away.
+  const discardRef = useRef(false);
+
   // See EditableSurveyTitle: follow the prop, and leave isDescriptionEditing out
   // of the dependencies so the text does not flash back mid-save.
   useEffect(() => {
@@ -36,6 +39,12 @@ export const EditableSurveyDescription = ({
   };
 
   const handleSave = () => {
+    if (discardRef.current) {
+      discardRef.current = false;
+      setDescription(savedDescription);
+      setIsDescriptionEditing(false);
+      return;
+    }
     if (description !== savedDescription) {
       onSave(description, () => setDescription(savedDescription));
     }
@@ -44,91 +53,86 @@ export const EditableSurveyDescription = ({
 
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
+      // Enter commits, as it does for the name, so the line break it would
+      // otherwise leave behind is prevented.
+      event.preventDefault();
       handleSave();
+    } else if (event.key === "Escape") {
+      // See EditableSurveyTitle: the reset is what the reading state shows,
+      // the flag is what stops a late blur from committing the draft.
+      discardRef.current = true;
+      setDescription(savedDescription);
+      setIsDescriptionEditing(false);
     }
   };
 
-  const handleEditClick = (event) => {
-    event.stopPropagation();
+  const handleEditClick = () => {
+    // See EditableSurveyTitle: a discard from an earlier Escape can outlive it,
+    // because not every browser blurs a field it removes from the page.
+    discardRef.current = false;
     setIsDescriptionEditing(true);
   };
 
+  const shown = truncateWithEllipsis(description, charLimit);
+  const placeholder = isEditable ? t("survey.description_placeholder") : "";
+
+  /* The description itself is the control, as the redesign draws it: no pencil
+     on hover, no save button after. The empty state is the same button holding
+     the prompt to write one, which is what makes a blank description
+     clickable at all. */
+  const text = isEditable ? (
+    <button
+      type="button"
+      dir="auto"
+      className={`${styles.descriptionText} ${
+        description ? "" : styles.descriptionEmpty
+      }`}
+      aria-label={t("edit_survey.edit_description")}
+      onClick={handleEditClick}
+    >
+      {shown || placeholder}
+    </button>
+  ) : (
+    <span dir="auto" className={styles.descriptionText}>
+      {shown}
+    </span>
+  );
+
   return (
     <Box className={styles.descriptionContainer}>
-      {isDescriptionEditing ? (
-        <>
-          <TextField
-            sx={{ px: 3 }}
-            value={description}
-            onChange={handleDescriptionChange}
-            onKeyDown={handleKeyDown}
-            onBlur={handleSave}
-            autoFocus
-            variant="standard"
-            fullWidth
-            multiline
-            rows={3}
-          />
-          <IconButton
-            className={`${styles.saveIcon}`}
-            onClick={handleSave}
-            sx={{ ml: 1 }}
-          >
-            <Check sx={{ color: "gray" }} />
-          </IconButton>
-        </>
-      ) : (
-        <>
-          {isEditable && <Box gap={1} pl={1} display="flex" alignItems="center">
-            <CustomTooltip body={t(`tooltips.survey_description`)} />
-          </Box>}
+      {/* The ⓘ stays mounted in both states. Swapping the whole row for the
+          textarea was what made the card jump while you typed, and made the ⓘ
+          vanish exactly when the hint was wanted. */}
+      {isEditable && (
+        <Box className={styles.rowInfo}>
+          <CustomTooltip body={t(`tooltips.survey_description`)} />
+        </Box>
+      )}
 
-          {description?.length > charLimit ? (
-            <CustomTooltip body={description}
-            
-            showIcon={false}>
-              <Typography
-                variant="caption"
-                onClick={isEditable ? handleEditClick : undefined}
-                sx={{
-                  pr: 3,
-                  pl: 1,
-                  color: description ? "inherit" : "gray",
-                  flexGrow: 1,
-                  cursor: isEditable ? "pointer" : "default",
-                }}
-                className={styles.truncatedText}
-              >
-                {truncateWithEllipsis(description, charLimit)}
-              </Typography>
-            </CustomTooltip>
-          ) : (
-            <Typography
-              variant="caption"
-              onClick={isEditable ? handleEditClick : undefined}
-              sx={{
-                pr: 3,
-                pl: 1,
-                color: description ? "inherit" : "gray",
-                flexGrow: 1,
-                cursor: isEditable ? "pointer" : "default",
-              }}
-              className={styles.truncatedText}
-            >
-              {truncateWithEllipsis(description, charLimit) ||
-                ( isEditable ? t("survey.description_placeholder") : "")}
-            </Typography>
-          )}
-          {isEditable && (
-            <IconButton
-              className={`${styles.descriptionIcon}`}
-              onClick={handleEditClick}
-              sx={{ ml: 1 }}
-            >
-              <Edit sx={{ color: "gray" }} />
-            </IconButton>
-          )}
-        </>
+      {isDescriptionEditing ? (
+        <TextField
+          className={styles.descriptionField}
+          value={description}
+          onChange={handleDescriptionChange}
+          onKeyDown={handleKeyDown}
+          onBlur={handleSave}
+          autoFocus
+          variant="standard"
+          InputProps={{ disableUnderline: true }}
+          inputProps={{
+            dir: "auto",
+            "aria-label": t("label.survey_description"),
+          }}
+          fullWidth
+          multiline
+          rows={2}
+        />
+      ) : description?.length > charLimit ? (
+        <CustomTooltip body={description} showIcon={false}>
+          {text}
+        </CustomTooltip>
+      ) : (
+        text
       )}
     </Box>
   );

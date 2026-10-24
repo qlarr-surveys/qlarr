@@ -10,7 +10,8 @@
     "save": "Save",
     "create": "Create",
     "export": "Export",
-    "download": "Download"
+    "download": "Download",
+    "delete_survey": "Delete survey"
   },
   "add_user": {
     "cancel": "Cancel",
@@ -31,7 +32,7 @@
   "confirm_password_required": "You must repeat password",
   "create_survey": {
     "title": "Create Survey",
-    "empty_state_message": "No surveys available.",
+    "empty_state_message": "No surveys match this status.",
     "or": "or",
     "empty_state_cta_copy": "to get started!"
   },
@@ -46,6 +47,7 @@
   "edit_survey": {
     "total_responses": "Total responses",
     "add_logo": "Add a survey logo",
+    "replace_logo": "Replace logo",
     "export": "Export Survey",
     "close_title": "Close Survey",
     "can_lock_survey": "Allow surveyors to lock survey",
@@ -53,7 +55,8 @@
     "count": "Count",
     "default_survey_url": "Default survey URL",
     "close_survey": "Are you sure you want to close {{survey_name}}?",
-    "delete_survey": "Are you sure you want to delete {{survey_name}}?",
+    "delete_survey": "The survey, its responses and its uploaded files are removed with it. This can’t be undone.",
+    "survey_deleted": "Deleted {{survey_name}}",
     "general": "General",
     "limit": "Limit",
     "limit_responses": "Limit Responses by Surveyors",
@@ -84,7 +87,10 @@
       "last_modified": "Last Modified",
       "start_date": "Start Date",
       "end_date": "End Date"
-    }
+    },
+    "edit_name": "Edit survey name: {{name}}",
+    "edit_description": "Edit survey description",
+    "delete_survey_title": "Delete “{{survey_name}}”?"
   },
   "edit_user": {
     "title": "Edit User"
@@ -181,10 +187,12 @@
     "to": "To",
     "total_responses_limit": "Total Responses Limit",
     "sort_by": "Sort By",
-    "unpublished_changes": "Has Unpublished Changes",
+    "unpublished_changes": "Has unpublished changes",
+    "unpublished_changes_info": "Edits made since the last publish aren’t live yet. Publish to update the survey respondents see.",
     "responses": "Complete Responses : {{count}}",
     "quota": "Quota: {{count}}",
-    "no_quota": "No Quota"
+    "no_quota": "No Quota",
+    "survey_description": "Survey Description"
   },
   "language": {
     "ar": "Arabic",
@@ -223,7 +231,7 @@
   },
   "fetch_error": "Couldn't load your surveys. Check your connection and try again.",
   "new_survey": "New Survey",
-  "reset_filter": "Reset Survey Filter",
+  "reset_filter": "Show all surveys",
   "create_new_survey": "Create New Survey",
   "import_survey": "Import a survey",
   "upload_zip_folder": "Upload Zip Folder",
@@ -506,7 +514,7 @@
     "draft": "Draft"
   },
   "survey_sort_options": {
-    "responses_desc": "Higest Responses First",
+    "responses_desc": "Highest Responses First",
     "last_modified_desc": "Last Modified First"
   },
   "super_admins": "super admins",
@@ -530,7 +538,6 @@
     "active": "Active",
     "invitation_sent": "Invitation Sent",
     "learn_about_roles": "Learn about user roles",
-    "statuses_info": "<strong>Draft</strong> — Survey has not been published yet. Only available for preview.<br/><br/><strong>Scheduled</strong> — Survey is published but the start date is in the future. It will become active automatically.<br/><br/><strong>Active</strong> — Survey is live and accepting responses.<br/><br/><strong>Expired</strong> — Survey end date has passed. No new responses can be collected. You can reactivate it by changing the dates.<br/><br/><strong>Closed</strong> — Survey has been permanently closed. You can only export data or duplicate it.",
     "roles_info": "<strong>Super Admin</strong> — Full access to all features including user management, survey creation, and system settings.<br/><br/><strong>Survey Admin</strong> — Can create and manage surveys, access survey design, settings, responses, and analytics.<br/><br/><strong>Analyst</strong> — Can view survey responses, analytics, and preview surveys.<br/><br/><strong>Surveyor</strong> — Can collect survey responses via the mobile app, and preview surveys."
   },
   "launch": {
@@ -575,7 +582,8 @@
     "import_survey": "Import an existing survey (that was exported earlier) from a ZIP file",
     "create_survey_with_ai": "Create a new survey automatically using AI assistance",
     "survey_title": "Internal title used by your team to identify the survey. This title is not shown to respondents.",
-    "survey_description": "Internal description used by your team to provide context about the survey. This description is not shown to respondents."
+    "survey_description": "Internal description used by your team to provide context about the survey. This description is not shown to respondents.",
+    "more_info": "More information"
   },
   "translations": {
     "title": "Translations",
@@ -787,6 +795,17 @@
     "feature_own": "Own every result.",
     "need_help": "Need help getting started?",
     "contact_support": "contact support"
+  },
+  "status_info": {
+    "draft": "Survey has not been published yet. Only available for preview.",
+    "scheduled": "Survey is published but the start date is in the future. It will become active automatically.",
+    "active": "Survey is live and accepting responses.",
+    "expired": "Survey end date has passed. No new responses can be collected. You can reactivate it by changing the dates.",
+    "closed": "Survey has been permanently closed. You can only export data or duplicate it."
+  },
+  "status_legend": {
+    "title": "Survey statuses",
+    "this_survey": "this survey"
   },
   "group_quotas": {
     "title": "Group quotas",

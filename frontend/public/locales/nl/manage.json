@@ -10,7 +10,8 @@
     "save": "Opslaan",
     "create": "Aanmaken",
     "export": "Exporteren",
-    "download": "Downloaden"
+    "download": "Downloaden",
+    "delete_survey": "Enquête verwijderen"
   },
   "add_user": {
     "cancel": "Annuleren",
@@ -31,7 +32,7 @@
   "confirm_password_required": "Je moet het wachtwoord herhalen",
   "create_survey": {
     "title": "Enquête Aanmaken",
-    "empty_state_message": "Geen enquêtes beschikbaar.",
+    "empty_state_message": "Geen enquêtes met deze status.",
     "or": "of",
     "empty_state_cta_copy": "om te beginnen!"
   },
@@ -46,6 +47,7 @@
   "edit_survey": {
     "total_responses": "Totaal aantal antwoorden",
     "add_logo": "Een enquêtelogo toevoegen",
+    "replace_logo": "Logo vervangen",
     "export": "Enquête Exporteren",
     "close_title": "Enquête Sluiten",
     "can_lock_survey": "Sta enquêteurs toe om enquête te vergrendelen",
@@ -53,7 +55,8 @@
     "count": "Aantal",
     "default_survey_url": "Standaard enquête URL",
     "close_survey": "Weet je zeker dat je {{survey_name}} wilt sluiten?",
-    "delete_survey": "Weet je zeker dat je {{survey_name}} wilt verwijderen?",
+    "delete_survey": "De enquête wordt samen met haar antwoorden en geüploade bestanden verwijderd. Dit kan niet ongedaan worden gemaakt.",
+    "survey_deleted": "{{survey_name}} is verwijderd",
     "general": "Algemeen",
     "limit": "Limiet",
     "limit_responses": "Reacties Beperken door Enquêteurs",
@@ -84,7 +87,10 @@
       "last_modified": "Laatst Gewijzigd",
       "start_date": "Startdatum",
       "end_date": "Einddatum"
-    }
+    },
+    "edit_name": "Enquêtenaam bewerken: {{name}}",
+    "edit_description": "Enquêtebeschrijving bewerken",
+    "delete_survey_title": "“{{survey_name}}” verwijderen?"
   },
   "edit_user": {
     "title": "Gebruiker Bewerken"
@@ -182,10 +188,12 @@
     "to": "Tot",
     "total_responses_limit": "Totaal Reacties Limiet",
     "sort_by": "Sorteren Op",
-    "unpublished_changes": "Heeft Ongepubliceerde Wijzigingen",
+    "unpublished_changes": "Heeft niet-gepubliceerde wijzigingen",
+    "unpublished_changes_info": "Wijzigingen sinds de laatste publicatie zijn nog niet live. Publiceer om bij te werken wat respondenten zien.",
     "responses": "Volledige Reacties : {{count}}",
     "quota": "Quota: {{count}}",
-    "no_quota": "Geen Quota"
+    "no_quota": "Geen Quota",
+    "survey_description": "Enquête Beschrijving"
   },
   "language": {
     "ar": "Arabisch",
@@ -224,7 +232,7 @@
   },
   "fetch_error": "Je enquêtes konden niet worden geladen. Controleer je verbinding en probeer het opnieuw.",
   "new_survey": "Nieuwe Enquête",
-  "reset_filter": "Enquête Filter Resetten",
+  "reset_filter": "Alle enquêtes tonen",
   "create_new_survey": "Nieuwe Enquête Aanmaken",
   "import_survey": "Een enquête importeren",
   "upload_zip_folder": "ZIP Map Uploaden",
@@ -530,7 +538,6 @@
     "active": "Actief",
     "invitation_sent": "Uitnodiging Verzonden",
     "learn_about_roles": "Meer informatie over gebruikersrollen",
-    "statuses_info": "<strong>Concept</strong> — De enquête is nog niet gepubliceerd. Alleen beschikbaar voor voorvertoning.<br/><br/><strong>Gepland</strong> — De enquête is gepubliceerd maar de startdatum ligt in de toekomst. Deze wordt automatisch actief.<br/><br/><strong>Actief</strong> — De enquête is live en accepteert reacties.<br/><br/><strong>Verlopen</strong> — De einddatum van de enquête is verstreken. Er kunnen geen nieuwe reacties worden verzameld. U kunt deze reactiveren door de datums te wijzigen.<br/><br/><strong>Gesloten</strong> — De enquête is permanent gesloten. U kunt alleen gegevens exporteren of dupliceren.",
     "roles_info": "<strong>Super Admin</strong> — Volledige toegang tot alle functies, inclusief gebruikersbeheer, enquêtes aanmaken en systeeminstellingen.<br/><br/><strong>Enquête Admin</strong> — Kan enquêtes aanmaken en beheren, toegang tot ontwerp, instellingen, reacties en analyses.<br/><br/><strong>Analist</strong> — Kan enquêtereacties en analyses bekijken, en enquêtes voorvertonen.<br/><br/><strong>Enquêteur</strong> — Kan enquêtereacties verzamelen via de mobiele app, en enquêtes voorvertonen."
   },
   "launch": {
@@ -575,7 +582,8 @@
     "import_survey": "Importeer een bestaande enquête (die eerder is geëxporteerd) vanuit een ZIP bestand",
     "create_survey_with_ai": "Maak automatisch een nieuwe enquête met AI ondersteuning",
     "survey_title": "Interne titel gebruikt door je team om de enquête te identificeren. Deze titel wordt niet getoond aan respondenten.",
-    "survey_description": "Interne beschrijving gebruikt door je team om context over de enquête te geven. Deze beschrijving wordt niet getoond aan respondenten."
+    "survey_description": "Interne beschrijving gebruikt door je team om context over de enquête te geven. Deze beschrijving wordt niet getoond aan respondenten.",
+    "more_info": "Meer informatie"
   },
   "translations": {
     "title": "Vertalingen",
@@ -787,6 +795,17 @@
     "question_type_text_display": "Tekst Weergave",
     "question_type_image_display": "Afbeelding Weergave",
     "question_type_video_display": "Video Weergave"
+  },
+  "status_info": {
+    "draft": "De enquête is nog niet gepubliceerd. Alleen beschikbaar voor voorvertoning.",
+    "scheduled": "De enquête is gepubliceerd maar de startdatum ligt in de toekomst. Deze wordt automatisch actief.",
+    "active": "De enquête is live en accepteert reacties.",
+    "expired": "De einddatum van de enquête is verstreken. Er kunnen geen nieuwe reacties worden verzameld. U kunt deze reactiveren door de datums te wijzigen.",
+    "closed": "De enquête is permanent gesloten. U kunt alleen gegevens exporteren of dupliceren."
+  },
+  "status_legend": {
+    "title": "Enquêtestatussen",
+    "this_survey": "deze enquête"
   },
   "group_quotas": {
     "title": "Groepsquota",
