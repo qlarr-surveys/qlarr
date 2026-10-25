@@ -10,7 +10,8 @@
     "delete": "Löschen",
     "download": "Download",
     "export": "Export",
-    "save": "Speichern"
+    "save": "Speichern",
+    "delete_survey": "Umfrage löschen"
   },
   "add_user": {
     "cancel": "Abbrechen",
@@ -40,7 +41,7 @@
   "create_new_survey": "Neue Umfrage erstellen",
   "create_survey": {
     "empty_state_cta_copy": "um loszulegen!",
-    "empty_state_message": "Keine Umfragen verfügbar.",
+    "empty_state_message": "Keine Umfragen mit diesem Status.",
     "or": "oder",
     "title": "Umfrage erstellen"
   },
@@ -48,6 +49,7 @@
   "edit_survey": {
     "total_responses": "Antworten insgesamt",
     "add_logo": "Umfrage-Logo hinzufügen",
+    "replace_logo": "Logo ersetzen",
     "active_mode": "Umfrage ist aktiv",
     "can_lock_survey": "Erlauben Sie Vermessern, die Vermessung zu sperren",
     "clone_survey": "Klon-Umfrage",
@@ -56,7 +58,8 @@
     "closed_mode": "Umfrage wurde geschlossen",
     "count": "Zählen",
     "default_survey_url": "Standard-Umfrage-URL",
-    "delete_survey": "Möchten Sie {{survey_name}} wirklich löschen?",
+    "delete_survey": "Die Umfrage wird zusammen mit ihren Antworten und hochgeladenen Dateien gelöscht. Das lässt sich nicht rückgängig machen.",
+    "survey_deleted": "{{survey_name}} wurde gelöscht",
     "draft_mode": "Umfrage befindet sich noch im Entwurfsmodus",
     "expired_mode": "Das Enddatum der Umfrage ist abgelaufen",
     "export": "Umfrage exportieren",
@@ -86,7 +89,10 @@
     "background_audio": "Hintergrundaudio",
     "record_gps": "GPS aufzeichnen",
     "save_ip": "IP speichern",
-    "save_timings": "Zeiten speichern"
+    "save_timings": "Zeiten speichern",
+    "edit_name": "Umfragenamen bearbeiten: {{name}}",
+    "edit_description": "Umfragebeschreibung bearbeiten",
+    "delete_survey_title": "„{{survey_name}}“ löschen?"
   },
   "edit_user": {
     "title": "Benutzer bearbeiten"
@@ -201,7 +207,9 @@
     "surveyor_admin": "Surveyor-Administrator",
     "to": "Zu",
     "total_responses_limit": "Beantwortungslimit insgesamt",
-    "unpublished_changes": "Nicht veröffentlichte Änderungen vorhanden"
+    "unpublished_changes": "Hat unveröffentlichte Änderungen",
+    "unpublished_changes_info": "Änderungen seit der letzten Veröffentlichung sind noch nicht live. Veröffentlichen Sie, um zu aktualisieren, was die Teilnehmenden sehen.",
+    "survey_description": "Umfragebeschreibung"
   },
   "language": {
     "ar": "Arabisch",
@@ -306,7 +314,7 @@
     "title": "Profil"
   },
   "registered": "eingetragen",
-  "reset_filter": "Umfrage-Filter zurücksetzen",
+  "reset_filter": "Alle Umfragen anzeigen",
   "reset_password": {
     "reset": "Zurücksetzen",
     "title": "Passwort Zurücksetzen"
@@ -573,7 +581,8 @@
     "survey_description": "Interne Beschreibung, die von Ihrem Team verwendet wird, um Kontext über die Umfrage bereitzustellen. Diese Beschreibung wird den Befragten nicht angezeigt.",
     "survey_mode": "Wählen Sie den Modus für Ihre Umfrage:<ul><li>Online-Umfragen sind über Webbrowser zugänglich</li><li>Offline-Umfragen können ohne Internetverbindung durchgeführt werden</li></ul>",
     "survey_title": "Interner Titel, der von Ihrem Team verwendet wird, um die Umfrage zu identifizieren. Dieser Titel wird den Befragten nicht angezeigt.",
-    "survey_url": "Teilen Sie diesen Link, um auf die Umfrage zuzugreifen"
+    "survey_url": "Teilen Sie diesen Link, um auf die Umfrage zuzugreifen",
+    "more_info": "Weitere Informationen"
   },
   "translations": {
     "design_language": "Design-Sprache",
@@ -601,7 +610,6 @@
     "title_edit": "Bearbeiten",
     "users": "Benutzer",
     "learn_about_roles": "Mehr über Benutzerrollen erfahren",
-    "statuses_info": "<strong>Entwurf</strong> — Die Umfrage wurde noch nicht veröffentlicht. Nur zur Vorschau verfügbar.<br/><br/><strong>Geplant</strong> — Die Umfrage ist veröffentlicht, aber das Startdatum liegt in der Zukunft. Sie wird automatisch aktiv.<br/><br/><strong>Aktiv</strong> — Die Umfrage ist live und nimmt Antworten entgegen.<br/><br/><strong>Abgelaufen</strong> — Das Enddatum der Umfrage ist überschritten. Es können keine neuen Antworten gesammelt werden. Sie können sie durch Ändern der Daten reaktivieren.<br/><br/><strong>Geschlossen</strong> — Die Umfrage wurde dauerhaft geschlossen. Sie können nur Daten exportieren oder sie duplizieren.",
     "roles_info": "<strong>Super-Admin</strong> — Vollzugriff auf alle Funktionen einschließlich Benutzerverwaltung, Umfrageerstellung und Systemeinstellungen.<br/><br/><strong>Umfrage-Admin</strong> — Kann Umfragen erstellen und verwalten, Zugriff auf Umfragedesign, Einstellungen, Antworten und Analysen.<br/><br/><strong>Analyst</strong> — Kann Umfrageantworten und Analysen einsehen sowie Umfragen in der Vorschau anzeigen.<br/><br/><strong>Interviewer</strong> — Kann Umfrageantworten über die mobile App erfassen und Umfragen in der Vorschau anzeigen."
   },
   "preview_page": {
@@ -788,6 +796,17 @@
     "question_type_text_display": "Textanzeige",
     "question_type_image_display": "Bildanzeige",
     "question_type_video_display": "Videoanzeige"
+  },
+  "status_info": {
+    "draft": "Die Umfrage wurde noch nicht veröffentlicht. Nur zur Vorschau verfügbar.",
+    "scheduled": "Die Umfrage ist veröffentlicht, aber das Startdatum liegt in der Zukunft. Sie wird automatisch aktiv.",
+    "active": "Die Umfrage ist live und nimmt Antworten entgegen.",
+    "expired": "Das Enddatum der Umfrage ist überschritten. Es können keine neuen Antworten gesammelt werden. Sie können sie durch Ändern der Daten reaktivieren.",
+    "closed": "Die Umfrage wurde dauerhaft geschlossen. Sie können nur Daten exportieren oder sie duplizieren."
+  },
+  "status_legend": {
+    "title": "Umfragestatus",
+    "this_survey": "diese Umfrage"
   },
   "group_quotas": {
     "title": "Gruppenquoten",

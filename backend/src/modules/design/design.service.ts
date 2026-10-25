@@ -6,6 +6,7 @@ import { ValidationJsonOutput } from '../../engine/engine.types';
 import { FILE_HELPER, FileHelper } from '../../integrations/filesystem/file-helper';
 import { SurveyFolder } from '../../integrations/filesystem/survey-folder';
 import { DbContext } from '../../database/db-context';
+import { resetCalculationsOnDesignChange } from '../calculations/calculations.repository';
 import { statusFromDb } from '../surveys/survey.enums';
 import { SurveyEntity } from '../surveys/survey.entity';
 import {
@@ -104,7 +105,7 @@ export class DesignService {
       String(versionToSave),
     );
 
-    // Version row + survey stamp as one transaction.
+    // Version row + survey stamp + calculations reset as one transaction.
     survey.lastModified = nowUtcString();
     const entity = await this.db.manager.transaction(async (tx) => {
       const e = await this.versions.save(
@@ -120,6 +121,7 @@ export class DesignService {
         tx,
       );
       await tx.getRepository(SurveyEntity).save(survey);
+      await resetCalculationsOnDesignChange(tx, surveyId);
       return e;
     });
 
@@ -198,6 +200,7 @@ export class DesignService {
     });
     survey.lastModified = nowUtcString();
     await this.surveys().save(survey);
+    await resetCalculationsOnDesignChange(this.db.manager, surveyId);
 
     return {
       designerInput: this.engine.toDesignerInput(output),

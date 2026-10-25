@@ -5,6 +5,7 @@ import { DataSource } from 'typeorm';
 import { EngineService } from '../src/engine/engine.service';
 import { runValidate } from '../src/engine/engine-runtime';
 import { FILE_HELPER } from '../src/integrations/filesystem/file-helper';
+import { DesignService } from '../src/modules/design/design.service';
 import { CalculationsRepository } from '../src/modules/calculations/calculations.repository';
 import { CalculationsService } from '../src/modules/calculations/calculations.service';
 import { bearer, startTestApp, TestApp } from './harness';
@@ -18,7 +19,10 @@ const SURVEYOR = bearer({ authorities: ['surveyor'] });
 const DESIGN_JSON = JSON.stringify(
   runValidate(readFileSync(`${__dirname}/fixtures/survey-design.json`, 'utf8')),
 );
-const files = { getText: jest.fn().mockResolvedValue(DESIGN_JSON) };
+const files = {
+  getText: jest.fn().mockResolvedValue(DESIGN_JSON),
+  uploadText: jest.fn().mockResolvedValue(undefined),
+};
 
 const DOUBLE = { code: 'double', label: 'Double', expression: 'Q880htp.value * 2' };
 const FIXED = { code: 'fixed', label: 'Fixed', expression: 'Q880htp.value.toFixed(1)' };
@@ -287,6 +291,51 @@ describe('Calculations', () => {
 
       expect((await calculationsOf(late))[0].state).toBe('not_computed');
       expect((await state(id)).newSinceLastRun).toBe(1);
+    });
+
+    it('after a completed run, Compute only runs the responses without results', async () => {
+      const { id, r1 } = await createSurvey();
+      await save(id, [DOUBLE], 0).expect(200);
+      await compute(id).expect(200);
+      await settle(id);
+      const late = `22000000-0000-0000-0000-0000000000${String(surveyCount).padStart(2, '0')}`;
+      await root.query(
+        `INSERT INTO responses
+           (id, version, survey_id, preview, nav_index, start_date, submit_date,
+            lang, events, "values")
+         VALUES ($1,1,$2,false,'','2024-01-01 00:00:00','2024-03-01 00:00:00','en',
+                 '[]'::jsonb,'{"Q880htp.value": 1}'::jsonb)`,
+        [late, id],
+      );
+      const calculate = jest.spyOn(app.get(EngineService), 'calculate');
+
+      await compute(id).expect(200);
+
+      expect(await settle(id)).toMatchObject({
+        status: 'completed',
+        progress: { done: 1, total: 1 },
+        newSinceLastRun: 0,
+      });
+      expect(Object.keys(calculate.mock.calls[0][2])).toEqual([late]);
+      expect((await calculationsOf(late))[0]).toMatchObject({ state: 'value', value: 2 });
+      expect((await calculationsOf(r1))[0]).toMatchObject({ state: 'value', value: 42 });
+    });
+
+    it('a design save hides the results, and the next Compute runs everything', async () => {
+      const { id, r1 } = await createSurvey();
+      await save(id, [DOUBLE], 0).expect(200);
+      await compute(id).expect(200);
+      await settle(id);
+
+      await app.get(DesignService).setDesign(id, {}, 1);
+
+      expect((await calculationsOf(r1))[0].state).toBe('not_computed');
+      expect(await state(id)).toMatchObject({ status: 'idle', newSinceLastRun: null });
+      await compute(id).expect(200);
+      expect(await settle(id)).toMatchObject({
+        status: 'completed',
+        progress: { done: 3, total: 3 },
+      });
     });
 
     it('everything is refused (409) while a run is in progress', async () => {

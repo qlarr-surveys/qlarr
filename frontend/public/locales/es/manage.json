@@ -10,7 +10,8 @@
     "save": "Guardar",
     "create": "Crear",
     "export": "Exportar",
-    "download": "Descargar"
+    "download": "Descargar",
+    "delete_survey": "Eliminar encuesta"
   },
   "add_user": {
     "cancel": "Cancelar",
@@ -31,7 +32,7 @@
   "confirm_password_required": "Debes repetir la contraseña",
   "create_survey": {
     "title": "Crear Encuesta",
-    "empty_state_message": "No hay encuestas disponibles.",
+    "empty_state_message": "Ninguna encuesta coincide con este estado.",
     "or": "o",
     "empty_state_cta_copy": "¡para comenzar!"
   },
@@ -46,6 +47,7 @@
   "edit_survey": {
     "total_responses": "Total de respuestas",
     "add_logo": "Añadir un logo a la encuesta",
+    "replace_logo": "Reemplazar logo",
     "export": "Exportar Encuesta",
     "close_title": "Cerrar Encuesta",
     "can_lock_survey": "Permitir a los encuestadores bloquear la encuesta",
@@ -53,7 +55,8 @@
     "count": "Cantidad",
     "default_survey_url": "URL de encuesta predeterminada",
     "close_survey": "¿Estás seguro de que quieres cerrar {{survey_name}}?",
-    "delete_survey": "¿Estás seguro de que quieres eliminar {{survey_name}}?",
+    "delete_survey": "La encuesta se elimina junto con sus respuestas y sus archivos subidos. Esto no se puede deshacer.",
+    "survey_deleted": "{{survey_name}} fue eliminada",
     "general": "General",
     "limit": "Límite",
     "limit_responses": "Limitar Respuestas por Encuestadores",
@@ -84,7 +87,10 @@
       "last_modified": "Última Modificación",
       "start_date": "Fecha de Inicio",
       "end_date": "Fecha de Finalización"
-    }
+    },
+    "edit_name": "Editar el nombre de la encuesta: {{name}}",
+    "edit_description": "Editar la descripción de la encuesta",
+    "delete_survey_title": "¿Eliminar “{{survey_name}}”?"
   },
   "edit_user": {
     "title": "Editar Usuario"
@@ -182,10 +188,12 @@
     "to": "A",
     "total_responses_limit": "Límite Total de Respuestas",
     "sort_by": "Ordenar Por",
-    "unpublished_changes": "Tiene Cambios No Publicados",
+    "unpublished_changes": "Tiene cambios sin publicar",
+    "unpublished_changes_info": "Los cambios realizados desde la última publicación aún no están activos. Publica para actualizar lo que ven los participantes.",
     "responses": "Respuestas Completas : {{count}}",
     "quota": "Cuota: {{count}}",
-    "no_quota": "Sin Cuota"
+    "no_quota": "Sin Cuota",
+    "survey_description": "Descripción de la Encuesta"
   },
   "language": {
     "ar": "Árabe",
@@ -224,7 +232,7 @@
   },
   "fetch_error": "No se pudieron cargar tus encuestas. Comprueba tu conexión e inténtalo de nuevo.",
   "new_survey": "Nueva Encuesta",
-  "reset_filter": "Restablecer Filtro de Encuesta",
+  "reset_filter": "Mostrar todas las encuestas",
   "create_new_survey": "Crear Nueva Encuesta",
   "import_survey": "Importar una encuesta",
   "upload_zip_folder": "Subir Carpeta ZIP",
@@ -530,7 +538,6 @@
     "active": "Activo",
     "invitation_sent": "Invitación Enviada",
     "learn_about_roles": "Conoce los roles de usuario",
-    "statuses_info": "<strong>Borrador</strong> — La encuesta aún no ha sido publicada. Solo disponible para vista previa.<br/><br/><strong>Programada</strong> — La encuesta está publicada pero la fecha de inicio es futura. Se activará automáticamente.<br/><br/><strong>Activa</strong> — La encuesta está en línea y aceptando respuestas.<br/><br/><strong>Expirada</strong> — La fecha de finalización ha pasado. No se pueden recopilar nuevas respuestas. Puedes reactivarla cambiando las fechas.<br/><br/><strong>Cerrada</strong> — La encuesta ha sido cerrada permanentemente. Solo puedes exportar datos o duplicarla.",
     "roles_info": "<strong>Super Admin</strong> — Acceso completo a todas las funciones, incluida la gestión de usuarios, creación de encuestas y configuración del sistema.<br/><br/><strong>Admin de Encuestas</strong> — Puede crear y gestionar encuestas, acceder al diseño, configuración, respuestas y análisis.<br/><br/><strong>Analista</strong> — Puede ver las respuestas y análisis de encuestas, y previsualizar encuestas.<br/><br/><strong>Encuestador</strong> — Puede recopilar respuestas de encuestas a través de la aplicación móvil, y previsualizar encuestas."
   },
   "launch": {
@@ -575,7 +582,8 @@
     "import_survey": "Importar una encuesta existente (que fue exportada anteriormente) desde un archivo ZIP",
     "create_survey_with_ai": "Crear una nueva encuesta automáticamente usando asistencia de IA",
     "survey_title": "Título interno usado por tu equipo para identificar la encuesta. Este título no se muestra a los encuestados.",
-    "survey_description": "Descripción interna usada por tu equipo para proporcionar contexto sobre la encuesta. Esta descripción no se muestra a los encuestados."
+    "survey_description": "Descripción interna usada por tu equipo para proporcionar contexto sobre la encuesta. Esta descripción no se muestra a los encuestados.",
+    "more_info": "Más información"
   },
   "translations": {
     "title": "Traducciones",
@@ -787,6 +795,17 @@
     "question_type_text_display": "Visualización de Texto",
     "question_type_image_display": "Visualización de Imagen",
     "question_type_video_display": "Visualización de Video"
+  },
+  "status_info": {
+    "draft": "La encuesta aún no ha sido publicada. Solo disponible para vista previa.",
+    "scheduled": "La encuesta está publicada pero la fecha de inicio es futura. Se activará automáticamente.",
+    "active": "La encuesta está en línea y aceptando respuestas.",
+    "expired": "La fecha de finalización ha pasado. No se pueden recopilar nuevas respuestas. Puedes reactivarla cambiando las fechas.",
+    "closed": "La encuesta ha sido cerrada permanentemente. Solo puedes exportar datos o duplicarla."
+  },
+  "status_legend": {
+    "title": "Estados de la encuesta",
+    "this_survey": "esta encuesta"
   },
   "group_quotas": {
     "title": "Cuotas por grupo",
