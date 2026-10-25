@@ -77,7 +77,13 @@ instance.interceptors.response.use(
     ) {
       originalConfig._retry = true;
       try {
-        await refreshSession();
+        // A token change since this request was sent means a refresh already
+        // happened (here or in another tab): retry with the new token rather
+        // than rotating the refresh token again.
+        const sentToken = originalConfig.headers["Authorization"]?.replace("Bearer ", "");
+        if (sentToken === TokenService.getAuthToken()) {
+          await refreshSession();
+        }
 
         return instance(originalConfig);
       } catch (_error) {
