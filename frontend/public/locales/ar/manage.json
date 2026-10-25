@@ -332,10 +332,13 @@
     "database_format": "تنسيق قاعدة البيانات",
     "text_format": "تنسيق نصي",
     "range_invalid": "لا يمكن أن يكون 'من' أكبر من 'إلى'.",
+    "all_responses": "كل الردود",
+    "custom_range": "نطاق مخصص",
     "max": "الحد الأقصى {{max}}",
     "min": "الحد الأدنى {{min}}",
     "enter_a_number": "أدخل رقمًا",
     "no_files_found": "لم يتم العثور على ملفات للنطاق المحدد",
+    "no_responses_found": "لا توجد ردود تطابق النطاق وأنواع الردود المحددة",
     "yes": "نعم",
     "no": "لا",
     "disqualified": "مستبعد",
@@ -607,8 +610,7 @@
   },
   "responses_export": {
     "format_csv": "CSV",
-    "format_excel": "Excel",
-    "format_ods": "ODS"
+    "format_excel": "Excel"
   },
   "aria": {
     "users_table": "جدول المستخدمين",

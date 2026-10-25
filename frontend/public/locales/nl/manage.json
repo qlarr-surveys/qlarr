@@ -328,10 +328,13 @@
     "database_format": "Database Formaat",
     "text_format": "Tekst Formaat",
     "range_invalid": "\"Van\" kan niet groter zijn dan \"Tot\".",
+    "all_responses": "Alle antwoorden",
+    "custom_range": "Aangepast bereik",
     "max": "Max {{max}}",
     "min": "Min {{min}}",
     "enter_a_number": "Voer een nummer in",
     "no_files_found": "Geen bestanden gevonden voor het geselecteerde bereik",
+    "no_responses_found": "Geen antwoorden komen overeen met het geselecteerde bereik en de antwoordtypen",
     "yes": "Ja",
     "no": "Nee",
     "disqualified": "Gediskwalificeerd",
@@ -599,8 +602,7 @@
   },
   "responses_export": {
     "format_csv": "CSV",
-    "format_excel": "Excel",
-    "format_ods": "ODS"
+    "format_excel": "Excel"
   },
   "aria": {
     "users_table": "Gebruikerstabel",

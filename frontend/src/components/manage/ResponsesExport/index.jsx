@@ -1,5 +1,5 @@
 // ResponsesExport.jsx
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -16,6 +16,8 @@ import {
   Radio,
   Checkbox,
   FormHelperText,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -35,6 +37,7 @@ const EXPORT_STATUSES = [
   { value: "disqualified", label: "responses.disqualified" },
 ];
 const ALL_STATUSES = EXPORT_STATUSES.map((s) => s.value);
+const MAX_RESPONSE_INDEX = 2147483647;
 
 export default function ResponsesExport({ 
   open, 
@@ -46,27 +49,37 @@ export default function ResponsesExport({
   const { surveyId } = useParams();
 
   const surveyService = useService("survey");
+  const [noResponses, setNoResponses] = useState(false);
 
   const min = 1;
 
   const Schema = yup.object().shape({
-    from: yup
-      .number()
-      .typeError(t("responses.enter_a_number"))
-      .required(t("responses.enter_a_number"))
-      .min(min, t("responses.min", { min })),
-    to: yup
-      .number()
-      .typeError(t("responses.enter_a_number"))
-      .required(t("responses.enter_a_number"))
-      .min(min, t("responses.min", { min }))
-      .test("gte-from", t("responses.range_invalid"), function (value) {
-        const { from } = this.parent;
-        if (typeof from !== "number" || typeof value !== "number") return false;
-        return value >= from;
-      }),
+    range: yup.string().oneOf(["all", "custom"]).required(),
+    from: yup.mixed().when("range", {
+      is: "custom",
+      then: () =>
+        yup
+          .number()
+          .typeError(t("responses.enter_a_number"))
+          .required(t("responses.enter_a_number"))
+          .min(min, t("responses.min", { min })),
+    }),
+    to: yup.mixed().when("range", {
+      is: "custom",
+      then: () =>
+        yup
+          .number()
+          .typeError(t("responses.enter_a_number"))
+          .required(t("responses.enter_a_number"))
+          .min(min, t("responses.min", { min }))
+          .test("gte-from", t("responses.range_invalid"), function (value) {
+            const { from } = this.parent;
+            if (typeof from !== "number" || typeof value !== "number") return false;
+            return value >= from;
+          }),
+    }),
     statuses: yup.array().of(yup.string().oneOf(ALL_STATUSES)).min(1),
-    format: yup.string().oneOf(["csv", "xlsx", "ods"]).required(),
+    format: yup.string().oneOf(["csv", "xlsx"]).required(),
     mode: yup.string().oneOf(["database", "text"]).required(),
   });
 
@@ -74,6 +87,7 @@ export default function ResponsesExport({
     mode: "onChange",
     resolver: yupResolver(Schema),
     defaultValues: {
+      range: "all",
       from: currentFrom,
       to: currentTo,
       statuses: ALL_STATUSES,
@@ -89,10 +103,12 @@ export default function ResponsesExport({
     formState: { errors },
   } = methods;
   const statuses = useWatch({ control, name: "statuses" });
+  const range = useWatch({ control, name: "range" });
 
   useEffect(() => {
     if (open) {
       reset({
+        range: "all",
         from: currentFrom,
         to: currentTo,
         statuses: ALL_STATUSES,
@@ -103,8 +119,9 @@ export default function ResponsesExport({
   }, [open, currentFrom, currentTo, reset]);
 
   const onSubmit = handleSubmit(async (data) => {
-    const from = Number(data.from);
-    const to = Number(data.to);
+    const allResponses = data.range === "all";
+    const from = allResponses ? 1 : Number(data.from);
+    const to = allResponses ? MAX_RESPONSE_INDEX : Number(data.to);
     const dbValues = data.mode === "database";
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 
@@ -118,27 +135,52 @@ export default function ResponsesExport({
         timezone,
       });
 
+      if (!blob || blob.size === 0) {
+        setNoResponses(true);
+        return;
+      }
+
       const fileName = `${surveyId}-responses-export.${data.format}`;
       const mimeByFormat = {
         csv: "text/csv",
         xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        ods: "application/vnd.oasis.opendocument.spreadsheet",
       };
 
       const file = new File([blob], fileName, {
         type: mimeByFormat[data.format] || "application/octet-stream",
       });
       FileSaver.saveAs(file);
-    } finally {
       onClose?.();
+    } catch (error) {
+      onClose?.();
+      throw error;
     }
   });
   return (
+    <>
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>{t("responses.export")}</DialogTitle>
 
       <FormProvider methods={methods} onSubmit={onSubmit}>
         <DialogContent sx={{ display: "grid", gap: 2 }}>
+          <Controller
+            name="range"
+            control={control}
+            render={({ field }) => (
+              <RadioGroup row {...field}>
+                <FormControlLabel
+                  value="all"
+                  control={<Radio />}
+                  label={t("responses.all_responses")}
+                />
+                <FormControlLabel
+                  value="custom"
+                  control={<Radio />}
+                  label={t("responses.custom_range")}
+                />
+              </RadioGroup>
+            )}
+          />
           <Box display="flex" gap={2}>
             <Controller
               name="from"
@@ -148,6 +190,7 @@ export default function ResponsesExport({
                   {...field}
                   label={t("responses.from")}
                   type="number"
+                  disabled={range !== "custom"}
                   inputProps={{ min }}
                   error={!!errors.from}
                   helperText={errors.from?.message || ""}
@@ -167,6 +210,7 @@ export default function ResponsesExport({
                   {...field}
                   label={t("responses.to")}
                   type="number"
+                  disabled={range !== "custom"}
                   inputProps={{ min }}
                   error={!!errors.to}
                   helperText={errors.to?.message || ""}
@@ -237,11 +281,6 @@ export default function ResponsesExport({
                     control={<Radio />}
                     label={t("responses_export.format_excel")}
                   />
-                  <FormControlLabel
-                    value="ods"
-                    control={<Radio />}
-                    label={t("responses_export.format_ods")}
-                  />
                 </RadioGroup>
               )}
             />
@@ -282,5 +321,20 @@ export default function ResponsesExport({
         </DialogActions>
       </FormProvider>
     </Dialog>
+    <Snackbar
+      open={noResponses}
+      autoHideDuration={4000}
+      onClose={() => setNoResponses(false)}
+      anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+    >
+      <Alert
+        onClose={() => setNoResponses(false)}
+        severity="warning"
+        sx={{ width: "100%" }}
+      >
+        {t("responses.no_responses_found")}
+      </Alert>
+    </Snackbar>
+    </>
   );
 }

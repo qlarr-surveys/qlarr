@@ -328,10 +328,13 @@
     "database_format": "Format de Base de Données",
     "text_format": "Format de Texte",
     "range_invalid": "\"De\" ne peut pas être supérieur à \"À\".",
+    "all_responses": "Toutes les réponses",
+    "custom_range": "Plage personnalisée",
     "max": "Max {{max}}",
     "min": "Min {{min}}",
     "enter_a_number": "Entrer un nombre",
     "no_files_found": "Aucun fichier trouvé pour la plage sélectionnée",
+    "no_responses_found": "Aucune réponse ne correspond à la plage et aux types de réponse sélectionnés",
     "yes": "Oui",
     "no": "Non",
     "disqualified": "Disqualifié",
@@ -599,8 +602,7 @@
   },
   "responses_export": {
     "format_csv": "CSV",
-    "format_excel": "Excel",
-    "format_ods": "ODS"
+    "format_excel": "Excel"
   },
   "aria": {
     "users_table": "Tableau des utilisateurs",
