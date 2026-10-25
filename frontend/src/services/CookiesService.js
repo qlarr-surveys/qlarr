@@ -1,11 +1,10 @@
-import { FRONT_END_DOMAIN } from "~/constants/networking";
 import Cookies from "js-cookie";
 
 class CookiesService {
   setObject(value, key) {
     Cookies.set(key, JSON.stringify(value), {
-      domain: FRONT_END_DOMAIN,
-      SameSite: "Strict",
+      secure: true,
+      sameSite: "Strict",
       expires: expiry(),
     });
   }
@@ -17,9 +16,8 @@ class CookiesService {
 
   removeByKey(key) {
     Cookies.remove(key, {
-      domain: FRONT_END_DOMAIN,
-      SameSite: "Strict",
-      expires: expiry(),
+      secure: true,
+      sameSite: "Strict",
     });
   }
 }

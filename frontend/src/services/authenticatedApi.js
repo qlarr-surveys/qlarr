@@ -3,6 +3,32 @@ import TokenService from "./TokenService";
 import { BACKEND_BASE_URL } from '~/constants/networking';
 const REFRESH_URL = "/user/refresh_token";
 
+// The in-flight refresh, shared by every request that fails with 401 at the
+// same time: refresh tokens rotate, so parallel refreshes would race.
+let refreshing = null;
+
+const refreshSession = () => {
+  if (!refreshing) {
+    refreshing = instance
+      .post(REFRESH_URL, {
+        accessToken: TokenService.getAuthToken(),
+        refreshToken: TokenService.getRefreshToken(),
+      })
+      // A grace-window refresh carries no refresh token: keep the one in the
+      // cookie, which another tab may have rotated in the meantime.
+      .then((rs) =>
+        TokenService.setSession({
+          ...rs.data,
+          refreshToken: rs.data.refreshToken ?? TokenService.getRefreshToken(),
+        })
+      )
+      .finally(() => {
+        refreshing = null;
+      });
+  }
+  return refreshing;
+};
+
 const instance = axios.create({
   headers: {
     Accept: "application/json",
@@ -51,11 +77,7 @@ instance.interceptors.response.use(
     ) {
       originalConfig._retry = true;
       try {
-        const rs = await instance.post(`/user/refresh_token`, {
-          accessToken: TokenService.getAuthToken(),
-          refreshToken: TokenService.getRefreshToken(),
-        });
-        TokenService.setSession(rs.data);
+        await refreshSession();
 
         return instance(originalConfig);
       } catch (_error) {

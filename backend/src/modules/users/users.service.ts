@@ -215,6 +215,7 @@ export class UsersService {
     user.email = scrub();
     user.deleted = true;
     await this.users.save(user);
+    await this.refreshTokens.deleteByUser(user.id);
   }
 
   countUserRoles(): Promise<CountByRoleResponse> {
