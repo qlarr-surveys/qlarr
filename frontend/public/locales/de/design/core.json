@@ -579,5 +579,8 @@
   "err_nested_repeatable": "Ein wiederholbares Element kann nicht in einem anderen wiederholbaren Element platziert werden. Entfernen Sie die Wiederholung von diesem Element oder seinem Container.",
   "err_repeatable_with_relevance": "Ein wiederholbares Element kann nicht zusätzlich eine eigene Relevanzbedingung haben – seine Anzeigelogik ist die Wiederholungsbedingung.",
   "err_repeat_relevance": "Fehler in der Wiederholungsbedingung",
-  "err_skip_inside_repeatable": "Sprunglogik ist innerhalb eines wiederholbaren Elements nicht zulässig."
+  "err_skip_inside_repeatable": "Sprunglogik ist innerhalb eines wiederholbaren Elements nicht zulässig.",
+  "find_element": "Frage oder Seite suchen (Strg+F)",
+  "find_element_placeholder": "Nach Code oder Text suchen",
+  "find_element_no_results": "Keine passenden Fragen oder Seiten"
 }
