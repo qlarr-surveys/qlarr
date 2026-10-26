@@ -355,10 +355,13 @@
     "mode": "Modus",
     "no": "Nein",
     "no_files_found": "Keine Dateien für den ausgewählten Bereich gefunden",
+    "no_responses_found": "Keine Antworten entsprechen dem ausgewählten Bereich und den Antworttypen",
     "preview": "Vorschau",
     "preview_not_exportable": "Vorschauantworten können nicht exportiert werden",
     "question": "Frage",
     "range_invalid": "“From” kann nicht größer sein als “To”.",
+    "all_responses": "Alle Antworten",
+    "custom_range": "Benutzerdefinierter Bereich",
     "raw_values": "Rohwerte anzeigen",
     "reset_surveyor_filter": "Vermessungsfilter zurücksetzen",
     "responses_type": "Antworttyp",
@@ -539,8 +542,7 @@
   "responses_count": "Antworten",
   "responses_export": {
     "format_csv": "CSV",
-    "format_excel": "Excel",
-    "format_ods": "ODS"
+    "format_excel": "Excel"
   },
   "roles_required": "Roles ist erforderlich",
   "save_changes": "Änderung speichern",

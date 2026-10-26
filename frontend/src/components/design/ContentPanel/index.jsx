@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import styles from "./ContentPanel.module.css";
 import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
@@ -23,6 +29,7 @@ import { buildResourceUrl } from "~/networking/common";
 import { useLogoUpload } from "~/hooks/useLogoUpload";
 import {
   logoSetup,
+  setupOptions,
   LOGO_ALIGNMENT_DEFAULT,
   LOGO_SIZE_DEFAULT,
   LOGO_SIZE_DIMENSIONS,
@@ -36,7 +43,7 @@ const ALIGNMENT_TO_FLEX = {
   right: "flex-end",
 };
 
-function ContentPanel({ designMode }, ref) {
+function ContentPanel({ designMode, navigatorRef }, ref) {
   const { i18n } = useTranslation(NAMESPACES.DESIGN_CORE);
   const theme = useTheme();
   const lang = useSelector((state) => state.designState.langInfo?.lang);
@@ -293,6 +300,83 @@ function ContentPanel({ designMode }, ref) {
     }, 100);
     return () => clearTimeout(timeoutId);
   }, [revealQuotaMessage, items]);
+
+  useImperativeHandle(
+    navigatorRef,
+    () => ({
+      navigateTo: ({ code, groupCode, type }) => {
+        const itemIndex = items.findIndex(
+          (it) => it.name === ELEMENTS.GROUP && it.group.code === groupCode
+        );
+        if (itemIndex === -1 || !virtuosoRef.current) {
+          return;
+        }
+        if (designMode == DESIGN_SURVEY_MODE.DESIGN) {
+          dispatch(setup({ code, rules: setupOptions(type) }));
+        }
+        virtuosoRef.current.scrollToIndex({
+          index: itemIndex,
+          align: "start",
+          behavior: "auto",
+        });
+
+        let frames = 0;
+        let lastScrollTop = null;
+        let stableFrames = 0;
+        const reveal = () => {
+          const wrapper = virtuosoWrapperRef.current;
+          const scroller = wrapper?.querySelector("[data-virtuoso-scroller]");
+          const element = wrapper?.querySelector(`[data-code="${code}"]`);
+          const outOfFrames = frames++ > 60;
+          if (!scroller || !element) {
+            if (!outOfFrames) requestAnimationFrame(reveal);
+            return;
+          }
+          stableFrames =
+            scroller.scrollTop === lastScrollTop ? stableFrames + 1 : 0;
+          lastScrollTop = scroller.scrollTop;
+          if (!outOfFrames) {
+            if (stableFrames < 2) {
+              requestAnimationFrame(reveal);
+              return;
+            }
+            const elementRect = element.getBoundingClientRect();
+            const scrollerRect = scroller.getBoundingClientRect();
+            const margin =
+              code === groupCode
+                ? 0
+                : Math.max((scrollerRect.height - elementRect.height) / 2, 0);
+            const target = Math.min(
+              Math.max(
+                scroller.scrollTop +
+                  elementRect.top -
+                  scrollerRect.top -
+                  margin,
+                0
+              ),
+              scroller.scrollHeight - scroller.clientHeight
+            );
+            if (Math.abs(target - scroller.scrollTop) > 1) {
+              scroller.scrollTop = target;
+              requestAnimationFrame(reveal);
+              return;
+            }
+          }
+          element.classList.remove(styles.searchHit);
+          void element.offsetWidth;
+          element.classList.add(styles.searchHit);
+          const clearHit = (event) => {
+            if (event.target !== element) return;
+            element.classList.remove(styles.searchHit);
+            element.removeEventListener("animationend", clearHit);
+          };
+          element.addEventListener("animationend", clearHit);
+        };
+        requestAnimationFrame(reveal);
+      },
+    }),
+    [items, designMode, dispatch]
+  );
 
   return (
     <Box

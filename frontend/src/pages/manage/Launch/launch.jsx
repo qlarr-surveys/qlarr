@@ -88,7 +88,7 @@ function LaunchPage({ onPublish }) {
 
   const onSurveyActiveFromChanged = (value) => {
     setSurveyDateError("");
-    const dateValue = value instanceof Date ? value : value.toDate();
+    const dateValue = !value || value instanceof Date ? value : value.toDate();
     dispatch(
       surveyAttributeChanged({
         key: "startDate",
@@ -99,7 +99,7 @@ function LaunchPage({ onPublish }) {
 
   const onSurveyActiveToChanged = (value) => {
     setSurveyDateError("");
-    const dateValue = value instanceof Date ? value : value.toDate();
+    const dateValue = !value || value instanceof Date ? value : value.toDate();
     dispatch(
       surveyAttributeChanged({
         key: "endDate",

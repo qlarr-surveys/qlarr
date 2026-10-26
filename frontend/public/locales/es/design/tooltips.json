@@ -20,6 +20,7 @@
   "email": "Recopilar y validar direcciones de correo electrónico",
   "file_upload": "Subir archivos como documentos o imágenes",
   "fullday_format": "Establecer si quieres mostrar el día completo o no",
+  "show_now_button": "Mostrar un botón que rellena la fecha/hora actual con un clic",
   "group": "Agregar una nueva página para organizar tu encuesta en secciones",
   "groups_order": "Establecer el orden de las páginas",
   "groups_priority": "Muestra solo algunas páginas a cada participante. Elige cuántas mostrar — las demás se ocultan, al azar para cada participante.",

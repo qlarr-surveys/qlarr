@@ -16,6 +16,7 @@ import { isTouchDevice } from "~/utils/isTouchDevice";
 import { TouchBackend } from "react-dnd-touch-backend";
 import { buildResourceUrl } from "~/networking/common";
 import LoadingDots from "~/components/common/LoadingDots";
+import ElementSearch from "~/components/design/ElementSearch";
 import {
   setDesignModeToDesign,
   setDesignModeToLang,
@@ -45,6 +46,11 @@ function DesignSurvey() {
   }, []);
 
   const containerRef = useRef();
+  const navigatorRef = useRef(null);
+
+  const navigateToElement = React.useCallback((entry) => {
+    navigatorRef.current?.navigateTo(entry);
+  }, []);
 
   const langInfo = useSelector((state) => {
     return state.designState.langInfo;
@@ -145,12 +151,16 @@ function DesignSurvey() {
             <Suspense fallback={<LoadingDots fullHeight />}>
               <ContentPanel
                 designMode={designMode}
+                navigatorRef={navigatorRef}
                 ref={contentRef}
                 className={styles.contentPanel}
               />
             </Suspense>
           </ThemeProvider>
         </CacheProvider>
+        {designStateReceived && (
+          <ElementSearch t={t} onNavigate={navigateToElement} />
+        )}
       </DndProvider>
     </Box>
   );

@@ -28,6 +28,7 @@
   "bytes": "Bytes",
   "cancel": "Annuleren",
   "choose_file": "Bestand Kiezen",
+  "show_now_button": "Knop Nu/Vandaag tonen",
   "choose_image": "Afbeelding Kiezen",
   "collapse_groups": "Pagina's Herschikken",
   "collapse_none": "Geen",
@@ -579,5 +580,8 @@
   "err_nested_repeatable": "Een herhaalbaar element kan niet in een ander herhaalbaar element worden geplaatst. Verwijder de herhaling van dit element of de bijbehorende container.",
   "err_repeatable_with_relevance": "Een herhaalbaar element kan niet ook een eigen relevantievoorwaarde hebben — de weergavelogica is de herhaalvoorwaarde.",
   "err_repeat_relevance": "Fout in herhaalvoorwaarde",
-  "err_skip_inside_repeatable": "Overslaanlogica is niet toegestaan binnen een herhaalbaar element."
+  "err_skip_inside_repeatable": "Overslaanlogica is niet toegestaan binnen een herhaalbaar element.",
+  "find_element": "Vraag of pagina zoeken (Ctrl+F)",
+  "find_element_placeholder": "Zoeken op code of tekst",
+  "find_element_no_results": "Geen overeenkomende vragen of pagina's"
 }

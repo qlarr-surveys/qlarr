@@ -328,10 +328,13 @@
     "database_format": "Database Format",
     "text_format": "Text Format",
     "range_invalid": "“From” cannot be greater than “To”.",
+    "all_responses": "All responses",
+    "custom_range": "Custom range",
     "max": "Max {{max}}",
     "min": "Min {{min}}",
     "enter_a_number": "Enter a number",
     "no_files_found": "No files found for the selected range",
+    "no_responses_found": "No responses match the selected range and response types",
     "yes": "Yes",
     "no": "No",
     "disqualified": "Disqualified",
@@ -599,8 +602,7 @@
   },
   "responses_export": {
     "format_csv": "CSV",
-    "format_excel": "Excel",
-    "format_ods": "ODS"
+    "format_excel": "Excel"
   },
   "aria": {
     "users_table": "Users table",

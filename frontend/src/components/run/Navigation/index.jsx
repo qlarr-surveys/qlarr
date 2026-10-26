@@ -17,6 +17,7 @@ function Navigation(props) {
       has_next: state.runState.values.Survey.has_next,
       can_save: state.runState.data.survey.allowIncomplete,
       has_errors: state.runState.values.Survey.show_errors,
+      invalid_next_attempts: state.runState.invalidNextAttempts,
     };
   }, shallowEqual);
   const dispatch = useDispatch();
@@ -38,7 +39,7 @@ function Navigation(props) {
 
   useEffect(() => {
     if (state.has_errors) {
-      setTimeout(() => {
+      const id = setTimeout(() => {
         const invalidQuestion = document.querySelector(".invalidQuestion");
         if (invalidQuestion) {
           const scrollContainer = getClosestScrollableParent(invalidQuestion);
@@ -48,8 +49,9 @@ function Navigation(props) {
           });
         }
       }, 500);
+      return () => clearTimeout(id);
     }
-  }, [state.has_errors]);
+  }, [state.has_errors, state.invalid_next_attempts]);
 
   const next = () => {
     dispatch(navigateNext());

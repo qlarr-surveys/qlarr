@@ -20,6 +20,7 @@
   "email": "Verzamel en valideer e-mailadressen",
   "file_upload": "Upload bestanden zoals documenten of afbeeldingen",
   "fullday_format": "Stel in of je de volledige dag wilt tonen of niet",
+  "show_now_button": "Toon een knop die de huidige datum/tijd met één klik invult",
   "group": "Voeg een nieuwe pagina toe om je enquête in secties te organiseren",
   "groups_order": "Stel de volgorde van de pagina's in",
   "groups_priority": "Toon elke respondent slechts enkele pagina's. Kies hoeveel er worden getoond — de rest wordt per respondent willekeurig verborgen.",

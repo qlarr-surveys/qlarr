@@ -28,6 +28,7 @@
   "bytes": "Bytes",
   "cancel": "Cancelar",
   "choose_file": "Elegir Archivo",
+  "show_now_button": "Mostrar botón Ahora/Hoy",
   "choose_image": "Elegir Imagen",
   "collapse_groups": "Reordenar Páginas",
   "collapse_none": "Ninguno",
@@ -579,5 +580,8 @@
   "err_nested_repeatable": "Un elemento repetible no se puede colocar dentro de otro repetible. Quita la repetición de este elemento o de su contenedor.",
   "err_repeatable_with_relevance": "Un elemento repetible no puede tener también su propia condición de relevancia: su lógica de visualización es la condición de repetición.",
   "err_repeat_relevance": "Error en la condición de repetición",
-  "err_skip_inside_repeatable": "La lógica de salto no está permitida dentro de un elemento repetible."
+  "err_skip_inside_repeatable": "La lógica de salto no está permitida dentro de un elemento repetible.",
+  "find_element": "Buscar pregunta o página (Ctrl+F)",
+  "find_element_placeholder": "Buscar por código o texto",
+  "find_element_no_results": "No hay preguntas ni páginas que coincidan"
 }

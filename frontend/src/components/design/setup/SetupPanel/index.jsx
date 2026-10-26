@@ -33,7 +33,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useDispatch } from "react-redux";
-import { resetSetup, clearHighlighted, setShowAdvanced } from "~/state/design/designState";
+import { resetSetup, clearHighlighted } from "~/state/design/designState";
 import { useSelector } from "react-redux";
 import { createSelector } from "@reduxjs/toolkit";
 import Theming from "../Theming";
@@ -306,6 +306,16 @@ const SetupComponent = React.memo(({ code, rule, t, isQuickOptions }) => {
           label={"fullday_format"}
         />
       );
+    case "showNowButton":
+      return (
+        <ToggleValue
+          t={t}
+          key={code + rule}
+          rule={rule}
+          code={code}
+          label={"show_now_button"}
+        />
+      );
     case "randomize_questions":
     case "randomize_options":
     case "randomize_groups":
@@ -541,19 +551,26 @@ const SetupComponent = React.memo(({ code, rule, t, isQuickOptions }) => {
   }
 });
 
+const SHOW_ADVANCED_KEY = "design_show_advanced";
+
 const SetupSection = React.memo(({ highlighted, rules, code, t, theme }) => {
   const dispatch = useDispatch();
   const [highlightedEl, setHighlightedEl] = React.useState(highlighted);
-  const showAdvanced = useSelector(
-    (state) => state.designState.advancedByCode?.[code] ?? false
+  const [preferAdvanced, setPreferAdvanced] = React.useState(
+    () => localStorage.getItem(SHOW_ADVANCED_KEY) === "true"
   );
+  const [revealedAdvanced, setRevealedAdvanced] = React.useState(false);
+  const showAdvanced = preferAdvanced || revealedAdvanced;
 
-  const handleShowAdvanced = React.useCallback(
-    (value) => {
-      dispatch(setShowAdvanced({ code, value }));
-    },
-    [code, dispatch]
-  );
+  React.useEffect(() => {
+    setRevealedAdvanced(false);
+  }, [code]);
+
+  const handleShowAdvanced = React.useCallback((value) => {
+    localStorage.setItem(SHOW_ADVANCED_KEY, String(value));
+    setPreferAdvanced(value);
+    setRevealedAdvanced(false);
+  }, []);
 
   const targetTabIndex = React.useMemo(() => {
     if (!rules?.length) return 0;
@@ -578,7 +595,7 @@ const SetupSection = React.memo(({ highlighted, rules, code, t, theme }) => {
           (tab) => tab.key === highlighted && tab.rules?.some((r) => normalRules.includes(r))
         );
       if (!(isBasicMode && visibleInBasic)) {
-        handleShowAdvanced(true);
+        setRevealedAdvanced(true);
       }
       setSelectedTab(targetTabIndex);
     }
