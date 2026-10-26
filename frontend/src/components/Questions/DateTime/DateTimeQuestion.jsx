@@ -178,9 +178,11 @@ function DateTimeQuestion(props) {
           />
         )}
       </LocalizationProvider>
-      <Button variant="outlined" onClick={() => handleDateChange(dayjs().startOf("minute"))}>
-        {props.component.type == "date" ? t("today") : t("now")}
-      </Button>
+      {props.component.showNowButton && (
+        <Button variant="outlined" className="now-button" onClick={() => handleDateChange(dayjs().startOf("minute"))}>
+          {props.component.type == "date" ? t("today") : t("now")}
+        </Button>
+      )}
     </div>
   );
 }

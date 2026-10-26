@@ -49,6 +49,7 @@
   "max_date": "Set the maximum date for date input",
   "min_date": "Set the minimum date for date input",
   "fullday_format": "Set if you want to show the full day or not",
+  "show_now_button": "Show a button that fills in the current date/time with one click",
   "order_mode": "Set the order mode for the survey",
   "hide_text": "Set if you want the text to be hidden",
   "columns_number": "Set how many options appear per row.",

@@ -306,6 +306,16 @@ const SetupComponent = React.memo(({ code, rule, t, isQuickOptions }) => {
           label={"fullday_format"}
         />
       );
+    case "showNowButton":
+      return (
+        <ToggleValue
+          t={t}
+          key={code + rule}
+          rule={rule}
+          code={code}
+          label={"show_now_button"}
+        />
+      );
     case "randomize_questions":
     case "randomize_options":
     case "randomize_groups":
