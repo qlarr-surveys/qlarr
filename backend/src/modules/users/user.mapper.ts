@@ -19,14 +19,14 @@ export function userToDto(e: UserEntity): UserDTO {
 export function loggedInResponse(
   e: UserEntity,
   accessToken: string,
-  refreshTokenId: string,
+  refreshTokenId?: string,
 ): LoggedInUserResponse {
   return {
     id: e.id,
     firstName: e.firstName,
     lastName: e.lastName,
     accessToken,
-    refreshToken: refreshTokenId,
+    ...(refreshTokenId && { refreshToken: refreshTokenId }),
     email: e.email,
     roles: rolesFromDb(e.roles),
   };

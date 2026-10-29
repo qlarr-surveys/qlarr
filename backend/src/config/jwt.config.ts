@@ -6,7 +6,10 @@ export interface JwtConfig {
   activeExpirationMs: number;
   resetExpirationMs: number;
   resetExpirationForNewUsersMs: number;
+  /** Hard cap on a session, counted from login. */
   refreshExpirationMs: number;
+  /** A session unused (not refreshed) for this long is dead. */
+  refreshIdleMs: number;
 }
 
 /** All values come from the environment — see backend/.env. */
@@ -21,5 +24,6 @@ export default registerAs(
       10,
     ),
     refreshExpirationMs: parseInt(process.env.JWT_REFRESH_EXPIRATION_MS!, 10),
+    refreshIdleMs: parseInt(process.env.JWT_REFRESH_IDLE_MS!, 10),
   }),
 );
