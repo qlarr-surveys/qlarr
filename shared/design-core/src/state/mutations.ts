@@ -52,6 +52,7 @@ import {
   conditionalRelevanceEquation,
   instructionByCode,
   isQuotaInstruction,
+  logicRefersToQuestion,
   processValidation,
   quotaInstruction,
   quotaRefersToQuestion,
@@ -1043,6 +1044,7 @@ export function convertQuestion(state, payload) {
     );
   } else if (inTextGroup) {
     convertTextQuestion(currentQuestion, newType);
+    addMaskedValuesInstructions(questionCode, currentQuestion, state);
   } else if (inDateTimeGroup) {
     convertDateTimeQuestion(currentQuestion, currentType, newType);
     addMaskedValuesInstructions(questionCode, currentQuestion, state);
@@ -1061,6 +1063,9 @@ export function convertQuestion(state, payload) {
   if (quotaRefersToQuestion(state, questionCode)) {
     refreshQuotaInstructions(state);
   }
+  // Compiled relevance depends on the referenced question's type, so every
+  // condition reading the converted question must be recompiled.
+  refreshRelevanceReferencing(state, questionCode);
 }
 
 export function changeContent(state, payload) {
@@ -1840,6 +1845,15 @@ const cleanupValidation = (state, code) => {
   }
   const ruleKeys = Object.keys(component["validation"]);
   ruleKeys.forEach((key) => processValidation(state, code, key, true));
+};
+
+const refreshRelevanceReferencing = (state, questionCode) => {
+  Object.keys(state).forEach((code) => {
+    const relevance = state[code]?.relevance;
+    if (relevance?.logic && logicRefersToQuestion(relevance.logic, questionCode)) {
+      addRelevanceInstructions(state, code, relevance);
+    }
+  });
 };
 
 const addRelevanceInstructions = (state, code, relevance) => {
