@@ -1,0 +1,94 @@
+/* ====== Strip ====== */
+
+.strip {
+  flex: none;
+  display: flex;
+  align-items: stretch;
+  height: var(--editor-tabs-h);
+  background: #f6f7fc;
+  border-bottom: 1px solid #dce0ee;
+}
+
+.link {
+  display: flex;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ====== Tab ====== */
+
+.tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: var(--editor-tabs-h);
+  /* Pulls the tab over the strip's own bottom border so the selected one reads
+     as continuous with the pane below it. */
+  margin-block-end: -1px;
+  padding-inline: 18px 20px;
+  background: transparent;
+  border: none;
+  white-space: nowrap;
+  font: 500 15px/1 Rubik, sans-serif;
+  color: #555d7d;
+  cursor: pointer;
+}
+
+.tab:hover {
+  background: #fff;
+}
+
+/* The inset shadow stands in for an outline here: an outline would be drawn
+   outside the tab and clipped by the next one, and this reads as the same
+   underline the selected tab uses, which is what focus is moving between. */
+.tab:focus-visible {
+  outline: none;
+  box-shadow: inset 0 -3px 0 #3a46d8;
+}
+
+.selected {
+  background: #fff;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+/* The accent bar is a pseudo-element, not a border: margin-block-end lifts the
+   tab a pixel over the strip's border, and a border here would land under it. */
+.selected::after {
+  content: "";
+  position: absolute;
+  inset-inline: 1px;
+  bottom: 1px;
+  height: 3px;
+  background: #3a46d8;
+  border-radius: 2px 2px 0 0;
+}
+
+.selected:focus-visible {
+  box-shadow: none;
+  outline: 2px solid #3a46d8;
+  outline-offset: -4px;
+}
+
+/* ====== Icon and badge ====== */
+
+.icon {
+  position: relative;
+  display: flex;
+  color: #4c5474;
+}
+
+.selected .icon {
+  color: #3a46d8;
+}
+
+.unpublishedChangesDot {
+  position: absolute;
+  top: -4px;
+  inset-inline-end: -5px;
+  width: 8px;
+  height: 8px;
+  background-color: #ff0000;
+  border-radius: 50%;
+  border: 1px solid #fff;
+}

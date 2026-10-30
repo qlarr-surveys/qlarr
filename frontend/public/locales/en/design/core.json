@@ -583,5 +583,18 @@
   "err_skip_inside_repeatable": "Skip logic isn't allowed inside a repeatable.",
   "find_element": "Find question or page (Ctrl+F)",
   "find_element_placeholder": "Search by code or text",
-  "find_element_no_results": "No matching questions or pages"
+  "find_element_no_results": "No matching questions or pages",
+  "survey_workspaces": "Survey workspaces",
+  "left_panel": "Left panel",
+  "question_types": "Question types",
+  "question_settings": "Question settings",
+  "page_settings": "Page settings",
+  "settings_for": "{{order}} settings",
+  "survey_theme": "Survey theme",
+  "survey_languages": "Survey languages",
+  "types_coach_title": "Drag a type onto the page",
+  "types_coach_body": "to add a question. Use ⓘ to learn what each type does.",
+  "types_coach_dismiss": "Got it",
+  "about_type": "About {{name}}",
+  "workspace_tools": "Workspace tools"
 }
