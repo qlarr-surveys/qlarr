@@ -289,6 +289,9 @@ const PrivateComponent = ({ children }) => {
 
 const ForceRole = ({ roles, children }) => {
   const user = TokenService.getUser();
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
   let hasCorrectRole = false;
   user.roles.forEach((el) => {
     if (roles.indexOf(el) > -1) {
