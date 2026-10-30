@@ -45,7 +45,7 @@ export default function ProfileView() {
   });
   const { t } = useTranslation(NAMESPACES.MANAGE);
   const passwordShow = useBoolean();
-  const userId = TokenService.getUser().id;
+  const userId = TokenService.getUser()?.id;
   const [user, setUser] = useState({});
   const [verifyEmailOpen, setVerifyEmailOpen] = useState(false);
   const [disableNameFields, setDisableNameFields] = useState(false);
@@ -167,6 +167,7 @@ export default function ProfileView() {
 
 
   useEffect(() => {
+    if (!userId) return;
     userService.getUser({ userId: userId }).then((response) => {
       const userData = {
         firstName: response.firstName,
