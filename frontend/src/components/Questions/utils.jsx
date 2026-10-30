@@ -240,7 +240,6 @@ export const QUESTION_TYPES = [
       },
     ],
   },
-  ,
   {
     name: "section_image_choice_based",
     type: "choice",

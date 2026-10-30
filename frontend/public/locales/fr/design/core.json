@@ -583,5 +583,18 @@
   "err_skip_inside_repeatable": "La logique de saut n'est pas autorisée à l'intérieur d'un élément répétable.",
   "find_element": "Rechercher une question ou une page (Ctrl+F)",
   "find_element_placeholder": "Rechercher par code ou texte",
-  "find_element_no_results": "Aucune question ou page correspondante"
+  "find_element_no_results": "Aucune question ou page correspondante",
+  "survey_workspaces": "Espaces de travail du questionnaire",
+  "left_panel": "Panneau latéral",
+  "question_types": "Types de question",
+  "question_settings": "Paramètres de la question",
+  "page_settings": "Paramètres de la page",
+  "settings_for": "Paramètres de {{order}}",
+  "survey_theme": "Thème du questionnaire",
+  "survey_languages": "Langues du questionnaire",
+  "types_coach_title": "Faites glisser un type sur la page",
+  "types_coach_body": "pour ajouter une question. Utilisez ⓘ pour savoir à quoi sert chaque type.",
+  "types_coach_dismiss": "J'ai compris",
+  "about_type": "À propos de {{name}}",
+  "workspace_tools": "Outils de l'espace de travail"
 }

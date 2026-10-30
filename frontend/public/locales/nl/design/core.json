@@ -583,5 +583,18 @@
   "err_skip_inside_repeatable": "Overslaanlogica is niet toegestaan binnen een herhaalbaar element.",
   "find_element": "Vraag of pagina zoeken (Ctrl+F)",
   "find_element_placeholder": "Zoeken op code of tekst",
-  "find_element_no_results": "Geen overeenkomende vragen of pagina's"
+  "find_element_no_results": "Geen overeenkomende vragen of pagina's",
+  "survey_workspaces": "Werkruimtes van de enquête",
+  "left_panel": "Zijpaneel",
+  "question_types": "Vraagtypen",
+  "question_settings": "Vraaginstellingen",
+  "page_settings": "Pagina-instellingen",
+  "settings_for": "Instellingen van {{order}}",
+  "survey_theme": "Thema van de enquête",
+  "survey_languages": "Talen van de enquête",
+  "types_coach_title": "Sleep een type naar de pagina",
+  "types_coach_body": "om een vraag toe te voegen. Gebruik ⓘ om te zien wat elk type doet.",
+  "types_coach_dismiss": "Begrepen",
+  "about_type": "Over {{name}}",
+  "workspace_tools": "Gereedschappen van de werkruimte"
 }

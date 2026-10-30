@@ -1,0 +1,79 @@
+/* ====== Aside ====== */
+
+.aside {
+  flex: none;
+  width: 22rem;
+  display: flex;
+  flex-direction: column;
+  /* Without this the body's own `min-height: 0` cannot shrink it below its
+     content, and the panel grows past the viewport instead of scrolling. */
+  min-height: 0;
+  height: var(--editor-pane-h);
+  background: #fff;
+  border-inline-end: 1px solid #dce0ee;
+}
+
+/* ====== Tablist ====== */
+
+.tablist {
+  flex: none;
+  display: flex;
+  align-items: stretch;
+  gap: 18px;
+  height: 38px;
+  padding-inline: 16px;
+  background: #f7f8fc;
+  border-bottom: 1px solid #dce0ee;
+}
+
+.tab {
+  flex: none;
+  height: 38px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  font: 700 12px/1 Rubik, sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #555d7d;
+  cursor: pointer;
+}
+
+.tab:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.tabActive {
+  color: #3a46d8;
+  box-shadow: inset 0 -2px 0 #3a46d8;
+}
+
+/* Until something is selected, question types is the only tab there is. It
+   greys itself down rather than claiming an accent it is not competing for. */
+.tabActiveAlone {
+  color: #a0a8c8;
+  box-shadow: none;
+}
+
+/* ====== Title bar (theme and translation workspaces) ====== */
+
+.title {
+  flex: none;
+  padding: 14px 16px 10px;
+  background: #f6f7fc;
+  border-bottom: 1px solid #dce0ee;
+  font: 600 12px/1 Rubik, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6b7194;
+}
+
+/* ====== Body ====== */
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  scrollbar-width: thin;
+}

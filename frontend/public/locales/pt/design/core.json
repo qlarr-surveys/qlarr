@@ -583,5 +583,18 @@
   "err_skip_inside_repeatable": "A lógica de salto não é permitida dentro de um item repetível.",
   "find_element": "Procurar pergunta ou página (Ctrl+F)",
   "find_element_placeholder": "Pesquisar por código ou texto",
-  "find_element_no_results": "Nenhuma pergunta ou página correspondente"
+  "find_element_no_results": "Nenhuma pergunta ou página correspondente",
+  "survey_workspaces": "Áreas de trabalho do inquérito",
+  "left_panel": "Painel lateral",
+  "question_types": "Tipos de pergunta",
+  "question_settings": "Definições da pergunta",
+  "page_settings": "Definições da página",
+  "settings_for": "Definições de {{order}}",
+  "survey_theme": "Tema do inquérito",
+  "survey_languages": "Idiomas do inquérito",
+  "types_coach_title": "Arrasta um tipo para a página",
+  "types_coach_body": "para adicionar uma pergunta. Usa ⓘ para saber o que cada tipo faz.",
+  "types_coach_dismiss": "Entendido",
+  "about_type": "Sobre {{name}}",
+  "workspace_tools": "Ferramentas da área de trabalho"
 }
