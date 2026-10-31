@@ -392,7 +392,15 @@
     "warn_lowEfficiency": "De efficiëntie is {{efficiency}}%. Onder 60% gaat een kleine groep het hele rapport bepalen.",
     "warn_highWeight": "Eén weging is {{maxWeight}}. Wegingen boven 5 betekenen meestal dat het doel onrealistisch is voor deze steekproef.",
     "warn_droppedWeight": "{{count}} reactie(s) hadden geen antwoord op de wegingsvraag en zijn uit deze tabel weggelaten.",
-    "warn_truncated": "De eerste {{shown}} van {{total}} reacties worden getoond. Cijfers en toetsen zijn op die steekproef gebaseerd."
+    "warn_truncated": "De eerste {{shown}} van {{total}} reacties worden getoond. Cijfers en toetsen zijn op die steekproef gebaseerd.",
+    "filters": "Filters",
+    "add_filter": "Filter toevoegen",
+    "filter_any_of": "Een van…",
+    "remove_filter": "Filter verwijderen",
+    "filtered_base": "Gefilterd tot {{count}} van {{total}} antwoorden",
+    "warn_noMatches": "Geen antwoorden voldoen aan deze filters.",
+    "plan_name": "Plannaam",
+    "plan_name_taken": "Er bestaat al een plan met deze naam."
   },
   "calculations": {
     "title": "Berekende velden",

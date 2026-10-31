@@ -1,4 +1,6 @@
+import { BadRequestException } from '@nestjs/common';
 import {
+  buildFilterSql,
   buildVarDefs,
   computeCrosstab,
   CrosstabRecord,
@@ -261,6 +263,63 @@ describe('computeCrosstab — weighting', () => {
       params: { count: 10 },
     });
   });
+
+  // Full sample: 90 small / 10 large, target 50/50 → small ≈ 0.556, large = 5.
+  const fullSample = { small: 90, large: 10 };
+  const weightInput = (records: CrosstabRecord[]) => ({
+    records,
+    rowCodes: ['yes'],
+    colCodes: ['north', 'south'],
+    multi: false,
+    weightCodes: ['small', 'large'],
+    targets: { small: 50, large: 50 },
+    weightBaseCounts: fullSample,
+    options: opts,
+  });
+
+  it('keeps full-sample weights when records hold one weight category (filter on the weight var)', () => {
+    const mk = (col: string) => ({ col, rows: ['yes'], weight: 'large' });
+    const records: CrosstabRecord[] = [
+      ...Array.from({ length: 6 }, () => mk('north')),
+      ...Array.from({ length: 4 }, () => mk('south')),
+    ];
+    const res = computeCrosstab(weightInput(records));
+    // each large respondent keeps weight 5 → weighted base 10*5, not scaled down
+    expect(res.weighting!.weightedBase).toBe(50);
+    expect(res.columns.map((c) => c.base)).toEqual([30, 20]);
+    expect(res.weighting!.maxWeight).toBe(5);
+    expect(res.weighting!.droppedNoWeight).toBe(0);
+    // the summary reports the full-sample distribution the weights came from
+    const large = res.weighting!.categories.find((c) => c.code === 'large')!;
+    expect(large).toMatchObject({ count: 10, share: 0.1, weight: 5 });
+  });
+
+  it('keeps full-sample weights for a subgroup filtered on another variable', () => {
+    // subgroup is 50/50 small/large; recomputing from it would give weight 1 each
+    const mk = (weight: string) => ({ col: 'north', rows: ['yes'], weight });
+    const records: CrosstabRecord[] = [
+      ...Array.from({ length: 10 }, () => mk('small')),
+      ...Array.from({ length: 10 }, () => mk('large')),
+    ];
+    const res = computeCrosstab(weightInput(records));
+    const weights = Object.fromEntries(
+      res.weighting!.categories.map((c) => [c.code, c.weight]),
+    );
+    expect(weights).toEqual({ small: 0.56, large: 5 });
+    // 10*0.556 + 10*5 ≈ 56
+    expect(res.weighting!.weightedBase).toBe(56);
+  });
+
+  it('reports maxWeight only over weight categories present in the table', () => {
+    const records: CrosstabRecord[] = Array.from({ length: 10 }, () => ({
+      col: 'north',
+      rows: ['yes'],
+      weight: 'small',
+    }));
+    const res = computeCrosstab(weightInput(records));
+    expect(res.weighting!.maxWeight).toBeCloseTo(0.56, 2);
+    expect(res.warnings.some((w) => w.code === 'highWeight')).toBe(false);
+  });
 });
 
 describe('zTest', () => {
@@ -294,12 +353,25 @@ describe('resolveRows — row kinds', () => {
     expect(resolveRows(d, { 'Q.value': 'A1' })).toEqual([]);
   });
 
+  it('multi keeps string elements only, like the SQL filter', () => {
+    const d = def({ kind: 'multi', multi: true });
+    expect(resolveRows(d, { 'Q.value': ['A1', 1, null, true] })).toEqual(['A1']);
+  });
+
   it('NPS → the derived bucket', () => {
     const d = def({ kind: 'nps' });
     expect(resolveRows(d, { 'Q.value': 3 })).toEqual(['detractors']);
     expect(resolveRows(d, { 'Q.value': 8 })).toEqual(['passives']);
     expect(resolveRows(d, { 'Q.value': 10 })).toEqual(['promoters']);
     expect(resolveRows(d, { 'Q.value': '9' })).toEqual(['promoters']); // string coercion
+  });
+
+  it('NPS reads plain decimal strings only, like the SQL filter', () => {
+    const d = def({ kind: 'nps' });
+    expect(resolveRows(d, { 'Q.value': ' 7.5 ' })).toEqual(['passives']);
+    for (const v of ['+5', '.5', '1e1', '0x9', '']) {
+      expect(resolveRows(d, { 'Q.value': v })).toEqual([]);
+    }
   });
 
   it('matrix sub-row → the stored column value via its own valueKey', () => {
@@ -422,5 +494,71 @@ describe('buildVarDefs — design → crossable variables', () => {
   it('drops choice questions with fewer than two options', () => {
     expect(rowDefs.has('Q5')).toBe(false);
     expect(colDefs.has('Q5')).toBe(false);
+  });
+});
+
+describe('buildFilterSql — answer filters → WHERE fragment', () => {
+  const def = (id: string, kind: VarDef['kind'], codes: string[]): VarDef => ({
+    id,
+    label: id,
+    kind,
+    multi: kind === 'multi',
+    categories: codes.map((code) => ({ code, label: code })),
+    valueKey: `${id}.value`,
+  });
+  const defs = new Map<string, VarDef>([
+    ['Q1', def('Q1', 'single', ['A1', 'A2', 'A3'])],
+    ['Q2', def('Q2', 'multi', ['A1', 'A2'])],
+    ['Q3', def('Q3', 'nps', ['detractors', 'passives', 'promoters'])],
+  ]);
+
+  it('is empty when there are no filters', () => {
+    expect(buildFilterSql(undefined, defs, 3)).toEqual({ clause: '', params: [] });
+    expect(buildFilterSql([], defs, 3)).toEqual({ clause: '', params: [] });
+  });
+
+  it('ANDs filters and numbers placeholders from firstParam', () => {
+    const { clause, params } = buildFilterSql(
+      [
+        { var: 'Q1', codes: ['A1', 'A2'] },
+        { var: 'Q2', codes: ['A2'] },
+      ],
+      defs,
+      3,
+    );
+    expect(params).toEqual(['Q1.value', ['A1', 'A2'], 'Q2.value', ['A2']]);
+    expect(clause).toBe(
+      ` AND ("values" ->> $3 = ANY($4::text[]))` +
+        ` AND (jsonb_typeof("values" -> $5) = 'array' AND "values" -> $5 ?| $6::text[])`,
+    );
+  });
+
+  it('ORs NPS buckets as numeric ranges', () => {
+    const { clause, params } = buildFilterSql(
+      [{ var: 'Q3', codes: ['detractors', 'promoters'] }],
+      defs,
+      2,
+    );
+    expect(params).toEqual(['Q3.value']);
+    expect(clause).toContain(' <= 6 OR ');
+    expect(clause).toContain(' > 8');
+    expect(clause).not.toContain('$3');
+  });
+
+  it('dedupes repeated codes', () => {
+    const { params } = buildFilterSql([{ var: 'Q1', codes: ['A1', 'A1'] }], defs, 2);
+    expect(params).toEqual(['Q1.value', ['A1']]);
+  });
+
+  it('rejects unknown variables, unknown codes and empty code lists', () => {
+    expect(() => buildFilterSql([{ var: 'Q9', codes: ['A1'] }], defs, 2)).toThrow(
+      BadRequestException,
+    );
+    expect(() => buildFilterSql([{ var: 'Q1', codes: ['A9'] }], defs, 2)).toThrow(
+      BadRequestException,
+    );
+    expect(() => buildFilterSql([{ var: 'Q1', codes: [] }], defs, 2)).toThrow(
+      BadRequestException,
+    );
   });
 });

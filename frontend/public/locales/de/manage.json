@@ -425,7 +425,15 @@
     "warn_lowEfficiency": "Die Effizienz beträgt {{efficiency}} %. Unter 60 % beginnt eine kleine Gruppe, den gesamten Bericht zu bestimmen.",
     "warn_highWeight": "Eine Gewichtung beträgt {{maxWeight}}. Gewichtungen über 5 bedeuten meist, dass das Ziel für diese Stichprobe unrealistisch ist.",
     "warn_droppedWeight": "{{count}} Antwort(en) hatten keine Angabe zur Gewichtungsfrage und wurden aus dieser Tabelle ausgeschlossen.",
-    "warn_truncated": "Es werden die ersten {{shown}} von {{total}} Antworten angezeigt. Zahlen und Tests basieren auf dieser Stichprobe."
+    "warn_truncated": "Es werden die ersten {{shown}} von {{total}} Antworten angezeigt. Zahlen und Tests basieren auf dieser Stichprobe.",
+    "filters": "Filter",
+    "add_filter": "Filter hinzufügen",
+    "filter_any_of": "Eines von…",
+    "remove_filter": "Filter entfernen",
+    "filtered_base": "Gefiltert auf {{count}} von {{total}} Antworten",
+    "warn_noMatches": "Keine Antworten entsprechen diesen Filtern.",
+    "plan_name": "Planname",
+    "plan_name_taken": "Ein Plan mit diesem Namen existiert bereits."
   },
   "calculations": {
     "title": "Berechnete Felder",

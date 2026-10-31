@@ -392,7 +392,15 @@
     "warn_lowEfficiency": "A eficiência é de {{efficiency}}%. Abaixo de 60%, um grupo pequeno começa a determinar todo o relatório.",
     "warn_highWeight": "Uma ponderação é {{maxWeight}}. Ponderações acima de 5 costumam indicar que o alvo é irrealista para esta amostra.",
     "warn_droppedWeight": "{{count}} resposta(s) não responderam à pergunta de ponderação e foram excluídas desta tabela.",
-    "warn_truncated": "A mostrar as primeiras {{shown}} de {{total}} respostas. Os valores e os testes baseiam-se nessa amostra."
+    "warn_truncated": "A mostrar as primeiras {{shown}} de {{total}} respostas. Os valores e os testes baseiam-se nessa amostra.",
+    "filters": "Filtros",
+    "add_filter": "Adicionar filtro",
+    "filter_any_of": "Qualquer um de…",
+    "remove_filter": "Remover filtro",
+    "filtered_base": "Filtrado para {{count}} de {{total}} respostas",
+    "warn_noMatches": "Nenhuma resposta corresponde a estes filtros.",
+    "plan_name": "Nome do plano",
+    "plan_name_taken": "Já existe um plano com este nome."
   },
   "calculations": {
     "title": "Campos calculados",

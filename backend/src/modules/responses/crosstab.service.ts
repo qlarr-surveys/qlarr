@@ -14,6 +14,7 @@ import {
   NOT_DISQUALIFIED,
   NPS_TYPE,
   SINGLE_CHOICE_TYPES,
+  SqlFilter,
   toAnalyticsOptions,
   toValueKey,
 } from './analytics.service';
@@ -21,6 +22,7 @@ import {
   CrosstabCatalogueDto,
   CrosstabCategory,
   CrosstabCell,
+  CrosstabFilter,
   CrosstabRequestDto,
   CrosstabResultDto,
   CrosstabWarning,
@@ -44,6 +46,12 @@ const NPS_BUCKETS: CrosstabCategory[] = [
   { code: 'passives', label: 'Passives (7–8)' },
   { code: 'promoters', label: 'Promoters (9–10)' },
 ];
+/**
+ * A numeric string NPS answer: plain decimal only (no `+`, `.5`, `1e1`, hex).
+ * Shared by `resolveRows` and the SQL filter (`numericAnswer`) so both agree.
+ */
+const NPS_NUMBER = /^\s*-?[0-9]+(\.[0-9]+)?\s*$/;
+
 export const npsBucket = (n: number): string =>
   n <= 6 ? 'detractors' : n <= 8 ? 'passives' : 'promoters';
 
@@ -73,6 +81,12 @@ export interface CrosstabComputeInput {
   weightCodes?: string[] | null;
   /** Weight targets by category code (percentages). */
   targets?: Record<string, number> | null;
+  /**
+   * Full-sample respondent count per weight category. When present, weights
+   * derive from these instead of `records`, so filters and the row cap don't
+   * change them; absent → shares are counted from `records`.
+   */
+  weightBaseCounts?: Record<string, number> | null;
   options?: { counts?: boolean; pct?: boolean; significance?: boolean };
 }
 
@@ -125,15 +139,23 @@ export function computeCrosstab(
     const codes = input.weightCodes as string[];
     const targets = input.targets as Record<string, number>;
     targetSum = codes.reduce((s, c) => s + (targets[c] ?? 0), 0);
-    const denom = records.filter((r) => r.weight != null).length || 1;
+    const base = input.weightBaseCounts;
+    const countOf = (c: string): number =>
+      base ? base[c] ?? 0 : records.filter((r) => r.weight === c).length;
+    const denom =
+      (base
+        ? codes.reduce((s, c) => s + (base[c] ?? 0), 0)
+        : records.filter((r) => r.weight != null).length) || 1;
+    // maxWeight describes the table shown, so only categories present in it.
+    const present = new Set(records.map((r) => r.weight));
     for (const c of codes) {
-      const count = records.filter((r) => r.weight === c).length;
+      const count = countOf(c);
       const share = count / denom;
       const tgt = (targets[c] ?? 0) / (targetSum || 1);
       weightCount[c] = count;
       weightShare[c] = share;
       weightMap[c] = share > 0 ? tgt / share : 0;
-      if (weightMap[c] > maxWeight) maxWeight = weightMap[c];
+      if (present.has(c) && weightMap[c] > maxWeight) maxWeight = weightMap[c];
     }
   }
   const weightOf = (r: CrosstabRecord): number =>
@@ -373,15 +395,16 @@ export function resolveRows(
   const v = resp[def.valueKey];
   if (v == null) return [];
   if (def.kind === 'multi') {
+    // Strings only: the SQL filter's `?|` matches string elements only.
     return Array.isArray(v)
-      ? v.filter((x) => x != null).map((x) => String(x))
+      ? v.filter((x): x is string => typeof x === 'string')
       : [];
   }
   if (def.kind === 'nps') {
     const n =
       typeof v === 'number'
         ? v
-        : typeof v === 'string' && v.trim() !== ''
+        : typeof v === 'string' && NPS_NUMBER.test(v)
           ? Number(v)
           : NaN;
     return Number.isFinite(n) ? [npsBucket(n)] : [];
@@ -389,6 +412,90 @@ export function resolveRows(
   if (Array.isArray(v)) return [];
   const s = String(v);
   return s.trim() === '' ? [] : [s];
+}
+
+// --- answer filters → SQL ---
+
+/** Numeric value of a jsonb answer, or NULL when it isn't a plain number. */
+const numericAnswer = (key: string): string =>
+  `(CASE WHEN "values" ->> ${key} ~ '${NPS_NUMBER.source}' ` +
+  `THEN ("values" ->> ${key})::numeric END)`;
+
+/** NPS bucket → SQL predicate on the numeric answer; mirrors `npsBucket`. */
+const NPS_BUCKET_SQL: Record<string, (n: string) => string> = {
+  detractors: (n) => `${n} <= 6`,
+  passives: (n) => `(${n} > 6 AND ${n} <= 8)`,
+  promoters: (n) => `${n} > 8`,
+};
+
+/**
+ * Turn answer filters into a WHERE fragment over the `responses` table. Filters
+ * are ANDed; a filter's codes are ORed. Placeholders start at `$firstParam`.
+ * Unknown variables or category codes are rejected, like unknown row/col vars.
+ */
+export function buildFilterSql(
+  filters: CrosstabFilter[] | undefined,
+  defs: Map<string, VarDef>,
+  firstParam: number,
+): SqlFilter {
+  const params: unknown[] = [];
+  const param = (v: unknown): string => {
+    params.push(v);
+    return `$${firstParam + params.length - 1}`;
+  };
+  const parts: string[] = [];
+  for (const f of filters ?? []) {
+    const def = defs.get(f.var);
+    if (!def) {
+      throw new BadRequestException(`Unknown filter variable: ${f.var}`);
+    }
+    const known = new Set(def.categories.map((c) => c.code));
+    const unknown = f.codes.find((c) => !known.has(c));
+    if (unknown != null) {
+      throw new BadRequestException(
+        `Unknown category ${unknown} for filter ${f.var}`,
+      );
+    }
+    const codes = [...new Set(f.codes)];
+    if (codes.length === 0) {
+      throw new BadRequestException(`Filter ${f.var} has no categories`);
+    }
+    const key = param(def.valueKey);
+    if (def.kind === 'nps') {
+      const n = numericAnswer(key);
+      parts.push(`(${codes.map((c) => NPS_BUCKET_SQL[c](n)).join(' OR ')})`);
+    } else if (def.kind === 'multi') {
+      parts.push(
+        `(jsonb_typeof("values" -> ${key}) = 'array' AND "values" -> ${key} ?| ${param(codes)}::text[])`,
+      );
+    } else {
+      parts.push(`("values" ->> ${key} = ANY(${param(codes)}::text[]))`);
+    }
+  }
+  return { clause: parts.map((p) => ` AND ${p}`).join(''), params };
+}
+
+/**
+ * Completed responses per answer to `valueKey`, over the whole survey (no
+ * filters, no row cap) — the base post-stratification weights derive from.
+ * Answers are read as `resolveSingle` reads them: arrays, objects and blank
+ * strings count as unanswered.
+ */
+export async function countWeightBase(
+  db: { query(sql: string, params?: unknown[]): Promise<any> },
+  surveyId: string,
+  valueKey: string,
+): Promise<Record<string, number>> {
+  const rows: Array<{ code: string; n: string }> = await db.query(
+    `SELECT "values" ->> $2 AS code, COUNT(*) AS n FROM responses
+     WHERE survey_id = $1 AND submit_date IS NOT NULL AND preview = false
+       AND ${NOT_DISQUALIFIED}
+       AND jsonb_typeof("values" -> $2) NOT IN ('array', 'object', 'null')
+       AND btrim("values" ->> $2) <> ''
+     GROUP BY 1`,
+    [surveyId, valueKey],
+  );
+  return Object.fromEntries(rows.map((r) => [r.code, Number(r.n)]));
 }
 
 /**
@@ -416,7 +523,7 @@ export class CrosstabService {
       false, // catalogue needs the design only, not the responses
     );
     const { rowDefs, colDefs } = buildVarDefs(ctx, this.engine);
-    const totalResponses = await this.countCompleted(surveyId);
+    const { total: totalResponses } = await this.countCompleted(surveyId);
     return {
       totalResponses,
       rowVariables: [...rowDefs.values()].map((d) => ({
@@ -452,13 +559,22 @@ export class CrosstabService {
         }
       }
     }
+    // Filters are resolved against the design before the response query, so
+    // they narrow the set in SQL ahead of the row cap.
+    let filterDefs = new Map<string, VarDef>();
     const ctx = await buildAnalyticsContext(
       this.design,
       this.engine,
       this.db,
       surveyId,
       maxResponses,
+      true,
+      (meta, firstParam) => {
+        filterDefs = buildVarDefs(meta, this.engine).rowDefs;
+        return buildFilterSql(config.filters, filterDefs, firstParam);
+      },
     );
+    // Rebuilt after loading: labels are resolved against the loaded responses.
     const { rowDefs, colDefs } = buildVarDefs(ctx, this.engine);
 
     const rowDef = rowDefs.get(config.rowVar);
@@ -488,6 +604,22 @@ export class CrosstabService {
       weight: weightDef ? resolveSingle(weightDef, resp) : null,
     }));
 
+    // Independent of each other, so run concurrently.
+    const [weightBaseCounts, counts] = await Promise.all([
+      // Weights come from the full sample, then the filters/row cap apply, so
+      // a filtered subgroup keeps the weights its respondents have overall.
+      weightDef
+        ? countWeightBase(this.db.manager, surveyId, weightDef.valueKey)
+        : null,
+      // Both counted in one query, so "X of Y" can't mix a fresh X with a Y
+      // loaded earlier.
+      this.countCompleted(
+        surveyId,
+        buildFilterSql(config.filters, filterDefs, 2),
+      ),
+    ]);
+    const { filtered: totalCompleted, total: totalResponses } = counts;
+
     const result = computeCrosstab({
       records,
       rowCodes: rowDef.categories.map((c) => c.code),
@@ -495,14 +627,17 @@ export class CrosstabService {
       multi: rowDef.multi,
       weightCodes: weightDef ? weightDef.categories.map((c) => c.code) : null,
       targets: config.targets ?? null,
+      weightBaseCounts,
       options: config.options,
     });
 
-    // The context loads at most `maxResponses` rows; if more completed responses
+    // The context loads at most `maxResponses` rows; if more matching responses
     // exist, the table is a first-N sample — surface that so the stats aren't
     // read as the whole population.
     const warnings = [...result.warnings];
-    const totalCompleted = await this.countCompleted(surveyId);
+    if (totalCompleted === 0 && config.filters?.length) {
+      warnings.push({ code: 'noMatches' });
+    }
     if (ctx.responses.length < totalCompleted) {
       warnings.push({
         code: 'truncated',
@@ -524,18 +659,29 @@ export class CrosstabService {
         cells: r.cells,
       })),
       notAnswered: result.notAnswered,
+      filteredResponses: totalCompleted,
+      totalResponses,
       weighting: result.weighting,
       warnings,
     };
   }
 
-  private async countCompleted(surveyId: string): Promise<number> {
+  /**
+   * Completed responses in one scan: all of them, and those matching `filter`
+   * (placeholders from `$2`; no filter → both equal).
+   */
+  private async countCompleted(
+    surveyId: string,
+    filter: SqlFilter = { clause: '', params: [] },
+  ): Promise<{ total: number; filtered: number }> {
     const [row] = await this.db.manager.query(
-      `SELECT COUNT(*) AS c FROM responses
+      `SELECT COUNT(*) AS total,
+              COUNT(*) FILTER (WHERE true${filter.clause}) AS filtered
+       FROM responses
        WHERE survey_id = $1 AND submit_date IS NOT NULL AND preview = false
          AND ${NOT_DISQUALIFIED}`,
-      [surveyId],
+      [surveyId, ...filter.params],
     );
-    return Number(row.c);
+    return { total: Number(row.total), filtered: Number(row.filtered) };
   }
 }

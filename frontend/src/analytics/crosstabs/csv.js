@@ -1,16 +1,22 @@
 /**
  * Build a CSV string from a CrosstabResultDto (client-side, no extra endpoint).
- * Low-base columns are marked; each cell shows count and column %.
+ * Low-base columns are marked; each cell shows count and column %. Active
+ * filters (from describeFilters) go on a leading "Filters" line.
  */
 
 const quote = (s) => `"${String(s).replace(/"/g, '""')}"`;
 
-export function crosstabToCsv(result, rowVarLabel) {
+export function crosstabToCsv(result, rowVarLabel, filters = []) {
   if (!result) return '';
   const { columns, rows } = result;
 
+  const lines = [];
+  if (filters.length) {
+    const summary = filters.map((f) => `${f.label} = ${f.values.join(' | ')}`).join('; ');
+    lines.push([quote('Filters'), quote(summary)].join(','));
+  }
   const header = [quote(rowVarLabel ?? ''), ...columns.map((c) => quote(c.label))];
-  const lines = [header.join(',')];
+  lines.push(header.join(','));
 
   for (const row of rows) {
     const cells = columns.map((col, i) => {
