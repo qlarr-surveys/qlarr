@@ -374,6 +374,7 @@
     "effective_base": "Base effective",
     "efficiency": "Efficacité",
     "weight_note": "Pondération maximale {{maxWeight}}. Les tests de significativité utilisent la base effective, et non la base pondérée.",
+    "weight_filtered_note": "Des filtres sont actifs. Les valeurs réelles et les pondérations proviennent des {{total}} réponses, pas seulement des {{filtered}} du tableau. Chaque répondant conserve sa pondération de l'échantillon complet : le tableau filtré peut donc ne pas correspondre aux cibles.",
     "base": "Base",
     "eff": "eff",
     "subtitle": "Par {{column}} · {{weighting}}",
@@ -392,7 +393,15 @@
     "warn_lowEfficiency": "L'efficacité est de {{efficiency}} %. En dessous de 60 %, un petit groupe finit par déterminer l'ensemble du rapport.",
     "warn_highWeight": "Une pondération vaut {{maxWeight}}. Des pondérations supérieures à 5 indiquent généralement que la cible est irréaliste pour cet échantillon.",
     "warn_droppedWeight": "{{count}} réponse(s) n'avaient pas de réponse à la question de pondération et ont été exclues de ce tableau.",
-    "warn_truncated": "Affichage des {{shown}} premières réponses sur {{total}}. Les chiffres et les tests reposent sur cet échantillon."
+    "warn_truncated": "Affichage des {{shown}} premières réponses sur {{total}}. Les chiffres et les tests reposent sur cet échantillon.",
+    "filters": "Filtres",
+    "add_filter": "Ajouter un filtre",
+    "filter_any_of": "L'un de…",
+    "remove_filter": "Supprimer le filtre",
+    "filtered_base": "Filtré sur {{count}} réponses sur {{total}}",
+    "warn_noMatches": "Aucune réponse ne correspond à ces filtres.",
+    "plan_name": "Nom du plan",
+    "plan_name_taken": "Un plan portant ce nom existe déjà."
   },
   "calculations": {
     "title": "Champs calculés",

@@ -28,8 +28,11 @@ backend/    # NestJS survey backend (its own package.json + lockfile)
 deploy/     # docker-compose + Caddy for deploying both
 .github/    # CI workflows
 ```
-Each app installs independently (its own `package-lock.json`); there is no root
-`package.json` / npm workspace. Run frontend commands from `frontend/`.
+Each app installs independently (its own `package-lock.json`). The root
+`package.json` is only a task runner, not an npm workspace: its sole dependency is
+`concurrently`, and `npm run dev` starts the frontend and backend together
+(`dev-debug` runs the backend with `--debug`). Frontend scripts are also proxied
+from the root; app-level commands can still be run from `frontend/` or `backend/`.
 
 ## Frontend Structure (`frontend/`)
 ```
@@ -55,9 +58,9 @@ src/
 `~/` maps to `src/` (configured in `jsconfig.json`)
 
 ## Development
-- Run all frontend commands from the `frontend/` directory
+- Run frontend commands from `frontend/`, or from the repo root via the proxied scripts (`npm start`, `npm run build`, …)
 - **Package manager**: npm
-- **Node version**: 16+
+- **Node version**: 20+ (the backend requires it; the root `concurrently` needs 18+)
 - Copy `.env.example` to `.env` and set `VITE_BE_URL` to point to the backend API
 
 ### Commands

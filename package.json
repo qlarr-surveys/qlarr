@@ -1,0 +1,22 @@
+{
+  "name": "qlarr",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Repo-root task runner for the two independent apps (frontend/, backend/). NOT an npm workspace root — each app installs and builds from its own folder. The root's only dependency is concurrently, used to run both apps together.",
+  "scripts": {
+    "start": "npm --prefix frontend run start",
+    "build": "npm --prefix frontend run build",
+    "build-staging": "npm --prefix frontend run build-staging",
+    "build-android": "npm --prefix frontend run build-android",
+    "build-android-debuggable": "npm --prefix frontend run build-android-debuggable",
+    "serve": "npm --prefix frontend run serve",
+    "backend:dev": "npm --prefix backend run start:dev",
+    "backend:debug": "npm --prefix backend run start:debug",
+    "backend:build": "npm --prefix backend run build",
+    "dev": "concurrently -n frontend,backend -c blue,magenta \"npm start\" \"npm run backend:dev\"",
+    "dev-debug": "concurrently -n frontend,backend -c blue,magenta \"npm start\" \"npm run backend:debug\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

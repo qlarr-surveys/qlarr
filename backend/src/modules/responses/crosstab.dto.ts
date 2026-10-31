@@ -10,6 +10,9 @@
  */
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
+  ArrayNotEmpty,
+  IsArray,
   IsBoolean,
   IsInt,
   IsNotEmpty,
@@ -55,6 +58,15 @@ export class CrosstabOptions {
   @IsOptional() @IsBoolean() significance?: boolean;
 }
 
+/**
+ * Restrict the respondent base to those whose answer to `var` (a
+ * CrosstabRowVariable.id) is any of `codes`. Several filters are ANDed.
+ */
+export class CrosstabFilter {
+  @IsString() @IsNotEmpty() var: string;
+  @IsArray() @ArrayNotEmpty() @IsString({ each: true }) codes: string[];
+}
+
 export class CrosstabRequestDto {
   /** A CrosstabRowVariable.id. */
   @IsString() @IsNotEmpty() rowVar: string;
@@ -72,6 +84,13 @@ export class CrosstabRequestDto {
   @ValidateNested()
   @Type(() => CrosstabOptions)
   options?: CrosstabOptions;
+  /** Answer filters, applied in SQL before the row cap. */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(50)
+  @ValidateNested({ each: true })
+  @Type(() => CrosstabFilter)
+  filters?: CrosstabFilter[];
   /** Row cap; the service clamps it to [1, DEFAULT_MAX_RESPONSES]. */
   @IsOptional() @IsInt() @Min(1) maxResponses?: number;
 }
@@ -145,6 +164,10 @@ export interface CrosstabResultDto {
   rows: CrosstabRowResult[];
   /** Respondents in a valid column who did not answer the row question. */
   notAnswered: number;
+  /** Completed responses matching the filters (all completed when unfiltered). */
+  filteredResponses: number;
+  /** All completed responses, unfiltered — counted with `filteredResponses`. */
+  totalResponses: number;
   weighting?: CrosstabWeighting;
   warnings: CrosstabWarning[];
 }

@@ -374,6 +374,7 @@
     "effective_base": "Effectieve basis",
     "efficiency": "Efficiëntie",
     "weight_note": "Grootste weging {{maxWeight}}. Significantietoetsen gebruiken de effectieve basis, niet de gewogen basis.",
+    "weight_filtered_note": "Er zijn filters actief. Werkelijke waarden en wegingen komen uit alle {{total}} antwoorden, niet alleen uit de {{filtered}} in de tabel. Elke respondent behoudt de weging uit de volledige steekproef, dus de gefilterde tabel komt mogelijk niet overeen met de doelen.",
     "base": "Basis",
     "eff": "eff",
     "subtitle": "Naar {{column}} · {{weighting}}",
@@ -392,7 +393,15 @@
     "warn_lowEfficiency": "De efficiëntie is {{efficiency}}%. Onder 60% gaat een kleine groep het hele rapport bepalen.",
     "warn_highWeight": "Eén weging is {{maxWeight}}. Wegingen boven 5 betekenen meestal dat het doel onrealistisch is voor deze steekproef.",
     "warn_droppedWeight": "{{count}} reactie(s) hadden geen antwoord op de wegingsvraag en zijn uit deze tabel weggelaten.",
-    "warn_truncated": "De eerste {{shown}} van {{total}} reacties worden getoond. Cijfers en toetsen zijn op die steekproef gebaseerd."
+    "warn_truncated": "De eerste {{shown}} van {{total}} reacties worden getoond. Cijfers en toetsen zijn op die steekproef gebaseerd.",
+    "filters": "Filters",
+    "add_filter": "Filter toevoegen",
+    "filter_any_of": "Een van…",
+    "remove_filter": "Filter verwijderen",
+    "filtered_base": "Gefilterd tot {{count}} van {{total}} antwoorden",
+    "warn_noMatches": "Geen antwoorden voldoen aan deze filters.",
+    "plan_name": "Plannaam",
+    "plan_name_taken": "Er bestaat al een plan met deze naam."
   },
   "calculations": {
     "title": "Berekende velden",

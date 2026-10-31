@@ -8,13 +8,17 @@ import LoadingDots from '~/components/common/LoadingDots';
 import {
   configReducer,
   defaultTargets,
+  describeFilters,
   initialConfig,
+  sanitizeConfig,
   toRequest,
 } from '~/analytics/crosstabs/config';
 import { loadPlans, newPlanId, savePlans } from '~/analytics/crosstabs/storage';
 import { crosstabToCsv, downloadCsv } from '~/analytics/crosstabs/csv';
 import TabPlansPanel from '~/components/analytics/crosstabs/TabPlansPanel';
 import CrosstabControls from '~/components/analytics/crosstabs/CrosstabControls';
+import CrosstabFilters from '~/components/analytics/crosstabs/CrosstabFilters';
+import SavePlanDialog from '~/components/analytics/crosstabs/SavePlanDialog';
 import WeightPanel from '~/components/analytics/crosstabs/WeightPanel';
 import CrosstabTable from '~/components/analytics/crosstabs/CrosstabTable';
 import CrosstabWarnings from '~/components/analytics/crosstabs/CrosstabWarnings';
@@ -45,6 +49,7 @@ function CrosstabsSurvey() {
   const [config, updateConfig] = useReducer(configReducer, null);
   const [plans, setPlans] = useState([]);
   const [activePlanId, setActivePlanId] = useState(null);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 
   const [result, setResult] = useState(null);
   const [computeError, setComputeError] = useState(null);
@@ -80,8 +85,11 @@ function CrosstabsSurvey() {
     }
   }, [config?.weightVar, catalogue]);
 
-  // --- debounced compute on config change ---
+  // --- debounced compute on request change ---
+  // Keyed on the request body, not `config`: edits that don't change it (a
+  // filter with no categories picked yet) don't refetch the same table.
   const sameVar = config && config.rowVar === config.colVar;
+  const requestKey = config ? JSON.stringify(toRequest(config)) : null;
   useEffect(() => {
     if (!config || !config.rowVar || !config.colVar || sameVar) {
       setResult(null);
@@ -94,7 +102,9 @@ function CrosstabsSurvey() {
         .computeCrosstab(surveyId, toRequest(config))
         .then((data) => {
           if (seq === computeSeq.current) {
-            setResult(data);
+            // Keep the config that produced this result, so the filter line
+            // and the export describe the table shown, not pending edits.
+            setResult({ ...data, config });
             setComputeError(null);
           }
         })
@@ -106,7 +116,7 @@ function CrosstabsSurvey() {
     }, COMPUTE_DEBOUNCE_MS);
     return () => debounceRef.current && clearTimeout(debounceRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config, surveyId]);
+  }, [requestKey, surveyId]);
 
   if (loading) return <LoadingDots fullHeight />;
   if (loadError) return <EmptyCard>{loadError}</EmptyCard>;
@@ -132,11 +142,24 @@ function CrosstabsSurvey() {
   const rowVar = catalogue.rowVariables.find((v) => v.id === config.rowVar);
   const colVar = catalogue.colVariables.find((v) => v.code === config.colVar);
 
-  const handleSavePlan = () => {
-    const name =
-      rowVar && colVar
-        ? `${rowVar.label} × ${colVar.label}`
-        : t('crosstabs.untitled_plan', 'Untitled plan');
+  const defaultPlanName =
+    rowVar && colVar
+      ? `${rowVar.label} × ${colVar.label}`
+      : t('crosstabs.untitled_plan', 'Untitled plan');
+  const filterSummary = result ? describeFilters(result.config, catalogue) : [];
+  // Labels of the table shown, which may lag a pending config edit.
+  const resultRowLabel = result
+    ? catalogue.rowVariables.find((v) => v.id === result.config.rowVar)?.label
+    : undefined;
+  const resultColLabel = result
+    ? catalogue.colVariables.find((c) => c.code === result.config.colVar)?.label
+    : undefined;
+  const resultWeightLabel = result?.config.weightVar
+    ? catalogue.colVariables.find((c) => c.code === result.config.weightVar)?.label
+    : undefined;
+
+  const handleSavePlan = (name) => {
+    setSaveDialogOpen(false);
     const plan = { id: newPlanId(), name, config: JSON.parse(JSON.stringify(config)) };
     const next = [...plans, plan];
     setPlans(next);
@@ -145,7 +168,10 @@ function CrosstabsSurvey() {
   };
 
   const handleSelectPlan = (plan) => {
-    updateConfig({ type: 'LOAD', config: JSON.parse(JSON.stringify(plan.config)) });
+    updateConfig({
+      type: 'LOAD',
+      config: sanitizeConfig(JSON.parse(JSON.stringify(plan.config)), catalogue),
+    });
     setActivePlanId(plan.id);
   };
 
@@ -162,7 +188,7 @@ function CrosstabsSurvey() {
   };
 
   const handleExport = () => {
-    if (result) downloadCsv(crosstabToCsv(result, rowVar?.label));
+    if (result) downloadCsv(crosstabToCsv(result, resultRowLabel, filterSummary));
   };
 
   return (
@@ -192,15 +218,17 @@ function CrosstabsSurvey() {
             config={config}
             updateConfig={updateConfig}
             onExport={handleExport}
-            onSavePlan={handleSavePlan}
+            onSavePlan={() => setSaveDialogOpen(true)}
             canExport={!!result && !sameVar}
           />
+          <CrosstabFilters catalogue={catalogue} config={config} updateConfig={updateConfig} />
           {weightDef && (
             <WeightPanel
               weightDef={weightDef}
               config={config}
               updateConfig={updateConfig}
               weighting={result?.weighting}
+              filteredCount={filterSummary.length ? result.filteredResponses : null}
             />
           )}
         </Paper>
@@ -218,17 +246,28 @@ function CrosstabsSurvey() {
             <LoadingDots />
           ) : (
             <>
-              <Typography variant="h6">{rowVar?.label}</Typography>
+              <Typography variant="h6">{resultRowLabel}</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                 {t('crosstabs.subtitle', {
-                  column: colVar?.label,
-                  weighting: weightDef
-                    ? t('crosstabs.weighted_on', { label: weightDef.label, defaultValue: 'weighted on {{label}}' })
+                  column: resultColLabel,
+                  weighting: resultWeightLabel
+                    ? t('crosstabs.weighted_on', { label: resultWeightLabel, defaultValue: 'weighted on {{label}}' })
                     : t('crosstabs.unweighted', 'unweighted'),
                   defaultValue: 'By {{column}} · {{weighting}}',
                 })}
                 {result.multi ? ` · ${t('crosstabs.multi_note', 'multi-select: columns can exceed 100%')}` : ''}
               </Typography>
+              {filterSummary.length > 0 && (
+                <Typography variant="body2" color="text.secondary" sx={{ mt: -1.5, mb: 2 }}>
+                  {t('crosstabs.filtered_base', {
+                    count: result.filteredResponses,
+                    total: result.totalResponses,
+                    defaultValue: 'Filtered to {{count}} of {{total}} responses',
+                  })}
+                  {': '}
+                  {filterSummary.map((f) => `${f.label} = ${f.values.join(', ')}`).join(' · ')}
+                </Typography>
+              )}
               <CrosstabTable result={result} options={config.options} />
               {result.notAnswered > 0 && (
                 <Typography variant="caption" color="text.disabled" sx={{ mt: 1, display: 'block' }}>
@@ -240,6 +279,14 @@ function CrosstabsSurvey() {
           )}
         </Paper>
       </Box>
+
+      <SavePlanDialog
+        open={saveDialogOpen}
+        defaultName={defaultPlanName}
+        existingNames={plans.map((p) => p.name)}
+        onCancel={() => setSaveDialogOpen(false)}
+        onSave={handleSavePlan}
+      />
     </Box>
   );
 }

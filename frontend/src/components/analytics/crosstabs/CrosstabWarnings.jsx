@@ -16,6 +16,7 @@ const DEFAULTS = {
     'One weight is {{maxWeight}}. Weights above 5 usually mean the target is unrealistic for this sample.',
   droppedWeight:
     '{{count}} response(s) had no answer to the weight question and were left out of this table.',
+  noMatches: 'No responses match these filters.',
   truncated:
     'Showing the first {{shown}} of {{total}} responses. Figures and tests are based on that sample.',
 };

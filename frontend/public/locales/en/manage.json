@@ -374,6 +374,7 @@
     "effective_base": "Effective base",
     "efficiency": "Efficiency",
     "weight_note": "Largest weight {{maxWeight}}. Significance tests use the effective base, not the weighted base.",
+    "weight_filtered_note": "Filters are on. Actual and the weights come from all {{total}} responses, not just the {{filtered}} in the table. Each respondent keeps their full-sample weight, so the filtered table may not match the targets.",
     "base": "Base",
     "eff": "eff",
     "subtitle": "By {{column}} · {{weighting}}",
@@ -392,7 +393,15 @@
     "warn_lowEfficiency": "Efficiency is {{efficiency}}%. Below 60%, a small group starts driving the whole report.",
     "warn_highWeight": "One weight is {{maxWeight}}. Weights above 5 usually mean the target is unrealistic for this sample.",
     "warn_droppedWeight": "{{count}} response(s) had no answer to the weight question and were left out of this table.",
-    "warn_truncated": "Showing the first {{shown}} of {{total}} responses. Figures and tests are based on that sample."
+    "warn_truncated": "Showing the first {{shown}} of {{total}} responses. Figures and tests are based on that sample.",
+    "filters": "Filters",
+    "add_filter": "Add filter",
+    "filter_any_of": "Any of…",
+    "remove_filter": "Remove filter",
+    "filtered_base": "Filtered to {{count}} of {{total}} responses",
+    "warn_noMatches": "No responses match these filters.",
+    "plan_name": "Plan name",
+    "plan_name_taken": "A plan with this name already exists."
   },
   "calculations": {
     "title": "Calculated fields",
