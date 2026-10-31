@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { replaceFormatInstructions } from "@qlarr/design-core";
+import { extname } from "node:path";
 import { PassThrough, Readable } from "node:stream";
 import { ZipFile } from "yazl";
 import { stripTags } from "../../common/strip-tags";
@@ -20,6 +21,7 @@ import { CalculationsRepository } from "../calculations/calculations.repository"
 import { DesignService } from "../design/design.service";
 import { ResponseDetailRow, ResponseRepository } from "./response.repository";
 import {
+  ExportOptions,
   ExportStatus,
   ResponseDto,
   ResponseEventDto,
@@ -48,7 +50,6 @@ const MAX_BULK_BYTES = 200 * 1024 * 1024; // 200MB
 
 interface FileToDownload {
   responseId: string;
-  index: number;
   questionId: string;
   storedFilename: string;
   originalFilename: string;
@@ -98,8 +99,10 @@ export class ResponseService {
   }
 
   /**
-   * Export responses in an index range as CSV/XLSX using the stored (DB) values.
-   * Columns are the fixed metadata columns plus the design's response schema.
+   * Export responses in an index range as CSV/XLSX. The value type decides the
+   * columns and cells: DB values export every schema column raw, text values
+   * export only the `.value` columns (in design order) resolved to labels. The
+   * header type independently picks code headers (`Q1.value`) or label headers.
    * Returns null when the range is empty (→ 204).
    */
   async exportResponses(
@@ -108,6 +111,7 @@ export class ResponseService {
     format: ResponseFormat,
     from: number,
     to: number,
+    options: ExportOptions,
   ): Promise<Buffer | null> {
     const responses = await this.responses.findInIndexRange(
       surveyId,
@@ -118,9 +122,43 @@ export class ResponseService {
     if (!responses.length) return null;
 
     const processed = await this.design.getProcessedSurvey(surveyId, true);
-    const colNames = processed.output.schema.map(
+    const schema = processed.output.schema;
+    const fields = options.textValues
+      ? this.valueFieldsInDesignOrder(
+          schema,
+          processed.output.componentIndexList,
+        )
+      : schema;
+    const keys = fields.map(
       (f) => `${f.componentCode}.${String(f.columnName).toLowerCase()}`,
     );
+
+    const labels =
+      options.textValues || options.textHeaders
+        ? this.exportLabels(processed.output.survey)
+        : {};
+    const colNames = options.textHeaders
+      ? this.textHeaders(fields, processed.output.componentIndexList, labels)
+      : keys;
+
+    const dataTypeByCode = valueDataTypes(schema);
+    const cellFor = (
+      values: Record<string, unknown>,
+      { componentCode }: ResponseField,
+      key: string,
+    ) => {
+      if (!options.textValues) return values[key] ?? null;
+      const questionCode = this.engine.splitToComponentCodes(componentCode)[0];
+      return (
+        resolveListAndEnumValues(
+          values[key],
+          questionCode,
+          dataTypeByCode[componentCode],
+          labels,
+        ) ?? ""
+      );
+    };
+
     const calculated = await this.calculationsFor(surveyId);
     const finalCols = [
       ...ADDITIONAL_COL_NAMES,
@@ -134,7 +172,7 @@ export class ResponseService {
       r.submitDate,
       r.lang,
       r.values["Survey.disqualified"] ?? false,
-      ...colNames.map((c) => r.values[c] ?? null),
+      ...fields.map((f, i) => cellFor(r.values, f, keys[i])),
       ...calculationCells(
         calculated.columns.length,
         calculated.resolve(r.submitDate, r.computations),
@@ -145,99 +183,56 @@ export class ResponseService {
       : exportCsv(rows, finalCols);
   }
 
-  async exportTextResponses(
-    surveyId: string,
-    statuses: ExportStatus[],
-    format: ResponseFormat,
-    from: number,
-    to: number,
-  ): Promise<Buffer | null> {
-    const responses = await this.responses.findInIndexRange(
-      surveyId,
-      statuses,
-      from,
-      to,
-    );
-    if (!responses.length) return null;
-
-    const processed = await this.design.getProcessedSurvey(surveyId, true);
-    const survey = processed.output.survey;
-    const lang =
-      (survey.defaultLang as { code?: string } | undefined)?.code ?? "en";
-    const indexList = buildCodeIndex(processed.output.componentIndexList);
-    const labels: Record<string, string> = {};
-    for (const [code, value] of Object.entries(
-      this.engine.labels(survey, lang),
-    )) {
-      // non-empty, then strip HTML, then collapse `{{ pipe refs }}` to a literal `{{...}}`
-      if (value !== "")
-        labels[code] = stripTags(value).replace(/\{\{.*?\}\}/g, "{{...}}");
-    }
-
-    // `<component>.value` columns from the design schema (the source of truth),
-    // ordered by the component's position in the design's component index. Driving
-    // this from the schema rather than the responses in range keeps the column set
-    // stable and complete across export chunks.
-    const order = processed.output.componentIndexList.map((c) => c.code);
-    const valueFields = processed.output.schema.filter(
-      (f) => String(f.columnName) === "VALUE",
-    );
-    const valueNames = valueFields
-      .map((f) => `${f.componentCode}.value`)
+  /**
+   * The schema's `.value` fields, ordered by the component's position in the
+   * design's component index. Driving this from the schema rather than the
+   * responses in range keeps the column set stable and complete across export
+   * chunks.
+   */
+  private valueFieldsInDesignOrder(
+    schema: ResponseField[],
+    componentIndexList: ComponentIndex[],
+  ): ResponseField[] {
+    const order = componentIndexList.map((c) => c.code);
+    return schema
+      .filter((f) => String(f.columnName) === "VALUE")
       .sort(
         (a, b) =>
-          order.indexOf(a.split(".")[0]) - order.indexOf(b.split(".")[0]),
+          order.indexOf(a.componentCode) - order.indexOf(b.componentCode),
       );
-    const dataTypeByCode = valueDataTypes(processed.output.schema);
+  }
 
-    const colNames = valueNames.map((valueKey) => {
-      const componentCode = valueKey.split(".")[0];
+  // non-empty, then strip HTML, then collapse `{{ pipe refs }}` to a literal `{{...}}`
+  private exportLabels(
+    survey: Record<string, unknown>,
+  ): Record<string, string> {
+    const labels: Record<string, string> = {};
+    for (const [code, value] of Object.entries(this.resolveLabels(survey))) {
+      labels[code] = value.replace(/\{\{.*?\}\}/g, "{{...}}");
+    }
+    return labels;
+  }
+
+  private textHeaders(
+    fields: ResponseField[],
+    componentIndexList: ComponentIndex[],
+    labels: Record<string, string>,
+  ): string[] {
+    const indexList = buildCodeIndex(componentIndexList);
+    return fields.map((f) => {
       const componentCodes = this.engine
-        .splitToComponentCodes(componentCode)
+        .splitToComponentCodes(f.componentCode)
         .map((_, i, arr) => arr.slice(0, i + 1).join(""));
       const componentLabels = componentCodes
         .map((e) => labels[e])
         .filter((e) => e);
-      return indexList[componentCodes[0]] + " " + componentLabels.join(" - ");
+      const header =
+        indexList[componentCodes[0]] + " " + componentLabels.join(" - ");
+      const column = String(f.columnName);
+      return column === "VALUE"
+        ? header
+        : `${header} [${column.toLowerCase()}]`;
     });
-
-    const calculated = await this.calculationsFor(surveyId);
-    const finalCols = [
-      ...ADDITIONAL_COL_NAMES,
-      ...colNames,
-      ...calculated.columns.map((c) => c.label),
-    ];
-    const rows = responses.map((r) => {
-      return [
-        r.index,
-        r.id,
-        r.startDate,
-        r.submitDate,
-        r.lang,
-        r.values["Survey.disqualified"] ?? false,
-        ...valueNames.map((valueKey) => {
-          const componentCode = valueKey.split(".")[0];
-          const questionCode =
-            this.engine.splitToComponentCodes(componentCode)[0];
-          return (
-            resolveListAndEnumValues(
-              r.values[valueKey],
-              questionCode,
-              dataTypeByCode[componentCode],
-              labels,
-            ) ?? ""
-          );
-        }),
-        ...calculationCells(
-          calculated.columns.length,
-          calculated.resolve(r.submitDate, r.computations),
-        ),
-      ];
-    });
-
-    return format === "XLSX"
-      ? exportXlsx(rows, finalCols)
-      : exportCsv(rows, finalCols);
   }
 
   async getSummary(
@@ -317,7 +312,6 @@ export class ResponseService {
         if (storedFilename && originalFilename && size != null) {
           filesToDownload.push({
             responseId: row.id,
-            index: Number(row.index),
             questionId,
             storedFilename,
             originalFilename,
@@ -382,7 +376,8 @@ export class ResponseService {
           currentPass = pass;
           zip.addReadStream(
             pass,
-            `${file.index}-${file.questionId}-${file.originalFilename}`,
+            `${file.responseId}_${file.questionId.split(".")[0]}` +
+              extname(file.originalFilename),
           );
           dl.body.on("error", (err) => {
             this.logger.error(

@@ -105,7 +105,7 @@ export default function ResponsesDownload({
     setLoading(true);
     surveyService
       .downloadResponseFiles(surveyId, from, to, complete)
-      .then((blob) => {
+      .then(({ blob, fileName }) => {
         console.log("here!!!")
         if (!blob || blob.size === 0) {
           setSnackbar({
@@ -115,17 +115,8 @@ export default function ResponsesDownload({
           });
           return;
         }
-        if (blob) {
-          const suffix =
-            data.filter === "all"
-              ? "all"
-              : data.filter === "complete"
-              ? "complete"
-              : "incomplete";
-          const fileName = `${surveyId}-responses_${from}-${to}_${suffix}.zip`;
-          const file = new File([blob], fileName, { type: "application/zip" });
-          saveAs(file);
-        }
+        const file = new File([blob], fileName, { type: "application/zip" });
+        saveAs(file);
         onClose?.();
       })
       .catch((error) => {
