@@ -158,7 +158,7 @@ export class ResponseController {
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename="${surveyId}-responses-files.zip"`,
+      `attachment; filename="${surveyId}.zip"`,
     );
     // pipe() does not forward errors: if the zip stream fails, tear the
     // response down instead of leaving the socket hanging.

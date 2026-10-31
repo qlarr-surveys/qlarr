@@ -31,6 +31,7 @@ async function bootstrap() {
   app.enableCors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    exposedHeaders: ['Content-Disposition'],
   });
   configureBodyParsers(app);
   // The request-body ValidationPipe is registered globally via APP_PIPE in

@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { replaceFormatInstructions } from "@qlarr/design-core";
+import { extname } from "node:path";
 import { PassThrough, Readable } from "node:stream";
 import { ZipFile } from "yazl";
 import { stripTags } from "../../common/strip-tags";
@@ -49,7 +50,6 @@ const MAX_BULK_BYTES = 200 * 1024 * 1024; // 200MB
 
 interface FileToDownload {
   responseId: string;
-  index: number;
   questionId: string;
   storedFilename: string;
   originalFilename: string;
@@ -312,7 +312,6 @@ export class ResponseService {
         if (storedFilename && originalFilename && size != null) {
           filesToDownload.push({
             responseId: row.id,
-            index: Number(row.index),
             questionId,
             storedFilename,
             originalFilename,
@@ -377,7 +376,8 @@ export class ResponseService {
           currentPass = pass;
           zip.addReadStream(
             pass,
-            `${file.index}-${file.questionId}-${file.originalFilename}`,
+            `${file.responseId}_${file.questionId.split(".")[0]}` +
+              extname(file.originalFilename),
           );
           dl.body.on("error", (err) => {
             this.logger.error(

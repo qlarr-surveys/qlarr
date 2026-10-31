@@ -1,6 +1,10 @@
 import authenticatedApi from "./authenticatedApi";
 import BaseService from "./BaseService";
 
+const fileNameFrom = (response, fallback) =>
+  response.headers.get("Content-Disposition")?.match(/filename="(.+)"/)?.[1] ||
+  fallback;
+
 class SurveyService extends BaseService {
   async getAllSurveys(page, perpage, status, sortBy) {
     const response = await this.handleRequest(() =>
@@ -111,7 +115,10 @@ class SurveyService extends BaseService {
     const response = await this.handleRequest(() =>
       authenticatedApi.get(`${base}${query}`, { responseType: "blob" })
     );
-    return response.data;
+    return {
+      blob: response.data,
+      fileName: fileNameFrom(response, `${surveyId}.zip`),
+    };
   }
 
   async deleteResponse(surveyId, responseId) {
@@ -149,10 +156,7 @@ class SurveyService extends BaseService {
         responseType: "blob",
       })
     );
-    const contentDisposition = response.headers.get("Content-Disposition");
-    const filename = contentDisposition
-      ? contentDisposition.match(/filename="(.+)"/)?.[1] || `${surveyId}.zip`
-      : `${surveyId}.zip`;
+    const filename = fileNameFrom(response, `${surveyId}.zip`);
 
     // Convert the response to a Blob
     const blob = await response.data;
