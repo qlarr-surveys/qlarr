@@ -374,6 +374,7 @@
     "effective_base": "Base efetiva",
     "efficiency": "Eficiência",
     "weight_note": "Maior ponderação {{maxWeight}}. Os testes de significância usam a base efetiva, não a base ponderada.",
+    "weight_filtered_note": "Há filtros ativos. Os valores reais e as ponderações vêm de todas as {{total}} respostas, não apenas das {{filtered}} na tabela. Cada respondente mantém a ponderação da amostra completa, por isso a tabela filtrada pode não corresponder às metas.",
     "base": "Base",
     "eff": "efet",
     "subtitle": "Por {{column}} · {{weighting}}",

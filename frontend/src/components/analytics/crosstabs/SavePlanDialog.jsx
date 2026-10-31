@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   Button,
   Dialog,
@@ -23,13 +23,15 @@ const freeName = (base, existingNames) => {
 /** Name a tab plan before saving; names must be unique (trimmed, case-insensitive). */
 export default function SavePlanDialog({ open, defaultName, existingNames, onCancel, onSave }) {
   const { t } = useTranslation(NAMESPACES.MANAGE);
-  const [name, setName] = useState(defaultName);
+  const [name, setName] = useState(() => freeName(defaultName, existingNames));
 
-  // Only on open: `existingNames` is a new array every render.
-  useEffect(() => {
+  // Pick a free name as the dialog opens, during render rather than in an
+  // effect, so the first open frame never shows a taken name.
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
     if (open) setName(freeName(defaultName, existingNames));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, defaultName]);
+  }
 
   const taken = existingNames.some((n) => normalize(n) === normalize(name));
   const canSave = name.trim() !== '' && !taken;

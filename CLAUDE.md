@@ -58,9 +58,9 @@ src/
 `~/` maps to `src/` (configured in `jsconfig.json`)
 
 ## Development
-- Run all frontend commands from the `frontend/` directory
+- Run frontend commands from `frontend/`, or from the repo root via the proxied scripts (`npm start`, `npm run build`, …)
 - **Package manager**: npm
-- **Node version**: 16+
+- **Node version**: 20+ (the backend requires it; the root `concurrently` needs 18+)
 - Copy `.env.example` to `.env` and set `VITE_BE_URL` to point to the backend API
 
 ### Commands

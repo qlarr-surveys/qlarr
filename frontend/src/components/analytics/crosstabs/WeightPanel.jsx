@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Paper,
   Table,
@@ -26,7 +27,13 @@ function Metric({ label, value, warn }) {
 }
 
 /** Editable weight targets + weighted/effective base + efficiency. */
-export default function WeightPanel({ weightDef, config, updateConfig, weighting }) {
+export default function WeightPanel({
+  weightDef,
+  config,
+  updateConfig,
+  weighting,
+  filteredCount,
+}) {
   const { t } = useTranslation(NAMESPACES.MANAGE);
   if (!weightDef) return null;
 
@@ -113,6 +120,18 @@ export default function WeightPanel({ weightDef, config, updateConfig, weighting
           </TableBody>
         </Table>
       </Paper>
+
+      {/* Filters narrow the table, not the weights: say so where the full-sample figures sit. */}
+      {weighting && filteredCount != null && (
+        <Alert severity="info" sx={{ mt: 1.5 }}>
+          {t('crosstabs.weight_filtered_note', {
+            total: actualTotal,
+            filtered: filteredCount,
+            defaultValue:
+              'Filters are on. Actual and the weights come from all {{total}} responses, not just the {{filtered}} in the table. Each respondent keeps their full-sample weight, so the filtered table may not match the targets.',
+          })}
+        </Alert>
+      )}
 
       {weighting && (
         <Box

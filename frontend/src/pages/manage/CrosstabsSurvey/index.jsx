@@ -147,9 +147,15 @@ function CrosstabsSurvey() {
       ? `${rowVar.label} × ${colVar.label}`
       : t('crosstabs.untitled_plan', 'Untitled plan');
   const filterSummary = result ? describeFilters(result.config, catalogue) : [];
-  // The row label of the table shown, which may lag a pending config edit.
+  // Labels of the table shown, which may lag a pending config edit.
   const resultRowLabel = result
     ? catalogue.rowVariables.find((v) => v.id === result.config.rowVar)?.label
+    : undefined;
+  const resultColLabel = result
+    ? catalogue.colVariables.find((c) => c.code === result.config.colVar)?.label
+    : undefined;
+  const resultWeightLabel = result?.config.weightVar
+    ? catalogue.colVariables.find((c) => c.code === result.config.weightVar)?.label
     : undefined;
 
   const handleSavePlan = (name) => {
@@ -222,6 +228,7 @@ function CrosstabsSurvey() {
               config={config}
               updateConfig={updateConfig}
               weighting={result?.weighting}
+              filteredCount={filterSummary.length ? result.filteredResponses : null}
             />
           )}
         </Paper>
@@ -242,9 +249,9 @@ function CrosstabsSurvey() {
               <Typography variant="h6">{resultRowLabel}</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                 {t('crosstabs.subtitle', {
-                  column: colVar?.label,
-                  weighting: weightDef
-                    ? t('crosstabs.weighted_on', { label: weightDef.label, defaultValue: 'weighted on {{label}}' })
+                  column: resultColLabel,
+                  weighting: resultWeightLabel
+                    ? t('crosstabs.weighted_on', { label: resultWeightLabel, defaultValue: 'weighted on {{label}}' })
                     : t('crosstabs.unweighted', 'unweighted'),
                   defaultValue: 'By {{column}} · {{weighting}}',
                 })}

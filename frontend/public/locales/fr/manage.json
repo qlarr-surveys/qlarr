@@ -374,6 +374,7 @@
     "effective_base": "Base effective",
     "efficiency": "Efficacité",
     "weight_note": "Pondération maximale {{maxWeight}}. Les tests de significativité utilisent la base effective, et non la base pondérée.",
+    "weight_filtered_note": "Des filtres sont actifs. Les valeurs réelles et les pondérations proviennent des {{total}} réponses, pas seulement des {{filtered}} du tableau. Chaque répondant conserve sa pondération de l'échantillon complet : le tableau filtré peut donc ne pas correspondre aux cibles.",
     "base": "Base",
     "eff": "eff",
     "subtitle": "Par {{column}} · {{weighting}}",

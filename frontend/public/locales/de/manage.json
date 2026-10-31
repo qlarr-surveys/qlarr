@@ -407,6 +407,7 @@
     "effective_base": "Effektive Basis",
     "efficiency": "Effizienz",
     "weight_note": "Größte Gewichtung {{maxWeight}}. Signifikanztests verwenden die effektive Basis, nicht die gewichtete Basis.",
+    "weight_filtered_note": "Filter sind aktiv. Ist-Werte und Gewichte stammen aus allen {{total}} Antworten, nicht nur aus den {{filtered}} in der Tabelle. Jede befragte Person behält ihre Gewichtung aus der Gesamtstichprobe, daher entspricht die gefilterte Tabelle möglicherweise nicht den Zielwerten.",
     "base": "Basis",
     "eff": "eff",
     "subtitle": "Nach {{column}} · {{weighting}}",

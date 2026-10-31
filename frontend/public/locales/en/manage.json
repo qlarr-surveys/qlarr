@@ -374,6 +374,7 @@
     "effective_base": "Effective base",
     "efficiency": "Efficiency",
     "weight_note": "Largest weight {{maxWeight}}. Significance tests use the effective base, not the weighted base.",
+    "weight_filtered_note": "Filters are on. Actual and the weights come from all {{total}} responses, not just the {{filtered}} in the table. Each respondent keeps their full-sample weight, so the filtered table may not match the targets.",
     "base": "Base",
     "eff": "eff",
     "subtitle": "By {{column}} · {{weighting}}",
