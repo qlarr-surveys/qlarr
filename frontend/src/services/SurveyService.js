@@ -85,13 +85,13 @@ class SurveyService extends BaseService {
 
   async exportResponses(
     surveyId,
-    { format = "csv", from, to, dbValues = true, statuses, timezone }
+    { format = "csv", from, to, dbValues = true, headers, statuses, timezone }
   ) {
     const base = `/survey/${surveyId}/response/export/${format}/${from}/${to}`;
     const tz = encodeURIComponent(timezone);
 
     const url =
-      `${base}?db_values=${dbValues}&timezone=${tz}` +
+      `${base}?db_values=${dbValues}&headers=${headers}&timezone=${tz}` +
       `&status=${statuses.join(",")}`;
 
     const response = await this.handleRequest(() =>

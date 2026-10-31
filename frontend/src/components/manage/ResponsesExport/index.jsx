@@ -1,5 +1,5 @@
 // ResponsesExport.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -16,8 +16,6 @@ import {
   Radio,
   Checkbox,
   FormHelperText,
-  Snackbar,
-  Alert,
 } from "@mui/material";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -39,17 +37,55 @@ const EXPORT_STATUSES = [
 const ALL_STATUSES = EXPORT_STATUSES.map((s) => s.value);
 const MAX_RESPONSE_INDEX = 2147483647;
 
+const DEFAULT_VALUES = {
+  range: "all",
+  statuses: ALL_STATUSES,
+  format: "csv",
+  headers: "text",
+  mode: "text",
+};
+
+const MIME_BY_FORMAT = {
+  csv: "text/csv",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+};
+
+export async function exportResponsesFile(
+  surveyService,
+  surveyId,
+  { range, from, to, statuses, format, headers, mode } = DEFAULT_VALUES
+) {
+  const allResponses = range === "all";
+  const blob = await surveyService.exportResponses(surveyId, {
+    format,
+    from: allResponses ? 1 : Number(from),
+    to: allResponses ? MAX_RESPONSE_INDEX : Number(to),
+    dbValues: mode === "database",
+    headers,
+    statuses,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
+  });
+
+  if (!blob || blob.size === 0) return false;
+
+  const file = new File([blob], `${surveyId}-responses-export.${format}`, {
+    type: MIME_BY_FORMAT[format] || "application/octet-stream",
+  });
+  FileSaver.saveAs(file);
+  return true;
+}
+
 export default function ResponsesExport({ 
   open, 
   onClose, 
   currentFrom = 1, 
   currentTo = 1, 
+  onNoResponses,
   t 
 }) {
   const { surveyId } = useParams();
 
   const surveyService = useService("survey");
-  const [noResponses, setNoResponses] = useState(false);
 
   const min = 1;
 
@@ -80,20 +116,14 @@ export default function ResponsesExport({
     }),
     statuses: yup.array().of(yup.string().oneOf(ALL_STATUSES)).min(1),
     format: yup.string().oneOf(["csv", "xlsx"]).required(),
+    headers: yup.string().oneOf(["code", "text"]).required(),
     mode: yup.string().oneOf(["database", "text"]).required(),
   });
 
   const methods = useForm({
     mode: "onChange",
     resolver: yupResolver(Schema),
-    defaultValues: {
-      range: "all",
-      from: currentFrom,
-      to: currentTo,
-      statuses: ALL_STATUSES,
-      format: "csv",
-      mode: "database",
-    },
+    defaultValues: { ...DEFAULT_VALUES, from: currentFrom, to: currentTo },
   });
 
   const {
@@ -107,49 +137,17 @@ export default function ResponsesExport({
 
   useEffect(() => {
     if (open) {
-      reset({
-        range: "all",
-        from: currentFrom,
-        to: currentTo,
-        statuses: ALL_STATUSES,
-        format: "csv",
-        mode: "database",
-      });
+      reset({ ...DEFAULT_VALUES, from: currentFrom, to: currentTo });
     }
   }, [open, currentFrom, currentTo, reset]);
 
   const onSubmit = handleSubmit(async (data) => {
-    const allResponses = data.range === "all";
-    const from = allResponses ? 1 : Number(data.from);
-    const to = allResponses ? MAX_RESPONSE_INDEX : Number(data.to);
-    const dbValues = data.mode === "database";
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
-
     try {
-      const blob = await surveyService.exportResponses(surveyId, {
-        format: data.format,
-        from,
-        to,
-        dbValues,
-        statuses: data.statuses,
-        timezone,
-      });
-
-      if (!blob || blob.size === 0) {
-        setNoResponses(true);
+      const exported = await exportResponsesFile(surveyService, surveyId, data);
+      if (!exported) {
+        onNoResponses?.();
         return;
       }
-
-      const fileName = `${surveyId}-responses-export.${data.format}`;
-      const mimeByFormat = {
-        csv: "text/csv",
-        xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      };
-
-      const file = new File([blob], fileName, {
-        type: mimeByFormat[data.format] || "application/octet-stream",
-      });
-      FileSaver.saveAs(file);
       onClose?.();
     } catch (error) {
       onClose?.();
@@ -157,7 +155,6 @@ export default function ResponsesExport({
     }
   });
   return (
-    <>
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>{t("responses.export")}</DialogTitle>
 
@@ -287,6 +284,28 @@ export default function ResponsesExport({
           </FormControl>
 
           <FormControl>
+            <FormLabel>{t("responses.header_type")}</FormLabel>
+            <Controller
+              name="headers"
+              control={control}
+              render={({ field }) => (
+                <RadioGroup row {...field}>
+                  <FormControlLabel
+                    value="text"
+                    control={<Radio />}
+                    label={t("responses.text_headers")}
+                  />
+                  <FormControlLabel
+                    value="code"
+                    control={<Radio />}
+                    label={t("responses.code_headers")}
+                  />
+                </RadioGroup>
+              )}
+            />
+          </FormControl>
+
+          <FormControl>
             <FormLabel>{t("responses.mode")}</FormLabel>
             <Controller
               name="mode"
@@ -294,14 +313,14 @@ export default function ResponsesExport({
               render={({ field }) => (
                 <RadioGroup row {...field}>
                   <FormControlLabel
-                    value="database"
-                    control={<Radio />}
-                    label={t("responses.database_format")}
-                  />
-                  <FormControlLabel
                     value="text"
                     control={<Radio />}
                     label={t("responses.text_format")}
+                  />
+                  <FormControlLabel
+                    value="database"
+                    control={<Radio />}
+                    label={t("responses.database_format")}
                   />
                 </RadioGroup>
               )}
@@ -321,20 +340,5 @@ export default function ResponsesExport({
         </DialogActions>
       </FormProvider>
     </Dialog>
-    <Snackbar
-      open={noResponses}
-      autoHideDuration={4000}
-      onClose={() => setNoResponses(false)}
-      anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-    >
-      <Alert
-        onClose={() => setNoResponses(false)}
-        severity="warning"
-        sx={{ width: "100%" }}
-      >
-        {t("responses.no_responses_found")}
-      </Alert>
-    </Snackbar>
-    </>
   );
 }

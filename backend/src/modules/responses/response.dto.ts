@@ -35,6 +35,23 @@ export function exportStatusesFrom(input?: string): ExportStatus[] {
   return EXPORT_STATUSES.filter((s) => picked.includes(s));
 }
 
+export interface ExportOptions {
+  textHeaders: boolean;
+  textValues: boolean;
+}
+
+export function exportOptionsFrom(
+  dbValues?: string,
+  headers?: string,
+): ExportOptions {
+  const textValues = dbValues?.toLowerCase() === 'false';
+  const h = headers?.toLowerCase();
+  return {
+    textValues,
+    textHeaders: h === 'text' || (h !== 'code' && textValues),
+  };
+}
+
 /** One row in the response list. Dates are "yyyy-MM-dd HH:mm:ss" wall clocks;
  *  `values` is intentionally omitted. */
 export interface ResponseSummary {

@@ -411,6 +411,30 @@ describe('Calculations', () => {
       expect(text[0].endsWith(',Double,Fixed')).toBe(true);
       expect(text.find((l) => l.includes(r1))!.endsWith(',42,21.0')).toBe(true);
     });
+
+    it('picks header and value types independently', async () => {
+      const { id } = await createSurvey();
+      const exportWith = async (dbValues: boolean, headers?: string) =>
+        (
+          await request(server())
+            .get(
+              `/survey/${id}/response/export/csv/0/999999?db_values=${dbValues}` +
+                (headers ? `&headers=${headers}` : ''),
+            )
+            .set('Authorization', SUPER)
+            .expect(200)
+        ).text.split('\r\n')[0];
+
+      const codeDb = await exportWith(true);
+      const textText = await exportWith(false);
+      expect(codeDb).toContain('Q880htp.value');
+      expect(textText).not.toContain('Q880htp.value');
+
+      expect(await exportWith(true, 'code')).toBe(codeDb);
+      expect(await exportWith(false, 'text')).toBe(textText);
+      expect(await exportWith(false, 'code')).toContain('Q880htp.value');
+      expect(await exportWith(true, 'text')).not.toContain('Q880htp.value');
+    });
   });
 
   describe('roles', () => {

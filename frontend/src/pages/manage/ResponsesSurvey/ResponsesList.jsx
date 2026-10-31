@@ -3,8 +3,10 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import {
+  Alert,
   Box,
   Button,
+  ButtonGroup,
   Chip,
   Divider,
   IconButton,
@@ -26,8 +28,10 @@ import {
   Grid,
   Tabs,
   Tab,
+  Snackbar,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import styles from "./ResponsesSurvey.module.css";
 import {
   formatlocalDateTime,
@@ -38,7 +42,9 @@ import { RHFSelect } from "~/components/hook-form";
 import LoadingDots from "~/components/common/LoadingDots";
 import { useService } from "~/hooks/use-service";
 import ResponsesDownload from "~/components/manage/ResponsesDownload";
-import ResponsesExport from "~/components/manage/ResponsesExport";
+import ResponsesExport, {
+  exportResponsesFile,
+} from "~/components/manage/ResponsesExport";
 import ResponseEvents from "~/components/manage/ResponseEvents";
 import CalculationValue from "~/components/manage/CalculationValue";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
@@ -119,6 +125,8 @@ function ResponsesList({ refreshKey }) {
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const [exportDlgOpen, setExportDlgOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [noResponsesToExport, setNoResponsesToExport] = useState(false);
   const [downloadDlgOpen, setDownloadDlgOpen] = useState(false);
   const firstFetchThisVisitRef = useRef(true);
 
@@ -500,11 +508,22 @@ function ResponsesList({ refreshKey }) {
     );
   };
 
+  const quickExport = async () => {
+    setExporting(true);
+    try {
+      const exported = await exportResponsesFile(surveyService, surveyId);
+      if (!exported) setNoResponsesToExport(true);
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <>
       <ResponsesExport
         open={exportDlgOpen}
         onClose={() => setExportDlgOpen(false)}
+        onNoResponses={() => setNoResponsesToExport(true)}
         currentFrom={
           allResponse?.responses?.length > 0
             ? allResponse.responses[0].index
@@ -598,13 +617,23 @@ function ResponsesList({ refreshKey }) {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Box display="flex" flexDirection="column" gap={1}>
-                    <Button
+                    <ButtonGroup
                       size="small"
                       variant="contained"
-                      onClick={() => setExportDlgOpen(true)}
+                      sx={{ alignSelf: "flex-end" }}
                     >
-                      {t("responses.export")}
-                    </Button>
+                      <Button disabled={exporting} onClick={quickExport}>
+                        {t("responses.export")}
+                      </Button>
+                      <Button
+                        aria-label={t("responses.export_options")}
+                        title={t("responses.export_options")}
+                        onClick={() => setExportDlgOpen(true)}
+                        sx={{ "&&": { minWidth: 0, px: 1 } }}
+                      >
+                        <MoreHorizIcon fontSize="small" />
+                      </Button>
+                    </ButtonGroup>
 
                     {canExportFiles && (
                       <Button
@@ -1040,6 +1069,21 @@ function ResponsesList({ refreshKey }) {
           )}
         </Box>
       </Box>
+
+      <Snackbar
+        open={noResponsesToExport}
+        autoHideDuration={4000}
+        onClose={() => setNoResponsesToExport(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setNoResponsesToExport(false)}
+          severity="warning"
+          sx={{ width: "100%" }}
+        >
+          {t("responses.no_responses_found")}
+        </Alert>
+      </Snackbar>
     </>
   );
 }
