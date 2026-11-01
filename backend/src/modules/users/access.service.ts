@@ -34,13 +34,19 @@ export class AccessService {
 
   /**
    * Public login: credential check + token issuance. An unknown email gives the
-   * same uniform 401 as a bad password, so nothing leaks which failed.
+   * same uniform 401 as a bad password, so nothing leaks which failed. An
+   * invited user who hasn't accepted yet has only a placeholder password, so
+   * they can't log in until they set one through the invitation link.
    */
   async login(email: string, password: string): Promise<LoggedInUserResponse> {
     const user = await this.users.findByEmailWithPassword(
       email.trim().toLowerCase(),
     );
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    if (
+      !user ||
+      !user.isConfirmed ||
+      !(await bcrypt.compare(password, user.password))
+    ) {
       throw new WrongCredentialsException();
     }
 

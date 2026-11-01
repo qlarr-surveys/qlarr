@@ -267,6 +267,7 @@
   },
   "processed_successes": {
     "copied": "Gekopieerd naar klembord",
+    "invitation_resent": "Uitnodiging opnieuw verzonden",
     "updated": "Succesvol bijgewerkt"
   },
   "profile": {
@@ -549,6 +550,7 @@
     "status": "Status",
     "active": "Actief",
     "invitation_sent": "Uitnodiging Verzonden",
+    "resend_invitation": "Uitnodiging Opnieuw Verzenden",
     "learn_about_roles": "Meer informatie over gebruikersrollen",
     "roles_info": "<strong>Super Admin</strong> — Volledige toegang tot alle functies, inclusief gebruikersbeheer, enquêtes aanmaken en systeeminstellingen.<br/><br/><strong>Enquête Admin</strong> — Kan enquêtes aanmaken en beheren, toegang tot ontwerp, instellingen, reacties en analyses.<br/><br/><strong>Analist</strong> — Kan enquêtereacties en analyses bekijken, en enquêtes voorvertonen.<br/><br/><strong>Enquêteur</strong> — Kan enquêtereacties verzamelen via de mobiele app, en enquêtes voorvertonen."
   },

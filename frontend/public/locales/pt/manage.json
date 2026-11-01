@@ -267,6 +267,7 @@
   },
   "processed_successes": {
     "copied": "Copiado para a área de transferência",
+    "invitation_resent": "Convite reenviado",
     "updated": "Atualizado com sucesso"
   },
   "profile": {
@@ -549,6 +550,7 @@
     "status": "Status",
     "active": "Ativo",
     "invitation_sent": "Convite Enviado",
+    "resend_invitation": "Reenviar Convite",
     "learn_about_roles": "Saiba mais sobre os papéis de usuário",
     "roles_info": "<strong>Super Admin</strong> — Acesso total a todos os recursos, incluindo gerenciamento de usuários, criação de pesquisas e configurações do sistema.<br/><br/><strong>Admin de Pesquisas</strong> — Pode criar e gerenciar pesquisas, acessar design, configurações, respostas e análises.<br/><br/><strong>Analista</strong> — Pode visualizar respostas e análises de pesquisas, e pré-visualizar pesquisas.<br/><br/><strong>Pesquisador</strong> — Pode coletar respostas de pesquisas pelo aplicativo móvel, e pré-visualizar pesquisas."
   },

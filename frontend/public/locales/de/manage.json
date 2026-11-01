@@ -299,6 +299,7 @@
   },
   "processed_successes": {
     "copied": "In die Zwischenablage kopiert",
+    "invitation_resent": "Einladung erneut gesendet",
     "updated": "Erfolgreich aktualisiert"
   },
   "profile": {
@@ -614,6 +615,7 @@
     "delete_title": "Sind Sie sicher, dass Sie den Benutzer löschen wollen: {{name}} ?",
     "email": "Email",
     "invitation_sent": "Einladung gesendet",
+    "resend_invitation": "Einladung erneut senden",
     "name": "Name",
     "roles": "Rollen",
     "status": "Status",

@@ -95,6 +95,15 @@ export class UserManagementController {
     return this.users.update(userId, body, user.userId);
   }
 
+  @Post(':userId/resend_invitation')
+  @Roles(Role.SUPER_ADMIN)
+  @HttpCode(204)
+  resendInvitation(
+    @Param('userId', ParseUUIDPipe) userId: string,
+  ): Promise<void> {
+    return this.users.resendInvitation(userId);
+  }
+
   @Delete(':userId')
   @Roles(Role.SUPER_ADMIN)
   @HttpCode(204)

@@ -267,6 +267,7 @@
   },
   "processed_successes": {
     "copied": "Copié dans le presse-papiers",
+    "invitation_resent": "Invitation renvoyée",
     "updated": "Mis à jour avec succès"
   },
   "profile": {
@@ -549,6 +550,7 @@
     "status": "Statut",
     "active": "Actif",
     "invitation_sent": "Invitation Envoyée",
+    "resend_invitation": "Renvoyer l'Invitation",
     "learn_about_roles": "En savoir plus sur les rôles utilisateur",
     "roles_info": "<strong>Super Admin</strong> — Accès complet à toutes les fonctionnalités, y compris la gestion des utilisateurs, la création de sondages et les paramètres système.<br/><br/><strong>Admin de Sondages</strong> — Peut créer et gérer des sondages, accéder à la conception, aux paramètres, aux réponses et aux analyses.<br/><br/><strong>Analyste</strong> — Peut consulter les réponses et analyses des sondages, et prévisualiser les sondages.<br/><br/><strong>Enquêteur</strong> — Peut collecter les réponses de sondages via l'application mobile, et prévisualiser les sondages."
   },

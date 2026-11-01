@@ -267,6 +267,7 @@
   },
   "processed_successes": {
     "copied": "Copiado al portapapeles",
+    "invitation_resent": "Invitación reenviada",
     "updated": "Actualizado exitosamente"
   },
   "profile": {
@@ -549,6 +550,7 @@
     "status": "Estado",
     "active": "Activo",
     "invitation_sent": "Invitación Enviada",
+    "resend_invitation": "Reenviar Invitación",
     "learn_about_roles": "Conoce los roles de usuario",
     "roles_info": "<strong>Super Admin</strong> — Acceso completo a todas las funciones, incluida la gestión de usuarios, creación de encuestas y configuración del sistema.<br/><br/><strong>Admin de Encuestas</strong> — Puede crear y gestionar encuestas, acceder al diseño, configuración, respuestas y análisis.<br/><br/><strong>Analista</strong> — Puede ver las respuestas y análisis de encuestas, y previsualizar encuestas.<br/><br/><strong>Encuestador</strong> — Puede recopilar respuestas de encuestas a través de la aplicación móvil, y previsualizar encuestas."
   },

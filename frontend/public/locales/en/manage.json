@@ -267,6 +267,7 @@
   },
   "processed_successes": {
     "copied": "Copied to clipboard",
+    "invitation_resent": "Invitation sent again",
     "updated": "Updated successfully"
   },
   "profile": {
@@ -549,6 +550,7 @@
     "status": "Status",
     "active": "Active",
     "invitation_sent": "Invitation Sent",
+    "resend_invitation": "Resend Invitation",
     "learn_about_roles": "Learn about user roles",
     "roles_info": "<strong>Super Admin</strong> — Full access to all features including user management, survey creation, and system settings.<br/><br/><strong>Survey Admin</strong> — Can create and manage surveys, access survey design, settings, responses, and analytics.<br/><br/><strong>Analyst</strong> — Can view survey responses, analytics, and preview surveys.<br/><br/><strong>Surveyor</strong> — Can collect survey responses via the mobile app, and preview surveys."
   },
