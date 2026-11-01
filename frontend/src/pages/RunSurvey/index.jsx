@@ -31,7 +31,10 @@ import { qlarrCssVars } from "~/components/Questions/qlarrVars";
 import SurveyDrawer, { COLLAPSE, EXPAND } from "~/components/run/SurveyDrawer";
 import SurveyAppBar from "~/components/run/SurveyAppBar";
 import PreviewEndActions from "~/components/run/PreviewEndActions";
-import { getClosestScrollableParent } from "~/components/run/Navigation";
+import {
+  getClosestScrollableParent,
+  scrollToCenter,
+} from "~/components/run/Navigation";
 import { routes } from "~/routes";
 
 function RunSurvey({
@@ -249,10 +252,7 @@ function RunSurvey({
       if (el) {
         const container = getClosestScrollableParent(el);
         if (container && container !== document.documentElement) {
-          container.scrollTo({
-            top: el.offsetTop - container.offsetTop,
-            behavior: "smooth",
-          });
+          scrollToCenter(container, el);
         }
         // No scrollable ancestor → content already fits the viewport, so the
         // element is visible without scrolling. Skip rather than call
