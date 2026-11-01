@@ -21,10 +21,9 @@ export interface ResponseExportRow {
   computations: Record<string, unknown> | null;
 }
 
-/** A response row for bulk file download (id + index + raw values). */
+/** A response row for bulk file download (id + raw values). */
 export interface ResponseFileRow {
   id: string;
-  index: number;
   values: Record<string, unknown> | null;
 }
 
@@ -127,7 +126,7 @@ export class ResponseRepository {
     );
   }
 
-  /** id/index/values for responses in the index range (bulk file download). */
+  /** id/values for responses in the index range (bulk file download). */
   findFilesInIndexRange(
     surveyId: string,
     complete: boolean | undefined,
@@ -136,7 +135,7 @@ export class ResponseRepository {
   ): Promise<ResponseFileRow[]> {
     const [lower, upper] = [Math.min(from, to), Math.max(from, to)];
     return this.db.manager.query(
-      `SELECT id, survey_response_index AS index, "values" AS values
+      `SELECT id, "values" AS values
        FROM responses
        WHERE survey_id = $1 AND preview = false
          AND survey_response_index BETWEEN $2 AND $3 ${completeClause(complete)}
