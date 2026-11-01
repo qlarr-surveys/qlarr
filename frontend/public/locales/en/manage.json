@@ -263,7 +263,8 @@
     "wrong_confirmation_token": "This Confirmation Token is incorrect, Please Register Once more",
     "survey_quota": "Sorry, this survey is no longer accepting responses.",
     "invalid_translations_csv": "Not a translations CSV.",
-    "translations_csv_not_utf8": "This file isn't UTF-8. In Excel, use File → Save As → 'CSV UTF-8 (Comma delimited)' and import again."
+    "translations_csv_not_utf8": "This file isn't UTF-8. In Excel, use File → Save As → 'CSV UTF-8 (Comma delimited)' and import again.",
+    "user_already_confirmed": "This user has already accepted the invitation."
   },
   "processed_successes": {
     "copied": "Copied to clipboard",

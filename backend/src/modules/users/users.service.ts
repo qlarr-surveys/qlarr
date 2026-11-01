@@ -116,17 +116,18 @@ export class UsersService {
   /**
    * Re-sends the invitation to a user who hasn't accepted yet (e.g. the invitee
    * deleted the original email, or its token expired). The placeholder password
-   * is rotated first, which voids every earlier invitation link — only the
-   * latest one works. Safe because an unconfirmed user's password is a
-   * placeholder nobody knows.
+   * is rotated, which voids every earlier invitation link — only the latest one
+   * works. Safe because an unconfirmed user's password is a placeholder nobody
+   * knows. The email goes out before the new placeholder is saved, so a failed
+   * send leaves the earlier links working instead of voiding them.
    */
   async resendInvitation(userId: string): Promise<void> {
     const user = await this.users.findById(userId);
     if (!user) throw new UserNotFoundException();
     if (user.isConfirmed) throw new UserAlreadyConfirmedException();
     user.password = await bcrypt.hash(randomPassword(), 10);
-    await this.users.save(user);
     await this.sendInvitation(user);
+    await this.users.save(user);
   }
 
   /**
@@ -313,9 +314,19 @@ export class UsersService {
       throw new WrongResetTokenException();
     }
 
-    user.password = await bcrypt.hash(req.newPassword, 10);
+    // Conditional write: if a concurrent request already consumed this token,
+    // the stored hash no longer matches and the update touches no row.
+    const newHash = await bcrypt.hash(req.newPassword, 10);
+    const applied = await this.users.resetPasswordIfUnchanged(
+      user.id,
+      user.password,
+      newHash,
+    );
+    if (!applied) {
+      throw new WrongResetTokenException();
+    }
+    user.password = newHash;
     user.isConfirmed = true;
-    await this.users.save(user);
     await this.refreshTokens.deleteByUser(user.id);
     return this.issueLogin(user);
   }

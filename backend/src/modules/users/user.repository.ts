@@ -86,6 +86,28 @@ export class UserRepository {
     }
   }
 
+  /**
+   * Compare-and-set for a password reset: writes the new hash (and confirms the
+   * account) only while the stored hash is still `expectedHash`. Returns false
+   * when a concurrent reset already changed it, so a token can't be used twice.
+   */
+  async resetPasswordIfUnchanged(
+    id: string,
+    expectedHash: string,
+    newHash: string,
+  ): Promise<boolean> {
+    const result = await this.repo
+      .createQueryBuilder()
+      .update(UserEntity)
+      .set({ password: newHash, isConfirmed: true })
+      .where('id = :id AND password = :expectedHash AND deleted = false', {
+        id,
+        expectedHash,
+      })
+      .execute();
+    return (result.affected ?? 0) === 1;
+  }
+
   /** Role counts (raw SQL over the roles array column). */
   async countByRole(): Promise<CountByRoleResponse> {
     const rows: Array<{

@@ -86,8 +86,9 @@ export const UsersTable = () => {
     userService
       .resendInvitation({ userId: user.id })
       .then(() => setResentCount((count) => count + 1))
-      .catch(() => {})
-      .finally(() => dispatch(setLoading(false)));
+      .finally(() => dispatch(setLoading(false)))
+      // The list may be stale (e.g. the invitee already accepted), so refresh it.
+      .catch(() => getUsers());
   };
 
   useEffect(() => {
@@ -332,7 +333,11 @@ export const UsersTable = () => {
       </CustomTooltip>
 
       {resentCount > 0 && (
-        <SuccessSnackbar key={resentCount} success="invitation_resent" />
+        <SuccessSnackbar
+          key={resentCount}
+          success="invitation_resent"
+          left="56"
+        />
       )}
 
       {Boolean(userToDelete) && (
