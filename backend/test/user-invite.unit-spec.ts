@@ -89,7 +89,7 @@ describe('UsersService — invitation email', () => {
   });
 
   describe('resendInvitation', () => {
-    it('rotates the placeholder password, then re-sends the link against the new hash', async () => {
+    it('rotates the placeholder password, sends the link against the new hash, then saves it', async () => {
       const { service, users, email, tokens } = makeService();
       const pending = {
         id: 'u1',
@@ -101,12 +101,12 @@ describe('UsersService — invitation email', () => {
 
       await service.resendInvitation('u1');
 
-      // New hash saved before the token is minted from it — that's what voids
-      // every earlier invitation link.
+      // Token minted from the new hash, and the hash saved only after the email
+      // went out — saving it is what voids every earlier invitation link.
       expect(pending.password).not.toBe('old-placeholder-hash');
       expect(users.save).toHaveBeenCalledWith(pending);
-      expect(users.save.mock.invocationCallOrder[0]).toBeLessThan(
-        tokens.generatePasswordResetToken.mock.invocationCallOrder[0],
+      expect(email.sendEmail.mock.invocationCallOrder[0]).toBeLessThan(
+        users.save.mock.invocationCallOrder[0],
       );
       expect(tokens.generatePasswordResetToken).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -124,6 +124,20 @@ describe('UsersService — invitation email', () => {
       expect(to).toBe('newbie@x.com');
       expect(subject).toBe('Invitation to join Qlarr.com');
       expect(body).toContain(`${FRONTEND}/reset-password?token=${TOKEN}`);
+    });
+
+    it('keeps the old placeholder when the email fails, so earlier links stay valid', async () => {
+      const { service, users, email } = makeService();
+      users.findById.mockResolvedValue({
+        id: 'u1',
+        email: 'newbie@x.com',
+        password: 'old-placeholder-hash',
+        isConfirmed: false,
+      });
+      email.sendEmail.mockRejectedValue(new Error('SMTP down'));
+
+      await expect(service.resendInvitation('u1')).rejects.toThrow('SMTP down');
+      expect(users.save).not.toHaveBeenCalled();
     });
 
     it('refuses a user who already accepted', async () => {
