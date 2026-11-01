@@ -20,7 +20,7 @@ import styles from "./ManageSurvey.module.css";
 
 import LoadingDots from "~/components/common/LoadingDots";
 import { useService } from "~/hooks/use-service";
-import SideTabs from "~/components/design/SideTabs";
+import WorkspaceTabs from "~/components/design/WorkspaceTabs";
 import DesignTourProvider from "~/components/design/DesignTour";
 
 const ResponsesSurvey = React.lazy(() => import("../manage/ResponsesSurvey"));
@@ -115,15 +115,13 @@ function ManageSurvey({ landingPage }) {
 
   const content = (
     <>
-      <Box sx={{ display: "flex" }}>
-        {availablePagesMemo.length > 0 && (
-          <SideTabs
-            availablePages={availablePagesMemo}
-            selectedPage={selectedPage}
-            surveyId={params.surveyId}
-            onPageChange={changePage}
-          />
-        )}
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
+        <WorkspaceTabs
+          availablePages={availablePagesMemo}
+          selectedPage={selectedPage}
+          surveyId={params.surveyId}
+          onPageChange={changePage}
+        />
         <Suspense fallback={<LoadingDots fullHeight />}>
           <Box className={styles.wrapper}>
             {shouldShowResponses() ? (

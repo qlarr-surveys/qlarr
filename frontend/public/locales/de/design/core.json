@@ -583,5 +583,18 @@
   "err_skip_inside_repeatable": "Sprunglogik ist innerhalb eines wiederholbaren Elements nicht zulässig.",
   "find_element": "Frage oder Seite suchen (Strg+F)",
   "find_element_placeholder": "Nach Code oder Text suchen",
-  "find_element_no_results": "Keine passenden Fragen oder Seiten"
+  "find_element_no_results": "Keine passenden Fragen oder Seiten",
+  "survey_workspaces": "Umfrage-Arbeitsbereiche",
+  "left_panel": "Seitenleiste",
+  "question_types": "Fragetypen",
+  "question_settings": "Frageeinstellungen",
+  "page_settings": "Seiteneinstellungen",
+  "settings_for": "Einstellungen für {{order}}",
+  "survey_theme": "Umfrage-Design",
+  "survey_languages": "Umfragesprachen",
+  "types_coach_title": "Ziehe einen Typ auf die Seite,",
+  "types_coach_body": "um eine Frage hinzuzufügen. Über ⓘ erfährst du, was jeder Typ macht.",
+  "types_coach_dismiss": "Verstanden",
+  "about_type": "Über {{name}}",
+  "workspace_tools": "Arbeitsbereich-Werkzeuge"
 }

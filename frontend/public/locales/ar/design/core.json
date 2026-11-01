@@ -293,7 +293,7 @@
   "text_field_size": "حجم حقل النص",
   "text_style": "نمط النص",
   "textarea_lines": "خطوط منطقة النص",
-  "theme": "تصميم",
+  "theme": "المظهر",
   "translation": "ترجمة",
   "upload_background": "تحميل الخلفية",
   "upload_logo": "تحميل الشعار",
@@ -583,5 +583,18 @@
   "err_skip_inside_repeatable": "منطق التخطي غير مسموح به داخل عنصر قابل للتكرار.",
   "find_element": "البحث عن سؤال أو صفحة (Ctrl+F)",
   "find_element_placeholder": "ابحث بالرمز أو النص",
-  "find_element_no_results": "لا توجد أسئلة أو صفحات مطابقة"
+  "find_element_no_results": "لا توجد أسئلة أو صفحات مطابقة",
+  "survey_workspaces": "مساحات عمل الاستبيان",
+  "left_panel": "اللوحة الجانبية",
+  "question_types": "أنواع الأسئلة",
+  "question_settings": "إعدادات السؤال",
+  "page_settings": "إعدادات الصفحة",
+  "settings_for": "إعدادات {{order}}",
+  "survey_theme": "مظهر الاستبيان",
+  "survey_languages": "لغات الاستبيان",
+  "types_coach_title": "اسحب نوعاً إلى الصفحة",
+  "types_coach_body": "لإضافة سؤال. استخدم ⓘ لمعرفة وظيفة كل نوع.",
+  "types_coach_dismiss": "فهمت",
+  "about_type": "عن {{name}}",
+  "workspace_tools": "أدوات مساحة العمل"
 }
