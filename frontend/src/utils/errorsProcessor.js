@@ -50,6 +50,10 @@ export const PROCESSED_ERRORS = {
     handleGlobally: false,
   },
   USER_NOT_FOUND: { name: "user_not_found", handleGlobally: false },
+  USER_ALREADY_CONFIRMED: {
+    name: "user_already_confirmed",
+    handleGlobally: true,
+  },
   MISSING_CREDENTIALS: { name: "missing_credentials", handleGlobally: false },
   SURVEY_DESIGN_ERROR: { name: "survey_design_error", handleGlobally: false },
   SURVEY_NOT_ACTIVE: { name: "survey_not_active", handleGlobally: false },
@@ -155,6 +159,8 @@ export const processError = (e) => {
         return PROCESSED_ERRORS.EXPIRED_CONFIRMATION_TOKEN;
       case "UserNotFoundException":
         return PROCESSED_ERRORS.USER_NOT_FOUND;
+      case "UserAlreadyConfirmedException":
+        return PROCESSED_ERRORS.USER_ALREADY_CONFIRMED;
       case "DuplicateEmailException":
         return PROCESSED_ERRORS.DUPLICATE_EMAIL;
       case "MissingCredentialsException":

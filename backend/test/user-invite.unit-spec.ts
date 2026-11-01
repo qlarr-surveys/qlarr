@@ -6,15 +6,17 @@ import { UsersService } from '../src/modules/users/users.service';
  * "set your password?token=..." with no URL). All collaborators are stubbed; no
  * DB or app boot.
  */
-describe('UsersService.create — invitation email', () => {
+describe('UsersService — invitation email', () => {
   const FRONTEND = 'http://localhost:3000';
   const TOKEN = 'reset.jwt.token';
 
   const makeService = () => {
     const users = {
       findByEmail: jest.fn().mockResolvedValue(null),
+      findById: jest.fn().mockResolvedValue(null),
       create: jest.fn((e: unknown) => e),
       insert: jest.fn().mockResolvedValue(undefined),
+      save: jest.fn().mockResolvedValue(undefined),
     };
     const tokens = { generatePasswordResetToken: jest.fn().mockReturnValue(TOKEN) };
     const email = { sendEmail: jest.fn().mockResolvedValue(undefined) };
@@ -36,7 +38,7 @@ describe('UsersService.create — invitation email', () => {
   };
 
   it('emails a working set-password link to the reset-password page with the reset token', async () => {
-    const { service, email, tokens } = makeService();
+    const { service, users, email, tokens } = makeService();
 
     await service.create({
       firstName: 'New',
@@ -45,9 +47,14 @@ describe('UsersService.create — invitation email', () => {
       roles: ['analyst'],
     });
 
-    // New-user reset token minted for the normalized (lowercased) email.
+    // New-user reset token minted for the normalized (lowercased) email,
+    // against the stored placeholder hash (the token's single-use fingerprint).
+    const inserted = users.insert.mock.calls[0][0] as { password: string };
     expect(tokens.generatePasswordResetToken).toHaveBeenCalledWith(
-      { email: 'newbie@x.com' },
+      expect.objectContaining({
+        email: 'newbie@x.com',
+        password: inserted.password,
+      }),
       true,
     );
 
@@ -79,5 +86,83 @@ describe('UsersService.create — invitation email', () => {
 
     expect(users.insert).not.toHaveBeenCalled();
     expect(email.sendEmail).not.toHaveBeenCalled();
+  });
+
+  describe('resendInvitation', () => {
+    it('rotates the placeholder password, sends the link against the new hash, then saves it', async () => {
+      const { service, users, email, tokens } = makeService();
+      const pending = {
+        id: 'u1',
+        email: 'newbie@x.com',
+        password: 'old-placeholder-hash',
+        isConfirmed: false,
+      };
+      users.findById.mockResolvedValue(pending);
+
+      await service.resendInvitation('u1');
+
+      // Token minted from the new hash, and the hash saved only after the email
+      // went out — saving it is what voids every earlier invitation link.
+      expect(pending.password).not.toBe('old-placeholder-hash');
+      expect(users.save).toHaveBeenCalledWith(pending);
+      expect(email.sendEmail.mock.invocationCallOrder[0]).toBeLessThan(
+        users.save.mock.invocationCallOrder[0],
+      );
+      expect(tokens.generatePasswordResetToken).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: 'newbie@x.com',
+          password: pending.password,
+        }),
+        true,
+      );
+      expect(email.sendEmail).toHaveBeenCalledTimes(1);
+      const [to, subject, body] = email.sendEmail.mock.calls[0] as [
+        string,
+        string,
+        string,
+      ];
+      expect(to).toBe('newbie@x.com');
+      expect(subject).toBe('Invitation to join Qlarr.com');
+      expect(body).toContain(`${FRONTEND}/reset-password?token=${TOKEN}`);
+    });
+
+    it('keeps the old placeholder when the email fails, so earlier links stay valid', async () => {
+      const { service, users, email } = makeService();
+      users.findById.mockResolvedValue({
+        id: 'u1',
+        email: 'newbie@x.com',
+        password: 'old-placeholder-hash',
+        isConfirmed: false,
+      });
+      email.sendEmail.mockRejectedValue(new Error('SMTP down'));
+
+      await expect(service.resendInvitation('u1')).rejects.toThrow('SMTP down');
+      expect(users.save).not.toHaveBeenCalled();
+    });
+
+    it('refuses a user who already accepted', async () => {
+      const { service, users, email } = makeService();
+      users.findById.mockResolvedValue({
+        id: 'u1',
+        email: 'newbie@x.com',
+        isConfirmed: true,
+      });
+
+      await expect(service.resendInvitation('u1')).rejects.toMatchObject({
+        response: { error: 'UserAlreadyConfirmedException' },
+      });
+      // A real password must never be overwritten.
+      expect(users.save).not.toHaveBeenCalled();
+      expect(email.sendEmail).not.toHaveBeenCalled();
+    });
+
+    it('404s an unknown user', async () => {
+      const { service, email } = makeService();
+
+      await expect(service.resendInvitation('nope')).rejects.toMatchObject({
+        response: { error: 'UserNotFoundException' },
+      });
+      expect(email.sendEmail).not.toHaveBeenCalled();
+    });
   });
 });

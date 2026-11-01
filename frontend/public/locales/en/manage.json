@@ -263,10 +263,12 @@
     "wrong_confirmation_token": "This Confirmation Token is incorrect, Please Register Once more",
     "survey_quota": "Sorry, this survey is no longer accepting responses.",
     "invalid_translations_csv": "Not a translations CSV.",
-    "translations_csv_not_utf8": "This file isn't UTF-8. In Excel, use File → Save As → 'CSV UTF-8 (Comma delimited)' and import again."
+    "translations_csv_not_utf8": "This file isn't UTF-8. In Excel, use File → Save As → 'CSV UTF-8 (Comma delimited)' and import again.",
+    "user_already_confirmed": "This user has already accepted the invitation."
   },
   "processed_successes": {
     "copied": "Copied to clipboard",
+    "invitation_resent": "Invitation sent again",
     "updated": "Updated successfully"
   },
   "profile": {
@@ -549,6 +551,7 @@
     "status": "Status",
     "active": "Active",
     "invitation_sent": "Invitation Sent",
+    "resend_invitation": "Resend Invitation",
     "learn_about_roles": "Learn about user roles",
     "roles_info": "<strong>Super Admin</strong> — Full access to all features including user management, survey creation, and system settings.<br/><br/><strong>Survey Admin</strong> — Can create and manage surveys, access survey design, settings, responses, and analytics.<br/><br/><strong>Analyst</strong> — Can view survey responses, analytics, and preview surveys.<br/><br/><strong>Surveyor</strong> — Can collect survey responses via the mobile app, and preview surveys."
   },

@@ -263,10 +263,12 @@
     "wrong_confirmation_token": "Deze Bevestiging Token is onjuist, Registreer Opnieuw",
     "survey_quota": "Sorry, deze enquête accepteert geen reacties meer.",
     "invalid_translations_csv": "Geen CSV met vertalingen.",
-    "translations_csv_not_utf8": "Dit bestand is niet in UTF-8. Kies in Excel Bestand → Opslaan als → “CSV UTF-8 (door komma's gescheiden)” en importeer het opnieuw."
+    "translations_csv_not_utf8": "Dit bestand is niet in UTF-8. Kies in Excel Bestand → Opslaan als → “CSV UTF-8 (door komma's gescheiden)” en importeer het opnieuw.",
+    "user_already_confirmed": "Deze gebruiker heeft de uitnodiging al geaccepteerd."
   },
   "processed_successes": {
     "copied": "Gekopieerd naar klembord",
+    "invitation_resent": "Uitnodiging opnieuw verzonden",
     "updated": "Succesvol bijgewerkt"
   },
   "profile": {
@@ -549,6 +551,7 @@
     "status": "Status",
     "active": "Actief",
     "invitation_sent": "Uitnodiging Verzonden",
+    "resend_invitation": "Uitnodiging Opnieuw Verzenden",
     "learn_about_roles": "Meer informatie over gebruikersrollen",
     "roles_info": "<strong>Super Admin</strong> — Volledige toegang tot alle functies, inclusief gebruikersbeheer, enquêtes aanmaken en systeeminstellingen.<br/><br/><strong>Enquête Admin</strong> — Kan enquêtes aanmaken en beheren, toegang tot ontwerp, instellingen, reacties en analyses.<br/><br/><strong>Analist</strong> — Kan enquêtereacties en analyses bekijken, en enquêtes voorvertonen.<br/><br/><strong>Enquêteur</strong> — Kan enquêtereacties verzamelen via de mobiele app, en enquêtes voorvertonen."
   },

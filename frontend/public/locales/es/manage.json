@@ -263,10 +263,12 @@
     "wrong_confirmation_token": "Este Token de Confirmación es incorrecto, Por favor Regístrate Una Vez Más",
     "survey_quota": "Lo sentimos, esta encuesta ya no está aceptando respuestas.",
     "invalid_translations_csv": "No es un CSV de traducciones.",
-    "translations_csv_not_utf8": "Este archivo no está en UTF-8. En Excel, usa Archivo → Guardar como → «CSV UTF-8 (delimitado por comas)» e impórtalo de nuevo."
+    "translations_csv_not_utf8": "Este archivo no está en UTF-8. En Excel, usa Archivo → Guardar como → «CSV UTF-8 (delimitado por comas)» e impórtalo de nuevo.",
+    "user_already_confirmed": "Este usuario ya ha aceptado la invitación."
   },
   "processed_successes": {
     "copied": "Copiado al portapapeles",
+    "invitation_resent": "Invitación reenviada",
     "updated": "Actualizado exitosamente"
   },
   "profile": {
@@ -549,6 +551,7 @@
     "status": "Estado",
     "active": "Activo",
     "invitation_sent": "Invitación Enviada",
+    "resend_invitation": "Reenviar Invitación",
     "learn_about_roles": "Conoce los roles de usuario",
     "roles_info": "<strong>Super Admin</strong> — Acceso completo a todas las funciones, incluida la gestión de usuarios, creación de encuestas y configuración del sistema.<br/><br/><strong>Admin de Encuestas</strong> — Puede crear y gestionar encuestas, acceder al diseño, configuración, respuestas y análisis.<br/><br/><strong>Analista</strong> — Puede ver las respuestas y análisis de encuestas, y previsualizar encuestas.<br/><br/><strong>Encuestador</strong> — Puede recopilar respuestas de encuestas a través de la aplicación móvil, y previsualizar encuestas."
   },

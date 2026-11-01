@@ -295,10 +295,12 @@
     "wrong_password": "Falsches Passwort",
     "wrong_reset_token": "Dieses Reset-Token ist falsch.",
     "invalid_translations_csv": "Keine Übersetzungs-CSV.",
-    "translations_csv_not_utf8": "Diese Datei ist nicht UTF-8-kodiert. Wählen Sie in Excel Datei → Speichern unter → „CSV UTF-8 (durch Trennzeichen getrennt)“ und importieren Sie sie erneut."
+    "translations_csv_not_utf8": "Diese Datei ist nicht UTF-8-kodiert. Wählen Sie in Excel Datei → Speichern unter → „CSV UTF-8 (durch Trennzeichen getrennt)“ und importieren Sie sie erneut.",
+    "user_already_confirmed": "Dieser Benutzer hat die Einladung bereits angenommen."
   },
   "processed_successes": {
     "copied": "In die Zwischenablage kopiert",
+    "invitation_resent": "Einladung erneut gesendet",
     "updated": "Erfolgreich aktualisiert"
   },
   "profile": {
@@ -614,6 +616,7 @@
     "delete_title": "Sind Sie sicher, dass Sie den Benutzer löschen wollen: {{name}} ?",
     "email": "Email",
     "invitation_sent": "Einladung gesendet",
+    "resend_invitation": "Einladung erneut senden",
     "name": "Name",
     "roles": "Rollen",
     "status": "Status",
