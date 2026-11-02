@@ -6,6 +6,8 @@
   padding: 0 16px;
   min-width: 300px;
   height: calc(100vh - 64px);
+  /* dvh tracks the visible viewport on mobile, so the page itself never scrolls. */
+  height: calc(100dvh - 64px);
   overflow: auto;
 }
 
