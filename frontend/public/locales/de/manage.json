@@ -166,6 +166,7 @@
     "title": "Passwort vergessen"
   },
   "goBack": "Zurückgehen",
+  "go_to_dashboard": "Zum Dashboard",
   "import_survey": "Umfrage importieren",
   "label": {
     "additional_languages": "Weitere Sprachen",
@@ -296,7 +297,8 @@
     "wrong_reset_token": "Dieses Reset-Token ist falsch.",
     "invalid_translations_csv": "Keine Übersetzungs-CSV.",
     "translations_csv_not_utf8": "Diese Datei ist nicht UTF-8-kodiert. Wählen Sie in Excel Datei → Speichern unter → „CSV UTF-8 (durch Trennzeichen getrennt)“ und importieren Sie sie erneut.",
-    "user_already_confirmed": "Dieser Benutzer hat die Einladung bereits angenommen."
+    "user_already_confirmed": "Dieser Benutzer hat die Einladung bereits angenommen.",
+    "survey_not_found": "Diese Umfrage existiert nicht oder wurde gelöscht"
   },
   "processed_successes": {
     "copied": "In die Zwischenablage kopiert",

@@ -22,6 +22,7 @@
   "timezone_info": "Usamos seu fuso horário local para calcular o tempo de expiração da pesquisa.",
   "timezone_tooltip": "A pesquisa expirará às 00:00 na data de finalização selecionada em seu fuso horário local",
   "goBack": "Voltar",
+  "go_to_dashboard": "Ir para o painel",
   "preview": "Pré-visualização",
   "mobile_view": "Console Não Otimizado para Telas Pequenas",
   "mobile_view_working": "Nosso console é complexo e não suporta telas menores para a melhor experiência. Mas não se preocupe - as pesquisas que ajudamos você a criar são incríveis em telas pequenas!",
@@ -264,7 +265,8 @@
     "survey_quota": "Desculpe, esta pesquisa não está mais aceitando respostas.",
     "invalid_translations_csv": "Não é um CSV de traduções.",
     "translations_csv_not_utf8": "Este arquivo não está em UTF-8. No Excel, use Arquivo → Salvar como → “CSV UTF-8 (Delimitado por vírgulas)” e importe novamente.",
-    "user_already_confirmed": "Este usuário já aceitou o convite."
+    "user_already_confirmed": "Este usuário já aceitou o convite.",
+    "survey_not_found": "Esta pesquisa não existe ou foi excluída"
   },
   "processed_successes": {
     "copied": "Copiado para a área de transferência",

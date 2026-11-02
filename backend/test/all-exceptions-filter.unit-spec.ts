@@ -2,10 +2,12 @@ import {
   ArgumentsHost,
   BadRequestException,
   ForbiddenException,
+  Logger,
   PayloadTooLargeException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { AllExceptionsFilter } from '../src/common/all-exceptions.filter';
+import { EngineException } from '../src/engine/engine.exceptions';
 import { ResponseNotFoundException } from '../src/modules/responses/response.exceptions';
 
 /** A fake express Response capturing the rendered status/body. */
@@ -90,6 +92,34 @@ describe('AllExceptionsFilter', () => {
     expect(res.body).toEqual({ message: 'Unexpected error', error: 'BoomError' });
     // The real message (which could carry internals) is never sent.
     expect(JSON.stringify(res.body)).not.toContain('secret dsn');
+  });
+
+  it('logs a thrown plain object by name and message, not [object Object]', () => {
+    const log = jest.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
+    const res = run({ name: 'NullPointerException', message: 'boom', cause: null });
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual({ message: 'Unexpected error', error: 'Error' });
+    const line = log.mock.calls[0][0] as string;
+    expect(line).toContain('NullPointerException: boom');
+    expect(line).not.toContain('[object Object]');
+    log.mockRestore();
+  });
+
+  it('renders a wrapped engine failure as a 500 EngineException without leaking its message', () => {
+    const log = jest.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
+    const res = run(
+      new EngineException('navigate', {
+        name: 'NullPointerException',
+        message: 'boom',
+        stack: 'at engine.kt:42',
+      }),
+    );
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual({ message: 'Unexpected error', error: 'EngineException' });
+    const line = log.mock.calls[0][0] as string;
+    expect(line).toContain("Engine op 'navigate' failed: NullPointerException: boom");
+    expect(line).toContain('at engine.kt:42');
+    log.mockRestore();
   });
 
   it('does not try to render over an already-committed (streamed) response', () => {

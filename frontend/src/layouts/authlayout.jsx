@@ -18,7 +18,7 @@ export default function AuthIllustrationLayout({ children }) {
         sx={{
           pb: 10,
           minHeight: 1,
-          pt: { xs: 12, md: 21 },
+          pt: { xs: 4, md: 21 },
         }}
       >
         <Grid
@@ -40,6 +40,8 @@ export default function AuthIllustrationLayout({ children }) {
               spacing={4}
               sx={{
                 p: 4,
+                // Below md the form stands alone; keep it off the screen edges.
+                m: { xs: "10px", md: 0 },
                 borderRadius: 2,
                 textAlign: { xs: "center", md: "left" },
                 boxShadow: (theme) => "22",
