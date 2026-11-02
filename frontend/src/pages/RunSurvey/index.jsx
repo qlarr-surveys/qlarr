@@ -30,7 +30,7 @@ import { qlarrCssVars } from "~/components/Questions/qlarrVars";
 
 import SurveyDrawer, { COLLAPSE, EXPAND } from "~/components/run/SurveyDrawer";
 import SurveyAppBar from "~/components/run/SurveyAppBar";
-import PreviewEndActions from "~/components/run/PreviewEndActions";
+import PreviewFooter from "~/components/run/PreviewFooter";
 import {
   getClosestScrollableParent,
   scrollToCenter,
@@ -362,7 +362,7 @@ function RunSurvey({
                 <SurveyMemo
                   key="Survey"
                 />
-                {preview && SURVEY_ENDED && <PreviewEndActions />}
+                {preview && <PreviewFooter ended={SURVEY_ENDED} />}
                 <SurveyDrawer
                   expanded={expanded}
                   toggleDrawer={toggleDrawer}

@@ -66,6 +66,7 @@
     "ranking_ranked": "{{count}} gerangschikt",
     "ranking_drag_hint": "Sleep items hierheen om ze te rangschikken",
     "ranking_all_ranked": "Alle items zijn gerangschikt",
+    "preview_not_exportable": "Voorvertoning reacties kunnen niet worden geëxporteerd",
     "preview_end_actions": {
         "heading": "Voorbeeldopties",
         "check_response": "Reactie bekijken",

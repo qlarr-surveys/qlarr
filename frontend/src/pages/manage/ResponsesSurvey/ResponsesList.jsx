@@ -693,11 +693,13 @@ function ResponsesList({ refreshKey }) {
                                 #{r.index}
                               </Typography>
                               {r.preview ? (
-                                <Chip
-                                  size="small"
-                                  variant="outlined"
-                                  label={t("responses.preview")}
-                                />
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                  fontWeight={500}
+                                >
+                                  {t("responses.test_response")}
+                                </Typography>
                               ) : r.disqualified ? (
                                 <Chip
                                   size="small"
@@ -851,11 +853,13 @@ function ResponsesList({ refreshKey }) {
                     label={t("responses.status") || "Status"}
                     value={
                       selected.preview ? (
-                        <Chip
-                          size="small"
-                          variant="outlined"
-                          label={t("responses.preview")}
-                        />
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          fontWeight={500}
+                        >
+                          {t("responses.test_response")}
+                        </Typography>
                       ) : selected.submitDate ? (
                         <Typography
                           variant="body2"
