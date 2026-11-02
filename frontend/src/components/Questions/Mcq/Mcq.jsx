@@ -132,6 +132,12 @@ function McqAnswerOther(props) {
   const showAnswer = () => {
     return (
       <FormControlLabel
+        // A div, not a label: the outlined label turns its pointer events on as
+        // it shrinks, so a tap on it is a mousedown on the input and a mouseup
+        // on the label, and the click retargets to their common parent. Inside
+        // a label that activates the checkbox, which takes the focus back off
+        // the input — on a phone the keyboard then never opens.
+        as="div"
         css={css`
           .MuiTypography-root {
             width: 100%;
@@ -144,6 +150,7 @@ function McqAnswerOther(props) {
             disabled={props.disabled}
             onChange={onButtonClick}
             name={props.Answer.qualifiedCode}
+            inputProps={{ "aria-label": props.Answer.content?.label }}
           />
         }
         label={
@@ -157,6 +164,10 @@ function McqAnswerOther(props) {
             name={nestedTextChild.qualifiedCode}
             disabled={props.disabled}
             label={props.Answer.content?.label}
+            // A press on the floating label would blur the input, and an empty
+            // input then drops the label away from under the finger, so the
+            // click misses it and the focus — and the keyboard — is lost.
+            InputLabelProps={{ onMouseDown: (event) => event.preventDefault() }}
             onChange={handleChange}
             onFocus={handleFocus}
             onBlur={lostFocus}
