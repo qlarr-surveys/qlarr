@@ -19,7 +19,10 @@
     "survey_design_error": "Fehler im Umfragedesign... Überprüfen Sie das Umfragedesign",
     "survey_expired": "Diese Umfrage ist abgelaufen",
     "survey_not_active": "Diese Umfrage ist nicht aktiv",
-    "survey_scheduled": "Diese Umfrage soll in der Zukunft beginnen"
+    "survey_scheduled": "Diese Umfrage soll in der Zukunft beginnen",
+    "client_time_skew": "Die Uhr Ihres Geräts ist nicht synchron. Bitte korrigieren Sie Ihre Datums- und Uhrzeiteinstellungen und laden Sie die Seite neu.",
+    "survey_not_published": "Diese Umfrage wurde noch nicht veröffentlicht",
+    "survey_not_found": "Diese Umfrage ist nicht verfügbar"
   },
   "upload": "Upload",
   "preview": "Sie befinden sich im Vorschaumodus",

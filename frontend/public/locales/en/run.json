@@ -19,7 +19,10 @@
         "survey_design_error": "Survey Design Error... Check Survey Design",
         "survey_expired": "This survey is expired",
         "survey_not_active": "This survey is not active",
-        "survey_scheduled": "This survey is scheduled to start in the future"
+        "survey_scheduled": "This survey is scheduled to start in the future",
+        "client_time_skew": "Your device clock is out of sync. Please correct your date and time settings, then reload the page.",
+        "survey_not_published": "This survey hasn't been published yet",
+        "survey_not_found": "This survey is not available"
     },
     "preview":"You're in preview mode",
     "upload": "Upload",

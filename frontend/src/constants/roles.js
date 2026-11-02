@@ -49,16 +49,16 @@ export const isUserAnalyst = () => {
   );
 };
 
-export const isSurveyor = (user) => {
-  const roles = user.roles;
+export const isSurveyor = () => {
+  const roles = currentRoles();
   return (
     roles.indexOf(ROLES.SUPER_ADMIN) != -1 ||
     roles.indexOf(ROLES.SURVEYOR) != -1
   );
 };
 
-export const isAnalyst = (user) => {
-  const roles = user.roles;
+export const isAnalyst = () => {
+  const roles = currentRoles();
   return (
     roles.indexOf(ROLES.SUPER_ADMIN) != -1 || roles.indexOf(ROLES.ANALYST) != -1 || roles.indexOf(ROLES.SURVEY_ADMIN) != -1
   );

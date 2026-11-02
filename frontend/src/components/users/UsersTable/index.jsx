@@ -44,7 +44,7 @@ export const UsersTable = () => {
 
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const userId = TokenService.getUser().id;
+  const userId = TokenService.getUser()?.id;
 
   const getUsers = () => {
     dispatch(setLoading(true));
@@ -182,7 +182,9 @@ export const UsersTable = () => {
 
       <TableContainer
         sx={{
-          overflow: "unset",
+          // The table keeps its min width; on a phone it scrolls sideways
+          // here instead of widening the page.
+          overflowX: "auto",
           [`& .${tableCellClasses.head}`]: {
             color: "text.primary",
           },

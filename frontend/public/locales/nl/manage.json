@@ -22,6 +22,7 @@
   "timezone_info": "We gebruiken je lokale tijdzone om de enquête vervaltijd te berekenen.",
   "timezone_tooltip": "De enquête verloopt om 00:00 op de geselecteerde einddatum in je lokale tijdzone",
   "goBack": "Terug",
+  "go_to_dashboard": "Naar dashboard",
   "preview": "Voorvertoning",
   "mobile_view": "Console Niet Geoptimaliseerd voor Kleine Schermen",
   "mobile_view_working": "Onze console is complex en ondersteunt geen kleinere schermen voor de beste ervaring. Maar maak je geen zorgen - de enquêtes die we je helpen maken zijn geweldig op kleine schermen!",
@@ -264,7 +265,8 @@
     "survey_quota": "Sorry, deze enquête accepteert geen reacties meer.",
     "invalid_translations_csv": "Geen CSV met vertalingen.",
     "translations_csv_not_utf8": "Dit bestand is niet in UTF-8. Kies in Excel Bestand → Opslaan als → “CSV UTF-8 (door komma's gescheiden)” en importeer het opnieuw.",
-    "user_already_confirmed": "Deze gebruiker heeft de uitnodiging al geaccepteerd."
+    "user_already_confirmed": "Deze gebruiker heeft de uitnodiging al geaccepteerd.",
+    "survey_not_found": "Deze enquête bestaat niet of is verwijderd"
   },
   "processed_successes": {
     "copied": "Gekopieerd naar klembord",

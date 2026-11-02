@@ -60,6 +60,16 @@ export class SurveyIsNotActiveException extends SurveyException {
   }
 }
 
+export class SurveyNotPublishedException extends SurveyException {
+  constructor() {
+    super(
+      'Survey has no published version',
+      'SurveyNotPublishedException',
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+}
+
 export class DuplicateSurveyException extends SurveyException {
   constructor() {
     super('Duplicate survey', 'DuplicateSurveyException', HttpStatus.BAD_REQUEST);

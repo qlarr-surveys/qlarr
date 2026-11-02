@@ -22,6 +22,7 @@
   "timezone_info": "Usamos tu zona horaria local para calcular el tiempo de expiración de la encuesta.",
   "timezone_tooltip": "La encuesta expirará a las 00:00 en la fecha de finalización seleccionada en tu zona horaria local",
   "goBack": "Volver",
+  "go_to_dashboard": "Ir al panel",
   "preview": "Vista previa",
   "mobile_view": "Consola No Optimizada para Pantallas Pequeñas",
   "mobile_view_working": "Nuestra consola es compleja y no admite pantallas más pequeñas para la mejor experiencia. ¡Pero no te preocupes - las encuestas que te ayudamos a crear son increíbles en pantallas pequeñas!",
@@ -264,7 +265,8 @@
     "survey_quota": "Lo sentimos, esta encuesta ya no está aceptando respuestas.",
     "invalid_translations_csv": "No es un CSV de traducciones.",
     "translations_csv_not_utf8": "Este archivo no está en UTF-8. En Excel, usa Archivo → Guardar como → «CSV UTF-8 (delimitado por comas)» e impórtalo de nuevo.",
-    "user_already_confirmed": "Este usuario ya ha aceptado la invitación."
+    "user_already_confirmed": "Este usuario ya ha aceptado la invitación.",
+    "survey_not_found": "Esta encuesta no existe o fue eliminada"
   },
   "processed_successes": {
     "copied": "Copiado al portapapeles",

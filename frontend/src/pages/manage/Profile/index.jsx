@@ -396,7 +396,7 @@ export default function ProfileView() {
             </Stack>
           </>
         </Stack>
-        <Stack spacing={1} direction="row">
+        <Stack spacing={1} direction="row" flexWrap="wrap" useFlexGap>
           {operation == OPERATION.NONE && (
             <LoadingButton
               color="inherit"

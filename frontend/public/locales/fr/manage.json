@@ -22,6 +22,7 @@
   "timezone_info": "Nous utilisons votre fuseau horaire local pour calculer l'heure d'expiration du sondage.",
   "timezone_tooltip": "Le sondage expirera à 00:00 à la date de fin sélectionnée dans votre fuseau horaire local",
   "goBack": "Retour",
+  "go_to_dashboard": "Aller au tableau de bord",
   "preview": "Aperçu",
   "mobile_view": "Console Non Optimisée pour les Petits Écrans",
   "mobile_view_working": "Notre console est complexe et ne prend pas en charge les petits écrans pour la meilleure expérience. Mais ne vous inquiétez pas - les sondages que nous vous aidons à créer sont excellents sur les petits écrans !",
@@ -264,7 +265,8 @@
     "survey_quota": "Désolé, ce sondage n'accepte plus de réponses.",
     "invalid_translations_csv": "Ce n'est pas un CSV de traductions.",
     "translations_csv_not_utf8": "Ce fichier n'est pas encodé en UTF-8. Dans Excel, utilisez Fichier → Enregistrer sous → « CSV UTF-8 (délimité par des virgules) » puis importez-le à nouveau.",
-    "user_already_confirmed": "Cet utilisateur a déjà accepté l'invitation."
+    "user_already_confirmed": "Cet utilisateur a déjà accepté l'invitation.",
+    "survey_not_found": "Ce sondage n'existe pas ou a été supprimé"
   },
   "processed_successes": {
     "copied": "Copié dans le presse-papiers",

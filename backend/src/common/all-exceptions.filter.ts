@@ -73,7 +73,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // Uncaught / non-HTTP error → 500 "Unexpected error" (also logs the
     // stack). Never send internals to the client.
     this.logger.error(
-      exception instanceof Error ? (exception.stack ?? exception.message) : String(exception),
+      exception instanceof Error ? (exception.stack ?? exception.message) : describe(exception),
     );
     return {
       status: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -98,6 +98,22 @@ function isErrorBody(response: unknown): response is ErrorBody {
     typeof (response as { error?: unknown }).error === 'string' &&
     (response as { statusCode?: unknown }).statusCode === undefined
   );
+}
+
+/**
+ * Log line for a thrown non-`Error` (e.g. a plain object), where `String()`
+ * would only give `[object Object]`.
+ */
+function describe(exception: unknown): string {
+  if (typeof exception !== 'object' || exception === null) return String(exception);
+  const { name, message } = exception as { name?: unknown; message?: unknown };
+  let json: string;
+  try {
+    json = JSON.stringify(exception);
+  } catch {
+    json = String(exception); // circular
+  }
+  return `Non-Error thrown: ${String(name)}: ${String(message)} ${json}`;
 }
 
 /** Nest can carry `message` as a string or a string[] (validation) — flatten it. */
