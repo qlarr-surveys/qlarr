@@ -7,7 +7,11 @@
   box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   padding: 20px;
-  min-width: 500px;
+  /* 500px of content on desktop; on a phone, the screen minus a 16px gutter. */
+  box-sizing: border-box;
+  width: min(540px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
 }
 
 .action {

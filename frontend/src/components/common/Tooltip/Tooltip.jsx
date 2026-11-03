@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Tooltip, Button } from "@mui/material";
-import HelpOutline from "@mui/icons-material/HelpOutline";
-import { useTheme } from "@emotion/react";
+import { Info } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import styles from "./Tooltip.module.css";
 
 const CustomTooltip = ({
@@ -11,10 +12,28 @@ const CustomTooltip = ({
   children,
   showIcon = true,
   placement = "bottom-start",
+  // Merged over the default tooltip styling. The status legend is a five-row
+  // table that needs more width than a one-line tooltip.
+  tooltipSx,
+  // What the trigger announces. Callers that can say what the ⓘ is about
+  // ("About the survey description") should; the generic label is the floor,
+  // not the target.
+  iconLabel,
 }) => {
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const triggerRef = useRef(null);
-  const theme = useTheme();
+  const { t } = useTranslation();
+
+  // Bound to no namespace, and resolved against both of the ones that hold the
+  // key, because this renders under the manage routes and inside the design
+  // editor, which load different bundles. Naming them in useTranslation would
+  // suspend whichever route has not loaded the other.
+  const triggerLabel =
+    iconLabel ||
+    t("tooltips.more_info", {
+      ns: [NAMESPACES.MANAGE, NAMESPACES.DESIGN_CORE],
+      defaultValue: "More information",
+    });
 
   useEffect(() => {
     if (!tooltipOpen || !showIcon) return;
@@ -32,14 +51,32 @@ const CustomTooltip = ({
 
   const tooltipContent = (
     <div>
-      {title && <span  dangerouslySetInnerHTML={{ __html: `<strong>${title}</strong>` }} />}
-      {body && <p className={styles.textPreLine} dangerouslySetInnerHTML={{ __html: body }} />}
+      {title && (
+        <strong
+          className={styles.tooltipTitle}
+          dangerouslySetInnerHTML={{ __html: title }}
+        />
+      )}
+      {/* A string is markup, as every caller but the status legend passes;
+          a node is rendered as itself, because a legend of coloured pills is
+          not something to spell out as an HTML string. */}
+      {body &&
+        (typeof body === "string" ? (
+          <p
+            className={styles.textPreLine}
+            dangerouslySetInnerHTML={{ __html: body }}
+          />
+        ) : (
+          <div className={styles.tooltipBody}>{body}</div>
+        ))}
       {url && (
         <Button
           variant="text"
           href={url}
           target="_blank"
-          sx={{ padding: 0, textTransform: "none" }}
+          // The link sits on the dark card now, where the theme's primary blue
+          // is all but invisible.
+          sx={{ padding: 0, textTransform: "none", color: "#c7cbf0" }}
         >
           Read more...
         </Button>
@@ -52,12 +89,19 @@ const CustomTooltip = ({
     placement,
     componentsProps: {
       tooltip: {
+        // The redesign's tooltip is a dark card, not a bordered white one:
+        // these float over cards that are themselves white, where a white
+        // tooltip with a hairline border reads as part of the page.
         sx: {
-          backgroundColor: "#fff",
-          color: "#1a2052",
-          fontSize: "0.875rem",
-          border: "1px solid #dadde9",
-          padding: 1,
+          maxWidth: 280,
+          padding: "9px 11px",
+          borderRadius: "8px",
+          backgroundColor: "#1b2150",
+          color: "#fff",
+          fontSize: "12.5px",
+          lineHeight: "18px",
+          boxShadow: "0 8px 22px rgba(20, 24, 52, 0.22)",
+          ...tooltipSx,
         },
       },
     },
@@ -67,22 +111,21 @@ const CustomTooltip = ({
     return (
       <div ref={triggerRef} className={styles.tooltipContainer}>
         <Tooltip {...commonTooltipProps} open={tooltipOpen}>
-          <HelpOutline
+          {/* A real button, not an icon carrying onClick: the tooltip opens on
+              click, so without one there is no keyboard path to the help at
+              all. It also gives the 24px target the redesign draws. */}
+          <button
+            type="button"
             className={styles.iconButton}
-            sx={{
-              fontSize: "16px",
-              transition: "background-color 0.3s ease, color 0.3s ease",
-              backgroundColor: tooltipOpen ? theme.palette.primary.main : "#fff",
-              color: tooltipOpen ? "#fff" : "#1a2052",
-              "&:hover": {
-                backgroundColor: theme.palette.primary.main,
-              },
-            }}
+            aria-label={triggerLabel}
+            aria-expanded={tooltipOpen}
             onClick={(e) => {
               e.stopPropagation();
               setTooltipOpen((prev) => !prev);
             }}
-          />
+          >
+            <Info size={14} strokeWidth={1.4} />
+          </button>
         </Tooltip>
       </div>
     );

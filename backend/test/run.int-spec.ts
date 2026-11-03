@@ -66,8 +66,20 @@ describe('Survey run — runtime.js', () => {
     expect(res.text).toBe(EXPECTED_RUNTIME);
   });
 
-  it('400 running a survey with no published version', () =>
-    request(server()).get(`/survey/${SURVEY_DRAFT}/run/runtime.js`).expect(400));
+  it('400 SurveyNotPublishedException running a survey with no published version', async () => {
+    const res = await request(server())
+      .get(`/survey/${SURVEY_DRAFT}/run/runtime.js`)
+      .expect(400);
+    // The route's javascript Content-Type sticks on error bodies, so parse the text.
+    expect(JSON.parse(res.text).error).toBe('SurveyNotPublishedException');
+  });
+
+  it('404 SurveyNotFoundException for a malformed survey id', async () => {
+    const res = await request(server())
+      .get('/survey/4167b7ac-f356-43e9-a07a-667232325100503/run/runtime.js')
+      .expect(404);
+    expect(JSON.parse(res.text).error).toBe('SurveyNotFoundException');
+  });
 
   it('serves the preview runtime for an admin (working version)', async () => {
     const res = await request(server())

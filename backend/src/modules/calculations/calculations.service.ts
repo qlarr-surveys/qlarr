@@ -107,7 +107,13 @@ export class CalculationsService implements OnApplicationBootstrap {
     if (!row || row.calculations.length === 0) throw new NoCalculationsException();
 
     const processedSurvey = await this.latestProcessedSurvey(surveyId);
-    const ids = await this.calculations.completedResponseIds(surveyId);
+    // After a completed run, every computed response is current for this set
+    // (completed responses are never edited), so only compute the rest.
+    // Otherwise (never run, set saved since, or the last run failed) compute all.
+    const ids = await this.calculations.completedResponseIds(
+      surveyId,
+      row.status === 'completed',
+    );
     // Only starts if the set is still the one read above: a save in between
     // would otherwise have this run compute the old set under the new one.
     const startedAt = await this.calculations.startRun(surveyId, ids.length, row.revision);

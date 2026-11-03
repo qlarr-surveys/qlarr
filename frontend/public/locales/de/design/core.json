@@ -40,6 +40,7 @@
   "cancel": "Abbrechen",
   "confirm": "Bestätigen Sie",
   "choose_file": "Datei auswählen",
+  "show_now_button": "Jetzt/Heute-Schaltfläche anzeigen",
   "choose_image": "Bild auswählen",
   "columns": "Spalten",
   "columns_number": "Spaltennummer",
@@ -512,7 +513,8 @@
     "allow_previous": "Allow respondents to go back to previous pages during the survey.",
     "allow_incomplete": "Allow respondents to save their progress and resume the survey later.",
     "allow_jump": "Allow respondents to jump to any page using a survey index/table of contents.",
-    "skip_invalid": "Skip validation errors while navigating and only enforce them when the survey is submitted."
+    "skip_invalid": "Skip validation errors while navigating and only enforce them when the survey is submitted.",
+    "more_info": "Weitere Informationen"
   },
   "processed_errors": {
     "unidentified_error": "Unerwarteter Fehler aufgetreten, bitte melden Sie sich an support@qlarr.com",
@@ -578,5 +580,8 @@
   "err_nested_repeatable": "Ein wiederholbares Element kann nicht in einem anderen wiederholbaren Element platziert werden. Entfernen Sie die Wiederholung von diesem Element oder seinem Container.",
   "err_repeatable_with_relevance": "Ein wiederholbares Element kann nicht zusätzlich eine eigene Relevanzbedingung haben – seine Anzeigelogik ist die Wiederholungsbedingung.",
   "err_repeat_relevance": "Fehler in der Wiederholungsbedingung",
-  "err_skip_inside_repeatable": "Sprunglogik ist innerhalb eines wiederholbaren Elements nicht zulässig."
+  "err_skip_inside_repeatable": "Sprunglogik ist innerhalb eines wiederholbaren Elements nicht zulässig.",
+  "find_element": "Frage oder Seite suchen (Strg+F)",
+  "find_element_placeholder": "Nach Code oder Text suchen",
+  "find_element_no_results": "Keine passenden Fragen oder Seiten"
 }

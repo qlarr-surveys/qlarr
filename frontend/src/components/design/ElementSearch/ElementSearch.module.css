@@ -1,0 +1,45 @@
+.container {
+  position: absolute;
+  top: 12px;
+  inset-inline-end: 24px;
+  z-index: 10;
+}
+
+.trigger {
+  border-radius: 50%;
+}
+
+.searchBox {
+  position: relative;
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  padding: 8px;
+}
+
+.results {
+  margin-top: 4px;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+}
+
+.optionIcon {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.optionCode {
+  flex: 0 0 auto;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.optionLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+}

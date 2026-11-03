@@ -49,6 +49,7 @@
   "max_date": "Maximales Datum festlegen",
   "min_date": "Minimales Datum festlegen",
   "fullday_format": "Ganze Tage anzeigen oder nicht",
+  "show_now_button": "Eine Schaltfläche anzeigen, die das aktuelle Datum/die aktuelle Uhrzeit mit einem Klick einträgt",
   "order_mode": "Reihenfolgemodus der Umfrage festlegen",
   "hide_text": "Text ausblenden",
   "columns_number": "Legen Sie fest, wie viele Optionen pro Zeile angezeigt werden.",

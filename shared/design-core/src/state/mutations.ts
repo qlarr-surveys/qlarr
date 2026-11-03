@@ -52,6 +52,7 @@ import {
   conditionalRelevanceEquation,
   instructionByCode,
   isQuotaInstruction,
+  logicRefersToQuestion,
   processValidation,
   quotaInstruction,
   quotaRefersToQuestion,
@@ -69,7 +70,6 @@ import {
 // Designer-only state: never saved, kept on reload. Add any new UI-only key here.
 export const UI_STATE_KEYS = [
   "setup",
-  "advancedByCode",
   "langInfo",
   "reorder_refresh_code",
   "state",
@@ -179,12 +179,6 @@ export function clearHighlighted(state) {
   if (state.setup) {
     delete state.setup.highlighted;
   }
-}
-
-export function setShowAdvanced(state, payload) {
-  const { code, value } = payload;
-  if (!state.advancedByCode) state.advancedByCode = {};
-  state.advancedByCode[code] = value;
 }
 
 export function newVersionReceived(state, payload) {
@@ -1050,6 +1044,7 @@ export function convertQuestion(state, payload) {
     );
   } else if (inTextGroup) {
     convertTextQuestion(currentQuestion, newType);
+    addMaskedValuesInstructions(questionCode, currentQuestion, state);
   } else if (inDateTimeGroup) {
     convertDateTimeQuestion(currentQuestion, currentType, newType);
     addMaskedValuesInstructions(questionCode, currentQuestion, state);
@@ -1068,6 +1063,9 @@ export function convertQuestion(state, payload) {
   if (quotaRefersToQuestion(state, questionCode)) {
     refreshQuotaInstructions(state);
   }
+  // Compiled relevance depends on the referenced question's type, so every
+  // condition reading the converted question must be recompiled.
+  refreshRelevanceReferencing(state, questionCode);
 }
 
 export function changeContent(state, payload) {
@@ -1847,6 +1845,15 @@ const cleanupValidation = (state, code) => {
   }
   const ruleKeys = Object.keys(component["validation"]);
   ruleKeys.forEach((key) => processValidation(state, code, key, true));
+};
+
+const refreshRelevanceReferencing = (state, questionCode) => {
+  Object.keys(state).forEach((code) => {
+    const relevance = state[code]?.relevance;
+    if (relevance?.logic && logicRefersToQuestion(relevance.logic, questionCode)) {
+      addRelevanceInstructions(state, code, relevance);
+    }
+  });
 };
 
 const addRelevanceInstructions = (state, code, relevance) => {

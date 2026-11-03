@@ -3,8 +3,10 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import {
+  Alert,
   Box,
   Button,
+  ButtonGroup,
   Chip,
   Divider,
   IconButton,
@@ -26,8 +28,10 @@ import {
   Grid,
   Tabs,
   Tab,
+  Snackbar,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import styles from "./ResponsesSurvey.module.css";
 import {
   formatlocalDateTime,
@@ -38,7 +42,9 @@ import { RHFSelect } from "~/components/hook-form";
 import LoadingDots from "~/components/common/LoadingDots";
 import { useService } from "~/hooks/use-service";
 import ResponsesDownload from "~/components/manage/ResponsesDownload";
-import ResponsesExport from "~/components/manage/ResponsesExport";
+import ResponsesExport, {
+  exportResponsesFile,
+} from "~/components/manage/ResponsesExport";
 import ResponseEvents from "~/components/manage/ResponseEvents";
 import CalculationValue from "~/components/manage/CalculationValue";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
@@ -80,7 +86,7 @@ function ClampTwoLines({ children, sx }) {
   );
 }
 
-function ResponsesList() {
+function ResponsesList({ refreshKey }) {
   const surveyService = useService("survey");
   const { t } = useTranslation(NAMESPACES.MANAGE);
   const { surveyId } = useParams();
@@ -119,6 +125,8 @@ function ResponsesList() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const [exportDlgOpen, setExportDlgOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [noResponsesToExport, setNoResponsesToExport] = useState(false);
   const [downloadDlgOpen, setDownloadDlgOpen] = useState(false);
   const firstFetchThisVisitRef = useRef(true);
 
@@ -353,6 +361,21 @@ function ResponsesList() {
     fetchResponses();
   }, [page, rowsPerPage, status, surveyor]);
 
+  // Refetch the page and the open response when the parent asks (refreshKey
+  // changes; 0 is the first render, already fetched above). The page fetch
+  // may deselect the response meanwhile; only replace it if still open.
+  useEffect(() => {
+    if (!refreshKey) return;
+    fetchResponses();
+    if (!responseId) return;
+    surveyService
+      .getResponseById(responseId)
+      .then((data) =>
+        setSelected((prev) => (prev?.id == data?.id ? data : prev))
+      )
+      .catch((err) => console.error(err));
+  }, [refreshKey]);
+
   useEffect(() => {
     if (!responseId || !allResponse || selected?.id == responseId) return;
     surveyService
@@ -485,11 +508,24 @@ function ResponsesList() {
     );
   };
 
+  const quickExport = async () => {
+    setExporting(true);
+    try {
+      const exported = await exportResponsesFile(surveyService, surveyId);
+      if (!exported) setNoResponsesToExport(true);
+    } catch (e) {
+      // already surfaced by the service's global error handler
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <>
       <ResponsesExport
         open={exportDlgOpen}
         onClose={() => setExportDlgOpen(false)}
+        onNoResponses={() => setNoResponsesToExport(true)}
         currentFrom={
           allResponse?.responses?.length > 0
             ? allResponse.responses[0].index
@@ -575,18 +611,31 @@ function ResponsesList() {
                       <MenuItem value="incomplete">
                         {t("responses.filter_completed_show_incomplete")}
                       </MenuItem>
+                      <MenuItem value="disqualified">
+                        {t("responses.filter_completed_show_disqualified")}
+                      </MenuItem>
                     </RHFSelect>
                   </FormControl>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Box display="flex" flexDirection="column" gap={1}>
-                    <Button
+                    <ButtonGroup
                       size="small"
                       variant="contained"
-                      onClick={() => setExportDlgOpen(true)}
+                      sx={{ alignSelf: "flex-end" }}
                     >
-                      {t("responses.export")}
-                    </Button>
+                      <Button disabled={exporting} onClick={quickExport}>
+                        {t("responses.export")}
+                      </Button>
+                      <Button
+                        aria-label={t("responses.export_options")}
+                        title={t("responses.export_options")}
+                        onClick={() => setExportDlgOpen(true)}
+                        sx={{ "&&": { minWidth: 0, px: 1 } }}
+                      >
+                        <MoreHorizIcon fontSize="small" />
+                      </Button>
+                    </ButtonGroup>
 
                     {canExportFiles && (
                       <Button
@@ -646,10 +695,19 @@ function ResponsesList() {
                                 #{r.index}
                               </Typography>
                               {r.preview ? (
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                  fontWeight={500}
+                                >
+                                  {t("responses.test_response")}
+                                </Typography>
+                              ) : r.disqualified ? (
                                 <Chip
                                   size="small"
                                   variant="outlined"
-                                  label={t("responses.preview")}
+                                  color="error"
+                                  label={t("responses.disqualified")}
                                 />
                               ) : r.submitDate ? (
                                 <Typography
@@ -797,11 +855,13 @@ function ResponsesList() {
                     label={t("responses.status") || "Status"}
                     value={
                       selected.preview ? (
-                        <Chip
-                          size="small"
-                          variant="outlined"
-                          label={t("responses.preview")}
-                        />
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          fontWeight={500}
+                        >
+                          {t("responses.test_response")}
+                        </Typography>
                       ) : selected.submitDate ? (
                         <Typography
                           variant="body2"
@@ -824,9 +884,17 @@ function ResponsesList() {
                   <InfoItem
                     label={t("responses.disqualified")}
                     value={
-                      selected.disqualified
-                        ? t("responses.yes")
-                        : t("responses.no")
+                      selected.disqualified ? (
+                        <Typography
+                          variant="body2"
+                          color="error.main"
+                          fontWeight={500}
+                        >
+                          {t("responses.yes")}
+                        </Typography>
+                      ) : (
+                        t("responses.no")
+                      )
                     }
                   />
                   <InfoItem
@@ -957,13 +1025,10 @@ function ResponsesList() {
                             <Table size="small">
                               <TableHead>
                                 <TableRow>
-                                  <TableCell sx={{ width: "40%", backgroundColor: "#212B36", color: "white" }}>
+                                  <TableCell sx={{ width: "50%", backgroundColor: "#212B36", color: "white" }}>
                                     {t("calculations.label", "Label")}
                                   </TableCell>
-                                  <TableCell sx={{ width: "20%", backgroundColor: "#212B36", color: "white" }}>
-                                    {t("calculations.code", "Code")}
-                                  </TableCell>
-                                  <TableCell sx={{ width: "40%", backgroundColor: "#212B36", color: "white" }}>
+                                  <TableCell sx={{ width: "50%", backgroundColor: "#212B36", color: "white" }}>
                                     {t("calculations.value", "Value")}
                                   </TableCell>
                                 </TableRow>
@@ -974,11 +1039,6 @@ function ResponsesList() {
                                     <TableCell sx={{ verticalAlign: "top" }}>
                                       <Typography variant="body2" color="text.secondary">
                                         {calc.label}
-                                      </Typography>
-                                    </TableCell>
-                                    <TableCell sx={{ verticalAlign: "top" }}>
-                                      <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
-                                        {calc.code}
                                       </Typography>
                                     </TableCell>
                                     <TableCell sx={{ verticalAlign: "top" }}>
@@ -1015,6 +1075,21 @@ function ResponsesList() {
           )}
         </Box>
       </Box>
+
+      <Snackbar
+        open={noResponsesToExport}
+        autoHideDuration={4000}
+        onClose={() => setNoResponsesToExport(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setNoResponsesToExport(false)}
+          severity="warning"
+          sx={{ width: "100%" }}
+        >
+          {t("responses.no_responses_found")}
+        </Alert>
+      </Snackbar>
     </>
   );
 }

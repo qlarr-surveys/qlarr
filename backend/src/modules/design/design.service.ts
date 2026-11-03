@@ -1,16 +1,19 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { buildDesignState, changeContent } from '@qlarr/design-core';
 import { nowUtcString } from '../../common/datetime';
+import { isUuid } from '../../common/validation';
 import { EngineService } from '../../engine/engine.service';
 import { ValidationJsonOutput } from '../../engine/engine.types';
 import { FILE_HELPER, FileHelper } from '../../integrations/filesystem/file-helper';
 import { SurveyFolder } from '../../integrations/filesystem/survey-folder';
 import { DbContext } from '../../database/db-context';
+import { resetCalculationsOnDesignChange } from '../calculations/calculations.repository';
 import { statusFromDb } from '../surveys/survey.enums';
 import { SurveyEntity } from '../surveys/survey.entity';
 import {
   SurveyIsClosedException,
   SurveyNotFoundException,
+  SurveyNotPublishedException,
 } from '../surveys/survey.exceptions';
 import { VersionEntity } from '../surveys/version.entity';
 import { VersionRepository } from './version.repository';
@@ -265,7 +268,7 @@ export class DesignService {
       String(versionToSave),
     );
 
-    // Version row + survey stamp as one transaction.
+    // Version row + survey stamp + calculations reset as one transaction.
     survey.lastModified = nowUtcString();
     const entity = await this.db.manager.transaction(async (tx) => {
       if (snapshot) await this.snapshots.create(snapshot, tx);
@@ -282,6 +285,7 @@ export class DesignService {
         tx,
       );
       await tx.getRepository(SurveyEntity).save(survey);
+      await resetCalculationsOnDesignChange(tx, survey.id);
       return e;
     });
 
@@ -557,12 +561,18 @@ export class DesignService {
     surveyId: string,
     published: boolean,
   ): Promise<ProcessedSurvey> {
+    // A malformed id (e.g. a mistyped run link) would fail the uuid cast with a 500.
+    if (!isUuid(surveyId)) throw new SurveyNotFoundException();
     const survey = await this.surveys().findOne({ where: { id: surveyId } });
     if (!survey) throw new SurveyNotFoundException();
     const version = published
       ? await this.versions.findLatestPublished(surveyId)
       : await this.versions.findLatest(surveyId);
-    if (!version) throw new DesignException();
+    if (!version) {
+      // No published version is a normal state (a run link opened before the
+      // first publish); no version at all means broken data.
+      throw published ? new SurveyNotPublishedException() : new DesignException();
+    }
     const json = await this.files.getText(
       surveyId,
       SurveyFolder.Design,

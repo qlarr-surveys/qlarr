@@ -37,7 +37,8 @@ export const envValidationSchema = Joi.object({
   DB_PORT: Joi.number().port().default(5432),
   DB_SSL: bool.default(false),
   JWT_ACTIVE_EXPIRATION_MS: Joi.number().positive().default(3_600_000), // 1h
-  JWT_REFRESH_EXPIRATION_MS: Joi.number().positive().default(2_592_000_000), // 30d
+  JWT_REFRESH_EXPIRATION_MS: Joi.number().positive().default(31_536_000_000), // 1y hard cap
+  JWT_REFRESH_IDLE_MS: Joi.number().positive().default(7_776_000_000), // 90d idle timeout
   JWT_RESET_EXPIRATION_MS: Joi.number().positive().default(3_600_000), // 1h
   JWT_RESET_EXPIRATION_NEW_USERS_MS: Joi.number()
     .positive()

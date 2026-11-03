@@ -13,10 +13,21 @@ import useNamespaceLoader, { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import { HEADER_OPTIONS } from "./headerOptions";
 import { useParams } from "react-router-dom";
 
+const MIN_WIDTH = 768;
+// Low enough for a laptop with devtools docked, high enough to rule out
+// phones in landscape.
+const MIN_HEIGHT = 450;
+
+const isScreenSupported = () =>
+  window.innerWidth >= MIN_WIDTH && window.innerHeight >= MIN_HEIGHT;
+
 const ManagePageWrapper = ({
   headerOptions = HEADER_OPTIONS.GENERAL,
   children,
   resolveSurveyId = false,
+  // For pages that work on a phone (auth pages, dashboard, profile, users):
+  // skip the screen-size gate and let the page scroll.
+  allowSmallScreens = false,
 }) => {
   if (resolveSurveyId) {
     sessionStorage.setItem("surveyId", useParams().surveyId);
@@ -28,30 +39,18 @@ const ManagePageWrapper = ({
   // Load namespaces based on current route
   useNamespaceLoader();
 
-  const [isSupportedScreenSize, setIsSupportedScreenSize] = useState(() => {
-    const minWidth = 768;
-    const minHeight = 600;
-    return window.innerWidth >= minWidth && window.innerHeight >= minHeight;
-  });
+  const [isSupportedScreenSize, setIsSupportedScreenSize] =
+    useState(isScreenSupported);
 
   useEffect(() => {
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow = allowSmallScreens ? "" : "hidden";
     setLangFromSession(i18n);
-  }, [lang]);
+  }, [lang, allowSmallScreens]);
 
   const cacheRtlMemo = useMemo(() => cacheRtl(lang), [lang]);
 
   useEffect(() => {
-    const checkScreenSize = () => {
-      const minWidth = 768;
-      const minHeight = 600;
-
-      if (window.innerWidth < minWidth || window.innerHeight < minHeight) {
-        setIsSupportedScreenSize(false);
-      } else {
-        setIsSupportedScreenSize(true);
-      }
-    };
+    const checkScreenSize = () => setIsSupportedScreenSize(isScreenSupported());
 
     window.addEventListener("resize", checkScreenSize);
 
@@ -60,7 +59,7 @@ const ManagePageWrapper = ({
     };
   }, []);
 
-  if (!isSupportedScreenSize) {
+  if (!allowSmallScreens && !isSupportedScreenSize) {
     return <UnsupportedView />;
   }
 

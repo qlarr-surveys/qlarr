@@ -13,13 +13,15 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import Image from "~/components/image/image";
 import CompactLayout from "~/layouts/compact";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { palette } from "~/theme/palette";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
+import { routes } from "~/routes";
 
 function ErrorLayout({ setErrorSeen, error }) {
   const { t } = useTranslation(NAMESPACES.MANAGE);
   const navigate = useNavigate();
+  const location = useLocation();
   const theme = createTheme({
     palette: palette("light"),
   });
@@ -40,6 +42,39 @@ function ErrorLayout({ setErrorSeen, error }) {
             }}
           >
             {t("ok")}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
+  }
+  if (error.name === "survey_not_found") {
+    // On the dashboard itself the list is refreshed there; just dismiss.
+    const onDashboard = location.pathname === routes.dashboard;
+    return (
+      <Dialog open={true} maxWidth="sm" fullWidth>
+        <DialogContent sx={{ textAlign: "center", py: 4 }}>
+          <Typography variant="h3" paragraph>
+            {t("error_title")}
+          </Typography>
+          <Typography sx={{ color: "text.secondary" }}>
+            {t("processed_errors.survey_not_found")}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button
+            fullWidth
+            size="large"
+            variant="contained"
+            onClick={() => {
+              setErrorSeen();
+              if (!onDashboard) navigate(routes.dashboard);
+            }}
+            style={{
+              backgroundColor: theme.palette.primary.main,
+              color: theme.palette.primary.contrastText,
+            }}
+          >
+            {onDashboard ? t("ok") : t("go_to_dashboard")}
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,5 +1,6 @@
 {
   "action_btn": {
+    "retry": "Opnieuw proberen",
     "add": "Toevoegen",
     "add_user": "Gebruiker Toevoegen",
     "cancel": "Annuleren",
@@ -9,7 +10,8 @@
     "save": "Opslaan",
     "create": "Aanmaken",
     "export": "Exporteren",
-    "download": "Downloaden"
+    "download": "Downloaden",
+    "delete_survey": "Enquête verwijderen"
   },
   "add_user": {
     "cancel": "Annuleren",
@@ -20,6 +22,7 @@
   "timezone_info": "We gebruiken je lokale tijdzone om de enquête vervaltijd te berekenen.",
   "timezone_tooltip": "De enquête verloopt om 00:00 op de geselecteerde einddatum in je lokale tijdzone",
   "goBack": "Terug",
+  "go_to_dashboard": "Naar dashboard",
   "preview": "Voorvertoning",
   "mobile_view": "Console Niet Geoptimaliseerd voor Kleine Schermen",
   "mobile_view_working": "Onze console is complex en ondersteunt geen kleinere schermen voor de beste ervaring. Maar maak je geen zorgen - de enquêtes die we je helpen maken zijn geweldig op kleine schermen!",
@@ -30,7 +33,7 @@
   "confirm_password_required": "Je moet het wachtwoord herhalen",
   "create_survey": {
     "title": "Enquête Aanmaken",
-    "empty_state_message": "Geen enquêtes beschikbaar.",
+    "empty_state_message": "Geen enquêtes met deze status.",
     "or": "of",
     "empty_state_cta_copy": "om te beginnen!"
   },
@@ -45,6 +48,7 @@
   "edit_survey": {
     "total_responses": "Totaal aantal antwoorden",
     "add_logo": "Een enquêtelogo toevoegen",
+    "replace_logo": "Logo vervangen",
     "export": "Enquête Exporteren",
     "close_title": "Enquête Sluiten",
     "can_lock_survey": "Sta enquêteurs toe om enquête te vergrendelen",
@@ -52,7 +56,8 @@
     "count": "Aantal",
     "default_survey_url": "Standaard enquête URL",
     "close_survey": "Weet je zeker dat je {{survey_name}} wilt sluiten?",
-    "delete_survey": "Weet je zeker dat je {{survey_name}} wilt verwijderen?",
+    "delete_survey": "De enquête wordt samen met haar antwoorden en geüploade bestanden verwijderd. Dit kan niet ongedaan worden gemaakt.",
+    "survey_deleted": "{{survey_name}} is verwijderd",
     "general": "Algemeen",
     "limit": "Limiet",
     "limit_responses": "Reacties Beperken door Enquêteurs",
@@ -84,7 +89,10 @@
       "start_date": "Startdatum",
       "end_date": "Einddatum"
     },
-    "version_history": "Versiegeschiedenis"
+    "version_history": "Versiegeschiedenis",
+    "edit_name": "Enquêtenaam bewerken: {{name}}",
+    "edit_description": "Enquêtebeschrijving bewerken",
+    "delete_survey_title": "“{{survey_name}}” verwijderen?"
   },
   "edit_user": {
     "title": "Gebruiker Bewerken"
@@ -170,6 +178,11 @@
     "survey_admin": "Enquête Beheerder",
     "survey_dates": "Enquête Datums",
     "survey_mode": "Enquête Modus",
+    "survey_mode_hint": {
+      "web": "Respondenten antwoorden online via een link.",
+      "offline": "Wordt op apparaten zonder verbinding verzameld en later gesynchroniseerd.",
+      "mixed": "Online via een link en offline op apparaten."
+    },
     "survey_name": "Enquête Naam",
     "survey_url": "Enquête URL",
     "surveyor": "Enquêteur",
@@ -177,10 +190,12 @@
     "to": "Tot",
     "total_responses_limit": "Totaal Reacties Limiet",
     "sort_by": "Sorteren Op",
-    "unpublished_changes": "Heeft Ongepubliceerde Wijzigingen",
+    "unpublished_changes": "Heeft niet-gepubliceerde wijzigingen",
+    "unpublished_changes_info": "Wijzigingen sinds de laatste publicatie zijn nog niet live. Publiceer om bij te werken wat respondenten zien.",
     "responses": "Volledige Reacties : {{count}}",
     "quota": "Quota: {{count}}",
-    "no_quota": "Geen Quota"
+    "no_quota": "Geen Quota",
+    "survey_description": "Enquête Beschrijving"
   },
   "language": {
     "ar": "Arabisch",
@@ -206,8 +221,20 @@
     "web": "Web"
   },
   "my_surveys": "Jouw Enquêtes",
+  "recent_surveys": "Recente enquêtes",
+  "survey_count_one": "{{count}} enquête",
+  "survey_count_other": "{{count}} enquêtes",
+  "dashboard": {
+    "subtitle": "Maak een enquête handmatig of importeer een bestaande definitie."
+  },
+  "action_cards": {
+    "create": { "description": "Begin met een lege enquête en voeg zelf pagina's en vragen toe." },
+    "import": { "description": "Upload een Qlarr-enquêtedefinitie die uit een andere werkruimte is geëxporteerd." },
+    "ai": { "description": "Beschrijf je enquête. De assistent maakt een opzet en blijft beschikbaar terwijl je bewerkt." }
+  },
+  "fetch_error": "Je enquêtes konden niet worden geladen. Controleer je verbinding en probeer het opnieuw.",
   "new_survey": "Nieuwe Enquête",
-  "reset_filter": "Enquête Filter Resetten",
+  "reset_filter": "Alle enquêtes tonen",
   "create_new_survey": "Nieuwe Enquête Aanmaken",
   "import_survey": "Een enquête importeren",
   "upload_zip_folder": "ZIP Map Uploaden",
@@ -240,10 +267,13 @@
     "invalid_translations_csv": "Geen CSV met vertalingen.",
     "translations_csv_not_utf8": "Dit bestand is niet in UTF-8. Kies in Excel Bestand → Opslaan als → “CSV UTF-8 (door komma's gescheiden)” en importeer het opnieuw.",
     "snapshot_not_found": "Deze versie bestaat niet meer. Laad de pagina opnieuw en probeer het nog eens.",
-    "nothing_to_revert": "Er zijn geen niet-gepubliceerde wijzigingen om te verwerpen."
+    "nothing_to_revert": "Er zijn geen niet-gepubliceerde wijzigingen om te verwerpen.",
+    "user_already_confirmed": "Deze gebruiker heeft de uitnodiging al geaccepteerd.",
+    "survey_not_found": "Deze enquête bestaat niet of is verwijderd"
   },
   "processed_successes": {
     "copied": "Gekopieerd naar klembord",
+    "invitation_resent": "Uitnodiging opnieuw verzonden",
     "updated": "Succesvol bijgewerkt"
   },
   "profile": {
@@ -270,16 +300,14 @@
     "filter_completed_show_all": "Alle Reacties",
     "filter_completed_show_completed": "Alleen Volledige Reacties",
     "filter_completed_show_incomplete": "Alleen Onvolledige Reacties",
-    "filter_preview": "Voorvertoning Reacties Filteren",
-    "filter_preview_show_actual": "Alleen Werkelijke Reacties",
-    "filter_preview_show_all": "Alle Reacties",
-    "filter_preview_show_preview": "Alleen Voorvertoning Reacties",
+    "filter_completed_show_disqualified": "Alleen gediskwalificeerde antwoorden",
+    "filter_preview_show_preview": "Alleen Testreacties (Voorvertoning)",
     "ip_addr": "IP Adres",
     "label_displayed_rows": "{{from}}-{{to}} van {{count}}",
     "label_rows_per_page": "Rijen per pagina:",
     "label_surveys_per_page": "Enquêtes per pagina:",
     "lang": "Taal",
-    "preview": "Voorvertoning",
+    "test_response": "Testreactie (voorvertoning)",
     "raw_values": "Ruwe Waarden Tonen",
     "reset_surveyor_filter": "Enquêteur Filter Resetten",
     "start_date": "Startdatum",
@@ -299,17 +327,26 @@
     "to": "Tot",
     "complete_responses": "Volledige Reacties",
     "incomplete_responses": "Onvolledige Reacties",
+    "status_complete": "Volledig",
+    "status_incomplete": "Onvolledig",
     "database_format": "Database Formaat",
     "text_format": "Tekst Formaat",
+    "header_type": "Koptype",
+    "text_headers": "Vraagtekst",
+    "code_headers": "Vraagcodes",
+    "export_options": "Meer exportopties",
     "range_invalid": "\"Van\" kan niet groter zijn dan \"Tot\".",
+    "all_responses": "Alle antwoorden",
+    "custom_range": "Aangepast bereik",
     "max": "Max {{max}}",
     "min": "Min {{min}}",
     "enter_a_number": "Voer een nummer in",
     "no_files_found": "Geen bestanden gevonden voor het geselecteerde bereik",
+    "no_responses_found": "Geen antwoorden komen overeen met het geselecteerde bereik en de antwoordtypen",
     "yes": "Ja",
     "no": "Nee",
     "disqualified": "Gediskwalificeerd",
-    "preview_not_exportable": "Voorvertoning reacties kunnen niet worden geëxporteerd",
+    "preview_not_exportable": "Testreacties (voorvertoning) kunnen niet worden geëxporteerd",
     "question": "Vraag",
     "answer": "Antwoord",
     "events": "Gebeurtenissen",
@@ -345,6 +382,7 @@
     "effective_base": "Effectieve basis",
     "efficiency": "Efficiëntie",
     "weight_note": "Grootste weging {{maxWeight}}. Significantietoetsen gebruiken de effectieve basis, niet de gewogen basis.",
+    "weight_filtered_note": "Er zijn filters actief. Werkelijke waarden en wegingen komen uit alle {{total}} antwoorden, niet alleen uit de {{filtered}} in de tabel. Elke respondent behoudt de weging uit de volledige steekproef, dus de gefilterde tabel komt mogelijk niet overeen met de doelen.",
     "base": "Basis",
     "eff": "eff",
     "subtitle": "Naar {{column}} · {{weighting}}",
@@ -363,11 +401,18 @@
     "warn_lowEfficiency": "De efficiëntie is {{efficiency}}%. Onder 60% gaat een kleine groep het hele rapport bepalen.",
     "warn_highWeight": "Eén weging is {{maxWeight}}. Wegingen boven 5 betekenen meestal dat het doel onrealistisch is voor deze steekproef.",
     "warn_droppedWeight": "{{count}} reactie(s) hadden geen antwoord op de wegingsvraag en zijn uit deze tabel weggelaten.",
-    "warn_truncated": "De eerste {{shown}} van {{total}} reacties worden getoond. Cijfers en toetsen zijn op die steekproef gebaseerd."
+    "warn_truncated": "De eerste {{shown}} van {{total}} reacties worden getoond. Cijfers en toetsen zijn op die steekproef gebaseerd.",
+    "filters": "Filters",
+    "add_filter": "Filter toevoegen",
+    "filter_any_of": "Een van…",
+    "remove_filter": "Filter verwijderen",
+    "filtered_base": "Gefilterd tot {{count}} van {{total}} antwoorden",
+    "warn_noMatches": "Geen antwoorden voldoen aan deze filters.",
+    "plan_name": "Plannaam",
+    "plan_name_taken": "Er bestaat al een plan met deze naam."
   },
   "calculations": {
     "title": "Berekende velden",
-    "code": "Code",
     "label": "Label",
     "expression": "Expressie",
     "value": "Waarde",
@@ -380,18 +425,16 @@
     "conflict": "Iemand anders heeft de berekeningen gewijzigd.",
     "empty": "Nog geen berekeningen.",
     "error_loading": "Berekeningen konden niet worden geladen",
-    "code_required": "Code is verplicht",
     "label_required": "Label is verplicht",
     "expression_required": "Expressie is verplicht",
     "error_ScriptError": "Scriptfout",
-    "error_InvalidCode": "Codes moeten met een kleine letter beginnen en mogen alleen kleine letters, cijfers en _ bevatten",
-    "error_DuplicateCode": "Een andere berekening heeft dezelfde code",
     "state_error": "Fout",
     "state_invalid": "Ongeldig",
     "state_not_computed": "Niet berekend",
     "status_idle": "Niet berekend. Klik op Berekenen.",
     "status_running": "Bezig met berekenen… {{done}}/{{total}}",
     "status_failed": "Berekening mislukt. Klik op Berekenen om het opnieuw uit te voeren.",
+    "compute_success": "Berekening voltooid.",
     "status_new_responses": "{{count}} antwoorden ingediend sinds de laatste berekening. Klik op Berekenen om ze mee te nemen.",
     "sample_response": "Antwoord",
     "sample_empty": "Nog geen voltooide antwoorden om op te testen.",
@@ -514,8 +557,8 @@
     "status": "Status",
     "active": "Actief",
     "invitation_sent": "Uitnodiging Verzonden",
+    "resend_invitation": "Uitnodiging Opnieuw Verzenden",
     "learn_about_roles": "Meer informatie over gebruikersrollen",
-    "statuses_info": "<strong>Concept</strong> — De enquête is nog niet gepubliceerd. Alleen beschikbaar voor voorvertoning.<br/><br/><strong>Gepland</strong> — De enquête is gepubliceerd maar de startdatum ligt in de toekomst. Deze wordt automatisch actief.<br/><br/><strong>Actief</strong> — De enquête is live en accepteert reacties.<br/><br/><strong>Verlopen</strong> — De einddatum van de enquête is verstreken. Er kunnen geen nieuwe reacties worden verzameld. U kunt deze reactiveren door de datums te wijzigen.<br/><br/><strong>Gesloten</strong> — De enquête is permanent gesloten. U kunt alleen gegevens exporteren of dupliceren.",
     "roles_info": "<strong>Super Admin</strong> — Volledige toegang tot alle functies, inclusief gebruikersbeheer, enquêtes aanmaken en systeeminstellingen.<br/><br/><strong>Enquête Admin</strong> — Kan enquêtes aanmaken en beheren, toegang tot ontwerp, instellingen, reacties en analyses.<br/><br/><strong>Analist</strong> — Kan enquêtereacties en analyses bekijken, en enquêtes voorvertonen.<br/><br/><strong>Enquêteur</strong> — Kan enquêtereacties verzamelen via de mobiele app, en enquêtes voorvertonen."
   },
   "launch": {
@@ -563,7 +606,8 @@
     "import_survey": "Importeer een bestaande enquête (die eerder is geëxporteerd) vanuit een ZIP bestand",
     "create_survey_with_ai": "Maak automatisch een nieuwe enquête met AI ondersteuning",
     "survey_title": "Interne titel gebruikt door je team om de enquête te identificeren. Deze titel wordt niet getoond aan respondenten.",
-    "survey_description": "Interne beschrijving gebruikt door je team om context over de enquête te geven. Deze beschrijving wordt niet getoond aan respondenten."
+    "survey_description": "Interne beschrijving gebruikt door je team om context over de enquête te geven. Deze beschrijving wordt niet getoond aan respondenten.",
+    "more_info": "Meer informatie"
   },
   "translations": {
     "title": "Vertalingen",
@@ -579,8 +623,7 @@
   },
   "responses_export": {
     "format_csv": "CSV",
-    "format_excel": "Excel",
-    "format_ods": "ODS"
+    "format_excel": "Excel"
   },
   "aria": {
     "users_table": "Gebruikerstabel",
@@ -733,7 +776,7 @@
     "stat_avg_completion": "Gem. voltooiing",
     "stat_answered": "Beantwoord",
     "stat_incomplete": "Onvolledig",
-    "stat_preview": "Voorbeeld",
+    "stat_preview": "Testreacties",
     "error_loading": "Fout bij laden van analyses",
     "error_loading_data": "Analysegegevens konden niet worden geladen",
     "no_data": "Geen analysegegevens beschikbaar",
@@ -791,6 +834,17 @@
       "restore": "Voor het herstellen van een eerdere versie",
       "discard": "Voor het verwerpen van niet-gepubliceerde wijzigingen"
     }
+  },
+  "status_info": {
+    "draft": "De enquête is nog niet gepubliceerd. Alleen beschikbaar voor voorvertoning.",
+    "scheduled": "De enquête is gepubliceerd maar de startdatum ligt in de toekomst. Deze wordt automatisch actief.",
+    "active": "De enquête is live en accepteert reacties.",
+    "expired": "De einddatum van de enquête is verstreken. Er kunnen geen nieuwe reacties worden verzameld. U kunt deze reactiveren door de datums te wijzigen.",
+    "closed": "De enquête is permanent gesloten. U kunt alleen gegevens exporteren of dupliceren."
+  },
+  "status_legend": {
+    "title": "Enquêtestatussen",
+    "this_survey": "deze enquête"
   },
   "group_quotas": {
     "title": "Groepsquota",

@@ -1,5 +1,6 @@
 {
   "action_btn": {
+    "retry": "Reintentar",
     "add": "Agregar",
     "add_user": "Agregar Usuario",
     "cancel": "Cancelar",
@@ -9,7 +10,8 @@
     "save": "Guardar",
     "create": "Crear",
     "export": "Exportar",
-    "download": "Descargar"
+    "download": "Descargar",
+    "delete_survey": "Eliminar encuesta"
   },
   "add_user": {
     "cancel": "Cancelar",
@@ -20,6 +22,7 @@
   "timezone_info": "Usamos tu zona horaria local para calcular el tiempo de expiración de la encuesta.",
   "timezone_tooltip": "La encuesta expirará a las 00:00 en la fecha de finalización seleccionada en tu zona horaria local",
   "goBack": "Volver",
+  "go_to_dashboard": "Ir al panel",
   "preview": "Vista previa",
   "mobile_view": "Consola No Optimizada para Pantallas Pequeñas",
   "mobile_view_working": "Nuestra consola es compleja y no admite pantallas más pequeñas para la mejor experiencia. ¡Pero no te preocupes - las encuestas que te ayudamos a crear son increíbles en pantallas pequeñas!",
@@ -30,7 +33,7 @@
   "confirm_password_required": "Debes repetir la contraseña",
   "create_survey": {
     "title": "Crear Encuesta",
-    "empty_state_message": "No hay encuestas disponibles.",
+    "empty_state_message": "Ninguna encuesta coincide con este estado.",
     "or": "o",
     "empty_state_cta_copy": "¡para comenzar!"
   },
@@ -45,6 +48,7 @@
   "edit_survey": {
     "total_responses": "Total de respuestas",
     "add_logo": "Añadir un logo a la encuesta",
+    "replace_logo": "Reemplazar logo",
     "export": "Exportar Encuesta",
     "close_title": "Cerrar Encuesta",
     "can_lock_survey": "Permitir a los encuestadores bloquear la encuesta",
@@ -52,7 +56,8 @@
     "count": "Cantidad",
     "default_survey_url": "URL de encuesta predeterminada",
     "close_survey": "¿Estás seguro de que quieres cerrar {{survey_name}}?",
-    "delete_survey": "¿Estás seguro de que quieres eliminar {{survey_name}}?",
+    "delete_survey": "La encuesta se elimina junto con sus respuestas y sus archivos subidos. Esto no se puede deshacer.",
+    "survey_deleted": "{{survey_name}} fue eliminada",
     "general": "General",
     "limit": "Límite",
     "limit_responses": "Limitar Respuestas por Encuestadores",
@@ -84,7 +89,10 @@
       "start_date": "Fecha de Inicio",
       "end_date": "Fecha de Finalización"
     },
-    "version_history": "Historial de versiones"
+    "version_history": "Historial de versiones",
+    "edit_name": "Editar el nombre de la encuesta: {{name}}",
+    "edit_description": "Editar la descripción de la encuesta",
+    "delete_survey_title": "¿Eliminar “{{survey_name}}”?"
   },
   "edit_user": {
     "title": "Editar Usuario"
@@ -170,6 +178,11 @@
     "survey_admin": "Administrador de Encuesta",
     "survey_dates": "Fechas de la Encuesta",
     "survey_mode": "Modo de Encuesta",
+    "survey_mode_hint": {
+      "web": "Los participantes responden en línea mediante un enlace.",
+      "offline": "Se recoge en dispositivos sin conexión y luego se sincroniza.",
+      "mixed": "En línea por enlace y sin conexión en dispositivos."
+    },
     "survey_name": "Nombre de la Encuesta",
     "survey_url": "URL de la Encuesta",
     "surveyor": "Encuestador",
@@ -177,10 +190,12 @@
     "to": "A",
     "total_responses_limit": "Límite Total de Respuestas",
     "sort_by": "Ordenar Por",
-    "unpublished_changes": "Tiene Cambios No Publicados",
+    "unpublished_changes": "Tiene cambios sin publicar",
+    "unpublished_changes_info": "Los cambios realizados desde la última publicación aún no están activos. Publica para actualizar lo que ven los participantes.",
     "responses": "Respuestas Completas : {{count}}",
     "quota": "Cuota: {{count}}",
-    "no_quota": "Sin Cuota"
+    "no_quota": "Sin Cuota",
+    "survey_description": "Descripción de la Encuesta"
   },
   "language": {
     "ar": "Árabe",
@@ -206,8 +221,20 @@
     "web": "Web"
   },
   "my_surveys": "Tus Encuestas",
+  "recent_surveys": "Encuestas recientes",
+  "survey_count_one": "{{count}} encuesta",
+  "survey_count_other": "{{count}} encuestas",
+  "dashboard": {
+    "subtitle": "Crea una encuesta manualmente o importa una definición existente."
+  },
+  "action_cards": {
+    "create": { "description": "Empieza con una encuesta vacía y añade las páginas y preguntas tú mismo." },
+    "import": { "description": "Sube una definición de encuesta de Qlarr exportada desde otro espacio de trabajo." },
+    "ai": { "description": "Describe tu encuesta. El asistente la redacta y sigue disponible mientras la editas." }
+  },
+  "fetch_error": "No se pudieron cargar tus encuestas. Comprueba tu conexión e inténtalo de nuevo.",
   "new_survey": "Nueva Encuesta",
-  "reset_filter": "Restablecer Filtro de Encuesta",
+  "reset_filter": "Mostrar todas las encuestas",
   "create_new_survey": "Crear Nueva Encuesta",
   "import_survey": "Importar una encuesta",
   "upload_zip_folder": "Subir Carpeta ZIP",
@@ -240,10 +267,13 @@
     "invalid_translations_csv": "No es un CSV de traducciones.",
     "translations_csv_not_utf8": "Este archivo no está en UTF-8. En Excel, usa Archivo → Guardar como → «CSV UTF-8 (delimitado por comas)» e impórtalo de nuevo.",
     "snapshot_not_found": "Esta versión ya no existe. Recarga la página e inténtalo de nuevo.",
-    "nothing_to_revert": "No hay cambios no publicados que descartar."
+    "nothing_to_revert": "No hay cambios no publicados que descartar.",
+    "user_already_confirmed": "Este usuario ya ha aceptado la invitación.",
+    "survey_not_found": "Esta encuesta no existe o fue eliminada"
   },
   "processed_successes": {
     "copied": "Copiado al portapapeles",
+    "invitation_resent": "Invitación reenviada",
     "updated": "Actualizado exitosamente"
   },
   "profile": {
@@ -270,16 +300,14 @@
     "filter_completed_show_all": "Todas las Respuestas",
     "filter_completed_show_completed": "Solo Respuestas Completas",
     "filter_completed_show_incomplete": "Solo Respuestas Incompletas",
-    "filter_preview": "Filtrar Respuestas de Vista Previa",
-    "filter_preview_show_actual": "Solo Respuestas Reales",
-    "filter_preview_show_all": "Todas las Respuestas",
-    "filter_preview_show_preview": "Solo Respuestas de Vista Previa",
+    "filter_completed_show_disqualified": "Solo respuestas descalificadas",
+    "filter_preview_show_preview": "Solo Respuestas de Prueba (Vista Previa)",
     "ip_addr": "Dirección IP",
     "label_displayed_rows": "{{from}}-{{to}} de {{count}}",
     "label_rows_per_page": "Filas por página:",
     "label_surveys_per_page": "Encuestas por página:",
     "lang": "Idioma",
-    "preview": "Vista previa",
+    "test_response": "Respuesta de prueba (vista previa)",
     "raw_values": "Mostrar Valores Sin Procesar",
     "reset_surveyor_filter": "Restablecer Filtro de Encuestador",
     "start_date": "Fecha de Inicio",
@@ -299,17 +327,26 @@
     "to": "A",
     "complete_responses": "Respuestas Completas",
     "incomplete_responses": "Respuestas Incompletas",
+    "status_complete": "Completa",
+    "status_incomplete": "Incompleta",
     "database_format": "Formato de Base de Datos",
     "text_format": "Formato de Texto",
+    "header_type": "Tipo de encabezado",
+    "text_headers": "Texto de la pregunta",
+    "code_headers": "Códigos de pregunta",
+    "export_options": "Más opciones de exportación",
     "range_invalid": "\"Desde\" no puede ser mayor que \"A\".",
+    "all_responses": "Todas las respuestas",
+    "custom_range": "Rango personalizado",
     "max": "Máx {{max}}",
     "min": "Mín {{min}}",
     "enter_a_number": "Ingresa un número",
     "no_files_found": "No se encontraron archivos para el rango seleccionado",
+    "no_responses_found": "Ninguna respuesta coincide con el rango y los tipos de respuesta seleccionados",
     "yes": "Sí",
     "no": "No",
     "disqualified": "Descalificado",
-    "preview_not_exportable": "Las respuestas de vista previa no se pueden exportar",
+    "preview_not_exportable": "Las respuestas de prueba (vista previa) no se pueden exportar",
     "question": "Pregunta",
     "answer": "Respuesta",
     "events": "Eventos",
@@ -345,6 +382,7 @@
     "effective_base": "Base efectiva",
     "efficiency": "Eficiencia",
     "weight_note": "Ponderación máxima {{maxWeight}}. Las pruebas de significación usan la base efectiva, no la base ponderada.",
+    "weight_filtered_note": "Hay filtros activos. Los valores reales y las ponderaciones se calculan con las {{total}} respuestas, no solo con las {{filtered}} de la tabla. Cada encuestado conserva su ponderación de la muestra completa, por lo que la tabla filtrada puede no coincidir con los objetivos.",
     "base": "Base",
     "eff": "efec",
     "subtitle": "Por {{column}} · {{weighting}}",
@@ -363,11 +401,18 @@
     "warn_lowEfficiency": "La eficiencia es del {{efficiency}}%. Por debajo del 60%, un grupo pequeño empieza a determinar todo el informe.",
     "warn_highWeight": "Una ponderación es {{maxWeight}}. Las ponderaciones superiores a 5 suelen indicar que el objetivo no es realista para esta muestra.",
     "warn_droppedWeight": "{{count}} respuesta(s) no respondieron a la pregunta de ponderación y quedaron excluidas de esta tabla.",
-    "warn_truncated": "Se muestran las primeras {{shown}} de {{total}} respuestas. Las cifras y las pruebas se basan en esa muestra."
+    "warn_truncated": "Se muestran las primeras {{shown}} de {{total}} respuestas. Las cifras y las pruebas se basan en esa muestra.",
+    "filters": "Filtros",
+    "add_filter": "Añadir filtro",
+    "filter_any_of": "Cualquiera de…",
+    "remove_filter": "Quitar filtro",
+    "filtered_base": "Filtrado a {{count}} de {{total}} respuestas",
+    "warn_noMatches": "Ninguna respuesta coincide con estos filtros.",
+    "plan_name": "Nombre del plan",
+    "plan_name_taken": "Ya existe un plan con este nombre."
   },
   "calculations": {
     "title": "Campos calculados",
-    "code": "Código",
     "label": "Etiqueta",
     "expression": "Expresión",
     "value": "Valor",
@@ -380,18 +425,16 @@
     "conflict": "Otra persona ha cambiado los cálculos.",
     "empty": "Aún no hay cálculos.",
     "error_loading": "No se pudieron cargar los cálculos",
-    "code_required": "El código es obligatorio",
     "label_required": "La etiqueta es obligatoria",
     "expression_required": "La expresión es obligatoria",
     "error_ScriptError": "Error de script",
-    "error_InvalidCode": "Los códigos deben empezar con una letra minúscula y usar solo letras minúsculas, dígitos y _",
-    "error_DuplicateCode": "Otro cálculo tiene el mismo código",
     "state_error": "Error",
     "state_invalid": "No válido",
     "state_not_computed": "No calculado",
     "status_idle": "No calculado. Haz clic en Calcular.",
     "status_running": "Calculando… {{done}}/{{total}}",
     "status_failed": "El cálculo falló. Haz clic en Calcular para ejecutarlo de nuevo.",
+    "compute_success": "Cálculo completado.",
     "status_new_responses": "{{count}} respuestas enviadas desde el último cálculo. Haz clic en Calcular para incluirlas.",
     "sample_response": "Respuesta",
     "sample_empty": "Aún no hay respuestas completadas para probar.",
@@ -514,8 +557,8 @@
     "status": "Estado",
     "active": "Activo",
     "invitation_sent": "Invitación Enviada",
+    "resend_invitation": "Reenviar Invitación",
     "learn_about_roles": "Conoce los roles de usuario",
-    "statuses_info": "<strong>Borrador</strong> — La encuesta aún no ha sido publicada. Solo disponible para vista previa.<br/><br/><strong>Programada</strong> — La encuesta está publicada pero la fecha de inicio es futura. Se activará automáticamente.<br/><br/><strong>Activa</strong> — La encuesta está en línea y aceptando respuestas.<br/><br/><strong>Expirada</strong> — La fecha de finalización ha pasado. No se pueden recopilar nuevas respuestas. Puedes reactivarla cambiando las fechas.<br/><br/><strong>Cerrada</strong> — La encuesta ha sido cerrada permanentemente. Solo puedes exportar datos o duplicarla.",
     "roles_info": "<strong>Super Admin</strong> — Acceso completo a todas las funciones, incluida la gestión de usuarios, creación de encuestas y configuración del sistema.<br/><br/><strong>Admin de Encuestas</strong> — Puede crear y gestionar encuestas, acceder al diseño, configuración, respuestas y análisis.<br/><br/><strong>Analista</strong> — Puede ver las respuestas y análisis de encuestas, y previsualizar encuestas.<br/><br/><strong>Encuestador</strong> — Puede recopilar respuestas de encuestas a través de la aplicación móvil, y previsualizar encuestas."
   },
   "launch": {
@@ -563,7 +606,8 @@
     "import_survey": "Importar una encuesta existente (que fue exportada anteriormente) desde un archivo ZIP",
     "create_survey_with_ai": "Crear una nueva encuesta automáticamente usando asistencia de IA",
     "survey_title": "Título interno usado por tu equipo para identificar la encuesta. Este título no se muestra a los encuestados.",
-    "survey_description": "Descripción interna usada por tu equipo para proporcionar contexto sobre la encuesta. Esta descripción no se muestra a los encuestados."
+    "survey_description": "Descripción interna usada por tu equipo para proporcionar contexto sobre la encuesta. Esta descripción no se muestra a los encuestados.",
+    "more_info": "Más información"
   },
   "translations": {
     "title": "Traducciones",
@@ -579,8 +623,7 @@
   },
   "responses_export": {
     "format_csv": "CSV",
-    "format_excel": "Excel",
-    "format_ods": "ODS"
+    "format_excel": "Excel"
   },
   "aria": {
     "users_table": "Tabla de usuarios",
@@ -733,7 +776,7 @@
     "stat_avg_completion": "Finalización prom.",
     "stat_answered": "Respondido",
     "stat_incomplete": "Incompleto",
-    "stat_preview": "Vista previa",
+    "stat_preview": "Respuestas de prueba",
     "error_loading": "Error al cargar análisis",
     "error_loading_data": "Error al cargar datos de análisis",
     "no_data": "No hay datos de análisis disponibles",
@@ -791,6 +834,17 @@
       "restore": "Antes de restaurar una versión anterior",
       "discard": "Antes de descartar los cambios no publicados"
     }
+  },
+  "status_info": {
+    "draft": "La encuesta aún no ha sido publicada. Solo disponible para vista previa.",
+    "scheduled": "La encuesta está publicada pero la fecha de inicio es futura. Se activará automáticamente.",
+    "active": "La encuesta está en línea y aceptando respuestas.",
+    "expired": "La fecha de finalización ha pasado. No se pueden recopilar nuevas respuestas. Puedes reactivarla cambiando las fechas.",
+    "closed": "La encuesta ha sido cerrada permanentemente. Solo puedes exportar datos o duplicarla."
+  },
+  "status_legend": {
+    "title": "Estados de la encuesta",
+    "this_survey": "esta encuesta"
   },
   "group_quotas": {
     "title": "Cuotas por grupo",

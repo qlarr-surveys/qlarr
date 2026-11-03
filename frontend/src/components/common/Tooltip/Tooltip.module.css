@@ -3,16 +3,57 @@
   align-items: center;
 }
 
+/* The redesign's trigger: a 24px round target around a 14px hairline glyph,
+   tinting rather than inverting. It sits inline beside a label, so flex:none
+   keeps it from being squeezed by a long one. */
 .iconButton {
-  cursor: pointer;
+  flex: none;
+  width: 18px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
   border-radius: 50%;
+  background: transparent;
+  color: #6b7194;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.iconButton:hover {
-  color: #fff;
+.iconButton:hover,
+.iconButton[aria-expanded="true"] {
+  background: #eceefb;
+  color: #3a46d8;
 }
 
+.iconButton:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+/* The <p>'s own margins would otherwise pad the card unevenly: a tooltip with
+   no title is all body, and the browser's 1em top margin pushes it off
+   centre inside the 9px the card is padded with. */
 .textPreLine{
+  margin: 0;
   white-space: pre-line;
   word-break: break-word;
+}
+/* A heading line above the body, as the redesign sets it. */
+.tooltipTitle {
+  display: block;
+  font-weight: 600;
+}
+
+.tooltipTitle + .textPreLine,
+.tooltipTitle + .tooltipBody {
+  margin: 2px 0 0;
+}
+
+/* A node body brings its own layout; all this owes it is the same margin
+   reset the text body gets, so the card stays padded by its own 9px. */
+.tooltipBody {
+  margin: 0;
 }

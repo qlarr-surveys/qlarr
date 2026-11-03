@@ -20,6 +20,7 @@
   "email": "Coletar e validar endereços de e-mail",
   "file_upload": "Enviar arquivos como documentos ou imagens",
   "fullday_format": "Definir se você deseja mostrar o dia completo ou não",
+  "show_now_button": "Mostrar um botão que preenche a data/hora atual com um clique",
   "group": "Adicionar uma nova página para organizar sua pesquisa em seções",
   "groups_order": "Definir a ordem das páginas",
   "groups_priority": "Mostra apenas algumas páginas a cada participante. Escolha quantas mostrar — as restantes são ocultadas, ao acaso para cada participante.",

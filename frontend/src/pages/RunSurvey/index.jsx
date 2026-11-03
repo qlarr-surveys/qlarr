@@ -30,8 +30,11 @@ import { qlarrCssVars } from "~/components/Questions/qlarrVars";
 
 import SurveyDrawer, { COLLAPSE, EXPAND } from "~/components/run/SurveyDrawer";
 import SurveyAppBar from "~/components/run/SurveyAppBar";
-import PreviewEndActions from "~/components/run/PreviewEndActions";
-import { getClosestScrollableParent } from "~/components/run/Navigation";
+import PreviewFooter from "~/components/run/PreviewFooter";
+import {
+  getClosestScrollableParent,
+  scrollToCenter,
+} from "~/components/run/Navigation";
 import { routes } from "~/routes";
 
 function RunSurvey({
@@ -143,6 +146,9 @@ function RunSurvey({
         PROCESSED_ERRORS.SURVEY_CLOSED,
         PROCESSED_ERRORS.SURVEY_EXPIRED,
         PROCESSED_ERRORS.SURVEY_SCHEDULED,
+        PROCESSED_ERRORS.CLIENT_TIME_SKEW,
+        PROCESSED_ERRORS.SURVEY_NOT_PUBLISHED,
+        PROCESSED_ERRORS.SURVEY_NOT_FOUND,
       ].indexOf(procesed) > -1
     ) {
       setInlineError(procesed);
@@ -249,10 +255,7 @@ function RunSurvey({
       if (el) {
         const container = getClosestScrollableParent(el);
         if (container && container !== document.documentElement) {
-          container.scrollTo({
-            top: el.offsetTop - container.offsetTop,
-            behavior: "smooth",
-          });
+          scrollToCenter(container, el);
         }
         // No scrollable ancestor → content already fits the viewport, so the
         // element is visible without scrolling. Skip rather than call
@@ -362,7 +365,7 @@ function RunSurvey({
                 <SurveyMemo
                   key="Survey"
                 />
-                {preview && SURVEY_ENDED && <PreviewEndActions />}
+                {preview && <PreviewFooter ended={SURVEY_ENDED} />}
                 <SurveyDrawer
                   expanded={expanded}
                   toggleDrawer={toggleDrawer}

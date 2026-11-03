@@ -1,5 +1,6 @@
 {
   "action_btn": {
+    "retry": "إعادة المحاولة",
     "add": "يضيف",
     "add_user": "إضافة مستخدم",
     "cancel": "يلغي",
@@ -9,7 +10,8 @@
     "save": "يحفظ",
     "create": "إنشاء",
     "export": "تصدير",
-    "download": "تحميل"
+    "download": "تحميل",
+    "delete_survey": "حذف الاستطلاع"
   },
   "add_user": {
     "cancel": "يلغي",
@@ -20,6 +22,7 @@
   "added": "تمت الإضافة:",
   "admins": "المسؤولون",
   "goBack": "العودة إلى الوراء",
+  "go_to_dashboard": "الذهاب إلى لوحة التحكم",
   "preview": "معاينة",
   "mobile_view": "وحدة التحكم غير محسّنة للشاشات الصغيرة",
   "mobile_view_working": "وحدة التحكم لدينا معقدة ولا تدعم الشاشات الصغيرة للحصول على أفضل تجربة. لكن لا تقلق - الاستطلاعات التي نساعدك في إنشائها رائعة على الشاشات الصغيرة!",
@@ -30,7 +33,7 @@
   "confirm_password_required": "يجب عليك تكرار كلمة المرور",
   "create_survey": {
     "title": "إنشاء الاستبيان",
-    "empty_state_message": "لا توجد استبيانات متاحة.",
+    "empty_state_message": "لا توجد استطلاعات بهذه الحالة.",
     "or": "أو",
     "empty_state_cta_copy": "للبدء!"
   },
@@ -45,6 +48,7 @@
   "edit_survey": {
     "total_responses": "إجمالي الردود",
     "add_logo": "إضافة شعار للاستبيان",
+    "replace_logo": "استبدال الشعار",
     "export": "تصدير الإستطلاع",
     "close_title": "إغلاق الاستطلاع",
     "can_lock_survey": "السماح للمساحين لقفل المسح",
@@ -52,7 +56,8 @@
     "count": "عدد",
     "default_survey_url": "عنوان URL الافتراضي للاستطلاع",
     "close_survey": "هل أنت متأكد أنك تريد إغلاق {{survey_name}}؟",
-    "delete_survey": "هل أنت متأكد أنك تريد حذف {{survey_name}}؟",
+    "delete_survey": "يُحذف الاستطلاع مع ردوده وملفاته المرفوعة. لا يمكن التراجع عن هذا.",
+    "survey_deleted": "تم حذف {{survey_name}}",
     "general": "عام",
     "limit": "حد",
     "limit_responses": "الحد من الردود من قبل المساحين",
@@ -84,7 +89,10 @@
       "start_date": "تاريخ البدء",
       "end_date": "تاريخ الانتهاء"
     },
-    "version_history": "سجل الإصدارات"
+    "version_history": "سجل الإصدارات",
+    "edit_name": "تعديل اسم الاستطلاع: {{name}}",
+    "edit_description": "تعديل وصف الاستطلاع",
+    "delete_survey_title": "حذف “{{survey_name}}”؟"
   },
   "edit_user": {
     "title": "تحرير العضو"
@@ -169,6 +177,11 @@
     "survey_active": "المسح نشط",
     "survey_admin": "مسؤول المسح",
     "survey_mode": "وضع المسح",
+    "survey_mode_hint": {
+      "web": "يجيب المشاركون عبر الإنترنت من خلال رابط.",
+      "offline": "تُجمع على الأجهزة دون اتصال، ثم تُزامن.",
+      "mixed": "عبر الإنترنت برابط ودون اتصال على الأجهزة."
+    },
     "survey_name": "اسم الاستطلاع",
     "surveyor": "مساح",
     "surveyor_admin": "مشرف المساح",
@@ -176,11 +189,13 @@
     "total_responses_limit": "حد الردود الإجمالي",
     "sort_by": "ترتيب حسب",
     "unpublished_changes": "هناك تغييرات غير منشورة",
+    "unpublished_changes_info": "التعديلات التي تمت منذ آخر نشر ليست مباشرة بعد. انشر لتحديث ما يراه المشاركون.",
     "responses": "الردود المكتملة: {{count}}",
     "quota": "الحد: {{count}}",
     "no_quota": "لا يوجد حد",
     "survey_dates": "تواريخ الاستبيان",
-    "survey_url": "رابط الاستبيان"
+    "survey_url": "رابط الاستبيان",
+    "survey_description": "وصف الاستطلاع"
   },
   "language": {
     "ar": "عربي",
@@ -206,8 +221,24 @@
     "web": "متصل"
   },
   "my_surveys": "استبياناتك",
+  "recent_surveys": "أحدث الاستبيانات",
+  "survey_count_zero": "{{count}} استبيان",
+  "survey_count_one": "استبيان واحد",
+  "survey_count_two": "استبيانان",
+  "survey_count_few": "{{count}} استبيانات",
+  "survey_count_many": "{{count}} استبيانًا",
+  "survey_count_other": "{{count}} استبيان",
+  "dashboard": {
+    "subtitle": "أنشئ استبيانًا يدويًا أو استورد تعريفًا موجودًا."
+  },
+  "action_cards": {
+    "create": { "description": "ابدأ من استبيان فارغ وأضف الصفحات والأسئلة بنفسك." },
+    "import": { "description": "حمّل تعريف استبيان Qlarr مُصدَّرًا من مساحة عمل أخرى." },
+    "ai": { "description": "اوصف استبيانك. يقوم المساعد بصياغته ويبقى متاحًا أثناء التحرير." }
+  },
+  "fetch_error": "تعذّر تحميل استبياناتك. تحقق من اتصالك وحاول مرة أخرى.",
   "new_survey": "استبيان جديد",
-  "reset_filter": "إعادة تعيين فلتر الاستطلاع",
+  "reset_filter": "عرض كل الاستطلاعات",
   "create_new_survey": "إنشاء استطلاع جديد",
   "import_survey": "تحميل استطلاع",
   "upload_zip_folder": "تحميل مجلد مضغوط",
@@ -240,10 +271,13 @@
     "invalid_translations_csv": "هذا ليس ملف ترجمات CSV.",
     "translations_csv_not_utf8": "هذا الملف ليس بترميز UTF-8. في Excel، اختر ملف ← حفظ باسم ← \"CSV UTF-8 (محدد بفواصل)\" ثم استورده مرة أخرى.",
     "snapshot_not_found": "هذا الإصدار لم يعد موجودًا. أعد تحميل الصفحة وحاول مرة أخرى.",
-    "nothing_to_revert": "لا توجد تغييرات غير منشورة لتجاهلها."
+    "nothing_to_revert": "لا توجد تغييرات غير منشورة لتجاهلها.",
+    "user_already_confirmed": "هذا المستخدم قبل الدعوة بالفعل.",
+    "survey_not_found": "هذا الاستطلاع غير موجود أو تم حذفه"
   },
   "processed_successes": {
     "copied": "نسخ إلى الحافظة",
+    "invitation_resent": "تمت إعادة إرسال الدعوة",
     "updated": "تم التحديث بنجاح"
   },
   "profile": {
@@ -270,16 +304,14 @@
     "filter_completed_show_all": "كل الردود",
     "filter_completed_show_completed": "الردود الكاملة فقط",
     "filter_completed_show_incomplete": "الردود غير المكتملة فقط",
-    "filter_preview": "تصفية الردود المكتملة",
-    "filter_preview_show_actual": "الردود الفعلية فقط",
-    "filter_preview_show_all": "كل الردود",
-    "filter_preview_show_preview": "معاينة الردود فقط",
+    "filter_completed_show_disqualified": "الردود المستبعدة فقط",
+    "filter_preview_show_preview": "الردود التجريبية (المعاينة) فقط",
     "ip_addr": "عنوان IP",
     "label_displayed_rows": "{{from}} - {{to}} من {{count}}",
     "label_rows_per_page": "عدد الصفوف في كل صفحة:",
     "label_surveys_per_page": "الاستطلاعات لكل صفحة:",
     "lang": "اللغة",
-    "preview": "معاينة",
+    "test_response": "رد تجريبي (المعاينة)",
     "raw_values": "إظهار القيم الأولية",
     "reset_surveyor_filter": "إعادة تعيين عامل تصفية المساح",
     "start_date": "تاريخ البدء",
@@ -299,17 +331,26 @@
     "to": "إلى",
     "complete_responses": "الردود المكتملة",
     "incomplete_responses": "الردود غير المكتملة",
+    "status_complete": "مكتمل",
+    "status_incomplete": "غير مكتمل",
     "database_format": "تنسيق قاعدة البيانات",
     "text_format": "تنسيق نصي",
+    "header_type": "نوع العناوين",
+    "text_headers": "نص السؤال",
+    "code_headers": "رموز الأسئلة",
+    "export_options": "خيارات تصدير إضافية",
     "range_invalid": "لا يمكن أن يكون 'من' أكبر من 'إلى'.",
+    "all_responses": "كل الردود",
+    "custom_range": "نطاق مخصص",
     "max": "الحد الأقصى {{max}}",
     "min": "الحد الأدنى {{min}}",
     "enter_a_number": "أدخل رقمًا",
     "no_files_found": "لم يتم العثور على ملفات للنطاق المحدد",
+    "no_responses_found": "لا توجد ردود تطابق النطاق وأنواع الردود المحددة",
     "yes": "نعم",
     "no": "لا",
     "disqualified": "مستبعد",
-    "preview_not_exportable": "لا يمكن تصدير الردود التجريبية",
+    "preview_not_exportable": "لا يمكن تصدير الردود التجريبية (المعاينة)",
     "question": "السؤال",
     "answer": "الإجابة",
     "events": "الأحداث",
@@ -345,6 +386,7 @@
     "effective_base": "الأساس الفعّال",
     "efficiency": "الكفاءة",
     "weight_note": "أكبر ترجيح {{maxWeight}}. تستخدم اختبارات الدلالة الإحصائية الأساس الفعّال وليس الأساس المرجّح.",
+    "weight_filtered_note": "الفلاتر مفعّلة. القيم الفعلية والأوزان محسوبة من جميع الردود ({{total}})، وليس فقط من الردود الـ{{filtered}} الظاهرة في الجدول. يحتفظ كل مشارك بوزنه المحسوب من العينة الكاملة، لذا قد لا يطابق الجدول المفلتر الأهداف.",
     "base": "الأساس",
     "eff": "فعّال",
     "subtitle": "حسب {{column}} · {{weighting}}",
@@ -363,11 +405,18 @@
     "warn_lowEfficiency": "الكفاءة {{efficiency}}%. عندما تقل عن 60% تبدأ مجموعة صغيرة في التحكم بالتقرير بأكمله.",
     "warn_highWeight": "أحد الترجيحات {{maxWeight}}. عادةً ما تعني الترجيحات التي تزيد عن 5 أن الهدف غير واقعي لهذه العينة.",
     "warn_droppedWeight": "{{count}} استجابة (استجابات) لم تُجب على سؤال الترجيح واستُبعدت من هذا الجدول.",
-    "warn_truncated": "عرض أول {{shown}} من {{total}} استجابة. تستند الأرقام والاختبارات إلى تلك العينة."
+    "warn_truncated": "عرض أول {{shown}} من {{total}} استجابة. تستند الأرقام والاختبارات إلى تلك العينة.",
+    "filters": "عوامل التصفية",
+    "add_filter": "إضافة عامل تصفية",
+    "filter_any_of": "أيٌّ من…",
+    "remove_filter": "إزالة عامل التصفية",
+    "filtered_base": "تمت التصفية إلى {{count}} من أصل {{total}} استجابة",
+    "warn_noMatches": "لا توجد استجابات تطابق عوامل التصفية هذه.",
+    "plan_name": "اسم الخطة",
+    "plan_name_taken": "توجد خطة بهذا الاسم بالفعل."
   },
   "calculations": {
     "title": "الحقول المحسوبة",
-    "code": "الرمز",
     "label": "التسمية",
     "expression": "التعبير",
     "value": "القيمة",
@@ -380,18 +429,16 @@
     "conflict": "قام شخص آخر بتغيير الحسابات.",
     "empty": "لا توجد حسابات بعد.",
     "error_loading": "تعذر تحميل الحسابات",
-    "code_required": "الرمز مطلوب",
     "label_required": "التسمية مطلوبة",
     "expression_required": "التعبير مطلوب",
     "error_ScriptError": "خطأ في البرنامج النصي",
-    "error_InvalidCode": "يجب أن يبدأ الرمز بحرف صغير وأن يحتوي فقط على أحرف صغيرة وأرقام و _",
-    "error_DuplicateCode": "يوجد حساب آخر بنفس الرمز",
     "state_error": "خطأ",
     "state_invalid": "غير صالح",
     "state_not_computed": "غير محسوب",
     "status_idle": "غير محسوب. انقر على احسب.",
     "status_running": "جارٍ الحساب… {{done}}/{{total}}",
     "status_failed": "فشل الحساب. انقر على احسب لتشغيله مرة أخرى.",
+    "compute_success": "اكتمل الحساب.",
     "status_new_responses": "{{count}} من الردود أُرسلت منذ آخر حساب. انقر على احسب لتضمينها.",
     "sample_response": "الرد",
     "sample_empty": "لا توجد ردود مكتملة للاختبار بعد.",
@@ -514,8 +561,8 @@
     "status": "الحالة",
     "active": "نشط",
     "invitation_sent": "تم إرسال الدعوة",
+    "resend_invitation": "إعادة إرسال الدعوة",
     "learn_about_roles": "تعرّف على أدوار المستخدمين",
-    "statuses_info": "<strong>مسودة</strong> — لم يتم نشر الاستبيان بعد. متاح للمعاينة فقط.<br/><br/><strong>مجدول</strong> — تم نشر الاستبيان لكن تاريخ البدء في المستقبل. سيصبح نشطاً تلقائياً.<br/><br/><strong>نشط</strong> — الاستبيان مباشر ويقبل الردود.<br/><br/><strong>منتهي</strong> — انتهى تاريخ الاستبيان. لا يمكن جمع ردود جديدة. يمكنك إعادة تفعيله بتغيير التواريخ.<br/><br/><strong>مغلق</strong> — تم إغلاق الاستبيان نهائياً. يمكنك فقط تصدير البيانات أو نسخه.",
     "roles_info": "<strong>مدير النظام</strong> — وصول كامل لجميع الميزات بما في ذلك إدارة المستخدمين وإنشاء الاستبيانات وإعدادات النظام.<br/><br/><strong>مدير الاستبيانات</strong> — يمكنه إنشاء وإدارة الاستبيانات والوصول إلى التصميم والإعدادات والردود والتحليلات.<br/><br/><strong>محلل</strong> — يمكنه عرض ردود الاستبيانات والتحليلات ومعاينة الاستبيانات.<br/><br/><strong>مستطلع</strong> — يمكنه جمع ردود الاستبيانات عبر تطبيق الهاتف المحمول، ومعاينة الاستبيانات."
   },
   "launch": {
@@ -563,7 +610,8 @@
     "import_survey": "استيراد استطلاع موجود (تم تصديره سابقًا) من ملف ZIP",
     "survey_title": "عنوان داخلي يستخدمه فريقك لتحديد الاستطلاع. هذا العنوان لا يظهر للمستجيبين.",
     "survey_description": "وصف داخلي يستخدمه فريقك لتوفير سياق حول الاستطلاع. هذا الوصف لا يظهر للمستجيبين.",
-    "create_survey_with_ai": "إنشاء استبيان جديد تلقائيًا باستخدام مساعدة الذكاء الاصطناعي"
+    "create_survey_with_ai": "إنشاء استبيان جديد تلقائيًا باستخدام مساعدة الذكاء الاصطناعي",
+    "more_info": "مزيد من المعلومات"
   },
   "translations": {
     "title": "الترجمات",
@@ -583,8 +631,7 @@
   },
   "responses_export": {
     "format_csv": "CSV",
-    "format_excel": "Excel",
-    "format_ods": "ODS"
+    "format_excel": "Excel"
   },
   "aria": {
     "users_table": "جدول المستخدمين",
@@ -741,7 +788,7 @@
     "stat_avg_completion": "متوسط الإكمال",
     "stat_answered": "مُجاب",
     "stat_incomplete": "غير مكتمل",
-    "stat_preview": "معاينة",
+    "stat_preview": "الردود التجريبية",
     "error_loading": "خطأ في تحميل التحليلات",
     "error_loading_data": "فشل تحميل بيانات التحليلات",
     "no_data": "لا توجد بيانات تحليلات متاحة",
@@ -799,6 +846,17 @@
       "restore": "قبل استعادة إصدار سابق",
       "discard": "قبل تجاهل التغييرات غير المنشورة"
     }
+  },
+  "status_info": {
+    "draft": "لم يتم نشر الاستبيان بعد. متاح للمعاينة فقط.",
+    "scheduled": "تم نشر الاستبيان لكن تاريخ البدء في المستقبل. سيصبح نشطاً تلقائياً.",
+    "active": "الاستبيان مباشر ويقبل الردود.",
+    "expired": "انتهى تاريخ الاستبيان. لا يمكن جمع ردود جديدة. يمكنك إعادة تفعيله بتغيير التواريخ.",
+    "closed": "تم إغلاق الاستبيان نهائياً. يمكنك فقط تصدير البيانات أو نسخه."
+  },
+  "status_legend": {
+    "title": "حالات الاستبيان",
+    "this_survey": "هذا الاستبيان"
   },
   "group_quotas": {
     "title": "حصص المجموعات",

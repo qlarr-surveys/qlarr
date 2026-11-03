@@ -30,7 +30,8 @@ export interface LoggedInUserResponse {
   firstName: string;
   lastName: string;
   accessToken: string;
-  refreshToken: string;
+  /** Absent on a grace-window refresh: the client keeps the token it holds. */
+  refreshToken?: string;
   email: string;
   roles: string[]; // lowercase API form (the wire contract)
 }

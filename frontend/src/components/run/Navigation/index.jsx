@@ -17,6 +17,7 @@ function Navigation(props) {
       has_next: state.runState.values.Survey.has_next,
       can_save: state.runState.data.survey.allowIncomplete,
       has_errors: state.runState.values.Survey.show_errors,
+      invalid_next_attempts: state.runState.invalidNextAttempts,
     };
   }, shallowEqual);
   const dispatch = useDispatch();
@@ -38,18 +39,26 @@ function Navigation(props) {
 
   useEffect(() => {
     if (state.has_errors) {
-      setTimeout(() => {
+      const id = setTimeout(() => {
         const invalidQuestion = document.querySelector(".invalidQuestion");
         if (invalidQuestion) {
-          const scrollContainer = getClosestScrollableParent(invalidQuestion);
-          scrollContainer.scrollTo({
-            top: invalidQuestion.offsetTop - scrollContainer.offsetTop,
-            behavior: "smooth",
-          });
+          scrollToCenter(
+            getClosestScrollableParent(invalidQuestion),
+            invalidQuestion
+          );
+          // Touch devices would pop the soft keyboard and shift the view.
+          if (window.matchMedia("(pointer: fine)").matches) {
+            invalidQuestion
+              .querySelector(
+                "input:not([type=hidden]), textarea, select, [contenteditable=true]"
+              )
+              ?.focus({ preventScroll: true });
+          }
         }
       }, 500);
+      return () => clearTimeout(id);
     }
-  }, [state.has_errors]);
+  }, [state.has_errors, state.invalid_next_attempts]);
 
   const next = () => {
     dispatch(navigateNext());
@@ -107,4 +116,18 @@ export function getClosestScrollableParent(element) {
   }
 
   return document.documentElement; // Default to <html> if no scrollable parent is found
+}
+
+export function scrollToCenter(container, element) {
+  const viewTop =
+    container === document.documentElement
+      ? 0
+      : container.getBoundingClientRect().top;
+  container.scrollBy({
+    top:
+      element.getBoundingClientRect().top -
+      viewTop -
+      Math.max(0, (container.clientHeight - element.offsetHeight) / 2),
+    behavior: "smooth",
+  });
 }

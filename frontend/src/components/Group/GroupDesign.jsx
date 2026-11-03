@@ -188,6 +188,7 @@ function GroupDesign({
       }}
       className={`${styles.topLevel} ${styles.groupBase} ${stateClass} ${isLastAdded ? styles.highlight : ""}`}
       ref={containerRef}
+      data-code={code}
       style={{
         ...getStyles(isDragging),
         '--qlarr-shadow-color': shadowColor,

@@ -19,6 +19,9 @@ function ResponsesSurvey() {
   // Unsaved edits in the Calculated fields tab: leaving it asks first.
   const calculationsDirty = useRef(false);
   const [pendingTab, setPendingTab] = useState(null);
+  // Bumped when coming back from Calculated fields, where a Compute may have
+  // changed the responses' calculated values: the list refetches.
+  const [responsesRefreshKey, setResponsesRefreshKey] = useState(0);
   const onCalculationsDirtyChange = useCallback((dirty) => {
     calculationsDirty.current = dirty;
   }, []);
@@ -32,6 +35,9 @@ function ResponsesSurvey() {
   };
 
   const switchTab = (newValue) => {
+    if (activeTab === "calculations" && newValue === "responses") {
+      setResponsesRefreshKey((key) => key + 1);
+    }
     setActiveTab(newValue);
     if (newValue === "responses") {
       hasVisitedResponses.current = true;
@@ -82,7 +88,7 @@ function ResponsesSurvey() {
             pt: 2,
           }}
         >
-          <ResponsesList />
+          <ResponsesList refreshKey={responsesRefreshKey} />
         </Box>
       )}
 

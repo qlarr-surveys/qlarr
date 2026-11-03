@@ -91,22 +91,116 @@ describe('POST /user/login (single-tenant → issue token)', () => {
       return res.body as { accessToken: string; refreshToken: string };
     };
 
-    it('issues a new access token and reuses the same refresh token', async () => {
+    const refresh = (accessToken: string, refreshToken: string) =>
+      request(app.getHttpServer())
+        .post('/user/refresh_token')
+        .send({ accessToken, refreshToken });
+
+    const sessionRow = (id: string) =>
+      root.query(`SELECT id, previous_id FROM refresh_tokens WHERE id = $1`, [
+        id,
+      ]);
+
+    // Moves a session's clock back (UTC wall clocks, like the app writes).
+    const age = (id: string, column: string, interval: string) =>
+      root.query(
+        `UPDATE refresh_tokens SET ${column} = (now() AT TIME ZONE 'utc') - interval '${interval}' WHERE id = $1`,
+        [id],
+      );
+
+    it('rotates: issues a new access token and a new refresh token', async () => {
       const { accessToken, refreshToken } = await login();
 
-      const res = await request(app.getHttpServer())
-        .post('/user/refresh_token')
-        .send({ accessToken, refreshToken })
-        .expect(200);
+      const res = await refresh(accessToken, refreshToken).expect(200);
 
       expect(typeof res.body.accessToken).toBe('string');
-      expect(res.body.refreshToken).toBe(refreshToken); // no rotation
+      expect(res.body.refreshToken).not.toBe(refreshToken);
+      // Same session row, token swapped in place.
+      expect(await sessionRow(refreshToken)).toHaveLength(0);
+      expect(await sessionRow(res.body.refreshToken)).toEqual([
+        { id: res.body.refreshToken, previous_id: refreshToken },
+      ]);
 
       // the refreshed access token works on a protected endpoint
       await request(app.getHttpServer())
         .get('/users/me')
         .set('Authorization', `Bearer ${res.body.accessToken}`)
         .expect(200);
+
+      // and the new refresh token rotates again
+      const next = await refresh(
+        res.body.accessToken,
+        res.body.refreshToken,
+      ).expect(200);
+      expect(next.body.refreshToken).not.toBe(res.body.refreshToken);
+    });
+
+    it('serves the previous token within the grace window with an access token only', async () => {
+      const { accessToken, refreshToken } = await login();
+      const first = await refresh(accessToken, refreshToken).expect(200);
+
+      const retry = await refresh(accessToken, refreshToken).expect(200);
+
+      expect(typeof retry.body.accessToken).toBe('string');
+      expect(retry.body).not.toHaveProperty('refreshToken');
+      // No second rotation: the session still holds the first new token.
+      expect(await sessionRow(first.body.refreshToken)).toHaveLength(1);
+    });
+
+    it('lets concurrent refreshes of the same token all succeed', async () => {
+      const { accessToken, refreshToken } = await login();
+
+      const [a, b] = await Promise.all([
+        refresh(accessToken, refreshToken),
+        refresh(accessToken, refreshToken),
+      ]);
+
+      expect(a.status).toBe(200);
+      expect(b.status).toBe(200);
+      // One rotated; the other was served from the grace window.
+      const tokens = [a.body.refreshToken, b.body.refreshToken].filter(Boolean);
+      expect(tokens).toHaveLength(1);
+      expect(await sessionRow(tokens[0])).toHaveLength(1);
+    });
+
+    it('kills the session when the previous token is replayed after the grace window', async () => {
+      const { accessToken, refreshToken } = await login();
+      const first = await refresh(accessToken, refreshToken).expect(200);
+      await age(first.body.refreshToken, 'last_used_at', '1 minute');
+
+      await refresh(accessToken, refreshToken).expect(401);
+
+      // The whole session is gone: the current token no longer works either.
+      expect(await sessionRow(first.body.refreshToken)).toHaveLength(0);
+      await refresh(first.body.accessToken, first.body.refreshToken).expect(401);
+    });
+
+    it('rejects a session idle for longer than the idle timeout', async () => {
+      const { accessToken, refreshToken } = await login();
+      await age(refreshToken, 'last_used_at', '91 days');
+
+      await refresh(accessToken, refreshToken).expect(401);
+    });
+
+    it('rejects a session past its hard cap', async () => {
+      const { accessToken, refreshToken } = await login();
+      await age(refreshToken, 'expiration', '1 second');
+
+      await refresh(accessToken, refreshToken).expect(401);
+    });
+
+    it("deletes the user's dead sessions on the next login", async () => {
+      const idle = await login();
+      const capped = await login();
+      const live = await login();
+      await age(idle.refreshToken, 'last_used_at', '91 days');
+      await age(capped.refreshToken, 'expiration', '1 second');
+
+      await login();
+
+      expect(await sessionRow(idle.refreshToken)).toHaveLength(0);
+      expect(await sessionRow(capped.refreshToken)).toHaveLength(0);
+      expect(await sessionRow(live.refreshToken)).toHaveLength(1);
     });
 
     it('rejects an unknown refresh token with 401', async () => {

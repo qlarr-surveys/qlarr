@@ -1,5 +1,6 @@
 {
   "action_btn": {
+    "retry": "Erneut versuchen",
     "add": "Hinzufügen",
     "add_user": "Benutzer hinzufügen",
     "cancel": "Abbrechen",
@@ -9,7 +10,8 @@
     "delete": "Löschen",
     "download": "Download",
     "export": "Export",
-    "save": "Speichern"
+    "save": "Speichern",
+    "delete_survey": "Umfrage löschen"
   },
   "add_user": {
     "cancel": "Abbrechen",
@@ -39,7 +41,7 @@
   "create_new_survey": "Neue Umfrage erstellen",
   "create_survey": {
     "empty_state_cta_copy": "um loszulegen!",
-    "empty_state_message": "Keine Umfragen verfügbar.",
+    "empty_state_message": "Keine Umfragen mit diesem Status.",
     "or": "oder",
     "title": "Umfrage erstellen"
   },
@@ -47,6 +49,7 @@
   "edit_survey": {
     "total_responses": "Antworten insgesamt",
     "add_logo": "Umfrage-Logo hinzufügen",
+    "replace_logo": "Logo ersetzen",
     "active_mode": "Umfrage ist aktiv",
     "can_lock_survey": "Erlauben Sie Vermessern, die Vermessung zu sperren",
     "clone_survey": "Klon-Umfrage",
@@ -55,7 +58,8 @@
     "closed_mode": "Umfrage wurde geschlossen",
     "count": "Zählen",
     "default_survey_url": "Standard-Umfrage-URL",
-    "delete_survey": "Möchten Sie {{survey_name}} wirklich löschen?",
+    "delete_survey": "Die Umfrage wird zusammen mit ihren Antworten und hochgeladenen Dateien gelöscht. Das lässt sich nicht rückgängig machen.",
+    "survey_deleted": "{{survey_name}} wurde gelöscht",
     "draft_mode": "Umfrage befindet sich noch im Entwurfsmodus",
     "expired_mode": "Das Enddatum der Umfrage ist abgelaufen",
     "export": "Umfrage exportieren",
@@ -86,7 +90,10 @@
     "record_gps": "GPS aufzeichnen",
     "save_ip": "IP speichern",
     "save_timings": "Zeiten speichern",
-    "version_history": "Versionsverlauf"
+    "version_history": "Versionsverlauf",
+    "edit_name": "Umfragenamen bearbeiten: {{name}}",
+    "edit_description": "Umfragebeschreibung bearbeiten",
+    "delete_survey_title": "„{{survey_name}}“ löschen?"
   },
   "edit_user": {
     "title": "Benutzer bearbeiten"
@@ -160,6 +167,7 @@
     "title": "Passwort vergessen"
   },
   "goBack": "Zurückgehen",
+  "go_to_dashboard": "Zum Dashboard",
   "import_survey": "Umfrage importieren",
   "label": {
     "additional_languages": "Weitere Sprachen",
@@ -190,13 +198,20 @@
     "survey_admin": "Umfrage Admin",
     "survey_dates": "Umfragedaten",
     "survey_mode": "Umfragemodus",
+    "survey_mode_hint": {
+      "web": "Teilnehmende antworten online über einen Link.",
+      "offline": "Wird auf Geräten ohne Verbindung erfasst und später synchronisiert.",
+      "mixed": "Online per Link und offline auf Geräten."
+    },
     "survey_name": "Umfragename",
     "survey_url": "Umfrage-URL",
     "surveyor": "Landvermesser",
     "surveyor_admin": "Surveyor-Administrator",
     "to": "Zu",
     "total_responses_limit": "Beantwortungslimit insgesamt",
-    "unpublished_changes": "Nicht veröffentlichte Änderungen vorhanden"
+    "unpublished_changes": "Hat unveröffentlichte Änderungen",
+    "unpublished_changes_info": "Änderungen seit der letzten Veröffentlichung sind noch nicht live. Veröffentlichen Sie, um zu aktualisieren, was die Teilnehmenden sehen.",
+    "survey_description": "Umfragebeschreibung"
   },
   "language": {
     "ar": "Arabisch",
@@ -245,6 +260,18 @@
     "web": "Web"
   },
   "my_surveys": "Ihre Umfragen",
+  "recent_surveys": "Letzte Umfragen",
+  "survey_count_one": "{{count}} Umfrage",
+  "survey_count_other": "{{count}} Umfragen",
+  "dashboard": {
+    "subtitle": "Erstellen Sie eine Umfrage manuell oder importieren Sie eine vorhandene Definition."
+  },
+  "action_cards": {
+    "create": { "description": "Beginnen Sie mit einer leeren Umfrage und fügen Sie Seiten und Fragen selbst hinzu." },
+    "import": { "description": "Laden Sie eine aus einem anderen Arbeitsbereich exportierte Qlarr-Umfragedefinition hoch." },
+    "ai": { "description": "Beschreiben Sie Ihre Umfrage. Der Assistent erstellt einen Entwurf und bleibt während der Bearbeitung verfügbar." }
+  },
+  "fetch_error": "Ihre Umfragen konnten nicht geladen werden. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
   "new_survey": "Neue Umfrage",
   "ok": "OK",
   "password_required": "Passwort ist erforderlich",
@@ -275,10 +302,13 @@
     "invalid_translations_csv": "Keine Übersetzungs-CSV.",
     "translations_csv_not_utf8": "Diese Datei ist nicht UTF-8-kodiert. Wählen Sie in Excel Datei → Speichern unter → „CSV UTF-8 (durch Trennzeichen getrennt)“ und importieren Sie sie erneut.",
     "snapshot_not_found": "Diese Version existiert nicht mehr. Laden Sie die Seite neu und versuchen Sie es erneut.",
-    "nothing_to_revert": "Es gibt keine unveröffentlichten Änderungen zum Verwerfen."
+    "nothing_to_revert": "Es gibt keine unveröffentlichten Änderungen zum Verwerfen.",
+    "user_already_confirmed": "Dieser Benutzer hat die Einladung bereits angenommen.",
+    "survey_not_found": "Diese Umfrage existiert nicht oder wurde gelöscht"
   },
   "processed_successes": {
     "copied": "In die Zwischenablage kopiert",
+    "invitation_resent": "Einladung erneut gesendet",
     "updated": "Erfolgreich aktualisiert"
   },
   "profile": {
@@ -294,7 +324,7 @@
     "title": "Profil"
   },
   "registered": "eingetragen",
-  "reset_filter": "Umfrage-Filter zurücksetzen",
+  "reset_filter": "Alle Umfragen anzeigen",
   "reset_password": {
     "reset": "Zurücksetzen",
     "title": "Passwort Zurücksetzen"
@@ -315,13 +345,13 @@
     "filter_completed_show_all": "Alle Antworten",
     "filter_completed_show_completed": "Nur vollständige Antworten",
     "filter_completed_show_incomplete": "Nur unvollständige Antworten",
-    "filter_preview": "Erledigte Antworten filtern",
-    "filter_preview_show_actual": "Nur tatsächliche Antworten",
-    "filter_preview_show_all": "Alle Antworten",
-    "filter_preview_show_preview": "Nur Vorschau der Antworten",
+    "filter_completed_show_disqualified": "Nur disqualifizierte Antworten",
+    "filter_preview_show_preview": "Nur Testantworten (Vorschau)",
     "from": "Von",
     "incomplete_response": "Unvollständige Antwort",
     "incomplete_responses": "Unvollständige Antworten",
+    "status_complete": "Vollständig",
+    "status_incomplete": "Unvollständig",
     "ip_addr": "IP-Adresse",
     "label_displayed_rows": "{{from}}-{{to}} von {{count}}",
     "label_rows_per_page": "Zeilen pro Seite:",
@@ -332,10 +362,13 @@
     "mode": "Modus",
     "no": "Nein",
     "no_files_found": "Keine Dateien für den ausgewählten Bereich gefunden",
-    "preview": "Vorschau",
-    "preview_not_exportable": "Vorschauantworten können nicht exportiert werden",
+    "no_responses_found": "Keine Antworten entsprechen dem ausgewählten Bereich und den Antworttypen",
+    "test_response": "Testantwort (Vorschau)",
+    "preview_not_exportable": "Testantworten (Vorschau) können nicht exportiert werden",
     "question": "Frage",
     "range_invalid": "“From” kann nicht größer sein als “To”.",
+    "all_responses": "Alle Antworten",
+    "custom_range": "Benutzerdefinierter Bereich",
     "raw_values": "Rohwerte anzeigen",
     "reset_surveyor_filter": "Vermessungsfilter zurücksetzen",
     "responses_type": "Antworttyp",
@@ -343,6 +376,10 @@
     "status": "Status",
     "submit_date": "Sendedatum",
     "text_format": "Textformat",
+    "header_type": "Kopfzeilentyp",
+    "text_headers": "Fragetext",
+    "code_headers": "Fragecodes",
+    "export_options": "Weitere Exportoptionen",
     "title": "Antworten",
     "title_delete_response": "Antwort löschen?",
     "to": "Zu",
@@ -381,6 +418,7 @@
     "effective_base": "Effektive Basis",
     "efficiency": "Effizienz",
     "weight_note": "Größte Gewichtung {{maxWeight}}. Signifikanztests verwenden die effektive Basis, nicht die gewichtete Basis.",
+    "weight_filtered_note": "Filter sind aktiv. Ist-Werte und Gewichte stammen aus allen {{total}} Antworten, nicht nur aus den {{filtered}} in der Tabelle. Jede befragte Person behält ihre Gewichtung aus der Gesamtstichprobe, daher entspricht die gefilterte Tabelle möglicherweise nicht den Zielwerten.",
     "base": "Basis",
     "eff": "eff",
     "subtitle": "Nach {{column}} · {{weighting}}",
@@ -399,11 +437,18 @@
     "warn_lowEfficiency": "Die Effizienz beträgt {{efficiency}} %. Unter 60 % beginnt eine kleine Gruppe, den gesamten Bericht zu bestimmen.",
     "warn_highWeight": "Eine Gewichtung beträgt {{maxWeight}}. Gewichtungen über 5 bedeuten meist, dass das Ziel für diese Stichprobe unrealistisch ist.",
     "warn_droppedWeight": "{{count}} Antwort(en) hatten keine Angabe zur Gewichtungsfrage und wurden aus dieser Tabelle ausgeschlossen.",
-    "warn_truncated": "Es werden die ersten {{shown}} von {{total}} Antworten angezeigt. Zahlen und Tests basieren auf dieser Stichprobe."
+    "warn_truncated": "Es werden die ersten {{shown}} von {{total}} Antworten angezeigt. Zahlen und Tests basieren auf dieser Stichprobe.",
+    "filters": "Filter",
+    "add_filter": "Filter hinzufügen",
+    "filter_any_of": "Eines von…",
+    "remove_filter": "Filter entfernen",
+    "filtered_base": "Gefiltert auf {{count}} von {{total}} Antworten",
+    "warn_noMatches": "Keine Antworten entsprechen diesen Filtern.",
+    "plan_name": "Planname",
+    "plan_name_taken": "Ein Plan mit diesem Namen existiert bereits."
   },
   "calculations": {
     "title": "Berechnete Felder",
-    "code": "Code",
     "label": "Bezeichnung",
     "expression": "Ausdruck",
     "value": "Wert",
@@ -416,18 +461,16 @@
     "conflict": "Jemand anderes hat die Berechnungen geändert.",
     "empty": "Noch keine Berechnungen.",
     "error_loading": "Berechnungen konnten nicht geladen werden",
-    "code_required": "Code ist erforderlich",
     "label_required": "Bezeichnung ist erforderlich",
     "expression_required": "Ausdruck ist erforderlich",
     "error_ScriptError": "Skriptfehler",
-    "error_InvalidCode": "Codes müssen mit einem Kleinbuchstaben beginnen und dürfen nur Kleinbuchstaben, Ziffern und _ enthalten",
-    "error_DuplicateCode": "Eine andere Berechnung hat denselben Code",
     "state_error": "Fehler",
     "state_invalid": "Ungültig",
     "state_not_computed": "Nicht berechnet",
     "status_idle": "Nicht berechnet. Klicken Sie auf Berechnen.",
     "status_running": "Wird berechnet… {{done}}/{{total}}",
     "status_failed": "Berechnung fehlgeschlagen. Klicken Sie auf Berechnen, um sie erneut auszuführen.",
+    "compute_success": "Berechnung abgeschlossen.",
     "status_new_responses": "{{count}} Antworten seit der letzten Berechnung eingereicht. Klicken Sie auf Berechnen, um sie einzubeziehen.",
     "sample_response": "Antwort",
     "sample_empty": "Noch keine abgeschlossenen Antworten zum Testen.",
@@ -519,8 +562,7 @@
   "responses_count": "Antworten",
   "responses_export": {
     "format_csv": "CSV",
-    "format_excel": "Excel",
-    "format_ods": "ODS"
+    "format_excel": "Excel"
   },
   "roles_required": "Roles ist erforderlich",
   "save_changes": "Änderung speichern",
@@ -561,7 +603,8 @@
     "survey_description": "Interne Beschreibung, die von Ihrem Team verwendet wird, um Kontext über die Umfrage bereitzustellen. Diese Beschreibung wird den Befragten nicht angezeigt.",
     "survey_mode": "Wählen Sie den Modus für Ihre Umfrage:<ul><li>Online-Umfragen sind über Webbrowser zugänglich</li><li>Offline-Umfragen können ohne Internetverbindung durchgeführt werden</li></ul>",
     "survey_title": "Interner Titel, der von Ihrem Team verwendet wird, um die Umfrage zu identifizieren. Dieser Titel wird den Befragten nicht angezeigt.",
-    "survey_url": "Teilen Sie diesen Link, um auf die Umfrage zuzugreifen"
+    "survey_url": "Teilen Sie diesen Link, um auf die Umfrage zuzugreifen",
+    "more_info": "Weitere Informationen"
   },
   "translations": {
     "design_language": "Design-Sprache",
@@ -582,6 +625,7 @@
     "delete_title": "Sind Sie sicher, dass Sie den Benutzer löschen wollen: {{name}} ?",
     "email": "Email",
     "invitation_sent": "Einladung gesendet",
+    "resend_invitation": "Einladung erneut senden",
     "name": "Name",
     "roles": "Rollen",
     "status": "Status",
@@ -589,7 +633,6 @@
     "title_edit": "Bearbeiten",
     "users": "Benutzer",
     "learn_about_roles": "Mehr über Benutzerrollen erfahren",
-    "statuses_info": "<strong>Entwurf</strong> — Die Umfrage wurde noch nicht veröffentlicht. Nur zur Vorschau verfügbar.<br/><br/><strong>Geplant</strong> — Die Umfrage ist veröffentlicht, aber das Startdatum liegt in der Zukunft. Sie wird automatisch aktiv.<br/><br/><strong>Aktiv</strong> — Die Umfrage ist live und nimmt Antworten entgegen.<br/><br/><strong>Abgelaufen</strong> — Das Enddatum der Umfrage ist überschritten. Es können keine neuen Antworten gesammelt werden. Sie können sie durch Ändern der Daten reaktivieren.<br/><br/><strong>Geschlossen</strong> — Die Umfrage wurde dauerhaft geschlossen. Sie können nur Daten exportieren oder sie duplizieren.",
     "roles_info": "<strong>Super-Admin</strong> — Vollzugriff auf alle Funktionen einschließlich Benutzerverwaltung, Umfrageerstellung und Systemeinstellungen.<br/><br/><strong>Umfrage-Admin</strong> — Kann Umfragen erstellen und verwalten, Zugriff auf Umfragedesign, Einstellungen, Antworten und Analysen.<br/><br/><strong>Analyst</strong> — Kann Umfrageantworten und Analysen einsehen sowie Umfragen in der Vorschau anzeigen.<br/><br/><strong>Interviewer</strong> — Kann Umfrageantworten über die mobile App erfassen und Umfragen in der Vorschau anzeigen."
   },
   "preview_page": {
@@ -734,7 +777,7 @@
     "stat_avg_completion": "Durchschn. Abschluss",
     "stat_answered": "Beantwortet",
     "stat_incomplete": "Unvollständig",
-    "stat_preview": "Vorschau",
+    "stat_preview": "Testantworten",
     "error_loading": "Fehler beim Laden der Analysen",
     "error_loading_data": "Analysedaten konnten nicht geladen werden",
     "no_data": "Keine Analysedaten verfügbar",
@@ -792,6 +835,17 @@
       "restore": "Vor dem Wiederherstellen einer früheren Version",
       "discard": "Vor dem Verwerfen unveröffentlichter Änderungen"
     }
+  },
+  "status_info": {
+    "draft": "Die Umfrage wurde noch nicht veröffentlicht. Nur zur Vorschau verfügbar.",
+    "scheduled": "Die Umfrage ist veröffentlicht, aber das Startdatum liegt in der Zukunft. Sie wird automatisch aktiv.",
+    "active": "Die Umfrage ist live und nimmt Antworten entgegen.",
+    "expired": "Das Enddatum der Umfrage ist überschritten. Es können keine neuen Antworten gesammelt werden. Sie können sie durch Ändern der Daten reaktivieren.",
+    "closed": "Die Umfrage wurde dauerhaft geschlossen. Sie können nur Daten exportieren oder sie duplizieren."
+  },
+  "status_legend": {
+    "title": "Umfragestatus",
+    "this_survey": "diese Umfrage"
   },
   "group_quotas": {
     "title": "Gruppenquoten",

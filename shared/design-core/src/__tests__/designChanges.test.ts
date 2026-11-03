@@ -4,7 +4,6 @@ import {
   buildDesignState,
   designChanges,
   changeContent,
-  setShowAdvanced,
   showQuotaMessage,
   setup,
 } from "../state/mutations";
@@ -31,7 +30,6 @@ describe("designChanges", () => {
 
   it("ignores designer UI state, so a no-op action saves nothing", () => {
     showQuotaMessage(state, { code: "QT1", reveal: true });
-    setShowAdvanced(state, { code: "G1", value: true });
     setup(state, { code: "G1", rules: [] });
     state.focus = "Q298jbb";
 
@@ -49,13 +47,11 @@ describe("designChanges", () => {
 
   it("keeps UI state on a reload but ends any edit focus", () => {
     showQuotaMessage(state, { code: "QT1" });
-    setShowAdvanced(state, { code: "G1", value: true });
     state.focus = "Q298jbb";
 
     load(state);
 
     expect(state.quotaMessageView).toEqual({ code: "QT1", reveal: false });
-    expect(state.advancedByCode).toEqual({ G1: true });
     expect(state.focus).toBeUndefined();
   });
 });

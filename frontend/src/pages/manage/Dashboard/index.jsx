@@ -5,19 +5,16 @@ import {
   Button,
   Container,
   Snackbar,
-  Stack,
   TablePagination,
   Typography,
 } from "@mui/material";
 import styles from "./Dashboard.module.css";
 import { HeaderContent } from "~/components/manage/HeaderContent";
-import { isSurveyAdmin } from "~/constants/roles";
 import { setLoading } from "~/state/edit/editState";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import CreateSurvey from "~/components/manage/CreateSurvey/CreateSurvey";
 import { PROCESSED_ERRORS } from "~/utils/errorsProcessor";
-import FilterAltOffIcon from "@mui/icons-material/FilterAltOff";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 
@@ -26,9 +23,10 @@ import LoadingDots from "~/components/common/LoadingDots";
 import { useService } from "~/hooks/use-service";
 import ConfirmActionModal from "~/components/common/ConfirmActionModal";
 import StopSurveyModal from "~/components/manage/StopSurveyModal";
-import { Add, Description, FileUpload } from "@mui/icons-material";
-import CustomTooltip from "~/components/common/Tooltip/Tooltip";
+import { ErrorOutline } from "@mui/icons-material";
 import DashboardEmptyState from "~/components/manage/DashboardEmptyState";
+import ActionCards from "~/components/manage/Dashboard/ActionCards";
+import { useDashboardActions } from "~/components/manage/Dashboard/useDashboardActions";
 import {
   localDateToServerDateTime,
   serverDateTimeToLocalDateTime,
@@ -36,6 +34,12 @@ import {
 
 const Survey = lazy(() => import("~/components/manage/Survey"));
 const DASHBOARD_FILTERS_KEY = "dashboard_filters";
+const ROWS_PER_PAGE_OPTIONS = [6, 12, 18, 24];
+// The pager only earns its space once the smallest page size would split the
+// list. Below that every option shows everything, so there is nothing to pick.
+// It must not key off the current perPage: the rows-per-page selector lives
+// inside the pager, so hiding it at perPage 24 strands you on 24.
+const MIN_ROWS_PER_PAGE = Math.min(...ROWS_PER_PAGE_OPTIONS);
 
 function Dashboard() {
   const surveyService = useService("survey");
@@ -46,7 +50,7 @@ function Dashboard() {
     sessionStorage.getItem(DASHBOARD_FILTERS_KEY) || "{}"
   );
   const [page, setPage] = useState(savedFilters.page || 1);
-  const [perPage, setPerPage] = useState(savedFilters.perPage || 6);
+  const [perPage, setPerPage] = useState(savedFilters.perPage || MIN_ROWS_PER_PAGE);
   const [status, setStatus] = useState(savedFilters.status || "all");
   const [sortBy, setSortBy] = useState(
     savedFilters.sortBy || "last_modified_desc"
@@ -55,22 +59,48 @@ function Dashboard() {
   const [openImportModal, setOpenImportModal] = useState(false);
   const [recentlyUpdatedSurveyName, setRecentlyUpdatedSurveyName] =
     useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
+  // One transient message bar for the whole page: survey actions report both
+  // what succeeded and what failed, and only one of them is ever on screen.
+  const [notice, setNotice] = useState(null);
+  const [fetchError, setFetchError] = useState(false);
 
   const dispatch = useDispatch();
 
   const { t } = useTranslation(NAMESPACES.MANAGE);
 
+  const showNotice = (message, severity = "error") =>
+    setNotice({ message, severity });
+
+  const showActionError = (processedError) =>
+    showNotice(
+      t(
+        `processed_errors.${
+          processedError?.name ?? PROCESSED_ERRORS.UNIDENTIFIED_ERROR.name
+        }`
+      )
+    );
+
   const processApirror = (e) => {
     setFetchingSurveys(false);
+    setFetchError(true);
   };
 
   const fetchSurveys = () => {
     setFetchingSurveys(true);
+    setFetchError(false);
     surveyService
       .getAllSurveys(page, perPage, status, sortBy)
       .then((data) => {
         if (data) {
+          // A page past the end of the list comes back empty even though the
+          // dashboard has surveys -- a saved page restored after surveys were
+          // deleted, say. Fall back to the first page instead of handing an
+          // empty page to the first-run empty state, which would greet a full
+          // dashboard with "create your first survey".
+          if (page > 1 && data.totalCount > 0 && !data.surveys?.length) {
+            setPage(1);
+            return;
+          }
           setFetchingSurveys(false);
           setSurveys(data);
         }
@@ -87,6 +117,27 @@ function Dashboard() {
     fetchSurveys();
   }, [page, perPage, sortBy, status]);
 
+  // An action on a survey someone else deleted: drop it from the list.
+  const globalError = useSelector((state) => state.editState.error);
+  useEffect(() => {
+    // Dismissing the dialog marks the error seen, which is a new object too.
+    if (
+      globalError &&
+      !globalError.seen &&
+      globalError.name === PROCESSED_ERRORS.SURVEY_NOT_FOUND.name
+    ) {
+      fetchSurveys();
+    }
+  }, [globalError]);
+
+  // .highlight animates for 3s and then keeps its background colour, so drop
+  // the marker once the animation is done.
+  useEffect(() => {
+    if (!recentlyUpdatedSurveyName) return undefined;
+    const timer = setTimeout(() => setRecentlyUpdatedSurveyName(null), 3000);
+    return () => clearTimeout(timer);
+  }, [recentlyUpdatedSurveyName]);
+
   const handleSurveyStatusChange = (id, newStatus) => {
     setSurveys((prevState) => ({
       ...prevState,
@@ -100,7 +151,7 @@ function Dashboard() {
   const [actionType, setActionType] = useState("");
   const [selectedSurvey, setSelectedSurvey] = useState(null);
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState(t("action_btn.delete"));
+  const [title, setTitle] = useState("");
   const [openCreateModal, setOpenCreateModal] = useState(false);
 
   const handleCreateSurveyClick = () => {
@@ -111,13 +162,27 @@ function Dashboard() {
     setOpenImportModal(true);
   };
 
+  const actions = useDashboardActions({
+    onCreateSurvey: handleCreateSurveyClick,
+    onImportSurvey: handleImportSurveyClick,
+  });
+
+  // The first-run empty state is the whole page: it carries its own welcome
+  // heading and both actions, so the page heading and the action cards above
+  // it would only say the same things twice. Until the first response lands
+  // we don't know which way it goes, so they wait with the list rather than
+  // flashing above an empty state that then replaces them.
+  const showPageIntro =
+    fetchError || status !== "all" || Boolean(surveys?.surveys?.length);
+
   const onDelete = (survey) => {
     setActionType("delete");
-    setTitle(t("action_btn.delete"));
+    // The question names the survey and the body says what goes with it, as
+    // the redesign writes its confirmations. The title used to be the word
+    // "Delete" on its own, which asked nothing.
+    setTitle(t("edit_survey.delete_survey_title", { survey_name: survey.name }));
     setSelectedSurvey(survey);
-    setDescription(
-      t("edit_survey.delete_survey", { survey_name: survey.name })
-    );
+    setDescription(t("edit_survey.delete_survey"));
     setOpen(true);
   };
 
@@ -129,7 +194,7 @@ function Dashboard() {
 
   const handleAction = () => {
     if (actionType === "delete") {
-      deleteSurvey(selectedSurvey.id);
+      deleteSurvey(selectedSurvey);
       setOpen(false);
     }
   };
@@ -144,22 +209,27 @@ function Dashboard() {
           fetchSurveys();
         }
       })
-      .catch((processedError) => {})
+      .catch(showActionError)
       .finally(() => {
         dispatch(setLoading(false));
       });
   };
 
-  const deleteSurvey = (id) => {
+  const deleteSurvey = (survey) => {
     dispatch(setLoading(true));
     surveyService
-      .deleteSurvey(id)
+      .deleteSurvey(survey.id)
       .then(() => {
+        // Informational only. The delete has already cascaded through the
+        // design, the responses and the uploaded files, and there is no
+        // restore endpoint, so there is nothing to offer an undo for.
+        showNotice(
+          t("edit_survey.survey_deleted", { survey_name: survey.name }),
+          "info"
+        );
         fetchSurveys();
       })
-      .catch((e) => {
-        dispatch(setLoading(false));
-      })
+      .catch(showActionError)
       .finally(() => {
         dispatch(setLoading(false));
       });
@@ -167,7 +237,7 @@ function Dashboard() {
 
   const handleSurveyActionError = (processedError) => {
     if (processedError?.name === PROCESSED_ERRORS.INVALID_SURVEY_DATES.name) {
-      setErrorMessage(t(`processed_errors.${processedError.name}`));
+      showActionError(processedError);
     }
   };
 
@@ -252,80 +322,75 @@ function Dashboard() {
   };
 
   return (
-    <Box className={styles.mainContainer}>
+    <Box
+      className={styles.mainContainer}
+      sx={{
+        "--card-accent": (theme) => theme.palette.primary.main,
+      }}
+    >
       <Container sx={{ marginBottom: "48px" }}>
         <Box className={styles.content}>
-          {(surveys?.surveys?.length > 0 || status !== "all") && (
-          <Stack
-            className={styles.newSurveysButton}
-            direction="row"
-            spacing={2}
-          >
-            {isSurveyAdmin() && (
-              <CustomTooltip
-                title={t("tooltips.create_new_survey")}
-                showIcon={false}
-              >
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={<Add />}
-                  onClick={handleCreateSurveyClick}
-                >
-                  {t("create_new_survey")}
-                </Button>
-              </CustomTooltip>
-            )}
-            {isSurveyAdmin() && (
-              <CustomTooltip
-                title={t("tooltips.import_survey")}
-                showIcon={false}
-              >
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={<FileUpload />}
-                  onClick={handleImportSurveyClick}
-                >
-                  {t("import_survey")}
-                </Button>
-              </CustomTooltip>
-            )}
-          </Stack>
+          {showPageIntro && (
+            <>
+              <Box className={styles.pageHeading}>
+                <h1 className={styles.heading}>{t("my_surveys")}</h1>
+                <p className={styles.subtitle}>{t("dashboard.subtitle")}</p>
+              </Box>
+
+              <ActionCards actions={actions} />
+            </>
           )}
 
           {(surveys?.surveys?.length > 0 || status != "all") && (
-            <HeaderContent
-              filter={status}
-              onFilterSelected={(el) => {
-                setPage(1);
-                setStatus(el.target.value);
-              }}
-              sort={sortBy}
-              onSortSelected={(el) => {
-                setPage(1);
-                setSortBy(el.target.value);
-              }}
-            />
+            <Box className={styles.listHeading}>
+              <HeaderContent
+                heading={
+                  <h2 className={styles.sectionHeading}>
+                    {t("recent_surveys")}{" "}
+                    <span className={styles.sectionCount}>
+                      &middot;{" "}
+                      {t("survey_count", { count: surveys?.totalCount ?? 0 })}
+                    </span>
+                  </h2>
+                }
+                filter={status}
+                onFilterSelected={(el) => {
+                  setPage(1);
+                  setStatus(el.target.value);
+                }}
+                sort={sortBy}
+                onSortSelected={(el) => {
+                  setPage(1);
+                  setSortBy(el.target.value);
+                }}
+              />
+            </Box>
           )}
 
           <Box className={styles.surveyCardsContainer}>
             {!fetchingSurveys ? (
               <>
-                {surveys?.surveys?.length > 0 ? (
-                  <Box
-                    sx={{
-                      mt: 3,
-                      columnGap: 2,
-                      display: "grid",
-                      rowGap: { xs: 4, md: 5 },
-                      gridTemplateColumns: {
-                        xs: "1fr",
-                        sm: "repeat(auto-fit, minmax(280px, 1fr))",
-                        md: "repeat(auto-fit, minmax(330px, 350px))",
-                      },
-                    }}
-                  >
+                {fetchError ? (
+                  <div className={styles.noSurveys}>
+                    <ErrorOutline sx={{ fontSize: 48, color: "error.dark" }} />
+                    <Typography
+                      variant="h6"
+                      color="textSecondary"
+                      sx={{ mt: 2 }}
+                    >
+                      {t("fetch_error")}
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        sx={{ mx: 1 }}
+                        onClick={fetchSurveys}
+                      >
+                        {t("action_btn.retry")}
+                      </Button>
+                    </Typography>
+                  </div>
+                ) : surveys?.surveys?.length > 0 ? (
+                  <Box className={styles.surveyGrid}>
                     {surveys?.surveys?.map((survey) => {
                       return (
                         <Suspense key={survey.id} fallback={<LoadingDots />}>
@@ -335,7 +400,6 @@ function Dashboard() {
                             highlight={
                               survey.name === recentlyUpdatedSurveyName
                             }
-                            onStatusChange={handleSurveyStatusChange}
                             onClone={() => onClone(survey)}
                             onDelete={() => onDelete(survey)}
                             onClose={() => onCloseSurvey(survey)}
@@ -348,33 +412,35 @@ function Dashboard() {
                     })}
                   </Box>
                 ) : status !== "all" ? (
-                  <div className={styles.noSurveys}>
-                    <Description sx={{ fontSize: 48, color: "#ccc" }} />
-                    <Typography
-                      variant="h6"
-                      color="textSecondary"
-                      sx={{ mt: 2 }}
-                    >
+                  /* Nothing is missing here -- a filter is simply hiding it.
+                     A dashed panel says "this space is empty by your choice",
+                     where the grey icon and the filled button of a real empty
+                     state said something had gone wrong. role="status" so the
+                     filter change is announced rather than silently emptying
+                     the list. */
+                  <div className={styles.filterEmpty} role="status">
+                    <p className={styles.filterEmptyText}>
                       {t("create_survey.empty_state_message")}
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        sx={{ mx: 1 }}
-                        startIcon={<FilterAltOffIcon />}
-                        onClick={() => {
-                          setPage(1);
-                          setStatus("all");
-                        }}
-                      >
-                        {t("reset_filter")}
-                      </Button>
-                    </Typography>
+                    </p>
+                    <button
+                      type="button"
+                      className={styles.filterEmptyAction}
+                      onClick={() => {
+                        setPage(1);
+                        setStatus("all");
+                      }}
+                    >
+                      {t("reset_filter")}
+                    </button>
                   </div>
                 ) : (
                   <DashboardEmptyState
                     onCreateSurvey={handleCreateSurveyClick}
                     onImportTemplate={handleImportSurveyClick}
-                    canCreate={isSurveyAdmin()}
+                    /* Same gate as the action cards, which this now stands in
+                       for: an analyst gets the welcome without actions it
+                       can't carry out. */
+                    canCreate={actions.length > 0}
                   />
                 )}
               </>
@@ -383,9 +449,10 @@ function Dashboard() {
             )}
           </Box>
 
-          {surveys?.totalCount > 6 ? (
+          {surveys?.totalCount > MIN_ROWS_PER_PAGE ? (
             <TablePagination
-              rowsPerPageOptions={[6, 12, 18, 24]}
+              className={styles.pagination}
+              rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
               component="div"
               labelDisplayedRows={({ from, to, count, page }) => {
                 return t("responses.label_displayed_rows", { from, to, count });
@@ -433,7 +500,7 @@ function Dashboard() {
           onConfirm={handleAction}
           title={title}
           cancelLabel={t("action_btn.cancel")}
-          confirmLabel={t("action_btn.delete")}
+          confirmLabel={t("action_btn.delete_survey")}
         />
       )}
       {actionType === "close" && (
@@ -455,12 +522,15 @@ function Dashboard() {
         />
       )}
       <Snackbar
-        open={Boolean(errorMessage)}
+        open={Boolean(notice)}
         autoHideDuration={6000}
-        onClose={() => setErrorMessage(null)}
+        onClose={() => setNotice(null)}
       >
-        <Alert onClose={() => setErrorMessage(null)} severity="error">
-          {errorMessage}
+        <Alert
+          onClose={() => setNotice(null)}
+          severity={notice?.severity ?? "error"}
+        >
+          {notice?.message}
         </Alert>
       </Snackbar>
     </Box>

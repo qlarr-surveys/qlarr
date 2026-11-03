@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { DbContext } from '../../database/db-context';
 import { Calculation } from '../../engine/engine.types';
 import { RUN_TIME_LIMIT_SECONDS } from './calculations.constants';
@@ -23,12 +23,30 @@ const RUN_EXPIRED = `survey_calculations.started_at < now() - make_interval(secs
 const NOT_RUNNING = `(survey_calculations.status <> 'running' OR ${RUN_EXPIRED})`;
 
 /**
+ * A design change: set the survey's calculations `idle`, so the results stop
+ * showing and the next Compute is a full run. A run in progress stops at its
+ * next chunk (its writes need `running`). A plain function rather than a
+ * repository method, since DesignModule can't import CalculationsModule
+ * (which imports it).
+ */
+export async function resetCalculationsOnDesignChange(
+  manager: EntityManager,
+  surveyId: string,
+): Promise<void> {
+  await manager.query(
+    `UPDATE survey_calculations SET status = 'idle'
+     WHERE survey_id = $1 AND status <> 'idle'`,
+    [surveyId],
+  );
+}
+
+/**
  * Data-access for `survey_calculations` (the set and its Compute run state) and
  * the per-response results in `responses.computations`. The only writer of that
  * column: the response entity marks it `update: false`.
  *
- * Results are only shown when `status = completed`: a save sets `idle`, so it
- * hides them without touching `responses`.
+ * Results are only shown when `status = completed`: a save (of the set, or of
+ * the survey design) sets `idle`, so it hides them without touching `responses`.
  *
  * A Compute run is identified by its `started_at`, which `startRun` returns as
  * full-precision Postgres text. Every write a run makes is conditional on the
@@ -206,11 +224,18 @@ export class CalculationsRepository {
     return rows.length > 0;
   }
 
-  /** Ids of the survey's completed responses (previews included), by id. */
-  async completedResponseIds(surveyId: string): Promise<string[]> {
+  /**
+   * Ids of the survey's completed responses (previews included), by id. With
+   * `uncomputedOnly`, just those without `computations`.
+   */
+  async completedResponseIds(
+    surveyId: string,
+    uncomputedOnly: boolean,
+  ): Promise<string[]> {
     const rows: Array<{ id: string }> = await this.db.manager.query(
       `SELECT id FROM responses
        WHERE survey_id = $1 AND submit_date IS NOT NULL
+         ${uncomputedOnly ? 'AND computations IS NULL' : ''}
        ORDER BY id`,
       [surveyId],
     );

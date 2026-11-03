@@ -1305,12 +1305,16 @@ const logicVars = (logic, vars = []) => {
   return vars;
 };
 
+// Whether a logic tree reads the given question (or one of its rows/answers).
+export const logicRefersToQuestion = (logic, questionCode) =>
+  logicVars(logic).some(
+    (code) => code.match(/^Q[a-z0-9_]+/)?.[0] === questionCode,
+  );
+
 // Whether any quota condition reads the given question.
 export const quotaRefersToQuestion = (state, questionCode) =>
   (state.Survey?.quotas || []).some((quota) =>
-    logicVars(quota.condition?.logic).some(
-      (code) => code.match(/^Q[a-z0-9_]+/)?.[0] === questionCode,
-    ),
+    logicRefersToQuestion(quota.condition?.logic, questionCode),
   );
 
 // Quotas the engine rejected (their instruction has errors).
@@ -1341,7 +1345,7 @@ export const conditionalRelevanceEquation = (logic, rule, state) => {
   const text = jsonToJs(
     logic,
     false,
-    (code) => state[code].type,
+    (code) => state[code]?.type,
     (code) => getQuestionType(state, code),
   );
   // If no valid logic yet (empty text), treat as "show_always" to avoid validation errors
@@ -1530,7 +1534,8 @@ const jsonToJs = (json, nested, getComponentType, getQuestionType) => {
       } else if (getComponentType(code1) == "nps") {
         return `[${value[1].map((el) => +el)}].indexOf(${code1}.value) == -1`;
       } else if (
-        ["mcq", "image_mcq", "icon_mcq"].indexOf(getComponentType(code1)) > -1
+        ["mcq", "image_mcq", "icon_mcq"].indexOf(getComponentType(code1)) > -1 ||
+        getQuestionType(code1) == "mcq_array"
       ) {
         return `[${value[1].map(
           (el) => "'" + el + "'",

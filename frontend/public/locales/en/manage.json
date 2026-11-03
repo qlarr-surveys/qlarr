@@ -1,5 +1,6 @@
 {
   "action_btn": {
+    "retry": "Retry",
     "add": "Add",
     "add_user": "Add User",
     "cancel": "Cancel",
@@ -9,7 +10,8 @@
     "save": "Save",
     "create": "Create",
     "export": "Export",
-    "download": "Download"
+    "download": "Download",
+    "delete_survey": "Delete survey"
   },
   "add_user": {
     "cancel": "Cancel",
@@ -20,6 +22,7 @@
   "timezone_info": "We use your local timezone to calculate the survey expiration time.",
   "timezone_tooltip": "The survey will expire at 00:00 on the selected end date in your local timezone",
   "goBack": "Go Back",
+  "go_to_dashboard": "Go to Dashboard",
   "preview": "Preview",
   "mobile_view": "Console Not Optimized for Small Screens",
   "mobile_view_working": "Our console is complex and doesn't support smaller screens for the best experience. But don't worry - the surveys we help you create are awesome on small screens!",
@@ -30,7 +33,7 @@
   "confirm_password_required": "You must repeat password",
   "create_survey": {
     "title": "Create Survey",
-    "empty_state_message": "No surveys available.",
+    "empty_state_message": "No surveys match this status.",
     "or": "or",
     "empty_state_cta_copy": "to get started!"
   },
@@ -45,6 +48,7 @@
   "edit_survey": {
     "total_responses": "Total responses",
     "add_logo": "Add a survey logo",
+    "replace_logo": "Replace logo",
     "export": "Export Survey",
     "close_title": "Close Survey",
     "can_lock_survey": "Allow surveyors to lock survey",
@@ -52,7 +56,8 @@
     "count": "Count",
     "default_survey_url": "Default survey URL",
     "close_survey": "Are you sure you want to close {{survey_name}}?",
-    "delete_survey": "Are you sure you want to delete {{survey_name}}?",
+    "delete_survey": "The survey, its responses and its uploaded files are removed with it. This can’t be undone.",
+    "survey_deleted": "Deleted {{survey_name}}",
     "general": "General",
     "limit": "Limit",
     "limit_responses": "Limit Responses by Surveyors",
@@ -84,7 +89,10 @@
       "start_date": "Start Date",
       "end_date": "End Date"
     },
-    "version_history": "Version History"
+    "version_history": "Version History",
+    "edit_name": "Edit survey name: {{name}}",
+    "edit_description": "Edit survey description",
+    "delete_survey_title": "Delete “{{survey_name}}”?"
   },
   "edit_user": {
     "title": "Edit User"
@@ -169,6 +177,11 @@
     "survey_admin": "Survey Admin",
     "survey_dates": "Survey Dates",
     "survey_mode": "Survey Mode",
+    "survey_mode_hint": {
+      "web": "Respondents answer online via a link.",
+      "offline": "Collected on devices without a connection, then synced.",
+      "mixed": "Online by link and offline on devices."
+    },
     "survey_name": "Survey Name",
     "survey_url": "Survey URL",
     "surveyor": "Surveyor",
@@ -176,10 +189,12 @@
     "to": "To",
     "total_responses_limit": "Total Responses Limit",
     "sort_by": "Sort By",
-    "unpublished_changes": "Has Unpublished Changes",
+    "unpublished_changes": "Has unpublished changes",
+    "unpublished_changes_info": "Edits made since the last publish aren’t live yet. Publish to update the survey respondents see.",
     "responses": "Complete Responses : {{count}}",
     "quota": "Quota: {{count}}",
-    "no_quota": "No Quota"
+    "no_quota": "No Quota",
+    "survey_description": "Survey Description"
   },
   "language": {
     "ar": "Arabic",
@@ -205,8 +220,20 @@
     "web": "Web"
   },
   "my_surveys": "Your Surveys",
+  "recent_surveys": "Recent surveys",
+  "survey_count_one": "{{count}} survey",
+  "survey_count_other": "{{count}} surveys",
+  "dashboard": {
+    "subtitle": "Create a survey manually or import an existing definition."
+  },
+  "action_cards": {
+    "create": { "description": "Start from an empty survey and add pages and questions yourself." },
+    "import": { "description": "Upload a Qlarr survey definition exported from another workspace." },
+    "ai": { "description": "Describe your survey. The assistant drafts it and stays available while you edit." }
+  },
+  "fetch_error": "Couldn't load your surveys. Check your connection and try again.",
   "new_survey": "New Survey",
-  "reset_filter": "Reset Survey Filter",
+  "reset_filter": "Show all surveys",
   "create_new_survey": "Create New Survey",
   "import_survey": "Import a survey",
   "upload_zip_folder": "Upload Zip Folder",
@@ -240,10 +267,13 @@
     "invalid_translations_csv": "Not a translations CSV.",
     "translations_csv_not_utf8": "This file isn't UTF-8. In Excel, use File → Save As → 'CSV UTF-8 (Comma delimited)' and import again.",
     "snapshot_not_found": "This version no longer exists. Reload the page and try again.",
-    "nothing_to_revert": "There are no unpublished changes to discard."
+    "nothing_to_revert": "There are no unpublished changes to discard.",
+    "user_already_confirmed": "This user has already accepted the invitation.",
+    "survey_not_found": "This survey doesn't exist or was deleted"
   },
   "processed_successes": {
     "copied": "Copied to clipboard",
+    "invitation_resent": "Invitation sent again",
     "updated": "Updated successfully"
   },
   "profile": {
@@ -270,16 +300,14 @@
     "filter_completed_show_all": "All Responses",
     "filter_completed_show_completed": "Complete Responses only",
     "filter_completed_show_incomplete": "Incomplete Responses only",
-    "filter_preview": "Filter Preview Responses",
-    "filter_preview_show_actual": "Actual Responses only",
-    "filter_preview_show_all": "All Responses",
-    "filter_preview_show_preview": "Preview Responses only",
+    "filter_completed_show_disqualified": "Disqualified Responses only",
+    "filter_preview_show_preview": "Test (Preview) Responses only",
     "ip_addr": "IP Address",
     "label_displayed_rows": "{{from}}-{{to}} of {{count}}",
     "label_rows_per_page": "Rows per page:",
     "label_surveys_per_page": "Surveys per page:",
     "lang": "Language",
-    "preview": "Preview",
+    "test_response": "Test (preview) response",
     "raw_values": "Show Raw Values",
     "reset_surveyor_filter": "Reset Surveyor Filter",
     "start_date": "Start Date",
@@ -299,17 +327,26 @@
     "to": "To",
     "complete_responses": "Complete Responses",
     "incomplete_responses": "Incomplete Responses",
+    "status_complete": "Complete",
+    "status_incomplete": "Incomplete",
     "database_format": "Database Format",
     "text_format": "Text Format",
+    "header_type": "Header Type",
+    "text_headers": "Question text",
+    "code_headers": "Question codes",
+    "export_options": "More export options",
     "range_invalid": "“From” cannot be greater than “To”.",
+    "all_responses": "All responses",
+    "custom_range": "Custom range",
     "max": "Max {{max}}",
     "min": "Min {{min}}",
     "enter_a_number": "Enter a number",
     "no_files_found": "No files found for the selected range",
+    "no_responses_found": "No responses match the selected range and response types",
     "yes": "Yes",
     "no": "No",
     "disqualified": "Disqualified",
-    "preview_not_exportable": "Preview responses cannot be exported",
+    "preview_not_exportable": "Test (preview) responses cannot be exported",
     "question": "Question",
     "answer": "Answer",
     "events": "Events",
@@ -345,6 +382,7 @@
     "effective_base": "Effective base",
     "efficiency": "Efficiency",
     "weight_note": "Largest weight {{maxWeight}}. Significance tests use the effective base, not the weighted base.",
+    "weight_filtered_note": "Filters are on. Actual and the weights come from all {{total}} responses, not just the {{filtered}} in the table. Each respondent keeps their full-sample weight, so the filtered table may not match the targets.",
     "base": "Base",
     "eff": "eff",
     "subtitle": "By {{column}} · {{weighting}}",
@@ -363,11 +401,18 @@
     "warn_lowEfficiency": "Efficiency is {{efficiency}}%. Below 60%, a small group starts driving the whole report.",
     "warn_highWeight": "One weight is {{maxWeight}}. Weights above 5 usually mean the target is unrealistic for this sample.",
     "warn_droppedWeight": "{{count}} response(s) had no answer to the weight question and were left out of this table.",
-    "warn_truncated": "Showing the first {{shown}} of {{total}} responses. Figures and tests are based on that sample."
+    "warn_truncated": "Showing the first {{shown}} of {{total}} responses. Figures and tests are based on that sample.",
+    "filters": "Filters",
+    "add_filter": "Add filter",
+    "filter_any_of": "Any of…",
+    "remove_filter": "Remove filter",
+    "filtered_base": "Filtered to {{count}} of {{total}} responses",
+    "warn_noMatches": "No responses match these filters.",
+    "plan_name": "Plan name",
+    "plan_name_taken": "A plan with this name already exists."
   },
   "calculations": {
     "title": "Calculated fields",
-    "code": "Code",
     "label": "Label",
     "expression": "Expression",
     "value": "Value",
@@ -380,18 +425,16 @@
     "conflict": "Someone else changed the calculations.",
     "empty": "No calculations yet.",
     "error_loading": "Failed to load calculations",
-    "code_required": "Code is required",
     "label_required": "Label is required",
     "expression_required": "Expression is required",
     "error_ScriptError": "Script error",
-    "error_InvalidCode": "Codes must start with a lowercase letter and use only lowercase letters, digits and _",
-    "error_DuplicateCode": "Another calculation has the same code",
     "state_error": "Error",
     "state_invalid": "Invalid",
     "state_not_computed": "Not computed",
     "status_idle": "Not computed. Click Compute.",
     "status_running": "Computing… {{done}}/{{total}}",
     "status_failed": "Computation failed. Click Compute to run it again.",
+    "compute_success": "Computation finished.",
     "status_new_responses": "{{count}} responses submitted since the last computation. Click Compute to include them.",
     "sample_response": "Response",
     "sample_empty": "No completed responses to test on yet.",
@@ -491,7 +534,7 @@
     "draft": "Draft"
   },
   "survey_sort_options": {
-    "responses_desc": "Higest Responses First",
+    "responses_desc": "Highest Responses First",
     "last_modified_desc": "Last Modified First"
   },
   "super_admins": "super admins",
@@ -514,8 +557,8 @@
     "status": "Status",
     "active": "Active",
     "invitation_sent": "Invitation Sent",
+    "resend_invitation": "Resend Invitation",
     "learn_about_roles": "Learn about user roles",
-    "statuses_info": "<strong>Draft</strong> — Survey has not been published yet. Only available for preview.<br/><br/><strong>Scheduled</strong> — Survey is published but the start date is in the future. It will become active automatically.<br/><br/><strong>Active</strong> — Survey is live and accepting responses.<br/><br/><strong>Expired</strong> — Survey end date has passed. No new responses can be collected. You can reactivate it by changing the dates.<br/><br/><strong>Closed</strong> — Survey has been permanently closed. You can only export data or duplicate it.",
     "roles_info": "<strong>Super Admin</strong> — Full access to all features including user management, survey creation, and system settings.<br/><br/><strong>Survey Admin</strong> — Can create and manage surveys, access survey design, settings, responses, and analytics.<br/><br/><strong>Analyst</strong> — Can view survey responses, analytics, and preview surveys.<br/><br/><strong>Surveyor</strong> — Can collect survey responses via the mobile app, and preview surveys."
   },
   "launch": {
@@ -563,7 +606,8 @@
     "import_survey": "Import an existing survey (that was exported earlier) from a ZIP file",
     "create_survey_with_ai": "Create a new survey automatically using AI assistance",
     "survey_title": "Internal title used by your team to identify the survey. This title is not shown to respondents.",
-    "survey_description": "Internal description used by your team to provide context about the survey. This description is not shown to respondents."
+    "survey_description": "Internal description used by your team to provide context about the survey. This description is not shown to respondents.",
+    "more_info": "More information"
   },
   "translations": {
     "title": "Translations",
@@ -579,8 +623,7 @@
   },
   "responses_export": {
     "format_csv": "CSV",
-    "format_excel": "Excel",
-    "format_ods": "ODS"
+    "format_excel": "Excel"
   },
   "aria": {
     "users_table": "Users table",
@@ -706,7 +749,7 @@
     "stat_avg_completion": "Avg Completion",
     "stat_answered": "Answered",
     "stat_incomplete": "Incomplete",
-    "stat_preview": "Preview",
+    "stat_preview": "Test Responses",
     "error_loading": "Error Loading Analytics",
     "error_loading_data": "Failed to load analytics data",
     "no_data": "No analytics data available",
@@ -791,6 +834,17 @@
       "restore": "Before restoring a previous version",
       "discard": "Before discarding unpublished changes"
     }
+  },
+  "status_info": {
+    "draft": "Survey has not been published yet. Only available for preview.",
+    "scheduled": "Survey is published but the start date is in the future. It will become active automatically.",
+    "active": "Survey is live and accepting responses.",
+    "expired": "Survey end date has passed. No new responses can be collected. You can reactivate it by changing the dates.",
+    "closed": "Survey has been permanently closed. You can only export data or duplicate it."
+  },
+  "status_legend": {
+    "title": "Survey statuses",
+    "this_survey": "this survey"
   },
   "group_quotas": {
     "title": "Group quotas",

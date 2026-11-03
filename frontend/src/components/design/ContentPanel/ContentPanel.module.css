@@ -248,3 +248,16 @@
   background-color: #16205b;
   color: white;
 }
+
+.searchHit {
+  animation: searchHitFlash 2s ease-out;
+}
+
+@keyframes searchHitFlash {
+  0% {
+    background-color: var(--new-item-flash);
+  }
+  100% {
+    background-color: var(--new-item-flash-end);
+  }
+}

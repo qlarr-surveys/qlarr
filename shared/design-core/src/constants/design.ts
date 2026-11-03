@@ -591,6 +591,7 @@ const baseSetupOptions = (type) => {
             "maxDate",
             "minDate",
             "hint",
+            "showNowButton",
           ],
         },
         {
@@ -624,6 +625,7 @@ const baseSetupOptions = (type) => {
             "maxDate",
             "minDate",
             "hint",
+            "showNowButton",
           ],
         },
         {
@@ -655,6 +657,7 @@ const baseSetupOptions = (type) => {
             "convert_question_type",
             "fullDayFormat",
             "hint",
+            "showNowButton",
           ],
         },
         {

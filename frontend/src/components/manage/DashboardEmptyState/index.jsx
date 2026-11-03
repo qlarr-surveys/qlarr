@@ -9,6 +9,13 @@ import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import TokenService from "~/services/TokenService";
 import styles from "./DashboardEmptyState.module.css";
 
+const actionButtonSx = {
+  textTransform: "none",
+  px: 3,
+  py: 1.2,
+  borderRadius: "8px",
+};
+
 function DashboardEmptyState({
   onCreateSurvey,
   onImportTemplate,
@@ -40,47 +47,35 @@ function DashboardEmptyState({
         </Typography>
 
         {canCreate && (
-          <>
-            <Stack
-              direction="row"
-              spacing={2}
-              justifyContent="center"
-              sx={{ mt: 3 }}
+          /* Both ways in are buttons side by side. This state replaces the
+             dashboard's action cards rather than sitting under them, so
+             importing is the only other route and can't be a footnote. */
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={2}
+            justifyContent="center"
+            sx={{ mt: 3 }}
+          >
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<Add />}
+              onClick={onCreateSurvey}
+              sx={actionButtonSx}
             >
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<Add />}
-                onClick={onCreateSurvey}
-                sx={{
-                  textTransform: "none",
-                  px: 3,
-                  py: 1.2,
-                  borderRadius: "8px",
-                }}
-              >
-                {t("empty_state.create_survey_btn")}
-              </Button>
-              {children}
-            </Stack>
-            <Link
-              component="button"
-              variant="body2"
+              {t("empty_state.create_survey_btn")}
+            </Button>
+            <Button
+              variant="outlined"
+              color="primary"
+              startIcon={<UploadFileOutlined />}
               onClick={onImportTemplate}
-              underline="hover"
-              sx={{
-                mt: 2,
-                color: "primary.main",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: 0.5,
-              }}
+              sx={actionButtonSx}
             >
-              <UploadFileOutlined sx={{ fontSize: 18 }} />
               {t("empty_state.import_template")}
-            </Link>
-          </>
+            </Button>
+            {children}
+          </Stack>
         )}
       </Box>
 

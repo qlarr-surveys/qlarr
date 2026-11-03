@@ -151,6 +151,7 @@ function logTimes(state, code) {
 function next(state) {
   if (!state.values.Survey.validity) {
     state.values.Survey.show_errors = true;
+    state.invalidNextAttempts = (state.invalidNextAttempts ?? 0) + 1;
   } else {
     state.values.Survey.show_errors = false;
     state.navigation = {

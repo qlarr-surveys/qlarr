@@ -7,6 +7,11 @@ import * as Yup from "yup";
 import { PROCESSED_ERRORS } from "~/utils/errorsProcessor";
 import styles from "./CreateSurvey.module.css";
 import { SURVEY_MODE } from "~/constants/survey";
+import {
+  SURVEY_MODE_OPTIONS,
+  SurveyModeOption,
+  renderSurveyMode,
+} from "./SurveyModeOptions";
 import { setLoading } from "~/state/edit/editState";
 import { useDispatch } from "react-redux";
 import FormProvider, { RHFSelect, RHFTextField } from "~/components/hook-form";
@@ -15,12 +20,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { useService } from "~/hooks/use-service";
 import { useNavigate } from "react-router-dom";
-
-const surveyMode_options = [
-  { value: SURVEY_MODE.WEB, label: `mode.${SURVEY_MODE.WEB}` },
-  { value: SURVEY_MODE.OFFLINE, label: `mode.${SURVEY_MODE.OFFLINE}` },
-  { value: SURVEY_MODE.MIXED, label: `mode.${SURVEY_MODE.MIXED}` },
-];
 
 function CreateSurvey({ open, onResult }) {
   const surveyService = useService("survey");
@@ -136,10 +135,14 @@ function CreateSurvey({ open, onResult }) {
           <Box display="flex" flexDirection="column" gap={2}>
             <RHFTextField name="surveyName" label={t("label.survey_name")} />
 
-            <RHFSelect name="surveyMode" label={t("label.survey_mode")}>
-              {surveyMode_options.map((option) => (
+            <RHFSelect
+              name="surveyMode"
+              label={t("label.survey_mode")}
+              renderValue={renderSurveyMode(t)}
+            >
+              {SURVEY_MODE_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
-                  {t(option.label)}
+                  <SurveyModeOption {...option} t={t} />
                 </option>
               ))}
             </RHFSelect>
