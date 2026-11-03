@@ -8,7 +8,6 @@ import {
   Alert,
   Box,
   Button,
-  Chip,
   IconButton,
   Paper,
   Snackbar,
@@ -524,7 +523,13 @@ function SampleTable({ calculations, sample, t }) {
                 <Stack direction="row" spacing={1} alignItems="center">
                   <span>{row.index != null ? `#${row.index}` : "—"}</span>
                   {row.preview && (
-                    <Chip size="small" label={t("responses.preview", "Preview")} />
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      fontWeight={500}
+                    >
+                      {t("responses.test_response")}
+                    </Typography>
                   )}
                 </Stack>
               </TableCell>
