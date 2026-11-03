@@ -50,6 +50,7 @@ const MAX_BULK_BYTES = 200 * 1024 * 1024; // 200MB
 
 interface FileToDownload {
   responseId: string;
+  index: number;
   questionId: string;
   storedFilename: string;
   originalFilename: string;
@@ -142,13 +143,17 @@ export class ResponseService {
       : keys;
 
     const dataTypeByCode = valueDataTypes(schema);
+    // Per column, not per cell: the split recompiles a regex on every call.
+    const questionCodes = options.textValues
+      ? fields.map((f) => this.engine.splitToComponentCodes(f.componentCode)[0])
+      : [];
     const cellFor = (
       values: Record<string, unknown>,
       { componentCode }: ResponseField,
       key: string,
+      questionCode: string,
     ) => {
       if (!options.textValues) return values[key] ?? null;
-      const questionCode = this.engine.splitToComponentCodes(componentCode)[0];
       return (
         resolveListAndEnumValues(
           values[key],
@@ -172,7 +177,7 @@ export class ResponseService {
       r.submitDate,
       r.lang,
       r.values["Survey.disqualified"] ?? false,
-      ...fields.map((f, i) => cellFor(r.values, f, keys[i])),
+      ...fields.map((f, i) => cellFor(r.values, f, keys[i], questionCodes[i])),
       ...calculationCells(
         calculated.columns.length,
         calculated.resolve(r.submitDate, r.computations),
@@ -312,6 +317,7 @@ export class ResponseService {
         if (storedFilename && originalFilename && size != null) {
           filesToDownload.push({
             responseId: row.id,
+            index: row.index,
             questionId,
             storedFilename,
             originalFilename,
@@ -376,7 +382,7 @@ export class ResponseService {
           currentPass = pass;
           zip.addReadStream(
             pass,
-            `${file.responseId}_${file.questionId.split(".")[0]}` +
+            `${file.index}-${file.questionId.split(".")[0]}` +
               extname(file.originalFilename),
           );
           dl.body.on("error", (err) => {

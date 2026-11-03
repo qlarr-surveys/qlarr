@@ -69,7 +69,7 @@
   "ranking_ranked": "{{count}} eingeordnet",
   "ranking_drag_hint": "Elemente hierher ziehen, um sie einzuordnen",
   "ranking_all_ranked": "Alle Elemente wurden eingeordnet",
-  "preview_not_exportable": "Vorschauantworten können nicht exportiert werden",
+  "preview_not_exportable": "Testantworten (Vorschau) können nicht exportiert werden",
   "preview_end_actions": {
     "heading": "Vorschauoptionen",
     "check_response": "Antwort prüfen",

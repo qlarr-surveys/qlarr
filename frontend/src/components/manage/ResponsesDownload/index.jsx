@@ -106,7 +106,6 @@ export default function ResponsesDownload({
     surveyService
       .downloadResponseFiles(surveyId, from, to, complete)
       .then(({ blob, fileName }) => {
-        console.log("here!!!")
         if (!blob || blob.size === 0) {
           setSnackbar({
             open: true,

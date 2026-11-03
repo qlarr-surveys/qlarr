@@ -148,7 +148,7 @@ describe('Response file ops + bulk download', () => {
       expect(res.headers['content-type']).toContain('application/zip');
       expect(res.headers['content-disposition']).toContain(`filename="${SURVEY}.zip"`);
       expect(res.body.subarray(0, 2).toString('ascii')).toBe('PK'); // zip magic
-      expect(res.body.includes(`${R_FILE}_q1.png`)).toBe(true);
+      expect(res.body.includes('1-q1.png')).toBe(true);
       expect(res.body.includes('photo.png')).toBe(false);
       expect(files.download).toHaveBeenCalledWith(
         SURVEY,

@@ -69,7 +69,7 @@
     "ranking_ranked": "{{count}} ranked",
     "ranking_drag_hint": "Drag items here to rank them",
     "ranking_all_ranked": "All items have been ranked",
-    "preview_not_exportable": "Preview responses cannot be exported",
+    "preview_not_exportable": "Test (preview) responses cannot be exported",
     "preview_end_actions": {
         "heading": "Preview options",
         "check_response": "Check response",

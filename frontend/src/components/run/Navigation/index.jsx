@@ -46,11 +46,14 @@ function Navigation(props) {
             getClosestScrollableParent(invalidQuestion),
             invalidQuestion
           );
-          invalidQuestion
-            .querySelector(
-              "input:not([type=hidden]), textarea, select, [contenteditable=true]"
-            )
-            ?.focus({ preventScroll: true });
+          // Touch devices would pop the soft keyboard and shift the view.
+          if (window.matchMedia("(pointer: fine)").matches) {
+            invalidQuestion
+              .querySelector(
+                "input:not([type=hidden]), textarea, select, [contenteditable=true]"
+              )
+              ?.focus({ preventScroll: true });
+          }
         }
       }, 500);
       return () => clearTimeout(id);

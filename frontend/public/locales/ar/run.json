@@ -69,7 +69,7 @@
   "ranking_ranked": "{{count}} مُرتَّبة",
   "ranking_drag_hint": "اسحب العناصر هنا لترتيبها",
   "ranking_all_ranked": "تم ترتيب جميع العناصر",
-  "preview_not_exportable": "لا يمكن تصدير الردود التجريبية",
+  "preview_not_exportable": "لا يمكن تصدير الردود التجريبية (المعاينة)",
   "preview_end_actions": {
     "heading": "خيارات المعاينة",
     "check_response": "عرض الرد",

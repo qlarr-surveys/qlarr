@@ -101,7 +101,13 @@ class SurveyService extends BaseService {
     const response = await this.handleRequest(() =>
       authenticatedApi.get(url, { responseType: "blob" })
     );
-    return response.data;
+    return {
+      blob: response.data,
+      fileName: fileNameFrom(
+        response,
+        `${surveyId}-responses-export.${format}`
+      ),
+    };
   }
 
   async downloadResponseFiles(surveyId, from, to, complete) {

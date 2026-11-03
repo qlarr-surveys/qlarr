@@ -513,6 +513,8 @@ function ResponsesList({ refreshKey }) {
     try {
       const exported = await exportResponsesFile(surveyService, surveyId);
       if (!exported) setNoResponsesToExport(true);
+    } catch (e) {
+      // already surfaced by the service's global error handler
     } finally {
       setExporting(false);
     }

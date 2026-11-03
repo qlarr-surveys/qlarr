@@ -56,7 +56,7 @@ export async function exportResponsesFile(
   { range, from, to, statuses, format, headers, mode } = DEFAULT_VALUES
 ) {
   const allResponses = range === "all";
-  const blob = await surveyService.exportResponses(surveyId, {
+  const { blob, fileName } = await surveyService.exportResponses(surveyId, {
     format,
     from: allResponses ? 1 : Number(from),
     to: allResponses ? MAX_RESPONSE_INDEX : Number(to),
@@ -68,7 +68,7 @@ export async function exportResponsesFile(
 
   if (!blob || blob.size === 0) return false;
 
-  const file = new File([blob], `${surveyId}-responses-export.${format}`, {
+  const file = new File([blob], fileName, {
     type: MIME_BY_FORMAT[format] || "application/octet-stream",
   });
   FileSaver.saveAs(file);
@@ -150,8 +150,8 @@ export default function ResponsesExport({
       }
       onClose?.();
     } catch (error) {
+      // already surfaced by the service's global error handler
       onClose?.();
-      throw error;
     }
   });
   return (

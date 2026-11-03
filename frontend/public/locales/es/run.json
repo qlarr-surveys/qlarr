@@ -69,7 +69,7 @@
     "ranking_ranked": "{{count}} clasificadas",
     "ranking_drag_hint": "Arrastra los elementos aquí para clasificarlos",
     "ranking_all_ranked": "Todos los elementos han sido clasificados",
-    "preview_not_exportable": "Las respuestas de vista previa no se pueden exportar",
+    "preview_not_exportable": "Las respuestas de prueba (vista previa) no se pueden exportar",
     "preview_end_actions": {
         "heading": "Opciones de vista previa",
         "check_response": "Ver respuesta",
