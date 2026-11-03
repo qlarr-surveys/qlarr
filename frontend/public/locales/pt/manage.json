@@ -22,6 +22,7 @@
   "timezone_info": "Usamos seu fuso horário local para calcular o tempo de expiração da pesquisa.",
   "timezone_tooltip": "A pesquisa expirará às 00:00 na data de finalização selecionada em seu fuso horário local",
   "goBack": "Voltar",
+  "go_to_dashboard": "Ir para o painel",
   "preview": "Pré-visualização",
   "mobile_view": "Console Não Otimizado para Telas Pequenas",
   "mobile_view_working": "Nosso console é complexo e não suporta telas menores para a melhor experiência. Mas não se preocupe - as pesquisas que ajudamos você a criar são incríveis em telas pequenas!",
@@ -263,10 +264,13 @@
     "wrong_confirmation_token": "Este Token de Confirmação está incorreto, Por favor Registre-se Mais Uma Vez",
     "survey_quota": "Desculpe, esta pesquisa não está mais aceitando respostas.",
     "invalid_translations_csv": "Não é um CSV de traduções.",
-    "translations_csv_not_utf8": "Este arquivo não está em UTF-8. No Excel, use Arquivo → Salvar como → “CSV UTF-8 (Delimitado por vírgulas)” e importe novamente."
+    "translations_csv_not_utf8": "Este arquivo não está em UTF-8. No Excel, use Arquivo → Salvar como → “CSV UTF-8 (Delimitado por vírgulas)” e importe novamente.",
+    "user_already_confirmed": "Este usuário já aceitou o convite.",
+    "survey_not_found": "Esta pesquisa não existe ou foi excluída"
   },
   "processed_successes": {
     "copied": "Copiado para a área de transferência",
+    "invitation_resent": "Convite reenviado",
     "updated": "Atualizado com sucesso"
   },
   "profile": {
@@ -378,6 +382,7 @@
     "effective_base": "Base efetiva",
     "efficiency": "Eficiência",
     "weight_note": "Maior ponderação {{maxWeight}}. Os testes de significância usam a base efetiva, não a base ponderada.",
+    "weight_filtered_note": "Há filtros ativos. Os valores reais e as ponderações vêm de todas as {{total}} respostas, não apenas das {{filtered}} na tabela. Cada respondente mantém a ponderação da amostra completa, por isso a tabela filtrada pode não corresponder às metas.",
     "base": "Base",
     "eff": "efet",
     "subtitle": "Por {{column}} · {{weighting}}",
@@ -396,7 +401,15 @@
     "warn_lowEfficiency": "A eficiência é de {{efficiency}}%. Abaixo de 60%, um grupo pequeno começa a determinar todo o relatório.",
     "warn_highWeight": "Uma ponderação é {{maxWeight}}. Ponderações acima de 5 costumam indicar que o alvo é irrealista para esta amostra.",
     "warn_droppedWeight": "{{count}} resposta(s) não responderam à pergunta de ponderação e foram excluídas desta tabela.",
-    "warn_truncated": "A mostrar as primeiras {{shown}} de {{total}} respostas. Os valores e os testes baseiam-se nessa amostra."
+    "warn_truncated": "A mostrar as primeiras {{shown}} de {{total}} respostas. Os valores e os testes baseiam-se nessa amostra.",
+    "filters": "Filtros",
+    "add_filter": "Adicionar filtro",
+    "filter_any_of": "Qualquer um de…",
+    "remove_filter": "Remover filtro",
+    "filtered_base": "Filtrado para {{count}} de {{total}} respostas",
+    "warn_noMatches": "Nenhuma resposta corresponde a estes filtros.",
+    "plan_name": "Nome do plano",
+    "plan_name_taken": "Já existe um plano com este nome."
   },
   "calculations": {
     "title": "Campos calculados",
@@ -544,6 +557,7 @@
     "status": "Status",
     "active": "Ativo",
     "invitation_sent": "Convite Enviado",
+    "resend_invitation": "Reenviar Convite",
     "learn_about_roles": "Saiba mais sobre os papéis de usuário",
     "roles_info": "<strong>Super Admin</strong> — Acesso total a todos os recursos, incluindo gerenciamento de usuários, criação de pesquisas e configurações do sistema.<br/><br/><strong>Admin de Pesquisas</strong> — Pode criar e gerenciar pesquisas, acessar design, configurações, respostas e análises.<br/><br/><strong>Analista</strong> — Pode visualizar respostas e análises de pesquisas, e pré-visualizar pesquisas.<br/><br/><strong>Pesquisador</strong> — Pode coletar respostas de pesquisas pelo aplicativo móvel, e pré-visualizar pesquisas."
   },

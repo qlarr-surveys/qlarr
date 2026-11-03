@@ -2,7 +2,7 @@ import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import * as path from 'path';
 import { Piscina } from 'piscina';
 import { dispatch, EngineOp, EngineTask } from './engine-runtime';
-import { EngineTimeoutException } from './engine.exceptions';
+import { EngineException, EngineTimeoutException } from './engine.exceptions';
 
 export interface EnginePoolOptions {
   /** Run engine ops on worker threads. When false everything runs in-process
@@ -60,7 +60,11 @@ export class EnginePool implements OnModuleDestroy {
   async run<T>(op: EngineOp, payload: unknown): Promise<T> {
     const task = { op, payload } as EngineTask;
     if (!this.piscina) {
-      return dispatch(task) as T;
+      try {
+        return (await dispatch(task)) as T;
+      } catch (err) {
+        throw err instanceof Error ? err : new EngineException(op, err);
+      }
     }
     // Aborting a *running* task makes Piscina terminate the worker executing it,
     // which is the only way to interrupt a synchronous infinite loop in the
@@ -76,7 +80,7 @@ export class EnginePool implements OnModuleDestroy {
         );
         throw new EngineTimeoutException();
       }
-      throw err;
+      throw err instanceof Error ? err : new EngineException(op, err);
     } finally {
       clearTimeout(timer);
     }

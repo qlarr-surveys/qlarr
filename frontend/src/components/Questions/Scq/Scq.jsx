@@ -129,6 +129,12 @@ function ScqChoiceOther(props) {
   const showChoice = () => {
     return (
       <FormControlLabel
+        // A div, not a label: the outlined label turns its pointer events on as
+        // it shrinks, so a tap on it is a mousedown on the input and a mouseup
+        // on the label, and the click retargets to their common parent. Inside
+        // a label that activates the radio, which takes the focus back off the
+        // input — on a phone the keyboard then never opens.
+        as="div"
         data-code={props.Choice.code}
         key={props.Choice.qualifiedCode}
         css={css`
@@ -136,7 +142,7 @@ function ScqChoiceOther(props) {
             width: 100%;
           }
         `}
-        control={<Radio />}
+        control={<Radio inputProps={{ "aria-label": props.Choice.content?.label }} />}
         label={
           <TextField
             variant="outlined"
@@ -148,6 +154,10 @@ function ScqChoiceOther(props) {
             id={nestedTextChild.qualifiedCode}
             name={nestedTextChild.qualifiedCode}
             label={props.Choice.content?.label}
+            // A press on the floating label would blur the input, and an empty
+            // input then drops the label away from under the finger, so the
+            // click misses it and the focus — and the keyboard — is lost.
+            InputLabelProps={{ onMouseDown: (event) => event.preventDefault() }}
             onChange={handleChange}
             onFocus={handleFocus}
             onBlur={lostFocus}

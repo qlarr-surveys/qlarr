@@ -50,11 +50,18 @@ export const PROCESSED_ERRORS = {
     handleGlobally: false,
   },
   USER_NOT_FOUND: { name: "user_not_found", handleGlobally: false },
+  USER_ALREADY_CONFIRMED: {
+    name: "user_already_confirmed",
+    handleGlobally: true,
+  },
   MISSING_CREDENTIALS: { name: "missing_credentials", handleGlobally: false },
   SURVEY_DESIGN_ERROR: { name: "survey_design_error", handleGlobally: false },
   SURVEY_NOT_ACTIVE: { name: "survey_not_active", handleGlobally: false },
 
   SURVEY_SCHEDULED: { name: "survey_scheduled", handleGlobally: false },
+  CLIENT_TIME_SKEW: { name: "client_time_skew", handleGlobally: false },
+  SURVEY_NOT_PUBLISHED: { name: "survey_not_published", handleGlobally: false },
+  SURVEY_NOT_FOUND: { name: "survey_not_found", handleGlobally: true },
   SURVEY_EXPIRED: { name: "survey_expired", handleGlobally: false },
   INVALID_SURVEY_DATES: { name: "invalid_survey_dates", handleGlobally: false },
   SURVEY_QUOTA: { name: "survey_quota", handleGlobally: false },
@@ -155,6 +162,8 @@ export const processError = (e) => {
         return PROCESSED_ERRORS.EXPIRED_CONFIRMATION_TOKEN;
       case "UserNotFoundException":
         return PROCESSED_ERRORS.USER_NOT_FOUND;
+      case "UserAlreadyConfirmedException":
+        return PROCESSED_ERRORS.USER_ALREADY_CONFIRMED;
       case "DuplicateEmailException":
         return PROCESSED_ERRORS.DUPLICATE_EMAIL;
       case "MissingCredentialsException":
@@ -169,6 +178,12 @@ export const processError = (e) => {
         return PROCESSED_ERRORS.SURVEY_EXPIRED;
       case "SurveyNotStartedException":
         return PROCESSED_ERRORS.SURVEY_SCHEDULED;
+      case "ClientTimeSkewException":
+        return PROCESSED_ERRORS.CLIENT_TIME_SKEW;
+      case "SurveyNotPublishedException":
+        return PROCESSED_ERRORS.SURVEY_NOT_PUBLISHED;
+      case "SurveyNotFoundException":
+        return PROCESSED_ERRORS.SURVEY_NOT_FOUND;
       case "SurveyIsClosedException":
         return PROCESSED_ERRORS.SURVEY_CLOSED;
       case "InvalidSurveyDates":

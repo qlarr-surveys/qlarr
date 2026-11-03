@@ -22,7 +22,8 @@ export const SURVEY_MODE_OPTIONS = [
 /** The label and hint, as a MenuItem's contents. */
 export function SurveyModeOption({ labelKey, hintKey, t }) {
   return (
-    <Box>
+    // MenuItem is nowrap; let the hint wrap when the menu is phone-narrow.
+    <Box sx={{ whiteSpace: "normal" }}>
       <Typography component="span" sx={{ display: "block", fontSize: 15 }}>
         {t(labelKey)}
       </Typography>

@@ -19,7 +19,10 @@
         "survey_design_error": "Erreur de Conception de Sondage... Vérifiez la Conception du Sondage",
         "survey_expired": "Ce sondage a expiré",
         "survey_not_active": "Ce sondage n'est pas actif",
-        "survey_scheduled": "Ce sondage est programmé pour commencer dans le futur"
+        "survey_scheduled": "Ce sondage est programmé pour commencer dans le futur",
+        "client_time_skew": "L'horloge de votre appareil n'est pas synchronisée. Veuillez corriger vos paramètres de date et d'heure, puis recharger la page.",
+        "survey_not_published": "Ce sondage n'a pas encore été publié",
+        "survey_not_found": "Ce sondage n'est pas disponible"
     },
     "preview":"Vous êtes en mode aperçu",
     "upload": "Télécharger",

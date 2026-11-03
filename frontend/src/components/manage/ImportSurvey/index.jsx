@@ -106,7 +106,9 @@ export const ImportSurvey = ({ open, onResult }) => {
           </Button>
 
           {fileToImport && (
-            <Typography sx={{ margin: "4px" }}>{fileToImport.name}</Typography>
+            <Typography sx={{ margin: "4px", overflowWrap: "anywhere" }}>
+              {fileToImport.name}
+            </Typography>
           )}
 
           {error ? (

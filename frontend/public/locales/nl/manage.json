@@ -22,6 +22,7 @@
   "timezone_info": "We gebruiken je lokale tijdzone om de enquête vervaltijd te berekenen.",
   "timezone_tooltip": "De enquête verloopt om 00:00 op de geselecteerde einddatum in je lokale tijdzone",
   "goBack": "Terug",
+  "go_to_dashboard": "Naar dashboard",
   "preview": "Voorvertoning",
   "mobile_view": "Console Niet Geoptimaliseerd voor Kleine Schermen",
   "mobile_view_working": "Onze console is complex en ondersteunt geen kleinere schermen voor de beste ervaring. Maar maak je geen zorgen - de enquêtes die we je helpen maken zijn geweldig op kleine schermen!",
@@ -263,10 +264,13 @@
     "wrong_confirmation_token": "Deze Bevestiging Token is onjuist, Registreer Opnieuw",
     "survey_quota": "Sorry, deze enquête accepteert geen reacties meer.",
     "invalid_translations_csv": "Geen CSV met vertalingen.",
-    "translations_csv_not_utf8": "Dit bestand is niet in UTF-8. Kies in Excel Bestand → Opslaan als → “CSV UTF-8 (door komma's gescheiden)” en importeer het opnieuw."
+    "translations_csv_not_utf8": "Dit bestand is niet in UTF-8. Kies in Excel Bestand → Opslaan als → “CSV UTF-8 (door komma's gescheiden)” en importeer het opnieuw.",
+    "user_already_confirmed": "Deze gebruiker heeft de uitnodiging al geaccepteerd.",
+    "survey_not_found": "Deze enquête bestaat niet of is verwijderd"
   },
   "processed_successes": {
     "copied": "Gekopieerd naar klembord",
+    "invitation_resent": "Uitnodiging opnieuw verzonden",
     "updated": "Succesvol bijgewerkt"
   },
   "profile": {
@@ -378,6 +382,7 @@
     "effective_base": "Effectieve basis",
     "efficiency": "Efficiëntie",
     "weight_note": "Grootste weging {{maxWeight}}. Significantietoetsen gebruiken de effectieve basis, niet de gewogen basis.",
+    "weight_filtered_note": "Er zijn filters actief. Werkelijke waarden en wegingen komen uit alle {{total}} antwoorden, niet alleen uit de {{filtered}} in de tabel. Elke respondent behoudt de weging uit de volledige steekproef, dus de gefilterde tabel komt mogelijk niet overeen met de doelen.",
     "base": "Basis",
     "eff": "eff",
     "subtitle": "Naar {{column}} · {{weighting}}",
@@ -396,7 +401,15 @@
     "warn_lowEfficiency": "De efficiëntie is {{efficiency}}%. Onder 60% gaat een kleine groep het hele rapport bepalen.",
     "warn_highWeight": "Eén weging is {{maxWeight}}. Wegingen boven 5 betekenen meestal dat het doel onrealistisch is voor deze steekproef.",
     "warn_droppedWeight": "{{count}} reactie(s) hadden geen antwoord op de wegingsvraag en zijn uit deze tabel weggelaten.",
-    "warn_truncated": "De eerste {{shown}} van {{total}} reacties worden getoond. Cijfers en toetsen zijn op die steekproef gebaseerd."
+    "warn_truncated": "De eerste {{shown}} van {{total}} reacties worden getoond. Cijfers en toetsen zijn op die steekproef gebaseerd.",
+    "filters": "Filters",
+    "add_filter": "Filter toevoegen",
+    "filter_any_of": "Een van…",
+    "remove_filter": "Filter verwijderen",
+    "filtered_base": "Gefilterd tot {{count}} van {{total}} antwoorden",
+    "warn_noMatches": "Geen antwoorden voldoen aan deze filters.",
+    "plan_name": "Plannaam",
+    "plan_name_taken": "Er bestaat al een plan met deze naam."
   },
   "calculations": {
     "title": "Berekende velden",
@@ -544,6 +557,7 @@
     "status": "Status",
     "active": "Actief",
     "invitation_sent": "Uitnodiging Verzonden",
+    "resend_invitation": "Uitnodiging Opnieuw Verzenden",
     "learn_about_roles": "Meer informatie over gebruikersrollen",
     "roles_info": "<strong>Super Admin</strong> — Volledige toegang tot alle functies, inclusief gebruikersbeheer, enquêtes aanmaken en systeeminstellingen.<br/><br/><strong>Enquête Admin</strong> — Kan enquêtes aanmaken en beheren, toegang tot ontwerp, instellingen, reacties en analyses.<br/><br/><strong>Analist</strong> — Kan enquêtereacties en analyses bekijken, en enquêtes voorvertonen.<br/><br/><strong>Enquêteur</strong> — Kan enquêtereacties verzamelen via de mobiele app, en enquêtes voorvertonen."
   },

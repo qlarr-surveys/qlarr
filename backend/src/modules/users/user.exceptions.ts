@@ -17,6 +17,16 @@ export class UserNotFoundException extends UserException {
   }
 }
 
+export class UserAlreadyConfirmedException extends UserException {
+  constructor() {
+    super(
+      'User has already accepted the invitation',
+      'UserAlreadyConfirmedException',
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+}
+
 export class EditOwnUserException extends UserException {
   constructor() {
     super('Cannot edit your own user', 'EditOwnUserException', HttpStatus.BAD_REQUEST);
