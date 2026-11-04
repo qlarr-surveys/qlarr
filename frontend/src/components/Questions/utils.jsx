@@ -1,88 +1,81 @@
 import React from "react";
-import PagesIcon from "@mui/icons-material/Pages";
-import FlagIcon from "@mui/icons-material/Flag";
-import StartIcon from "@mui/icons-material/Start";
-import SurveyIcon from "../common/SurveyIcons/SurveyIcon";
+import {
+  AlignLeft,
+  Calendar,
+  CalendarClock,
+  Camera,
+  CircleDot,
+  Clock,
+  FileImage,
+  FileText,
+  FileVideo,
+  GalleryVerticalEnd,
+  Gauge,
+  Grid2x2,
+  Hash,
+  Image,
+  Images,
+  LayoutGrid,
+  ListOrdered,
+  ListTree,
+  Mail,
+  Paperclip,
+  Rows3,
+  ScanBarcode,
+  Search,
+  Signature,
+  Smile,
+  SmilePlus,
+  SquareCheck,
+  Table,
+  TextCursorInput,
+  Video,
+} from "lucide-react";
 import { getContrastRatio } from "@mui/material";
 
-export const groupIconByType = (type, size = "medium") => {
-  switch (type) {
-    case "welcome":
-      return <StartIcon fontSize={size} />;
-    case "END":
-      return <FlagIcon fontSize={size} />;
-    default:
-      return <PagesIcon fontSize={size} />;
-  }
+const QUESTION_ICONS = {
+  text: TextCursorInput,
+  paragraph: AlignLeft,
+  number: Hash,
+  email: Mail,
+  multiple_text: Rows3,
+  scq: CircleDot,
+  mcq: SquareCheck,
+  autocomplete: Search,
+  hierarchical_autocomplete: ListTree,
+  scq_array: Grid2x2,
+  mcq_array: Table,
+  nps: Gauge,
+  icon_scq: Smile,
+  image_scq: Image,
+  scq_icon_array: LayoutGrid,
+  icon_mcq: SmilePlus,
+  image_mcq: Images,
+  date: Calendar,
+  time: Clock,
+  date_time: CalendarClock,
+  text_display: FileText,
+  image_display: FileImage,
+  video_display: FileVideo,
+  barcode: ScanBarcode,
+  photo_capture: Camera,
+  video_capture: Video,
+  ranking: ListOrdered,
+  image_ranking: GalleryVerticalEnd,
+  file_upload: Paperclip,
+  signature: Signature,
 };
 
-export const questionIconByType = (type, size = "1.25em", color) => {
-  switch (type) {
-    case "text":
-      return <SurveyIcon name="shortText" size={size} color={color} />;
-    case "multiple_text":
-      return <SurveyIcon name="multipleText" size={size} color={color} />;
-    case "paragraph":
-      return <SurveyIcon name="longText" size={size} color={color} />;
-    case "autocomplete":
-      return <SurveyIcon name="autocomplete" size={size} color={color} />;
-    case "hierarchical_autocomplete":
-      return <SurveyIcon name="autocomplete" size={size} color={color} />;
-    case "barcode":
-      return <SurveyIcon name="qrCode" size={size} color={color} />;
-    case "number":
-      return <SurveyIcon name="number" size={size} color={color} />;
-    case "email":
-      return <SurveyIcon name="email" size={size} color={color} />;
-    case "scq":
-      return <SurveyIcon name="singleChoice" size={size} color={color} />;
-    case "icon_scq":
-      return <SurveyIcon name="singleIconChoice" size={size} color={color} />;
-    case "image_scq":
-      return <SurveyIcon name="singleImageChoice" size={size} color={color} />;
-    case "scq_icon_array":
-    case "scq_array":
-      return <SurveyIcon name="singleChoiceArray" size={size} color={color} />;
-    case "mcq_array":
-      return (
-        <SurveyIcon name="multipleChoiceArray" size={size} color={color} />
-      );
-    case "mcq":
-      return <SurveyIcon name="multipleChoice" size={size} color={color} />;
-    case "icon_mcq":
-      return <SurveyIcon name="multipleIconChoice" size={size} color={color} />;
+// 1.33 against a 16px glyph is the stroke the workspace tabs draw; keeping the
+// ratio is what makes an icon in the type list read as the same set as one in
+// the strip above it.
+export const ICON_STROKE = 1.33;
 
-    case "image_mcq":
-      return (
-        <SurveyIcon name="multipleImageChoice" size={size} color={color} />
-      );
-    case "nps":
-      return <SurveyIcon name="nps" size={size} color={color} />;
-    case "date":
-      return <SurveyIcon name="date" size={size} color={color} />;
-    case "date_time":
-      return <SurveyIcon name="datetime" size={size} color={color} />;
-    case "time":
-      return <SurveyIcon name="time" size={size} color={color} />;
-    case "file_upload":
-      return <SurveyIcon name="fileUpload" size={size} color={color} />;
-    case "signature":
-      return <SurveyIcon name="signature" size={size} color={color} />;
-    case "photo_capture":
-      return <SurveyIcon name="capturePhoto" size={size} color={color} />;
-    case "video_capture":
-      return <SurveyIcon name="captureVideo" size={size} color={color} />;
-    case "ranking":
-      return <SurveyIcon name="ranking" size={size} color={color} />;
-    case "image_ranking":
-      return <SurveyIcon name="imageRanking" size={size} color={color} />;
-    case "text_display":
-      return <SurveyIcon name="textDisplay" size={size} color={color} />;
-    case "image_display":
-      return <SurveyIcon name="imageDisplay" size={size} color={color} />;
-    case "video_display":
-      return <SurveyIcon name="videoDisplay" size={size} color={color} />;
-  }
+export const questionIconByType = (type, size = "1.25em", color) => {
+  const Icon = QUESTION_ICONS[type];
+  return Icon ? (
+    <Icon size={size} color={color} strokeWidth={ICON_STROKE} />
+  ) : undefined;
 };
 
 function hexToRgb(hex) {
