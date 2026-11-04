@@ -139,6 +139,7 @@ function SetupPanel({ t }) {
           </Box>
 
           <IconButton
+            data-preview-allow
             onClick={() => {
               dispatch(resetSetup());
             }}
@@ -681,6 +682,7 @@ const SetupSection = React.memo(({ highlighted, rules, code, t, theme }) => {
             variant="contained"
             size="medium"
             endIcon={<ArrowForwardIcon />}
+            data-preview-allow
             onClick={() => handleShowAdvanced(true)}
           >
             {t("show_advanced_settings")}
@@ -751,6 +753,7 @@ const SetupSection = React.memo(({ highlighted, rules, code, t, theme }) => {
               variant="contained"
               size="medium"
               startIcon={<ArrowBackIcon />}
+              data-preview-allow
               onClick={() => handleShowAdvanced(false)}
             >
               {t("hide_advanced_settings")}

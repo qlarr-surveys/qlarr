@@ -9,7 +9,6 @@ import { changeAttribute, changeResources } from "~/state/design/designState";
 import styles from "../AutoComplete/AutoComplete.module.css";
 import LoadingDots from "~/components/common/LoadingDots";
 import { useService } from "~/hooks/use-service";
-import { useDesignReadOnly } from "~/components/design/DesignReadOnly";
 import {
   formatlocalDateTime,
   serverDateTimeToLocalDateTime,
@@ -66,11 +65,8 @@ function HierarchicalAutoCompleteDesign({ code, t, designMode, langInfo }) {
   const levelsMismatch =
     typeof meta?.levels === "number" && meta.levels !== levelCount;
 
-  const readOnly = useDesignReadOnly();
-
   const handleUpload = (e) => {
     e.preventDefault();
-    if (readOnly) return;
     const file = e.target.files[0];
     e.target.value = "";
     if (!file) return;

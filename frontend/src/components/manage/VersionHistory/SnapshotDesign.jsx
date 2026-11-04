@@ -1,10 +1,11 @@
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { useService } from "~/hooks/use-service";
 import { onError } from "~/state/edit/editState";
 import { createPreviewStore, loadPreview } from "~/store";
 import { DesignReadOnly } from "~/components/design/DesignReadOnly";
 import LoadingDots from "~/components/common/LoadingDots";
+import { guardPreview } from "./previewGuard";
 
 const DesignSurvey = React.lazy(() => import("~/pages/DesignSurvey"));
 
@@ -19,6 +20,11 @@ function SnapshotDesign({ snapshotId, onSettled }) {
   const versionDto = useSelector((state) => state.designState.versionDto);
   const [store] = useState(() => createPreviewStore(survey));
   const [loaded, setLoaded] = useState(false);
+  const unguard = useRef(null);
+  const guardRef = useCallback((node) => {
+    unguard.current?.();
+    unguard.current = node ? guardPreview(node) : null;
+  }, []);
 
   useEffect(() => {
     // Ignore a slow response once another version has been picked.
@@ -45,9 +51,11 @@ function SnapshotDesign({ snapshotId, onSettled }) {
   return (
     <Provider store={store}>
       <DesignReadOnly.Provider value={true}>
-        <Suspense fallback={<LoadingDots fullHeight />}>
-          <DesignSurvey />
-        </Suspense>
+        <div ref={guardRef} style={{ display: "contents" }}>
+          <Suspense fallback={<LoadingDots fullHeight />}>
+            <DesignSurvey />
+          </Suspense>
+        </div>
       </DesignReadOnly.Provider>
     </Provider>
   );
