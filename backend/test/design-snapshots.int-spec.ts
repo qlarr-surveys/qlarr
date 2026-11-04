@@ -423,6 +423,22 @@ describe('Design snapshots', () => {
         .expect(400);
     });
 
+    it('restore_published succeeds when deleting the draft file fails', async () => {
+      const id = await newSurvey();
+      await publish(id);
+      await save(id, await removeQuestion(id, 'Q293sqi')).expect(201);
+
+      files.delete.mockRejectedValueOnce(new Error('storage down'));
+      const res = await request(server())
+        .post(`/survey/${id}/design/restore_published?${await at(id)}`)
+        .set('Authorization', SUPER)
+        .expect(201);
+      expect(res.body.versionDto).toMatchObject({ version: 1, published: true });
+
+      await save(id, await removeQuestion(id, 'Q510beg')).expect(201);
+      expect((await getDesign(id)).versionDto).toMatchObject({ version: 2, published: false });
+    });
+
     it('restore_published: 400 from a stale sub-version, keeping the draft', async () => {
       const id = await newSurvey();
       await publish(id);

@@ -156,7 +156,11 @@ export class DesignService {
       await tx.getRepository(SurveyEntity).save(survey);
       await resetCalculationsOnDesignChange(tx, surveyId);
     });
-    await this.files.delete(surveyId, SurveyFolder.Design, String(latest.version));
+    try {
+      await this.files.delete(surveyId, SurveyFolder.Design, String(latest.version));
+    } catch {
+      // best-effort cleanup: the next draft reuses this version and overwrites the file
+    }
 
     return {
       designerInput: this.engine.toDesignerInput(output),

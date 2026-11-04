@@ -24,6 +24,7 @@ import { onError } from "~/state/edit/editState";
 import { SURVEY_STATUS } from "~/constants/survey";
 import { routes } from "~/routes";
 import ConfirmActionModal from "~/components/common/ConfirmActionModal";
+import DiscardChangesModal from "~/components/manage/DiscardChangesModal";
 import {
   CURRENT_VERSION,
   SnapshotDesign,
@@ -42,10 +43,7 @@ function DesignHistory() {
   const versionDto = useSelector((state) => state.designState.versionDto);
   const survey = useSelector((state) => state.editState.survey);
   const closed = survey?.status == SURVEY_STATUS.CLOSED;
-  // Something since the last publish to throw away, as on the Launch page.
-  const canDiscard =
-    !closed && !versionDto?.published && versionDto?.version > 1;
-  const { busy, restoring, restore } = useDesignRestore();
+  const { busy, restoring, restore, canDiscard, discard } = useDesignRestore();
 
   const [snapshots, setSnapshots] = useState(null);
   const [toRestore, setToRestore] = useState(null);
@@ -105,9 +103,7 @@ function DesignHistory() {
     });
 
   const discardChanges = () =>
-    restore(
-      designService.restorePublished(versionDto.version, versionDto.subVersion),
-    ).then((ok) => {
+    discard().then((ok) => {
       setDiscardOpen(false);
       if (ok) toDesign();
     });
@@ -286,14 +282,8 @@ function DesignHistory() {
         onClose={() => setToRestore(null)}
         onConfirm={restoreSnapshot}
       />
-      <ConfirmActionModal
+      <DiscardChangesModal
         open={discardOpen}
-        title={t("launch.discard_title")}
-        description={t("launch.discard_description")}
-        cancelLabel={t("action_btn.cancel")}
-        confirmLabel={t("launch.discard_changes")}
-        requireAcknowledgement
-        acknowledgementLabel={t("version_history.restore_acknowledge")}
         isLoading={restoring}
         onClose={() => setDiscardOpen(false)}
         onConfirm={discardChanges}

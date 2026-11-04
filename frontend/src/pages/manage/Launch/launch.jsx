@@ -21,6 +21,7 @@ import QRCode from "react-qr-code";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@emotion/react";
 import ConfirmActionModal from "~/components/common/ConfirmActionModal";
+import DiscardChangesModal from "~/components/manage/DiscardChangesModal";
 import { useDesignRestore } from "~/hooks/useDesignRestore";
 import { brokenQuotaCodes } from "@qlarr/design-core";
 
@@ -41,7 +42,7 @@ function LaunchPage({ onPublish }) {
   const [isQRDialogOpen, setQRDialogOpen] = useState(false);
   const [copy, setCopy] = useState(false);
   const [isDiscardOpen, setDiscardOpen] = useState(false);
-  const { busy, restoring: discarding, restore } = useDesignRestore();
+  const { busy, restoring: discarding, canDiscard, discard } = useDesignRestore();
   const [confirmBrokenQuotas, setConfirmBrokenQuotas] = useState(false);
 
   const hasFatalErrors = useSelector((state) => {
@@ -78,10 +79,7 @@ function LaunchPage({ onPublish }) {
       });
   };
 
-  const discardChanges = () =>
-    restore(
-      designService.restorePublished(versionDto?.version, versionDto?.subVersion)
-    ).finally(() => setDiscardOpen(false));
+  const discardChanges = () => discard().finally(() => setDiscardOpen(false));
 
   useEffect(() => {
     const newSurveyMode = survey?.usage || "";
@@ -89,7 +87,6 @@ function LaunchPage({ onPublish }) {
   }, [survey]);
 
   const isDisabled = !isSurveyAdmin() || survey?.status == SURVEY_STATUS.CLOSED;
-  const canDiscard = !published && versionDto?.version > 1 && !isDisabled;
 
   const getUserTimezone = () => {
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -359,14 +356,8 @@ function LaunchPage({ onPublish }) {
         </Box>
       </Box>
 
-      <ConfirmActionModal
+      <DiscardChangesModal
         open={isDiscardOpen}
-        title={t("launch.discard_title")}
-        description={t("launch.discard_description")}
-        cancelLabel={t("action_btn.cancel")}
-        confirmLabel={t("launch.discard_changes")}
-        requireAcknowledgement
-        acknowledgementLabel={t("version_history.restore_acknowledge")}
         isLoading={discarding}
         onClose={() => setDiscardOpen(false)}
         onConfirm={discardChanges}
