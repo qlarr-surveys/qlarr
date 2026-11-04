@@ -8,10 +8,10 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
 import { useSelector } from "react-redux";
 import { stripTags } from "~/utils/design/utils";
 import { ICON_STROKE, PAGE_ICON, questionIconByType } from "~/components/Questions/utils";
+import { Search } from "lucide-react";
 import styles from "./ElementSearch.module.css";
 
 const MAX_RESULTS = 50;
@@ -196,7 +196,7 @@ function ElementSearch({ t, onNavigate }) {
               aria-label={t("find_element")}
               onClick={() => setOpen(true)}
             >
-              <SearchIcon />
+              <Search size={24} strokeWidth={ICON_STROKE} />
             </IconButton>
           </Paper>
         </Tooltip>

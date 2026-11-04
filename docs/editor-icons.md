@@ -68,6 +68,33 @@ the ones to revisit when the design covers them.
 The design labels these Builder, Theme, Survey Languages, Configure and Survey
 Results. The app still uses its own labels.
 
+## Canvas toolbar
+
+The three buttons on a selected question are in the design:
+
+| Button | Icon |
+|---|---|
+| Duplicate | `Copy` |
+| Validation | `ShieldCheck` |
+| Delete | `Trash2` |
+
+The status badges are not. A question with show-logic, skip logic, a randomised
+or prioritised order, or one that is disabled, shows a badge the design's sample
+survey never puts into any of those states, so these five were chosen to sit
+with the rest and are the ones to revisit when the design covers them:
+
+| State | Icon |
+|---|---|
+| Has show-logic | `GitBranch` |
+| Disabled | `EyeOff` |
+| Randomised | `Shuffle` |
+| Prioritised | `ArrowDownWideNarrow` |
+| Has skip logic | `CornerDownRight` |
+
+One behavioural difference worth noting: the design shows the validation shield
+on every question, labelled "No validation rules" when there are none. The app
+only shows it once a question has rules.
+
 ## Stroke
 
 `ICON_STROKE` in `frontend/src/components/Questions/utils.jsx` is the stroke
