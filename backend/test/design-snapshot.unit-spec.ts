@@ -6,7 +6,7 @@ const NOW = 1_000 * MIN;
 describe('snapshotDue', () => {
   const due = (lastAt: number | null) => snapshotDue({ lastAt, now: NOW });
 
-  it('is due when there is no earlier snapshot or restore', () => {
+  it('is due when there is no earlier snapshot', () => {
     expect(due(null)).toBe(true);
   });
 

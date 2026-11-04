@@ -15,7 +15,7 @@ const INTERVAL_MS = 60_000;
 
 /**
  * At most one snapshot a minute: one is due when a minute has passed since the
- * last snapshot or restore (`lastAt`), or there was neither.
+ * save in the last snapshot (`lastAt`), or there is none.
  */
 export function snapshotDue(opts: { lastAt: number | null; now: number }): boolean {
   const { lastAt, now } = opts;
@@ -37,16 +37,13 @@ export class DesignSnapshotService {
     return manager.getRepository(DesignSnapshotEntity);
   }
 
-  async isDue(surveyId: string, restoredAt: string | null): Promise<boolean> {
+  async isDue(surveyId: string): Promise<boolean> {
     const last = await this.repo().findOne({
       where: { surveyId },
-      order: { createdAt: 'DESC', id: 'DESC' },
+      order: { savedAt: 'DESC', id: 'DESC' },
     });
-    // A restore counts as the last snapshot: the design is back on a restore
-    // point, so the minute starts again from it.
-    const times = [last?.createdAt, restoredAt].filter(Boolean).map(wallClockToInstant);
     return snapshotDue({
-      lastAt: times.length ? Math.max(...times) : null,
+      lastAt: last ? wallClockToInstant(last.savedAt) : null,
       now: Date.now(),
     });
   }
@@ -54,12 +51,11 @@ export class DesignSnapshotService {
   async create(input: SnapshotInput, manager: EntityManager = this.db.manager): Promise<void> {
     await manager.query(
       `INSERT INTO design_snapshots
-         (id, survey_id, created_at, saved_at, created_by, data)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
+         (id, survey_id, saved_at, created_by, data)
+       VALUES ($1, $2, $3, $4, $5)`,
       [
         randomUUID(),
         input.surveyId,
-        nowUtcString(),
         input.savedAt,
         input.userId ?? null,
         JSON.stringify(input.survey),
@@ -72,12 +68,12 @@ export class DesignSnapshotService {
          SELECT id FROM (
            SELECT id, ROW_NUMBER() OVER (
                     PARTITION BY CASE
-                      WHEN created_at >= $2::timestamp - interval '1 hour' THEN id::text
-                      WHEN created_at >= $2::timestamp - interval '1 day'
-                        THEN 'b' || floor(extract(epoch FROM created_at) / 1800)
-                      ELSE 'd' || created_at::date
+                      WHEN saved_at >= $2::timestamp - interval '1 hour' THEN id::text
+                      WHEN saved_at >= $2::timestamp - interval '1 day'
+                        THEN 'b' || floor(extract(epoch FROM saved_at) / 1800)
+                      ELSE 'd' || saved_at::date
                     END
-                    ORDER BY created_at DESC, id DESC) AS rank
+                    ORDER BY saved_at DESC, id DESC) AS rank
              FROM design_snapshots WHERE survey_id = $1) ranked
           WHERE rank > 1)`,
       [input.surveyId, nowUtcString()],
@@ -85,7 +81,7 @@ export class DesignSnapshotService {
     await manager.query(
       `DELETE FROM design_snapshots WHERE survey_id = $1 AND id NOT IN (
          SELECT id FROM design_snapshots WHERE survey_id = $1
-          ORDER BY created_at DESC, id DESC LIMIT $2)`,
+          ORDER BY saved_at DESC, id DESC LIMIT $2)`,
       [input.surveyId, MAX_SNAPSHOTS],
     );
   }
@@ -102,7 +98,7 @@ export class DesignSnapshotService {
          FROM design_snapshots s
          LEFT JOIN users u ON u.id = s.created_by
         WHERE s.survey_id = $1
-        ORDER BY s.created_at DESC, s.id DESC`,
+        ORDER BY s.saved_at DESC, s.id DESC`,
       [surveyId],
     );
     return rows.map((r) => ({
@@ -128,16 +124,16 @@ export class DesignSnapshotService {
   }
 
   /**
-   * Deletes `id` and the snapshots taken after it. `created_at` has
-   * whole-second precision, so `id` breaks ties, matching the order everything
-   * else uses.
+   * Deletes `id` and the snapshots saved after it: restoring makes it the live
+   * design, which the next edit snapshots again. `saved_at` has whole-second
+   * precision, so `id` breaks ties, matching the order everything else uses.
    */
   async deleteFrom(surveyId: string, id: string, manager: EntityManager): Promise<void> {
     await manager.query(
       `DELETE FROM design_snapshots
         WHERE survey_id = $1
-          AND (created_at, id) >= (
-            SELECT created_at, id FROM design_snapshots WHERE survey_id = $1 AND id = $2)`,
+          AND (saved_at, id) >= (
+            SELECT saved_at, id FROM design_snapshots WHERE survey_id = $1 AND id = $2)`,
       [surveyId, id],
     );
   }

@@ -103,7 +103,7 @@ describe('Design snapshots', () => {
 
   const age = (id: string, interval: string) =>
     root.query(
-      `UPDATE design_snapshots SET created_at = created_at - interval '${interval}' WHERE survey_id = $1`,
+      `UPDATE design_snapshots SET saved_at = saved_at - interval '${interval}' WHERE survey_id = $1`,
       [id],
     );
 
@@ -134,7 +134,6 @@ describe('Design snapshots', () => {
 
       let { snapshots } = await list(id);
       expect(snapshots).toHaveLength(1);
-      expect(snapshots[0]).toMatchObject({ createdBy: { id: ADMIN_USER_ID, name: null } });
 
       await save(id, await edit(id, 'Two')).expect(201);
       expect((await list(id)).snapshots).toHaveLength(1);
@@ -157,10 +156,10 @@ describe('Design snapshots', () => {
       const block = `(to_timestamp(floor(extract(epoch FROM ${now} - interval '3 hours') / 1800) * 1800) at time zone 'utc')`;
       const day = `date_trunc('day', ${now} - interval '3 days')`;
       const snap = (n: number) => `40000000-0000-0000-0000-${String(seq).padStart(6, '0')}00000${n}`;
-      const insert = (n: number, createdAt: string) =>
+      const insert = (n: number, savedAt: string) =>
         root.query(
-          `INSERT INTO design_snapshots (id, survey_id, created_at, saved_at, data)
-           VALUES ($1, $2, ${createdAt}, ${createdAt}, '{}')`,
+          `INSERT INTO design_snapshots (id, survey_id, saved_at, data)
+           VALUES ($1, $2, ${savedAt}, '{}')`,
           [snap(n), id],
         );
       await insert(1, `${now} - interval '10 minutes'`);
@@ -189,9 +188,30 @@ describe('Design snapshots', () => {
       await save(id, await edit(id, 'Y')).expect(201);
       await save(id, await edit(id, 'Y, more')).expect(201);
 
+      // X was saved long ago, so the minute has passed and Y is snapshotted too.
       const { snapshots } = await list(id);
-      expect(snapshots).toHaveLength(1);
-      expect(snapshots[0].savedAt).toBe(xSavedAt);
+      expect(snapshots).toHaveLength(2);
+      expect(snapshots[1].savedAt).toBe(xSavedAt);
+    });
+  });
+
+  describe('author', () => {
+    it('credits who saved the snapshotted design, not whose edit took the snapshot', async () => {
+      const id = await newSurvey();
+      await save(id, await edit(id, 'By admin')).expect(201);
+      await age(id, '1 minute');
+
+      const other = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+      await request(server())
+        .post(`/survey/${id}/design?version=1`)
+        .set('Authorization', bearer({ userId: other, authorities: ['super_admin'] }))
+        .send(await edit(id, 'By other'))
+        .expect(201);
+
+      const { snapshots } = await list(id);
+      expect(snapshots).toHaveLength(2);
+      expect(snapshots[0].createdBy).toMatchObject({ id: ADMIN_USER_ID, name: null });
+      expect(snapshots[1].createdBy).toBeNull(); // the seeded design has no author
     });
   });
 
@@ -221,7 +241,7 @@ describe('Design snapshots', () => {
   });
 
   describe('restore', () => {
-    it('brings back the snapshot design, keeping neither the replaced draft nor the restored point', async () => {
+    it('brings back the snapshot design, dropping the replaced draft and the restored point', async () => {
       const id = await newSurvey();
       const before = await getDesign(id);
       await save(id, await removeQuestion(id, 'Q293sqi')).expect(201);
@@ -240,15 +260,14 @@ describe('Design snapshots', () => {
     const snapshotData = () => JSON.stringify(JSON.parse(DESIGN_JSON).survey);
     const snapId = (n: number) => `30000000-0000-0000-0000-${String(seq).padStart(6, '0')}00000${n}`;
 
-    it('deletes the restored point and the ones after it, breaking same-second ties by id', async () => {
+    it('deletes the restored point and the snapshots after it, breaking same-second ties by id', async () => {
       const id = await newSurvey();
       const data = snapshotData();
       const snap = snapId;
       const insert = (n: number, ago: string) =>
         root.query(
-          `INSERT INTO design_snapshots (id, survey_id, created_at, saved_at, data)
-           VALUES ($1, $2, date_trunc('second', now() at time zone 'utc') - interval '${ago}', date_trunc('second', now() at time zone 'utc') - interval '${ago}',
-                   $3)`,
+          `INSERT INTO design_snapshots (id, survey_id, saved_at, data)
+           VALUES ($1, $2, date_trunc('second', now() at time zone 'utc') - interval '${ago}', $3)`,
           [snap(n), id, data],
         );
       await insert(1, '3 hours');
@@ -270,11 +289,11 @@ describe('Design snapshots', () => {
       );
     });
 
-    it('restarts the minute, so an edit right after does not snapshot the restored design', async () => {
+    it('the next edit snapshots the restored design, as saved by the restore', async () => {
       const id = await newSurvey("interval '3 hours'");
       await root.query(
-        `INSERT INTO design_snapshots (id, survey_id, created_at, saved_at, data)
-         VALUES ($1, $2, (now() at time zone 'utc') - interval '2 hours', (now() at time zone 'utc') - interval '2 hours', $3)`,
+        `INSERT INTO design_snapshots (id, survey_id, saved_at, data)
+         VALUES ($1, $2, (now() at time zone 'utc') - interval '2 hours', $3)`,
         [snapId(1), id, snapshotData()],
       );
       await request(server())
@@ -282,15 +301,12 @@ describe('Design snapshots', () => {
         .set('Authorization', SUPER)
         .expect(201);
 
-      await save(id, await edit(id, 'After restore')).expect(201);
-      expect((await list(id)).snapshots).toEqual([]);
+      const restoredAt = (await getDesign(id)).versionDto.lastModified;
 
-      await root.query(
-        `UPDATE surveys SET last_restored_at = last_restored_at - interval '1 minute' WHERE id = $1`,
-        [id],
-      );
-      await save(id, await edit(id, 'Later')).expect(201);
-      expect((await list(id)).snapshots).toHaveLength(1);
+      await save(id, await edit(id, 'After restore')).expect(201);
+      const { snapshots } = await list(id);
+      expect(snapshots).toHaveLength(1);
+      expect(snapshots[0].savedAt).toBe(restoredAt);
     });
 
     it('previews a snapshot without touching the draft', async () => {
@@ -375,12 +391,9 @@ describe('Design snapshots', () => {
 
       await publish(id);
       expect((await list(id)).snapshots).toEqual([]);
-      expect((await list(id)).lastPublished).toBeNull();
 
       await save(id, await removeQuestion(id, 'Q510beg')).expect(201);
-      const after = await list(id);
-      expect(after.snapshots).toEqual([]);
-      expect(after.lastPublished).toMatchObject({ version: 1 });
+      expect((await list(id)).snapshots).toEqual([]);
     });
 
     it('restore_published drops the draft and the whole history, leaving the published version', async () => {
@@ -446,16 +459,15 @@ describe('Design snapshots', () => {
     // 100 snapshots inside the last hour (so none is thinned), the newest 90s old.
     for (let i = 0; i < 100; i++) {
       await root.query(
-        `INSERT INTO design_snapshots (id, survey_id, created_at, saved_at, data)
+        `INSERT INTO design_snapshots (id, survey_id, saved_at, data)
          VALUES (gen_random_uuid(), $1,
-                 (now() at time zone 'utc') - make_interval(secs => $2),
                  (now() at time zone 'utc') - make_interval(secs => $2),
                  '{}')`,
         [id, 90 + i * 30],
       );
     }
     const [oldest] = await root.query(
-      `SELECT id FROM design_snapshots WHERE survey_id = $1 ORDER BY created_at LIMIT 1`,
+      `SELECT id FROM design_snapshots WHERE survey_id = $1 ORDER BY saved_at LIMIT 1`,
       [id],
     );
     await request(server())
@@ -465,7 +477,6 @@ describe('Design snapshots', () => {
 
     const { snapshots } = await list(id);
     expect(snapshots).toHaveLength(100);
-    expect(snapshots[0].createdBy).toMatchObject({ id: ADMIN_USER_ID });
     expect(snapshots.map((s: { id: string }) => s.id)).not.toContain(oldest.id);
   });
 

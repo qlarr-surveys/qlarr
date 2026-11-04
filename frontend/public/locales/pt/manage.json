@@ -821,6 +821,7 @@
   },
   "version_history": {
     "description": "Pontos de restauro das suas alterações não publicadas, guardados automaticamente enquanto edita. O histórico é apagado sempre que publica.",
+    "current": "Versão atual",
     "empty": "Ainda não há pontos de restauro.",
     "restore": "Restaurar",
     "preview_title": "Pré-visualização: {{title}}",

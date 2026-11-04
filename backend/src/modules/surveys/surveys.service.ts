@@ -122,7 +122,6 @@ export class SurveysService {
       status: 'DRAFT',
       creationDate: nowUtcString(),
       lastModified: nowUtcString(),
-      lastRestoredAt: null,
     });
     await this.surveys.save(cloned);
     // The resource/design copies aren't part of the DB transaction, so unwind

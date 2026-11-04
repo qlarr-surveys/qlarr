@@ -821,6 +821,7 @@
   },
   "version_history": {
     "description": "Herstelpunten van je niet-gepubliceerde wijzigingen, automatisch bewaard tijdens het bewerken. De geschiedenis wordt bij elke publicatie gewist.",
+    "current": "Huidige versie",
     "empty": "Nog geen herstelpunten.",
     "restore": "Herstellen",
     "preview_title": "Voorbeeld: {{title}}",

@@ -1,6 +1,7 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import runState from "~/state/runState";
 import designState, {
+  changeLang,
   clearHighlighted,
   designStateReceived,
   resetSetup,
@@ -22,8 +23,14 @@ export const manageStore = configureStore({
 });
 
 // The only designer actions a preview accepts: opening, closing and browsing a
-// component's settings. They touch UI state only, never the design.
-const PREVIEW_ACTIONS = [setup.type, resetSetup.type, clearHighlighted.type];
+// component's settings, and switching language. They touch UI state only, never
+// the design.
+const PREVIEW_ACTIONS = [
+  setup.type,
+  resetSetup.type,
+  clearHighlighted.type,
+  changeLang.type,
+];
 const PREVIEW_LOAD = "preview/load";
 
 /** Shows another design in a preview store; only the preview page dispatches it. */

@@ -821,6 +821,7 @@
   },
   "version_history": {
     "description": "Restore points for your unpublished changes, kept automatically while you edit. The history is cleared each time you publish.",
+    "current": "Current version",
     "empty": "No restore points yet.",
     "restore": "Restore",
     "preview_title": "Preview: {{title}}",

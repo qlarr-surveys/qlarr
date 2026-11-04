@@ -115,12 +115,14 @@ export class DesignController {
     @Param('snapshotId', ParseUUIDPipe) snapshotId: string,
     @Query('version') version: string,
     @Query('sub_version') subVersion: string,
+    @CurrentUser() user: CurrentUserPrincipal,
   ): Promise<DesignDto> {
     return this.design.restoreSnapshot(
       surveyId,
       snapshotId,
       parseInt(version, 10),
       parseInt(subVersion, 10),
+      user.userId,
     );
   }
 

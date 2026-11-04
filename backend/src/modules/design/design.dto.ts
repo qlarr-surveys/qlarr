@@ -49,5 +49,4 @@ export interface SnapshotDto {
 
 export interface SnapshotListDto {
   snapshots: SnapshotDto[];
-  lastPublished: { version: number; subVersion: number; lastModified: string } | null;
 }

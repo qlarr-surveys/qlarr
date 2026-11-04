@@ -822,6 +822,7 @@
   },
   "version_history": {
     "description": "Wiederherstellungspunkte für Ihre unveröffentlichten Änderungen, die beim Bearbeiten automatisch angelegt werden. Der Verlauf wird bei jeder Veröffentlichung geleert.",
+    "current": "Aktuelle Version",
     "empty": "Noch keine Wiederherstellungspunkte.",
     "restore": "Wiederherstellen",
     "preview_title": "Vorschau: {{title}}",

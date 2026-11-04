@@ -9,13 +9,11 @@ export class DesignSnapshotEntity {
   @Column({ name: 'survey_id', type: 'uuid' })
   surveyId: string;
 
-  @Column({ name: 'created_at', type: 'timestamp', transformer: timestampTextTransformer })
-  createdAt: string;
-
-  /** When the snapshotted design was last saved; `created_at` is when it was snapshotted. */
+  /** When the snapshotted design was last saved. */
   @Column({ name: 'saved_at', type: 'timestamp', transformer: timestampTextTransformer })
   savedAt: string;
 
+  /** Who last saved the snapshotted design, not whose edit took the snapshot. */
   @Column({ name: 'created_by', type: 'uuid', nullable: true })
   createdBy: string | null;
 

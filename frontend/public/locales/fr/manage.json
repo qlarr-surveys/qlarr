@@ -821,6 +821,7 @@
   },
   "version_history": {
     "description": "Points de restauration de vos modifications non publiées, enregistrés automatiquement pendant l'édition. L'historique est effacé à chaque publication.",
+    "current": "Version actuelle",
     "empty": "Aucun point de restauration pour l'instant.",
     "restore": "Restaurer",
     "preview_title": "Aperçu : {{title}}",

@@ -8,7 +8,6 @@ import React, {
 import { useEditor, EditorContent } from "@tiptap/react";
 import { sanitizePastedText } from "../sanitizePastedText";
 import Toolbar from "./Toolbar";
-import { useDesignReadOnly } from "~/components/design/DesignReadOnly";
 import CollapsibleSettings from "./CollapsibleSettings";
 import { buildReferences } from "~/components/Questions/buildReferences";
 import { manageStore } from "~/store";
@@ -116,10 +115,8 @@ function TipTapEditor({
     lang,
   ]);
 
-  const readOnly = useDesignReadOnly();
   const editor = useEditor({
     extensions,
-    editable: !readOnly,
     content: value || "",
     onCreate: ({ editor }) => {
       const html = QuestionDisplayTransformer.decodeInstructionEntities(
@@ -240,8 +237,7 @@ function TipTapEditor({
   });
 
   useEffect(() => {
-    // A preview swapping versions can destroy an editor before this runs.
-    if (editor && !editor.isDestroyed && !readOnly) {
+    if (editor) {
       editor.commands.focus("end");
     }
   }, [editor]);
@@ -386,7 +382,7 @@ function TipTapEditor({
       className={`${EDITOR_WRAPPER_CLASS} ${isFocused ? EDITOR_FOCUSED_CLASS : ""}`}
     >
       <EditorContent editor={editor} />
-      {showToolbar && !readOnly && isFocused && (
+      {showToolbar && isFocused && (
         <Toolbar editor={editor} extended={extended} />
       )}
       <CollapsibleSettings

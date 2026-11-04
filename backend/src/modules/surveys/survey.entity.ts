@@ -30,15 +30,6 @@ export class SurveyEntity {
   })
   lastModified: string | null;
 
-  /** When the design was last restored or discarded; restarts the snapshot timer. */
-  @Column({
-    name: 'last_restored_at',
-    type: 'timestamp',
-    nullable: true,
-    transformer: timestampTextTransformer,
-  })
-  lastRestoredAt: string | null;
-
   @Column({
     name: 'start_date',
     type: 'timestamp',

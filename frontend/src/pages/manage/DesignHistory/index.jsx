@@ -24,8 +24,11 @@ import { onError } from "~/state/edit/editState";
 import { SURVEY_STATUS } from "~/constants/survey";
 import { routes } from "~/routes";
 import ConfirmActionModal from "~/components/common/ConfirmActionModal";
-import SnapshotDesign from "~/components/manage/VersionHistory/SnapshotDesign";
-import { snapshotDate } from "~/components/manage/VersionHistory/snapshotFormat";
+import {
+  CURRENT_VERSION,
+  SnapshotDesign,
+  snapshotDate,
+} from "~/components/manage/VersionHistory";
 
 /** Browse the design's restore points: the list on the side, the selected one read-only. */
 function DesignHistory() {
@@ -50,7 +53,11 @@ function DesignHistory() {
   const [listOpen, setListOpen] = useState(true);
   // The version picked in the list, until it has loaded; then the list closes.
   const [loadingId, setLoadingId] = useState(null);
+  // The version on screen; the selected one only once it has loaded.
+  const [shownId, setShownId] = useState(null);
   const onSnapshotSettled = (id, loaded) => {
+    if (loaded) setShownId(id);
+    else if (shownId) setSearchParams({ snapshot: shownId }, { replace: true });
     if (id !== loadingId) return;
     setLoadingId(null);
     if (loaded) setListOpen(false);
@@ -73,11 +80,15 @@ function DesignHistory() {
       });
   }, []);
 
+  const entries = snapshots && [{ id: CURRENT_VERSION }, ...snapshots];
   const selected =
-    snapshots?.find((s) => s.id === searchParams.get("snapshot")) ??
-    snapshots?.[0];
+    entries?.find((s) => s.id === searchParams.get("snapshot")) ?? entries?.[0];
 
   const formatDate = (savedAt) => snapshotDate(savedAt, i18n.language);
+  const entryLabel = (entry) =>
+    entry.id === CURRENT_VERSION
+      ? t("version_history.current")
+      : formatDate(entry.savedAt);
   const toDesign = () =>
     nav(routes.designSurvey.replace(":surveyId", surveyId));
 
@@ -135,16 +146,15 @@ function DesignHistory() {
             </IconButton>
           </CustomTooltip>
           <Typography sx={{ flex: 1 }} noWrap>
-            {selected &&
-              t("version_history.preview_title", {
-                title: formatDate(selected.savedAt),
-              })}
+            {t("version_history.preview_title", {
+              title: entryLabel(selected),
+            })}
           </Typography>
-          {selected && !closed && (
+          {selected.id !== CURRENT_VERSION && !closed && (
             <Button
               variant="contained"
               color="error"
-              disabled={busy || restoring}
+              disabled={busy || restoring || selected.id !== shownId}
               onClick={() => setToRestore(selected)}
             >
               {t("version_history.restore")}
@@ -165,18 +175,13 @@ function DesignHistory() {
         <LinearProgress
           sx={{ height: 2, visibility: loadingId ? "visible" : "hidden" }}
         />
-        {selected ? (
-          <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
-            <SnapshotDesign
-              snapshotId={selected.id}
-              onSettled={onSnapshotSettled}
-            />
-          </Box>
-        ) : (
-          <Typography sx={{ p: 4 }} color="text.secondary">
-            {t("version_history.empty")}
-          </Typography>
-        )}
+        <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
+          <SnapshotDesign
+            snapshotId={selected.id}
+            shownId={shownId}
+            onSettled={onSnapshotSettled}
+          />
+        </Box>
       </Box>
 
       <Slide
@@ -216,27 +221,37 @@ function DesignHistory() {
             {t("version_history.description")}
           </Typography>
           <List disablePadding sx={{ flex: 1, overflowY: "auto" }}>
-            {snapshots.map((snapshot) => (
+            {entries.map((entry) => (
               <ListItemButton
-                key={snapshot.id}
+                key={entry.id}
                 divider
-                selected={snapshot.id === selected?.id}
+                selected={entry.id === selected.id}
                 onClick={() => {
-                  if (snapshot.id === selected?.id) {
+                  if (entry.id === selected.id) {
                     setListOpen(false);
                     return;
                   }
-                  setLoadingId(snapshot.id);
-                  setSearchParams({ snapshot: snapshot.id });
+                  setLoadingId(entry.id);
+                  setSearchParams({ snapshot: entry.id });
                 }}
               >
                 <ListItemText
-                  primary={formatDate(snapshot.savedAt)}
-                  secondary={snapshot.createdBy?.name}
+                  primary={entryLabel(entry)}
+                  secondary={
+                    entry.id === CURRENT_VERSION
+                      ? versionDto?.lastModified &&
+                        formatDate(versionDto.lastModified)
+                      : entry.createdBy?.name
+                  }
                 />
-                {snapshot.id === loadingId && <CircularProgress size={18} />}
+                {entry.id === loadingId && <CircularProgress size={18} />}
               </ListItemButton>
             ))}
+            {snapshots.length === 0 && (
+              <Typography sx={{ p: 2 }} color="text.secondary">
+                {t("version_history.empty")}
+              </Typography>
+            )}
           </List>
           {canDiscard && (
             <Box sx={{ p: 2, borderTop: 1, borderColor: "divider" }}>
