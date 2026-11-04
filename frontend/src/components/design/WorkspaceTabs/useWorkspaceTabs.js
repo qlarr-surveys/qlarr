@@ -2,10 +2,10 @@ import { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   ChartColumn,
-  ClipboardList,
   Languages,
   Palette,
   SlidersHorizontal,
+  SquarePen,
 } from "lucide-react";
 import { MANAGE_SURVEY_LANDING_PAGES, routes } from "~/routes";
 import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
@@ -76,7 +76,7 @@ export default function useWorkspaceTabs({
         designTab(
           "builder",
           "design",
-          ClipboardList,
+          SquarePen,
           DESIGN_SURVEY_MODE.DESIGN,
           setDesignModeToDesign
         ),

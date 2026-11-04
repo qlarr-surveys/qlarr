@@ -1,8 +1,8 @@
 import React from "react";
 import styles from "./NewComponentsPanel.module.css";
 import NewComponentsItem from "~/components/design/NewComponentsItem";
-import { ICON_STROKE, QUESTION_TYPES } from "~/components/Questions/utils";
-import { Files, Lightbulb } from "lucide-react";
+import { ICON_STROKE, PAGE_ICON, QUESTION_TYPES } from "~/components/Questions/utils";
+import { Lightbulb } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { addComponent } from "~/state/design/designState";
 
@@ -16,7 +16,7 @@ const groups = [
       {
         idType: 2,
         type: "group",
-        icon: <Files size="1.25em" strokeWidth={ICON_STROKE} />,
+        icon: <PAGE_ICON size="1.25em" strokeWidth={ICON_STROKE} />,
       },
     ],
   },

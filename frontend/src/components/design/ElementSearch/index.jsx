@@ -11,8 +11,7 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import { useSelector } from "react-redux";
 import { stripTags } from "~/utils/design/utils";
-import { ICON_STROKE, questionIconByType } from "~/components/Questions/utils";
-import { Files } from "lucide-react";
+import { ICON_STROKE, PAGE_ICON, questionIconByType } from "~/components/Questions/utils";
 import styles from "./ElementSearch.module.css";
 
 const MAX_RESULTS = 50;
@@ -115,7 +114,7 @@ function SearchBox({ t, onSelect, onClose }) {
             <Box className={styles.option}>
               <span className={styles.optionIcon}>
                 {entry.isGroup ? (
-                  <Files size="1.25em" strokeWidth={ICON_STROKE} />
+                  <PAGE_ICON size="1.25em" strokeWidth={ICON_STROKE} />
                 ) : (
                   questionIconByType(entry.type)
                 )}
