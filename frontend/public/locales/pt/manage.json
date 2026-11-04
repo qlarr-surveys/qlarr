@@ -89,6 +89,7 @@
       "start_date": "Data de Início",
       "end_date": "Data de Finalização"
     },
+    "version_history": "Histórico de versões",
     "edit_name": "Editar o nome da pesquisa: {{name}}",
     "edit_description": "Editar a descrição da pesquisa",
     "delete_survey_title": "Excluir “{{survey_name}}”?"
@@ -265,6 +266,8 @@
     "survey_quota": "Desculpe, esta pesquisa não está mais aceitando respostas.",
     "invalid_translations_csv": "Não é um CSV de traduções.",
     "translations_csv_not_utf8": "Este arquivo não está em UTF-8. No Excel, use Arquivo → Salvar como → “CSV UTF-8 (Delimitado por vírgulas)” e importe novamente.",
+    "snapshot_not_found": "Esta versão já não existe. Recarregue a página e tente novamente.",
+    "nothing_to_revert": "Não há alterações não publicadas para descartar.",
     "user_already_confirmed": "Este usuário já aceitou o convite.",
     "survey_not_found": "Esta pesquisa não existe ou foi excluída"
   },
@@ -573,7 +576,10 @@
     "broken_quotas_title": "Algumas cotas não serão aplicadas",
     "broken_quotas": "Estas cotas fazem referência a perguntas ou opções que já não existem, portanto não contarão nem excluirão nenhum respondente: {{quotas}}. Corrija as suas condições em Cotas ou publique mesmo assim.",
     "publish_anyway": "Publicar mesmo assim",
-    "download_qr_code": "Baixar código QR"
+    "download_qr_code": "Baixar código QR",
+    "discard_changes": "Descartar alterações não publicadas",
+    "discard_title": "Descartar as alterações não publicadas?",
+    "discard_description": "O design volta à última versão publicada. O design atual e todo o histórico de versões serão eliminados permanentemente."
   },
   "email": {
     "check": "Verifique seu E-mail",
@@ -812,6 +818,16 @@
     "question_type_text_display": "Exibição de Texto",
     "question_type_image_display": "Exibição de Imagem",
     "question_type_video_display": "Exibição de Vídeo"
+  },
+  "version_history": {
+    "description": "Pontos de restauro das suas alterações não publicadas, guardados automaticamente enquanto edita. O histórico é apagado sempre que publica.",
+    "current": "Versão atual",
+    "empty": "Ainda não há pontos de restauro.",
+    "restore": "Restaurar",
+    "preview_title": "Pré-visualização: {{title}}",
+    "restore_title": "Restaurar esta versão?",
+    "restore_description": "O design volta ao estado de {{date}}. O design atual e todos os pontos de restauro posteriores a este serão eliminados permanentemente.",
+    "restore_acknowledge": "Compreendo que esta ação não pode ser desfeita"
   },
   "status_info": {
     "draft": "A pesquisa ainda não foi publicada. Disponível apenas para pré-visualização.",

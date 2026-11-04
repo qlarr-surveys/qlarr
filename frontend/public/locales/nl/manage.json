@@ -89,6 +89,7 @@
       "start_date": "Startdatum",
       "end_date": "Einddatum"
     },
+    "version_history": "Versiegeschiedenis",
     "edit_name": "Enquêtenaam bewerken: {{name}}",
     "edit_description": "Enquêtebeschrijving bewerken",
     "delete_survey_title": "“{{survey_name}}” verwijderen?"
@@ -265,6 +266,8 @@
     "survey_quota": "Sorry, deze enquête accepteert geen reacties meer.",
     "invalid_translations_csv": "Geen CSV met vertalingen.",
     "translations_csv_not_utf8": "Dit bestand is niet in UTF-8. Kies in Excel Bestand → Opslaan als → “CSV UTF-8 (door komma's gescheiden)” en importeer het opnieuw.",
+    "snapshot_not_found": "Deze versie bestaat niet meer. Laad de pagina opnieuw en probeer het nog eens.",
+    "nothing_to_revert": "Er zijn geen niet-gepubliceerde wijzigingen om te verwerpen.",
     "user_already_confirmed": "Deze gebruiker heeft de uitnodiging al geaccepteerd.",
     "survey_not_found": "Deze enquête bestaat niet of is verwijderd"
   },
@@ -573,7 +576,10 @@
     "broken_quotas_title": "Sommige quota worden niet toegepast",
     "broken_quotas": "Deze quota verwijzen naar vragen of opties die niet meer bestaan, dus ze tellen of weigeren geen respondenten: {{quotas}}. Herstel hun voorwaarden bij Quota, of publiceer toch.",
     "publish_anyway": "Toch publiceren",
-    "download_qr_code": "QR-code downloaden"
+    "download_qr_code": "QR-code downloaden",
+    "discard_changes": "Niet-gepubliceerde wijzigingen verwerpen",
+    "discard_title": "Niet-gepubliceerde wijzigingen verwerpen?",
+    "discard_description": "Het ontwerp gaat terug naar de laatst gepubliceerde versie. Het huidige ontwerp en de volledige versiegeschiedenis worden definitief verwijderd."
   },
   "email": {
     "check": "Controleer je E-mail",
@@ -812,6 +818,16 @@
     "question_type_text_display": "Tekst Weergave",
     "question_type_image_display": "Afbeelding Weergave",
     "question_type_video_display": "Video Weergave"
+  },
+  "version_history": {
+    "description": "Herstelpunten van je niet-gepubliceerde wijzigingen, automatisch bewaard tijdens het bewerken. De geschiedenis wordt bij elke publicatie gewist.",
+    "current": "Huidige versie",
+    "empty": "Nog geen herstelpunten.",
+    "restore": "Herstellen",
+    "preview_title": "Voorbeeld: {{title}}",
+    "restore_title": "Deze versie herstellen?",
+    "restore_description": "Het ontwerp gaat terug naar hoe het was op {{date}}. Het huidige ontwerp en alle herstelpunten na dit punt worden definitief verwijderd.",
+    "restore_acknowledge": "Ik begrijp dat dit niet ongedaan kan worden gemaakt"
   },
   "status_info": {
     "draft": "De enquête is nog niet gepubliceerd. Alleen beschikbaar voor voorvertoning.",

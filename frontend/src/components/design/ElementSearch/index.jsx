@@ -187,7 +187,7 @@ function ElementSearch({ t, onNavigate }) {
   const handleClose = () => setOpen(false);
 
   return (
-    <Box className={styles.container}>
+    <Box className={styles.container} data-preview-allow>
       {open ? (
         <SearchBox t={t} onSelect={handleSelect} onClose={handleClose} />
       ) : (

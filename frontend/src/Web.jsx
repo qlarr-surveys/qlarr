@@ -103,6 +103,22 @@ function Web() {
         }
       />
       <Route
+        path={routes.designHistory}
+        element={
+          <Suspense fallback={<LoadingIndicator />}>
+            <PrivateComponent>
+              <ForceRole roles={[ROLES.SUPER_ADMIN, ROLES.SURVEY_ADMIN]}>
+                <ManagePageWrapper headerOptions={HEADER_OPTIONS.NONE} resolveSurveyId={true}>
+                  <ManageSurvey
+                    landingPage={MANAGE_SURVEY_LANDING_PAGES.HISTORY}
+                  />
+                </ManagePageWrapper>
+              </ForceRole>
+            </PrivateComponent>
+          </Suspense>
+        }
+      />
+      <Route
         path={routes.preview}
         element={
           <Suspense fallback={<LoadingIndicator />}>

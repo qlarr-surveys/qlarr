@@ -89,6 +89,7 @@
       "start_date": "Start Date",
       "end_date": "End Date"
     },
+    "version_history": "Version History",
     "edit_name": "Edit survey name: {{name}}",
     "edit_description": "Edit survey description",
     "delete_survey_title": "Delete “{{survey_name}}”?"
@@ -265,6 +266,8 @@
     "survey_quota": "Sorry, this survey is no longer accepting responses.",
     "invalid_translations_csv": "Not a translations CSV.",
     "translations_csv_not_utf8": "This file isn't UTF-8. In Excel, use File → Save As → 'CSV UTF-8 (Comma delimited)' and import again.",
+    "snapshot_not_found": "This version no longer exists. Reload the page and try again.",
+    "nothing_to_revert": "There are no unpublished changes to discard.",
     "user_already_confirmed": "This user has already accepted the invitation.",
     "survey_not_found": "This survey doesn't exist or was deleted"
   },
@@ -573,7 +576,10 @@
     "broken_quotas_title": "Some quotas won't be enforced",
     "broken_quotas": "These quotas reference questions or options that no longer exist, so no respondent will be counted or screened out by them: {{quotas}}. Fix their conditions in Quotas, or publish anyway.",
     "publish_anyway": "Publish anyway",
-    "download_qr_code": "Download QR Code"
+    "download_qr_code": "Download QR Code",
+    "discard_changes": "Discard unpublished changes",
+    "discard_title": "Discard unpublished changes?",
+    "discard_description": "The design goes back to the last published version. Your current design and the whole version history will be permanently deleted."
   },
   "email": {
     "check": "Check Your Email",
@@ -812,6 +818,16 @@
     "feature_own": "Own every result.",
     "need_help": "Need help getting started?",
     "contact_support": "contact support"
+  },
+  "version_history": {
+    "description": "Restore points for your unpublished changes, kept automatically while you edit. The history is cleared each time you publish.",
+    "current": "Current version",
+    "empty": "No restore points yet.",
+    "restore": "Restore",
+    "preview_title": "Preview: {{title}}",
+    "restore_title": "Restore this version?",
+    "restore_description": "The design goes back to how it was on {{date}}. Your current design and every restore point after this one will be permanently deleted.",
+    "restore_acknowledge": "I understand this can't be undone"
   },
   "status_info": {
     "draft": "Survey has not been published yet. Only available for preview.",
