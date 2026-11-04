@@ -41,14 +41,14 @@ export function getDesignTourSteps(t) {
     },
     {
       element: '[data-tour="side-tab-theme"]',
-      position: "right",
+      position: "bottom",
       title: t("tour_step6_title"),
       intro: t("tour_step6_intro"),
       nextButtonText: t("tour_step6_next"),
     },
     {
       element: '[data-tour="side-tab-translation"]',
-      position: "right",
+      position: "bottom",
       title: t("tour_step7_title"),
       intro: t("tour_step7_intro"),
       nextButtonText: t("tour_step7_next"),
@@ -63,14 +63,14 @@ export function getDesignTourSteps(t) {
     },
     {
       element: '[data-tour="side-tab-settings"]',
-      position: "right",
+      position: "bottom",
       title: t("tour_step9_title"),
       intro: t("tour_step9_intro"),
       nextButtonText: t("tour_step9_next"),
     },
     {
       element: '[data-tour="side-tab-responses"]',
-      position: "right",
+      position: "bottom",
       title: t("tour_step10_title"),
       intro: t("tour_step10_intro"),
     },

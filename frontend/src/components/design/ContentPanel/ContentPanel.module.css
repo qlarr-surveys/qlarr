@@ -194,7 +194,7 @@
   overflow-y: auto;
   flex: 1 1 auto;
   width: 100%;
-  height: calc(100vh - 64px);
+  height: var(--editor-pane-h);
 }
 
 .cardImage {
@@ -229,7 +229,9 @@
   gap: 0px;
   position: absolute;
   top: 0;
-  right: 22.5rem;
+  /* Clears the left panel: its 22rem plus the half-rem gutter. Logical, not
+     `right`: this screen is mirrored in Arabic and the panel moves with it. */
+  inset-inline-end: 22.5rem;
   z-index: 1;
 }
 .button.button {

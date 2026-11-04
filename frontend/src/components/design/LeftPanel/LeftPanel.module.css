@@ -1,0 +1,23 @@
+/* ====== Aside ====== */
+
+.aside {
+  flex: none;
+  width: 22rem;
+  display: flex;
+  flex-direction: column;
+  /* Without this the body's own `min-height: 0` cannot shrink it below its
+     content, and the panel grows past the viewport instead of scrolling. */
+  min-height: 0;
+  height: var(--editor-pane-h);
+  background: #fff;
+  border-inline-end: 1px solid #dce0ee;
+}
+
+/* ====== Body ====== */
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  scrollbar-width: thin;
+}

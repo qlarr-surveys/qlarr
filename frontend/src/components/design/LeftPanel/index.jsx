@@ -1,28 +1,52 @@
-import { Box } from "@mui/material";
-import NewComponentsPanel from "~/components/design/NewComponentsPanel";
 import React from "react";
 import { useSelector } from "react-redux";
+import NewComponentsPanel from "~/components/design/NewComponentsPanel";
 import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
+import { isGroup, isQuestion } from "@qlarr/design-core";
 import SetupPanel from "../setup/SetupPanel";
+import styles from "./LeftPanel.module.css";
+
+/**
+ * The editor's left panel: the settings of whatever is selected, or the
+ * question-type list when nothing is. The theme and translation workspaces seed
+ * `setup` with their own single rule, so there they always show settings.
+ */
 function LeftPanel({ t }) {
-  const show = useSelector((state) => {
-    return (
-      (state.designState?.designMode || DESIGN_SURVEY_MODE.DESIGN) ==
-        DESIGN_SURVEY_MODE.DESIGN &&
-      (!state.designState.setup || Object.keys(state.designState.setup) == 0)
-    );
-  });
+  const designMode = useSelector(
+    (state) => state.designState?.designMode || DESIGN_SURVEY_MODE.DESIGN
+  );
 
-  const setup = useSelector((state) => state.designState?.setup);
+  const setupCode = useSelector((state) => state.designState?.setup?.code);
 
-  const hasSetup = setup && Object.keys(setup).length > 0;
+  const isBuilder = designMode === DESIGN_SURVEY_MODE.DESIGN;
+  const hasSetup = Boolean(setupCode);
 
+  const ariaLabel = () => {
+    if (!isBuilder) {
+      return t("workspace_tools");
+    }
+    if (!hasSetup) {
+      return t("question_types");
+    }
+    if (isQuestion(setupCode)) {
+      return t("question_settings");
+    }
+    if (isGroup(setupCode)) {
+      return t("page_settings");
+    }
+    return t("workspace_tools");
+  };
 
   return (
-    <Box data-tour="left-panel" sx={{width:"22rem", flex:"0 0 auto"}}>
-      {show &&  <NewComponentsPanel t={t} />}
-      {hasSetup &&  <SetupPanel t={t} />}
-    </Box>
+    <aside
+      data-tour="left-panel"
+      aria-label={ariaLabel()}
+      className={styles.aside}
+    >
+      <div className={styles.body}>
+        {hasSetup ? <SetupPanel t={t} /> : isBuilder && <NewComponentsPanel t={t} />}
+      </div>
+    </aside>
   );
 }
 

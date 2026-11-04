@@ -1,7 +1,7 @@
 
 .wrapper {
   width: 100%;
-  height: calc(100vh - 64px);
+  height: var(--editor-pane-h);
   background-color: #f7f8fc;
   overflow-y: auto;
 }
