@@ -41,17 +41,6 @@ export default function useWorkspaceTabs({
     (state) => state.designState.versionDto?.published
   );
 
-  // The Survey-level "random" rule opens its own panel, and while it is open the
-  // Builder tab is not the thing being edited — so it stops claiming selection.
-  const orderPriorityActive = useSelector((state) => {
-    const setupState = state.designState.setup;
-    return (
-      state.designState.designMode === DESIGN_SURVEY_MODE.DESIGN &&
-      setupState?.code === "Survey" &&
-      !!setupState?.rules?.some((rule) => rule.key === "random")
-    );
-  });
-
   return useMemo(() => {
     const tabAvailable = (page) => availablePages.indexOf(page) !== -1;
     const inDesignPage = selectedPage === MANAGE_SURVEY_LANDING_PAGES.DESIGN;
@@ -62,7 +51,7 @@ export default function useWorkspaceTabs({
       icon,
       dataTour,
       to: routes.designSurvey.replace(":surveyId", surveyId),
-      selected: inDesignPage && designMode === mode && !orderPriorityActive,
+      selected: inDesignPage && designMode === mode,
       onSelect: () => {
         onPageChange(MANAGE_SURVEY_LANDING_PAGES.DESIGN);
         dispatch(action());
@@ -136,7 +125,6 @@ export default function useWorkspaceTabs({
     onPageChange,
     designMode,
     published,
-    orderPriorityActive,
     dispatch,
   ]);
 }
