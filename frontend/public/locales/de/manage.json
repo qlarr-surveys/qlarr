@@ -242,7 +242,7 @@
     "unpublished_text": "Veröffentlichen Sie die Umfrage, um die neuesten Änderungen anzuwenden",
     "discard_changes": "Unveröffentlichte Änderungen verwerfen",
     "discard_title": "Unveröffentlichte Änderungen verwerfen?",
-    "discard_description": "Das Design wird auf die zuletzt veröffentlichte Version zurückgesetzt. Das aktuelle Design bleibt im Versionsverlauf erhalten und kann später wiederhergestellt werden."
+    "discard_description": "Das Design wird auf die zuletzt veröffentlichte Version zurückgesetzt. Das aktuelle Design und der gesamte Versionsverlauf werden endgültig gelöscht."
   },
   "login": {
     "dont_have_acc": "Sie haben noch kein Konto?",
@@ -824,17 +824,10 @@
     "description": "Wiederherstellungspunkte für Ihre unveröffentlichten Änderungen, die beim Bearbeiten automatisch angelegt werden. Der Verlauf wird bei jeder Veröffentlichung geleert.",
     "empty": "Noch keine Wiederherstellungspunkte.",
     "restore": "Wiederherstellen",
+    "preview_title": "Vorschau: {{title}}",
     "restore_title": "Diese Version wiederherstellen?",
-    "restore_description": "Das Design wird auf den Stand vom {{date}} zurückgesetzt. Das aktuelle Design bleibt im Versionsverlauf erhalten und kann später wiederhergestellt werden.",
-    "reason": {
-      "timer": "Automatische Sicherung",
-      "delete": "Vor dem Löschen von {{codes}}",
-      "change_code": "Vor dem Umbenennen {{from}} → {{to}}",
-      "translations_import_one": "Vor dem Import von Übersetzungen ({{count}} Feld)",
-      "translations_import_other": "Vor dem Import von Übersetzungen ({{count}} Felder)",
-      "restore": "Vor dem Wiederherstellen einer früheren Version",
-      "discard": "Vor dem Verwerfen unveröffentlichter Änderungen"
-    }
+    "restore_description": "Das Design wird auf den Stand vom {{date}} zurückgesetzt. Das aktuelle Design und alle späteren Wiederherstellungspunkte werden endgültig gelöscht.",
+    "restore_acknowledge": "Mir ist bewusst, dass dies nicht rückgängig gemacht werden kann"
   },
   "status_info": {
     "draft": "Die Umfrage wurde noch nicht veröffentlicht. Nur zur Vorschau verfügbar.",

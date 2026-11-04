@@ -4,6 +4,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
 import SetupPanel from "../setup/SetupPanel";
+import { useDesignReadOnly } from "~/components/design/DesignReadOnly";
 function LeftPanel({ t }) {
   const show = useSelector((state) => {
     return (
@@ -16,11 +17,13 @@ function LeftPanel({ t }) {
   const setup = useSelector((state) => state.designState?.setup);
 
   const hasSetup = setup && Object.keys(setup).length > 0;
-
+  // A read-only preview can't add components; it shows only the settings.
+  const readOnly = useDesignReadOnly();
+  if (readOnly && !hasSetup) return null;
 
   return (
     <Box data-tour="left-panel" sx={{width:"22rem", flex:"0 0 auto"}}>
-      {show &&  <NewComponentsPanel t={t} />}
+      {show && !readOnly && <NewComponentsPanel t={t} />}
       {hasSetup &&  <SetupPanel t={t} />}
     </Box>
   );

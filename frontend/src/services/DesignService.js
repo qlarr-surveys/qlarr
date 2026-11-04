@@ -39,25 +39,33 @@ class DesignService extends BaseService {
     return response.data;
   }
 
-  async restoreSnapshot(snapshotId, version) {
+  async getSnapshot(snapshotId) {
+    const surveyId = sessionStorage.getItem("surveyId");
+    const response = await this.handleRequest(() =>
+      authenticatedApi.get(`/survey/${surveyId}/design/snapshots/${snapshotId}`)
+    );
+    return response.data;
+  }
+
+  async restoreSnapshot(snapshotId, version, subVersion) {
     const surveyId = sessionStorage.getItem("surveyId");
     const response = await this.handleRequest(() =>
       authenticatedApi.post(
         `/survey/${surveyId}/design/snapshots/${snapshotId}/restore`,
         null,
-        { params: { version } }
+        { params: { version, sub_version: subVersion } }
       )
     );
     return response.data;
   }
 
-  async restorePublished(version) {
+  async restorePublished(version, subVersion) {
     const surveyId = sessionStorage.getItem("surveyId");
     const response = await this.handleRequest(() =>
       authenticatedApi.post(
         `/survey/${surveyId}/design/restore_published`,
         null,
-        { params: { version } }
+        { params: { version, sub_version: subVersion } }
       )
     );
     return response.data;

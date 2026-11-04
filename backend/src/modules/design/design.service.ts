@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { buildDesignState, changeContent } from '@qlarr/design-core';
+import { EntityManager } from 'typeorm';
 import { nowUtcString } from '../../common/datetime';
 import { isUuid } from '../../common/validation';
 import { EngineService } from '../../engine/engine.service';
@@ -17,9 +18,7 @@ import {
 } from '../surveys/survey.exceptions';
 import { VersionEntity } from '../surveys/version.entity';
 import { VersionRepository } from './version.repository';
-import { SnapshotReason } from './design-snapshot.entity';
 import {
-  deletedComponents,
   DesignSnapshotService,
   SnapshotInput,
 } from './design-snapshot.service';
@@ -53,8 +52,6 @@ import {
 export interface SaveOptions {
   sampleSurvey?: boolean;
   userId?: string | null;
-  event?: SnapshotReason;
-  details?: Record<string, unknown>;
 }
 
 export interface ProcessedSurvey {
@@ -108,7 +105,7 @@ export class DesignService {
     }
     const before = await this.loadOutput(surveyId, latest.version);
     const output = await this.engine.process(design, before.survey);
-    const snapshot = await this.snapshotBefore(survey, latest, before, output, opts);
+    const snapshot = await this.snapshotBefore(survey, latest, before, opts.userId);
     return this.saveDraft(survey, latest, output, snapshot);
   }
 
@@ -116,36 +113,49 @@ export class DesignService {
     surveyId: string,
     snapshotId: string,
     version: number,
-    userId: string | null,
+    subVersion: number,
   ): Promise<DesignDto> {
-    const { survey, latest } = await this.editableDraft(surveyId, version);
+    const { survey, latest } = await this.editableDraft(surveyId, version, subVersion);
     const target = await this.snapshots.load(surveyId, snapshotId);
     if (!target) throw new SnapshotNotFoundException();
-    return this.restoreDraft(survey, latest, target, { snapshotId }, userId);
+    const output = await this.engine.validate(JSON.stringify(target));
+    survey.lastRestoredAt = nowUtcString();
+    return this.saveDraft(survey, latest, output, null, (tx) =>
+      this.snapshots.deleteFrom(surveyId, snapshotId, tx),
+    );
+  }
+
+  /** A snapshot as the designer loads it, for a read-only preview. Writes nothing. */
+  async previewSnapshot(
+    surveyId: string,
+    snapshotId: string,
+  ): Promise<{ designerInput: DesignDto['designerInput'] }> {
+    const target = await this.snapshots.load(surveyId, snapshotId);
+    if (!target) throw new SnapshotNotFoundException();
+    const output = await this.engine.validate(JSON.stringify(target));
+    return { designerInput: this.engine.toDesignerInput(output) };
   }
 
   async restorePublished(
     surveyId: string,
     version: number,
-    userId: string | null,
+    subVersion: number,
   ): Promise<DesignDto> {
-    const { survey, latest } = await this.editableDraft(surveyId, version);
+    const { survey, latest } = await this.editableDraft(surveyId, version, subVersion);
     const published = await this.versions.findLatestPublished(surveyId);
     if (!published || latest.published) throw new NothingToRevertException();
-    const before = await this.loadOutput(surveyId, latest.version);
     const output = await this.loadOutput(surveyId, published.version);
-    const snapshot = await this.snapshotBefore(survey, latest, before, output, {
-      event: SnapshotReason.RESTORE,
-      details: { publishedVersion: published.version },
-      userId,
-    });
 
+    // No undo: every restore point is newer than the published version (publish
+    // clears the history), so they all go with the draft.
     survey.lastModified = nowUtcString();
+    survey.lastRestoredAt = survey.lastModified;
     await this.db.manager.transaction(async (tx) => {
-      if (snapshot) await this.snapshots.create(snapshot, tx);
+      await this.snapshots.deleteAll(surveyId, tx);
       await this.versions.repointResponses(surveyId, latest.version, published.version, tx);
       await this.versions.deleteVersion(surveyId, latest.version, tx);
       await tx.getRepository(SurveyEntity).save(survey);
+      await resetCalculationsOnDesignChange(tx, surveyId);
     });
     await this.files.delete(surveyId, SurveyFolder.Design, String(latest.version));
 
@@ -174,12 +184,21 @@ export class DesignService {
     };
   }
 
+  /**
+   * The draft to write to. Restores also pass `subVersion`: they replace the
+   * whole design, so any save since the client's last read is a conflict.
+   * Autosave sends a diff, which merges, so it only checks `version`.
+   */
   private async editableDraft(
     surveyId: string,
     version: number,
+    subVersion?: number,
   ): Promise<{ survey: SurveyEntity; latest: VersionEntity }> {
     const draft = await this.loadDraft(surveyId);
-    if (version !== draft.latest.version) {
+    if (
+      version !== draft.latest.version ||
+      (subVersion !== undefined && subVersion !== draft.latest.subVersion)
+    ) {
       throw new DesignOutOfSyncException(draft.latest.subVersion);
     }
     return draft;
@@ -197,56 +216,20 @@ export class DesignService {
     return { survey, latest };
   }
 
-  private async restoreDraft(
-    survey: SurveyEntity,
-    latest: VersionEntity,
-    target: Record<string, unknown>,
-    details: Record<string, unknown>,
-    userId: string | null,
-  ): Promise<DesignDto> {
-    const before = await this.loadOutput(survey.id, latest.version);
-    const output = await this.engine.validate(JSON.stringify(target));
-    const snapshot = await this.snapshotBefore(survey, latest, before, output, {
-      event: SnapshotReason.RESTORE,
-      details,
-      userId,
-    });
-    return this.saveDraft(survey, latest, output, snapshot);
-  }
-
+  /** The design as it was before this save, if a snapshot is due. */
   private async snapshotBefore(
     survey: SurveyEntity,
     latest: VersionEntity,
     before: ValidationJsonOutput,
-    after: ValidationJsonOutput,
-    opts: SaveOptions,
+    userId: string | null | undefined,
   ): Promise<SnapshotInput | null> {
     if (latest.published) return null;
-    const deleted = opts.event
-      ? []
-      : deletedComponents(
-          before.componentIndexList,
-          after.componentIndexList,
-          (code) => this.engine.isGroupCode(code) || this.engine.isQuestionCode(code),
-        );
-    const event = opts.event ?? (deleted.length ? SnapshotReason.DELETE : null);
-    const reason = await this.snapshots.reasonFor(survey.id, event, async () => {
-      const published = await this.versions.findLatestPublished(survey.id);
-      return published?.lastModified ?? survey.creationDate;
-    });
-    if (!reason) return null;
-    const details =
-      reason === SnapshotReason.DELETE
-        ? { deleted }
-        : reason === opts.event
-          ? (opts.details ?? null)
-          : null;
+    if (!(await this.snapshots.isDue(survey.id, survey.lastRestoredAt))) return null;
     return {
       surveyId: survey.id,
       survey: before.survey,
-      reason,
-      details,
-      userId: opts.userId,
+      savedAt: latest.lastModified,
+      userId,
     };
   }
 
@@ -255,6 +238,7 @@ export class DesignService {
     latest: VersionEntity,
     output: ValidationJsonOutput,
     snapshot: SnapshotInput | null,
+    alsoInTx?: (tx: EntityManager) => Promise<void>,
   ): Promise<DesignDto> {
     const versionToSave = latest.published ? latest.version + 1 : latest.version;
     const subVersionToSave = latest.published ? 1 : latest.subVersion + 1;
@@ -272,6 +256,7 @@ export class DesignService {
     survey.lastModified = nowUtcString();
     const entity = await this.db.manager.transaction(async (tx) => {
       if (snapshot) await this.snapshots.create(snapshot, tx);
+      if (alsoInTx) await alsoInTx(tx);
       const e = await this.versions.save(
         {
           version: versionToSave,
@@ -331,11 +316,7 @@ export class DesignService {
     const diff = Object.fromEntries(codes.map((code) => [code, state[code]]));
     return {
       updated: changes.length,
-      design: await this.setDesign(surveyId, diff, design.versionDto.version, {
-        event: SnapshotReason.TRANSLATIONS_IMPORT,
-        details: { updated: changes.length },
-        userId,
-      }),
+      design: await this.setDesign(surveyId, diff, design.versionDto.version, { userId }),
     };
   }
 
@@ -354,11 +335,7 @@ export class DesignService {
     );
     const output = await this.engine.changeCode(savedDesign, from, to);
     const before = JSON.parse(savedDesign) as ValidationJsonOutput;
-    const snapshot = await this.snapshotBefore(survey, latest, before, output, {
-      event: SnapshotReason.CHANGE_CODE,
-      details: { from, to },
-      userId,
-    });
+    const snapshot = await this.snapshotBefore(survey, latest, before, userId);
     return this.saveDraft(survey, latest, output, snapshot);
   }
 

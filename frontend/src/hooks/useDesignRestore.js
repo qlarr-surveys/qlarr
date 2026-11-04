@@ -10,14 +10,17 @@ export function useDesignRestore() {
   );
   const [restoring, setRestoring] = useState(false);
 
+  /** Resolves to whether the restore succeeded. */
   const restore = (request) => {
     setRestoring(true);
     return request
       .then((data) => {
         dispatch(designStateReceived({ ...data, overWriteLang: true }));
+        return true;
       })
       .catch((error) => {
         if (!error?.handleGlobally) dispatch(onError(error));
+        return false;
       })
       .finally(() => setRestoring(false));
   };

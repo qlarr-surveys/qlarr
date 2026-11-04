@@ -579,7 +579,7 @@
     "download_qr_code": "QR-code downloaden",
     "discard_changes": "Niet-gepubliceerde wijzigingen verwerpen",
     "discard_title": "Niet-gepubliceerde wijzigingen verwerpen?",
-    "discard_description": "Het ontwerp gaat terug naar de laatst gepubliceerde versie. Het huidige ontwerp blijft bewaard in de versiegeschiedenis, zodat je het later kunt herstellen."
+    "discard_description": "Het ontwerp gaat terug naar de laatst gepubliceerde versie. Het huidige ontwerp en de volledige versiegeschiedenis worden definitief verwijderd."
   },
   "email": {
     "check": "Controleer je E-mail",
@@ -823,17 +823,10 @@
     "description": "Herstelpunten van je niet-gepubliceerde wijzigingen, automatisch bewaard tijdens het bewerken. De geschiedenis wordt bij elke publicatie gewist.",
     "empty": "Nog geen herstelpunten.",
     "restore": "Herstellen",
+    "preview_title": "Voorbeeld: {{title}}",
     "restore_title": "Deze versie herstellen?",
-    "restore_description": "Het ontwerp gaat terug naar hoe het was op {{date}}. Het huidige ontwerp blijft bewaard in de versiegeschiedenis, zodat je het later kunt herstellen.",
-    "reason": {
-      "timer": "Automatisch opgeslagen",
-      "delete": "Voor het verwijderen van {{codes}}",
-      "change_code": "Voor het hernoemen {{from}} → {{to}}",
-      "translations_import_one": "Voor het importeren van vertalingen ({{count}} veld)",
-      "translations_import_other": "Voor het importeren van vertalingen ({{count}} velden)",
-      "restore": "Voor het herstellen van een eerdere versie",
-      "discard": "Voor het verwerpen van niet-gepubliceerde wijzigingen"
-    }
+    "restore_description": "Het ontwerp gaat terug naar hoe het was op {{date}}. Het huidige ontwerp en alle herstelpunten na dit punt worden definitief verwijderd.",
+    "restore_acknowledge": "Ik begrijp dat dit niet ongedaan kan worden gemaakt"
   },
   "status_info": {
     "draft": "De enquête is nog niet gepubliceerd. Alleen beschikbaar voor voorvertoning.",

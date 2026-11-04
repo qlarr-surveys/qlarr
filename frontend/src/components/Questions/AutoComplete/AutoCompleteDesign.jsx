@@ -24,6 +24,7 @@ import { changeAttribute, changeResources } from "~/state/design/designState";
 import styles from "./AutoComplete.module.css";
 import LoadingDots from "~/components/common/LoadingDots";
 import { useService } from "~/hooks/use-service";
+import { useDesignReadOnly } from "~/components/design/DesignReadOnly";
 import {
   formatlocalDateTime,
   serverDateTimeToLocalDateTime,
@@ -49,7 +50,10 @@ function AutoCompleteQuestion({ code, t, onMainLang }) {
     return state.designState.langInfo.lang;
   });
 
+  const readOnly = useDesignReadOnly();
+
   const uploadFile = (file, onSuccess, useDialogError = false) => {
+    if (readOnly) return;
     if (!useDialogError) {
       setUploading(true);
       setError(null);

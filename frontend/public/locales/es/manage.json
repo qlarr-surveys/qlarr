@@ -579,7 +579,7 @@
     "download_qr_code": "Descargar código QR",
     "discard_changes": "Descartar cambios no publicados",
     "discard_title": "¿Descartar los cambios no publicados?",
-    "discard_description": "El diseño vuelve a la última versión publicada. El diseño actual se guarda en el historial de versiones para que puedas restaurarlo más tarde."
+    "discard_description": "El diseño vuelve a la última versión publicada. El diseño actual y todo el historial de versiones se eliminarán de forma permanente."
   },
   "email": {
     "check": "Revisa tu Correo Electrónico",
@@ -823,17 +823,10 @@
     "description": "Puntos de restauración de tus cambios no publicados, guardados automáticamente mientras editas. El historial se borra cada vez que publicas.",
     "empty": "Aún no hay puntos de restauración.",
     "restore": "Restaurar",
+    "preview_title": "Vista previa: {{title}}",
     "restore_title": "¿Restaurar esta versión?",
-    "restore_description": "El diseño vuelve a como estaba el {{date}}. El diseño actual se guarda en el historial de versiones para que puedas restaurarlo más tarde.",
-    "reason": {
-      "timer": "Guardado automático",
-      "delete": "Antes de eliminar {{codes}}",
-      "change_code": "Antes de renombrar {{from}} → {{to}}",
-      "translations_import_one": "Antes de importar traducciones ({{count}} campo)",
-      "translations_import_other": "Antes de importar traducciones ({{count}} campos)",
-      "restore": "Antes de restaurar una versión anterior",
-      "discard": "Antes de descartar los cambios no publicados"
-    }
+    "restore_description": "El diseño vuelve a como estaba el {{date}}. El diseño actual y todos los puntos de restauración posteriores a este se eliminarán de forma permanente.",
+    "restore_acknowledge": "Entiendo que esto no se puede deshacer"
   },
   "status_info": {
     "draft": "La encuesta aún no ha sido publicada. Solo disponible para vista previa.",

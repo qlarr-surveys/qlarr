@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'node:crypto';
 import { EntityManager } from 'typeorm';
 import {
@@ -7,108 +6,86 @@ import {
   timestampTextTransformer,
   wallClockToInstant,
 } from '../../common/datetime';
-import { SnapshotsConfig } from '../../config/snapshots.config';
 import { DbContext } from '../../database/db-context';
-import { ComponentIndex } from '../../engine/engine.types';
-import { DesignSnapshotEntity, SnapshotReason } from './design-snapshot.entity';
+import { DesignSnapshotEntity } from './design-snapshot.entity';
 import { SnapshotDto } from './design.dto';
 
 const MAX_SNAPSHOTS = 100;
-const COOLDOWN_MS = 2 * 60_000;
+const INTERVAL_MS = 60_000;
 
-export function snapshotReason(opts: {
-  event: SnapshotReason | null;
-  lastSnapshotAt: number | null;
-  anchor: number;
-  now: number;
-  intervalMs: number;
-}): SnapshotReason | null {
-  const { event, lastSnapshotAt, anchor, now, intervalMs } = opts;
-  if (event === SnapshotReason.RESTORE) return event;
-  if (event && (lastSnapshotAt === null || now - lastSnapshotAt >= COOLDOWN_MS)) {
-    return event;
-  }
-  return now - anchor >= intervalMs ? SnapshotReason.TIMER : null;
-}
-
-export function deletedComponents(
-  before: ComponentIndex[],
-  after: ComponentIndex[],
-  isTracked: (code: string) => boolean,
-): string[] {
-  const kept = new Set(after.map((c) => c.code));
-  return before
-    .map((c) => c.code)
-    .filter((code) => !kept.has(code) && isTracked(code));
+/**
+ * At most one snapshot a minute: one is due when a minute has passed since the
+ * last snapshot or restore (`lastAt`), or there was neither.
+ */
+export function snapshotDue(opts: { lastAt: number | null; now: number }): boolean {
+  const { lastAt, now } = opts;
+  return lastAt === null || now - lastAt >= INTERVAL_MS;
 }
 
 export interface SnapshotInput {
   surveyId: string;
   survey: Record<string, unknown>;
-  reason: SnapshotReason;
-  details?: Record<string, unknown> | null;
+  savedAt: string;
   userId?: string | null;
 }
 
 @Injectable()
 export class DesignSnapshotService {
-  private readonly intervalMs: number;
-
-  constructor(
-    private readonly db: DbContext,
-    config: ConfigService,
-  ) {
-    this.intervalMs = config.getOrThrow<SnapshotsConfig>('snapshots').intervalMs;
-  }
+  constructor(private readonly db: DbContext) {}
 
   private repo(manager: EntityManager = this.db.manager) {
     return manager.getRepository(DesignSnapshotEntity);
   }
 
-  async reasonFor(
-    surveyId: string,
-    event: SnapshotReason | null,
-    anchor: () => Promise<string | null>,
-  ): Promise<SnapshotReason | null> {
+  async isDue(surveyId: string, restoredAt: string | null): Promise<boolean> {
     const last = await this.repo().findOne({
       where: { surveyId },
-      order: { createdAt: 'DESC' },
+      order: { createdAt: 'DESC', id: 'DESC' },
     });
-    const now = Date.now();
-    const lastSnapshotAt = last ? wallClockToInstant(last.createdAt) : null;
-    let start = lastSnapshotAt;
-    if (start === null) {
-      const wallClock = await anchor();
-      start = wallClock ? wallClockToInstant(wallClock) : now;
-    }
-    return snapshotReason({
-      event,
-      lastSnapshotAt,
-      anchor: start,
-      now,
-      intervalMs: this.intervalMs,
+    // A restore counts as the last snapshot: the design is back on a restore
+    // point, so the minute starts again from it.
+    const times = [last?.createdAt, restoredAt].filter(Boolean).map(wallClockToInstant);
+    return snapshotDue({
+      lastAt: times.length ? Math.max(...times) : null,
+      now: Date.now(),
     });
   }
 
   async create(input: SnapshotInput, manager: EntityManager = this.db.manager): Promise<void> {
     await manager.query(
       `INSERT INTO design_snapshots
-         (id, survey_id, created_at, created_by, reason, details, data)
-       VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7)`,
+         (id, survey_id, created_at, saved_at, created_by, data)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
       [
         randomUUID(),
         input.surveyId,
         nowUtcString(),
+        input.savedAt,
         input.userId ?? null,
-        input.reason,
-        input.details ? JSON.stringify(input.details) : null,
         JSON.stringify(input.survey),
       ],
+    );
+    // Thin out with age: every snapshot from the last hour, the newest per
+    // 30-minute block for the last day, the newest per day before that.
+    await manager.query(
+      `DELETE FROM design_snapshots WHERE id IN (
+         SELECT id FROM (
+           SELECT id, ROW_NUMBER() OVER (
+                    PARTITION BY CASE
+                      WHEN created_at >= $2::timestamp - interval '1 hour' THEN id::text
+                      WHEN created_at >= $2::timestamp - interval '1 day'
+                        THEN 'b' || floor(extract(epoch FROM created_at) / 1800)
+                      ELSE 'd' || created_at::date
+                    END
+                    ORDER BY created_at DESC, id DESC) AS rank
+             FROM design_snapshots WHERE survey_id = $1) ranked
+          WHERE rank > 1)`,
+      [input.surveyId, nowUtcString()],
     );
     await manager.query(
       `DELETE FROM design_snapshots WHERE survey_id = $1 AND id NOT IN (
          SELECT id FROM design_snapshots WHERE survey_id = $1
-          ORDER BY created_at DESC LIMIT $2)`,
+          ORDER BY created_at DESC, id DESC LIMIT $2)`,
       [input.surveyId, MAX_SNAPSHOTS],
     );
   }
@@ -116,32 +93,27 @@ export class DesignSnapshotService {
   async list(surveyId: string): Promise<SnapshotDto[]> {
     const rows: Array<{
       id: string;
-      created_at: Date | string;
+      saved_at: Date | string;
       created_by: string | null;
       first_name: string | null;
       last_name: string | null;
-      reason: SnapshotReason;
-      details: Record<string, unknown> | null;
     }> = await this.db.manager.query(
-      `SELECT s.id, s.created_at, s.created_by, u.first_name, u.last_name,
-              s.reason, s.details
+      `SELECT s.id, s.saved_at, s.created_by, u.first_name, u.last_name
          FROM design_snapshots s
          LEFT JOIN users u ON u.id = s.created_by
         WHERE s.survey_id = $1
-        ORDER BY s.created_at DESC`,
+        ORDER BY s.created_at DESC, s.id DESC`,
       [surveyId],
     );
     return rows.map((r) => ({
       id: r.id,
-      createdAt: timestampTextTransformer.from(r.created_at) as string,
+      savedAt: timestampTextTransformer.from(r.saved_at) as string,
       createdBy: r.created_by
         ? {
             id: r.created_by,
             name: [r.first_name, r.last_name].filter(Boolean).join(' ') || null,
           }
         : null,
-      reason: r.reason,
-      details: r.details,
     }));
   }
 
@@ -153,6 +125,21 @@ export class DesignSnapshotService {
       .getOne();
     if (!row) return null;
     return JSON.parse(row.data);
+  }
+
+  /**
+   * Deletes `id` and the snapshots taken after it. `created_at` has
+   * whole-second precision, so `id` breaks ties, matching the order everything
+   * else uses.
+   */
+  async deleteFrom(surveyId: string, id: string, manager: EntityManager): Promise<void> {
+    await manager.query(
+      `DELETE FROM design_snapshots
+        WHERE survey_id = $1
+          AND (created_at, id) >= (
+            SELECT created_at, id FROM design_snapshots WHERE survey_id = $1 AND id = $2)`,
+      [surveyId, id],
+    );
   }
 
   async deleteAll(surveyId: string, manager: EntityManager = this.db.manager): Promise<void> {

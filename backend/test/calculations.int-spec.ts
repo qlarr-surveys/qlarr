@@ -22,6 +22,7 @@ const DESIGN_JSON = JSON.stringify(
 const files = {
   getText: jest.fn().mockResolvedValue(DESIGN_JSON),
   uploadText: jest.fn().mockResolvedValue(undefined),
+  delete: jest.fn().mockResolvedValue(undefined),
 };
 
 const DOUBLE = { code: 'double', label: 'Double', expression: 'Q880htp.value * 2' };
@@ -336,6 +337,20 @@ describe('Calculations', () => {
         status: 'completed',
         progress: { done: 3, total: 3 },
       });
+    });
+
+    it('discarding unpublished changes hides the results', async () => {
+      const { id, r1 } = await createSurvey();
+      const design = app.get(DesignService);
+      await design.setDesign(id, {}, 1);
+      await save(id, [DOUBLE], 0).expect(200);
+      await compute(id).expect(200);
+      await settle(id);
+
+      await design.restorePublished(id, 2, 1);
+
+      expect((await calculationsOf(r1))[0].state).toBe('not_computed');
+      expect(await state(id)).toMatchObject({ status: 'idle', newSinceLastRun: null });
     });
 
     it('everything is refused (409) while a run is in progress', async () => {

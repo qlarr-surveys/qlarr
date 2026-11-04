@@ -579,7 +579,7 @@
     "download_qr_code": "Baixar código QR",
     "discard_changes": "Descartar alterações não publicadas",
     "discard_title": "Descartar as alterações não publicadas?",
-    "discard_description": "O design volta para a última versão publicada. O design atual fica guardado no histórico de versões, para que possa restaurá-lo mais tarde."
+    "discard_description": "O design volta à última versão publicada. O design atual e todo o histórico de versões serão eliminados permanentemente."
   },
   "email": {
     "check": "Verifique seu E-mail",
@@ -823,17 +823,10 @@
     "description": "Pontos de restauro das suas alterações não publicadas, guardados automaticamente enquanto edita. O histórico é apagado sempre que publica.",
     "empty": "Ainda não há pontos de restauro.",
     "restore": "Restaurar",
+    "preview_title": "Pré-visualização: {{title}}",
     "restore_title": "Restaurar esta versão?",
-    "restore_description": "O design volta ao estado de {{date}}. O design atual fica guardado no histórico de versões, para que possa restaurá-lo mais tarde.",
-    "reason": {
-      "timer": "Gravação automática",
-      "delete": "Antes de eliminar {{codes}}",
-      "change_code": "Antes de renomear {{from}} → {{to}}",
-      "translations_import_one": "Antes de importar traduções ({{count}} campo)",
-      "translations_import_other": "Antes de importar traduções ({{count}} campos)",
-      "restore": "Antes de restaurar uma versão anterior",
-      "discard": "Antes de descartar as alterações não publicadas"
-    }
+    "restore_description": "O design volta ao estado de {{date}}. O design atual e todos os pontos de restauro posteriores a este serão eliminados permanentemente.",
+    "restore_acknowledge": "Compreendo que esta ação não pode ser desfeita"
   },
   "status_info": {
     "draft": "A pesquisa ainda não foi publicada. Disponível apenas para pré-visualização.",

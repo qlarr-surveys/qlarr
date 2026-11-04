@@ -79,9 +79,9 @@ function LaunchPage({ onPublish }) {
   };
 
   const discardChanges = () =>
-    restore(designService.restorePublished(versionDto?.version)).finally(() =>
-      setDiscardOpen(false)
-    );
+    restore(
+      designService.restorePublished(versionDto?.version, versionDto?.subVersion)
+    ).finally(() => setDiscardOpen(false));
 
   useEffect(() => {
     const newSurveyMode = survey?.usage || "";
@@ -365,6 +365,8 @@ function LaunchPage({ onPublish }) {
         description={t("launch.discard_description")}
         cancelLabel={t("action_btn.cancel")}
         confirmLabel={t("launch.discard_changes")}
+        requireAcknowledgement
+        acknowledgementLabel={t("version_history.restore_acknowledge")}
         isLoading={discarding}
         onClose={() => setDiscardOpen(false)}
         onConfirm={discardChanges}

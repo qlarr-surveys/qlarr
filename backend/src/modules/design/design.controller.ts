@@ -99,15 +99,29 @@ export class DesignController {
     return this.design.listSnapshots(surveyId);
   }
 
+  @Get(':surveyId/design/snapshots/:snapshotId')
+  @Roles(Role.SUPER_ADMIN, Role.SURVEY_ADMIN)
+  previewSnapshot(
+    @Param('surveyId') surveyId: string,
+    @Param('snapshotId', ParseUUIDPipe) snapshotId: string,
+  ): Promise<{ designerInput: DesignDto['designerInput'] }> {
+    return this.design.previewSnapshot(surveyId, snapshotId);
+  }
+
   @Post(':surveyId/design/snapshots/:snapshotId/restore')
   @Roles(Role.SUPER_ADMIN, Role.SURVEY_ADMIN)
   restoreSnapshot(
     @Param('surveyId') surveyId: string,
     @Param('snapshotId', ParseUUIDPipe) snapshotId: string,
     @Query('version') version: string,
-    @CurrentUser() user: CurrentUserPrincipal,
+    @Query('sub_version') subVersion: string,
   ): Promise<DesignDto> {
-    return this.design.restoreSnapshot(surveyId, snapshotId, parseInt(version, 10), user.userId);
+    return this.design.restoreSnapshot(
+      surveyId,
+      snapshotId,
+      parseInt(version, 10),
+      parseInt(subVersion, 10),
+    );
   }
 
   @Post(':surveyId/design/restore_published')
@@ -115,9 +129,9 @@ export class DesignController {
   restorePublished(
     @Param('surveyId') surveyId: string,
     @Query('version') version: string,
-    @CurrentUser() user: CurrentUserPrincipal,
+    @Query('sub_version') subVersion: string,
   ): Promise<DesignDto> {
-    return this.design.restorePublished(surveyId, parseInt(version, 10), user.userId);
+    return this.design.restorePublished(surveyId, parseInt(version, 10), parseInt(subVersion, 10));
   }
 
   @Get(':surveyId/translations/export')

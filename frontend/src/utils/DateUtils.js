@@ -28,3 +28,22 @@ export const dayMonthUeatFormat = (date) => {
 
   return dd + "/" + mm + "/" + yyyy;
 };
+
+const RELATIVE_UNITS = [
+  ["year", 365 * 24 * 3600],
+  ["month", 30 * 24 * 3600],
+  ["week", 7 * 24 * 3600],
+  ["day", 24 * 3600],
+  ["hour", 3600],
+  ["minute", 60],
+];
+
+/** "5 minutes ago", "yesterday", "now" in the given language. */
+export const timeAgo = (date, language) => {
+  const seconds = (date.getTime() - Date.now()) / 1000;
+  const format = new Intl.RelativeTimeFormat(language, { numeric: "auto" });
+  for (const [unit, size] of RELATIVE_UNITS) {
+    if (Math.abs(seconds) >= size) return format.format(Math.trunc(seconds / size), unit);
+  }
+  return format.format(0, "second");
+};

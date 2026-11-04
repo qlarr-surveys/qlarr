@@ -579,7 +579,7 @@
     "download_qr_code": "Download QR Code",
     "discard_changes": "Discard unpublished changes",
     "discard_title": "Discard unpublished changes?",
-    "discard_description": "The design goes back to the last published version. The current design is kept in the version history, so you can restore it later."
+    "discard_description": "The design goes back to the last published version. Your current design and the whole version history will be permanently deleted."
   },
   "email": {
     "check": "Check Your Email",
@@ -823,17 +823,10 @@
     "description": "Restore points for your unpublished changes, kept automatically while you edit. The history is cleared each time you publish.",
     "empty": "No restore points yet.",
     "restore": "Restore",
+    "preview_title": "Preview: {{title}}",
     "restore_title": "Restore this version?",
-    "restore_description": "The design goes back to how it was on {{date}}. The current design is kept in the version history, so you can restore it later.",
-    "reason": {
-      "timer": "Autosave",
-      "delete": "Before deleting {{codes}}",
-      "change_code": "Before renaming {{from}} → {{to}}",
-      "translations_import_one": "Before importing translations ({{count}} field)",
-      "translations_import_other": "Before importing translations ({{count}} fields)",
-      "restore": "Before restoring a previous version",
-      "discard": "Before discarding unpublished changes"
-    }
+    "restore_description": "The design goes back to how it was on {{date}}. Your current design and every restore point after this one will be permanently deleted.",
+    "restore_acknowledge": "I understand this can't be undone"
   },
   "status_info": {
     "draft": "Survey has not been published yet. Only available for preview.",

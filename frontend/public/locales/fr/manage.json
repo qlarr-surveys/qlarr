@@ -579,7 +579,7 @@
     "download_qr_code": "Télécharger le code QR",
     "discard_changes": "Annuler les modifications non publiées",
     "discard_title": "Annuler les modifications non publiées ?",
-    "discard_description": "Le design revient à la dernière version publiée. Le design actuel est conservé dans l'historique des versions pour que vous puissiez le restaurer plus tard."
+    "discard_description": "Le design revient à la dernière version publiée. Le design actuel et tout l'historique des versions seront définitivement supprimés."
   },
   "email": {
     "check": "Vérifiez votre E-mail",
@@ -823,17 +823,10 @@
     "description": "Points de restauration de vos modifications non publiées, enregistrés automatiquement pendant l'édition. L'historique est effacé à chaque publication.",
     "empty": "Aucun point de restauration pour l'instant.",
     "restore": "Restaurer",
+    "preview_title": "Aperçu : {{title}}",
     "restore_title": "Restaurer cette version ?",
-    "restore_description": "Le design revient à son état du {{date}}. Le design actuel est conservé dans l'historique des versions pour que vous puissiez le restaurer plus tard.",
-    "reason": {
-      "timer": "Sauvegarde automatique",
-      "delete": "Avant la suppression de {{codes}}",
-      "change_code": "Avant le renommage {{from}} → {{to}}",
-      "translations_import_one": "Avant l'import des traductions ({{count}} champ)",
-      "translations_import_other": "Avant l'import des traductions ({{count}} champs)",
-      "restore": "Avant la restauration d'une version précédente",
-      "discard": "Avant l'annulation des modifications non publiées"
-    }
+    "restore_description": "Le design revient à son état du {{date}}. Le design actuel et tous les points de restauration postérieurs à celui-ci seront définitivement supprimés.",
+    "restore_acknowledge": "Je comprends que cette action est irréversible"
   },
   "status_info": {
     "draft": "Le sondage n'a pas encore été publié. Disponible uniquement en aperçu.",

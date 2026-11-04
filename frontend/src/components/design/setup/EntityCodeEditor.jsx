@@ -13,6 +13,7 @@ import {
   setup,
 } from "~/state/design/designState";
 import { useService } from "~/hooks/use-service";
+import { useDesignReadOnly } from "~/components/design/DesignReadOnly";
 import { useReleaseGuard } from "~/hooks/useReleaseGuard";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
@@ -27,6 +28,7 @@ function EntityCodeEditor({ code }) {
   const designService = useService("design");
   const { guard, modal } = useReleaseGuard();
   const { t } = useTranslation(NAMESPACES.DESIGN_CORE);
+  const readOnly = useDesignReadOnly();
 
   const { currentSetup, saving } = useSelector(
     (state) => ({
@@ -75,9 +77,9 @@ function EntityCodeEditor({ code }) {
   }, [code, dispatch, designService, fullCode, currentSetup]);
 
   const handleEntityCodeSave = React.useCallback(() => {
-    if (!code || !isDirty) return;
+    if (readOnly || !code || !isDirty) return;
     guard(performSave, { messageKey: "released_change_code" });
-  }, [code, isDirty, guard, performSave]);
+  }, [readOnly, code, isDirty, guard, performSave]);
 
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
@@ -107,6 +109,7 @@ function EntityCodeEditor({ code }) {
         error={!!error}
         helperText={getErrorMessage(error, t)}
         InputProps={{
+          readOnly,
           startAdornment: prefix && (
             <InputAdornment position="start" sx={{ mr: 0.2 }}>
               <Typography
@@ -124,7 +127,7 @@ function EntityCodeEditor({ code }) {
         variant="contained"
         color="primary"
         onClick={handleEntityCodeSave}
-        disabled={!code || !isDirty || saving || !suffix}
+        disabled={readOnly || !code || !isDirty || saving || !suffix}
       >
         {t("submit")}
       </Button>
