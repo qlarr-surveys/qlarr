@@ -39,10 +39,14 @@ function DesignHistory() {
   const versionDto = useSelector((state) => state.designState.versionDto);
   const survey = useSelector((state) => state.editState.survey);
   const closed = survey?.status == SURVEY_STATUS.CLOSED;
+  // Something since the last publish to throw away, as on the Launch page.
+  const canDiscard =
+    !closed && !versionDto?.published && versionDto?.version > 1;
   const { busy, restoring, restore } = useDesignRestore();
 
   const [snapshots, setSnapshots] = useState(null);
   const [toRestore, setToRestore] = useState(null);
+  const [discardOpen, setDiscardOpen] = useState(false);
   const [listOpen, setListOpen] = useState(true);
   // The version picked in the list, until it has loaded; then the list closes.
   const [loadingId, setLoadingId] = useState(null);
@@ -86,6 +90,14 @@ function DesignHistory() {
       ),
     ).then((ok) => {
       setToRestore(null);
+      if (ok) toDesign();
+    });
+
+  const discardChanges = () =>
+    restore(
+      designService.restorePublished(versionDto.version, versionDto.subVersion),
+    ).then((ok) => {
+      setDiscardOpen(false);
       if (ok) toDesign();
     });
 
@@ -182,7 +194,8 @@ function DesignHistory() {
             insetInlineEnd: 0,
             zIndex: 20, // above the designer's search box (z-index 10)
             width: 340,
-            overflowY: "auto",
+            display: "flex",
+            flexDirection: "column",
             backgroundColor: "background.paper",
             boxShadow: 8,
           }}
@@ -202,7 +215,7 @@ function DesignHistory() {
           >
             {t("version_history.description")}
           </Typography>
-          <List disablePadding>
+          <List disablePadding sx={{ flex: 1, overflowY: "auto" }}>
             {snapshots.map((snapshot) => (
               <ListItemButton
                 key={snapshot.id}
@@ -225,6 +238,19 @@ function DesignHistory() {
               </ListItemButton>
             ))}
           </List>
+          {canDiscard && (
+            <Box sx={{ p: 2, borderTop: 1, borderColor: "divider" }}>
+              <Button
+                fullWidth
+                variant="outlined"
+                color="error"
+                disabled={busy || restoring}
+                onClick={() => setDiscardOpen(true)}
+              >
+                {t("launch.discard_changes")}
+              </Button>
+            </Box>
+          )}
         </Box>
       </Slide>
 
@@ -244,6 +270,18 @@ function DesignHistory() {
         isLoading={restoring}
         onClose={() => setToRestore(null)}
         onConfirm={restoreSnapshot}
+      />
+      <ConfirmActionModal
+        open={discardOpen}
+        title={t("launch.discard_title")}
+        description={t("launch.discard_description")}
+        cancelLabel={t("action_btn.cancel")}
+        confirmLabel={t("launch.discard_changes")}
+        requireAcknowledgement
+        acknowledgementLabel={t("version_history.restore_acknowledge")}
+        isLoading={restoring}
+        onClose={() => setDiscardOpen(false)}
+        onConfirm={discardChanges}
       />
     </Box>
   );
