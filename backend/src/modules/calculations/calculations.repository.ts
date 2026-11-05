@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager, Repository } from 'typeorm';
 import { DbContext } from '../../database/db-context';
 import { Calculation } from '../../engine/engine.types';
+import { replaceCode } from '../../engine/replace-code';
 import { RUN_TIME_LIMIT_SECONDS } from './calculations.constants';
 import {
   CalculationRunInProgressException,
@@ -37,6 +38,37 @@ export async function resetCalculationsOnDesignChange(
     `UPDATE survey_calculations SET status = 'idle'
      WHERE survey_id = $1 AND status <> 'idle'`,
     [surveyId],
+  );
+}
+
+/**
+ * A component code rename: rewrite the code in the set's expressions, bumping
+ * `revision` if any changed so an editor still holding the old set gets a
+ * conflict instead of saving it back. A plain function for the same reason as
+ * `resetCalculationsOnDesignChange`.
+ */
+export async function renameCodeInCalculations(
+  manager: EntityManager,
+  surveyId: string,
+  from: string,
+  to: string,
+): Promise<void> {
+  const rows = await manager.query<{ calculations: Calculation[] }[]>(
+    `SELECT calculations FROM survey_calculations WHERE survey_id = $1 FOR UPDATE`,
+    [surveyId],
+  );
+  if (rows.length === 0) return;
+  const before = rows[0].calculations;
+  const after = before.map((c) => ({
+    ...c,
+    expression: replaceCode(c.expression, from, to),
+  }));
+  if (after.every((c, i) => c.expression === before[i].expression)) return;
+  await manager.query(
+    `UPDATE survey_calculations
+     SET calculations = $2::jsonb, revision = revision + 1, updated_at = now()
+     WHERE survey_id = $1`,
+    [surveyId, JSON.stringify(after)],
   );
 }
 

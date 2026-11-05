@@ -103,6 +103,11 @@ describe('Calculations', () => {
       .set('Authorization', SUPER)
       .send({ calculations, revision });
 
+  const rename = (id: string, from: string, to: string) =>
+    request(server())
+      .post(`/survey/${id}/change_code?from=${from}&to=${to}`)
+      .set('Authorization', SUPER);
+
   const compute = (id: string) =>
     request(server()).post(`${base(id)}/compute`).set('Authorization', SUPER);
 
@@ -336,6 +341,32 @@ describe('Calculations', () => {
       expect(await settle(id)).toMatchObject({
         status: 'completed',
         progress: { done: 3, total: 3 },
+      });
+    });
+
+    it('a code rename rewrites the expressions and bumps the revision', async () => {
+      const { id } = await createSurvey();
+      const similar = { code: 'similar', label: 'Similar', expression: 'Q880htpx.value' };
+      await save(id, [DOUBLE, similar], 0).expect(200);
+
+      await rename(id, 'Q880htp', 'Q880new').expect(201);
+
+      const after = await state(id);
+      expect(after.calculations[0]).toMatchObject({ expression: 'Q880new.value * 2', errors: [] });
+      expect(after.calculations[1].expression).toBe('Q880htpx.value');
+      expect(after.revision).toBe(2);
+      await save(id, [DOUBLE], 1).expect(409);
+    });
+
+    it('a code rename no calculation references keeps the revision', async () => {
+      const { id } = await createSurvey();
+      await save(id, [DOUBLE], 0).expect(200);
+
+      await rename(id, 'G2', 'G9').expect(201);
+
+      expect(await state(id)).toMatchObject({
+        revision: 1,
+        calculations: [{ expression: DOUBLE.expression }],
       });
     });
 

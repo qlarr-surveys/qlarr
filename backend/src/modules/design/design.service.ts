@@ -8,7 +8,10 @@ import { ValidationJsonOutput } from '../../engine/engine.types';
 import { FILE_HELPER, FileHelper } from '../../integrations/filesystem/file-helper';
 import { SurveyFolder } from '../../integrations/filesystem/survey-folder';
 import { DbContext } from '../../database/db-context';
-import { resetCalculationsOnDesignChange } from '../calculations/calculations.repository';
+import {
+  renameCodeInCalculations,
+  resetCalculationsOnDesignChange,
+} from '../calculations/calculations.repository';
 import { statusFromDb } from '../surveys/survey.enums';
 import { SurveyEntity } from '../surveys/survey.entity';
 import {
@@ -326,7 +329,9 @@ export class DesignService {
     const output = await this.engine.changeCode(savedDesign, from, to);
     const before = JSON.parse(savedDesign) as ValidationJsonOutput;
     const snapshot = await this.snapshotBefore(survey, latest, before);
-    return this.saveDraft(survey, latest, output, snapshot, userId);
+    return this.saveDraft(survey, latest, output, snapshot, userId, (tx) =>
+      renameCodeInCalculations(tx, surveyId, from, to),
+    );
   }
 
   /**

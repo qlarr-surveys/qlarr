@@ -10,6 +10,7 @@ import {
   SurveyModeName,
   ValidationJsonOutput,
 } from './engine.types';
+import { replaceCode } from './replace-code';
 
 /**
  * The heavy, author-JS-executing engine operations, extracted from
@@ -172,10 +173,7 @@ function replaceInField(
 ): void {
   const obj = node[field];
   if (obj && typeof obj === 'object') {
-    // Whole codes only: renaming Q1 must not touch Q10 or Q1_x.
-    const escaped = from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const code = new RegExp(`${escaped}(?![a-z0-9_])`, 'g');
-    node[field] = JSON.parse(JSON.stringify(obj).replace(code, () => to));
+    node[field] = JSON.parse(replaceCode(JSON.stringify(obj), from, to));
   }
 }
 
