@@ -25,10 +25,11 @@ const NOT_RUNNING = `(survey_calculations.status <> 'running' OR ${RUN_EXPIRED})
 
 /**
  * A design change: set the survey's calculations `idle`, so the results stop
- * showing and the next Compute is a full run. A run in progress stops at its
- * next chunk (its writes need `running`). A plain function rather than a
- * repository method, since DesignModule can't import CalculationsModule
- * (which imports it).
+ * showing and the next Compute is a full run, and mark every calculation
+ * `OutOfDate` until the next Save validates it. `revision` stays: the authored
+ * set is unchanged. A run in progress stops at its next chunk (its writes need
+ * `running`). A plain function rather than a repository method, since
+ * DesignModule can't import CalculationsModule (which imports it).
  */
 export async function resetCalculationsOnDesignChange(
   manager: EntityManager,
@@ -39,6 +40,26 @@ export async function resetCalculationsOnDesignChange(
      WHERE survey_id = $1 AND status <> 'idle'`,
     [surveyId],
   );
+  const rows = await manager.query<{ calculations: Calculation[] }[]>(
+    `SELECT calculations FROM survey_calculations WHERE survey_id = $1 FOR UPDATE`,
+    [surveyId],
+  );
+  const set = rows[0]?.calculations ?? [];
+  if (set.every(isOutOfDate)) return;
+  const marked = set.map((c) =>
+    isOutOfDate(c)
+      ? c
+      : { ...c, errors: [...(c.errors ?? []), { name: 'OutOfDate' as const }] },
+  );
+  await manager.query(
+    `UPDATE survey_calculations SET calculations = $2::jsonb, updated_at = now()
+     WHERE survey_id = $1`,
+    [surveyId, JSON.stringify(marked)],
+  );
+}
+
+function isOutOfDate(calculation: Calculation): boolean {
+  return (calculation.errors ?? []).some((e) => e.name === 'OutOfDate');
 }
 
 /**
