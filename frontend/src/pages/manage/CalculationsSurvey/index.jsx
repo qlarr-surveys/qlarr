@@ -28,6 +28,7 @@ import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import { useService } from "~/hooks/use-service";
 import FormProvider, { RHFTextField } from "~/components/hook-form";
+import ConfirmActionModal from "~/components/common/ConfirmActionModal";
 import LoadingDots from "~/components/common/LoadingDots";
 import CalculationValue from "~/components/manage/CalculationValue";
 import { PROCESSED_ERRORS } from "~/utils/errorsProcessor";
@@ -65,6 +66,9 @@ const toFormValues = (calculations) => ({
   })),
 });
 
+const isOutOfDate = ({ errors }) =>
+  (errors ?? []).some((e) => e.name === "OutOfDate");
+
 /** One cell of the Test sample: invalid, error, value or no value. */
 function sampleCell(calculation, row) {
   if ((calculation.errors ?? []).length > 0) return { state: "invalid" };
@@ -93,6 +97,8 @@ function CalculationsSurvey({ onDirtyChange }) {
   const [busy, setBusy] = useState(null); // "save" | "test" | "compute"
   const [helpOpen, setHelpOpen] = useState(false);
   const [computeDone, setComputeDone] = useState(false);
+  // The form values of a first save, held until the author confirms the warning.
+  const [firstSave, setFirstSave] = useState(null);
   // Status seen last, and whether this session started a run, so the success
   // notice shows only for a run that finishes here, not on first load.
   const prevStatus = useRef(null);
@@ -115,6 +121,8 @@ function CalculationsSurvey({ onDirtyChange }) {
 
   const running = state?.status === "running";
   const savedEmpty = (state?.calculations.length ?? 0) === 0;
+  // Only a Save clears it, so it has to be possible without any edits.
+  const outOfDate = state?.calculations.some(isOutOfDate) ?? false;
 
   /** Take a fresh server state; reset the editor unless it holds unsaved edits. */
   const applyState = useCallback(
@@ -187,7 +195,7 @@ function CalculationsSurvey({ onDirtyChange }) {
     }
   };
 
-  const onSave = handleSubmit((values) => {
+  const save = (values) => {
     setBusy("save");
     setSample(null);
     surveyService
@@ -203,7 +211,17 @@ function CalculationsSurvey({ onDirtyChange }) {
       .then((next) => applyState(next, { resetForm: true }))
       .catch(handleError)
       .finally(() => setBusy(null));
+  };
+
+  const onSave = handleSubmit((values) => {
+    if (savedEmpty) setFirstSave(values);
+    else save(values);
   });
+
+  const onConfirmFirstSave = () => {
+    save(firstSave);
+    setFirstSave(null);
+  };
 
   const onTest = () => {
     setBusy("test");
@@ -318,7 +336,7 @@ function CalculationsSurvey({ onDirtyChange }) {
                 type="submit"
                 variant="contained"
                 loading={busy === "save"}
-                disabled={actionsDisabled || !isDirty}
+                disabled={actionsDisabled || (!isDirty && !outOfDate)}
               >
                 {t("calculations.save", "Save")}
               </LoadingButton>
@@ -351,6 +369,20 @@ function CalculationsSurvey({ onDirtyChange }) {
         )}
       </Stack>
 
+      <ConfirmActionModal
+        open={firstSave !== null}
+        title={t("calculations.first_save_title", "Good to know")}
+        description={t(
+          "calculations.design_warning",
+          "Calculations need re-validating with every survey design change."
+        )}
+        cancelLabel={t("action_btn.cancel")}
+        confirmLabel={t("calculations.save", "Save")}
+        confirmColor="primary"
+        onClose={() => setFirstSave(null)}
+        onConfirm={onConfirmFirstSave}
+      />
+
       <Snackbar
         open={computeDone}
         autoHideDuration={4000}
@@ -373,6 +405,8 @@ function CalculationsSurvey({ onDirtyChange }) {
 function StatusBanner({ state, t }) {
   // No saved calculations: Compute is disabled, so don't prompt for it.
   if (state.calculations.length === 0 && state.status !== "running") return null;
+  // Each card asks for a Save first, so don't prompt for Compute yet.
+  if (state.status === "idle" && state.calculations.some(isOutOfDate)) return null;
   switch (state.status) {
     case "idle":
       return (
@@ -456,6 +490,14 @@ function CalculationCard({ index, control, errors, disabled, onRemove, t }) {
         {scriptErrors.map((e, i) => (
           <ScriptErrorText key={i} error={e} control={control} index={index} t={t} />
         ))}
+        {isOutOfDate({ errors }) && (
+          <Alert severity="warning">
+            {t(
+              "calculations.error_OutOfDate",
+              "The survey design changed. Review this calculation and click Save."
+            )}
+          </Alert>
+        )}
       </Stack>
     </Paper>
   );

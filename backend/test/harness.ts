@@ -85,7 +85,7 @@ export async function startTestApp(
   // and re-register it with a generous limit so large design payloads pass.
   const app = moduleRef.createNestApplication({ bodyParser: false });
   configureBodyParsers(app);
-  await app.init();
+  await app.listen(0, '127.0.0.1');
 
   const root = new DataSource({
     type: 'postgres',

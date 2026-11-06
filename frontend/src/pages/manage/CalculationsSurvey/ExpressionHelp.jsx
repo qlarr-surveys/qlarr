@@ -1,6 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import {
+  Alert,
   Box,
   Divider,
   Drawer,
@@ -143,6 +144,7 @@ function ExpressionHelp({ open, onClose }) {
           <Typography variant="body2" color="text.secondary">
             {h("test_hint")}
           </Typography>
+          <Alert severity="warning">{t("calculations.design_warning")}</Alert>
         </Stack>
 
         <Section title={h("references_title")}>
