@@ -215,7 +215,6 @@ export class DesignService {
     latest: VersionEntity,
     before: ValidationJsonOutput,
   ): Promise<SnapshotInput | null> {
-    if (latest.published) return null;
     if (!(await this.snapshots.isDue(survey.id))) return null;
     return {
       surveyId: survey.id,
