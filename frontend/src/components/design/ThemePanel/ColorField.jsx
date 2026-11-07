@@ -41,6 +41,9 @@ function ColorField({ t, name, label, value, presets, onChange }) {
     setInvalid(false);
     const normalized = candidate.startsWith("#") ? candidate : `#${candidate}`;
     onChange(normalized.toLowerCase());
+    // Applying a typed hex finishes the edit — the colour is on the survey and
+    // the swatch row shows it, so the editor has nothing left to say.
+    setOpen(false);
   };
 
   const pick = (preset) => {
