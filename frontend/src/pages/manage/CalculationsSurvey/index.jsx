@@ -66,12 +66,14 @@ const toFormValues = (calculations) => ({
   })),
 });
 
+const hasErrors = ({ errors }) => (errors ?? []).length > 0;
+
 const isOutOfDate = ({ errors }) =>
   (errors ?? []).some((e) => e.name === "OutOfDate");
 
 /** One cell of the Test sample: invalid, error, value or no value. */
 function sampleCell(calculation, row) {
-  if ((calculation.errors ?? []).length > 0) return { state: "invalid" };
+  if (hasErrors(calculation)) return { state: "invalid" };
   const error = row.errors[calculation.code];
   if (error) return { state: "error", message: `${error.name}: ${error.message}` };
   if (calculation.code in row.results) {
@@ -122,7 +124,7 @@ function CalculationsSurvey({ onDirtyChange }) {
   const running = state?.status === "running";
   const savedEmpty = (state?.calculations.length ?? 0) === 0;
   // Only a Save clears it, so it has to be possible without any edits.
-  const outOfDate = state?.calculations.some(isOutOfDate) ?? false;
+  const savedErrors = state?.calculations.some(hasErrors) ?? false;
 
   /** Take a fresh server state; reset the editor unless it holds unsaved edits. */
   const applyState = useCallback(
@@ -339,7 +341,7 @@ function CalculationsSurvey({ onDirtyChange }) {
                 type="submit"
                 variant="contained"
                 loading={busy === "save"}
-                disabled={actionsDisabled || (!isDirty && !outOfDate)}
+                disabled={actionsDisabled || (!isDirty && !savedErrors)}
               >
                 {t("calculations.save", "Save")}
               </LoadingButton>
@@ -347,7 +349,7 @@ function CalculationsSurvey({ onDirtyChange }) {
                 variant="outlined"
                 onClick={onTest}
                 loading={busy === "test"}
-                disabled={actionsDisabled || isDirty || savedEmpty}
+                disabled={actionsDisabled || isDirty || savedEmpty || savedErrors}
               >
                 {t("calculations.test", "Test")}
               </LoadingButton>
@@ -355,7 +357,7 @@ function CalculationsSurvey({ onDirtyChange }) {
                 variant="outlined"
                 onClick={onCompute}
                 loading={busy === "compute"}
-                disabled={actionsDisabled || isDirty || savedEmpty}
+                disabled={actionsDisabled || isDirty || savedEmpty || savedErrors}
               >
                 {t("calculations.compute", "Compute")}
               </LoadingButton>
@@ -409,7 +411,7 @@ function StatusBanner({ state, t }) {
   // No saved calculations: Compute is disabled, so don't prompt for it.
   if (state.calculations.length === 0 && state.status !== "running") return null;
   // Each card asks for a Save first, so don't prompt for Compute yet.
-  if (state.status === "idle" && state.calculations.some(isOutOfDate)) return null;
+  if (state.status === "idle" && state.calculations.some(hasErrors)) return null;
   switch (state.status) {
     case "idle":
       return (

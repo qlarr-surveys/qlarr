@@ -91,11 +91,10 @@ export class ResponseService {
   }> {
     const row = await this.calculations.find(surveyId);
     const set = row?.calculations ?? [];
-    const status = row?.status ?? "idle";
     return {
       columns: validCalculations(set).map(({ code, label }) => ({ code, label })),
       resolve: (submitDate, computations) =>
-        submitDate == null ? [] : resolveCalculations(set, status, computations),
+        submitDate == null ? [] : resolveCalculations(set, computations),
     };
   }
 

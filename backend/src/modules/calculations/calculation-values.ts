@@ -1,5 +1,4 @@
 import { Calculation } from '../../engine/engine.types';
-import { CalculationStatus } from './survey-calculations.entity';
 
 /** Stored in `responses.computations` for a calculation that failed. */
 export const ERROR_VALUE = '#ERROR';
@@ -23,21 +22,19 @@ export function validCalculations(calculations: Calculation[]): Calculation[] {
 
 /**
  * Every valid calculation of the set for one completed response, in the set's
- * order (calculations with errors never run and are left out). Results only
- * show when the last run completed (`status = completed`) and the response has
- * `computations`; otherwise every calculation is `not_computed`.
+ * order (calculations with errors never run and are left out). A response
+ * without `computations` has every calculation `not_computed`; stored results
+ * always belong to the current set, as a save or design change deletes them.
  */
 export function resolveCalculations(
   calculations: Calculation[],
-  status: CalculationStatus,
   computations: Record<string, unknown> | null,
 ): CalculatedValue[] {
-  const shown = status === 'completed' ? computations : null;
   return validCalculations(calculations).map(({ code, label }) => {
-    if (!shown) return { code, label, state: 'not_computed', value: null };
-    if (!(code in shown)) return { code, label, state: 'empty', value: null };
-    if (shown[code] === ERROR_VALUE) return { code, label, state: 'error', value: null };
-    return { code, label, state: 'value', value: shown[code] };
+    if (!computations) return { code, label, state: 'not_computed', value: null };
+    if (!(code in computations)) return { code, label, state: 'empty', value: null };
+    if (computations[code] === ERROR_VALUE) return { code, label, state: 'error', value: null };
+    return { code, label, state: 'value', value: computations[code] };
   });
 }
 

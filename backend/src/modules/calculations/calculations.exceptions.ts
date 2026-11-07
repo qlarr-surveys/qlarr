@@ -33,7 +33,7 @@ export class CalculationRunInProgressException extends CalculationsException {
   }
 }
 
-/** A save with an invalid calculation stores nothing; `calculations` has the errors. */
+/** A save with an invalid calculation stores nothing, and a set with errors can't be tested or computed; `calculations` has the errors. */
 export class InvalidCalculationsException extends HttpException {
   constructor(calculations: Calculation[]) {
     super(

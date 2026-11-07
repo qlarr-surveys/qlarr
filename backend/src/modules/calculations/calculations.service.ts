@@ -31,8 +31,8 @@ import { CalculationsRepository } from './calculations.repository';
  * engine never runs a calculation with errors. A design change marks every
  * calculation `OutOfDate`, so they stop running until the next Save.
  * Everything runs against the survey's latest version. Nothing is allowed while
- * a run is in progress, and results only show once a run has completed on the
- * current set (a save sets `idle` and deletes them).
+ * a run is in progress. Stored results always belong to the current set: a save
+ * or design change sets `idle` and deletes them.
  */
 @Injectable()
 export class CalculationsService implements OnApplicationBootstrap {
@@ -70,8 +70,7 @@ export class CalculationsService implements OnApplicationBootstrap {
    * was validated when saved) and nothing is stored.
    */
   async test(surveyId: string): Promise<TestCalculationsResponse> {
-    const row = await this.assertNotRunning(surveyId);
-    if (!row || row.calculations.length === 0) throw new NoCalculationsException();
+    const row = await this.assertRunnable(surveyId);
     return {
       sample: await this.sample(
         surveyId,
@@ -109,8 +108,7 @@ export class CalculationsService implements OnApplicationBootstrap {
    * state (`running`). The run is the only thing that writes `computations`.
    */
   async compute(surveyId: string): Promise<CalculationsStateDto> {
-    const row = await this.assertNotRunning(surveyId);
-    if (!row || row.calculations.length === 0) throw new NoCalculationsException();
+    const row = await this.assertRunnable(surveyId);
 
     const processedSurvey = await this.latestProcessedSurvey(surveyId);
     // Every computed response is current for this set (completed responses are
@@ -174,6 +172,19 @@ export class CalculationsService implements OnApplicationBootstrap {
         .updateRun(surveyId, startedAt, { status: 'failed' })
         .catch(() => undefined);
     }
+  }
+
+  /**
+   * The saved set, if it can be evaluated: not during a run, and not with any
+   * error (an out-of-date set has no results, and must be saved first).
+   */
+  private async assertRunnable(surveyId: string) {
+    const row = await this.assertNotRunning(surveyId);
+    if (!row || row.calculations.length === 0) throw new NoCalculationsException();
+    if (validCalculations(row.calculations).length < row.calculations.length) {
+      throw new InvalidCalculationsException(row.calculations);
+    }
+    return row;
   }
 
   /** Evaluate a stored (validated) set on the most recent completed responses. */
