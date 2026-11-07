@@ -1298,6 +1298,12 @@ export function onAdditionalLangRemoved(state, payload) {
   state.langInfo.languagesList = [state.Survey.defaultLang].concat(
     state.Survey.additionalLang || [],
   );
+  // The language being removed can be the one currently being edited, which
+  // would leave the editor showing a language the survey no longer has.
+  if (state.langInfo.lang === payload.code) {
+    state.langInfo.lang = state.langInfo.mainLang;
+    state.langInfo.onMainLang = true;
+  }
 }
 
 export function changeLang(state, payload) {
