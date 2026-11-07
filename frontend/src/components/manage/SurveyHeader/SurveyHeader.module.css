@@ -1,24 +1,160 @@
+/* ====== Band ====== */
+
 .header {
   position: relative;
+  /* Above the panes below it: the band is a hairline now, with no shadow to
+     lift it off them. */
+  z-index: 1;
+  flex: none;
   display: flex;
   align-items: center;
-  z-index: 1;
-  height: 4rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-
-  justify-content: space-between;
+  gap: 12px;
+  height: var(--app-header-h);
+  padding-inline: 16px 24px;
+  background: #fff;
+  border-bottom: 1px solid #e3e6f0;
 }
 
-.container {
-  display: flex;
-  cursor: pointer;
-  flex-shrink: 0;
-  margin-left: 3.5rem;
+.spacer {
+  flex: 1;
 }
 
-.containerRtl {
+/* ====== Back ====== */
+
+.backBtn {
+  flex: none;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #1b2150;
   cursor: pointer;
-  flex-shrink: 0;
-  margin-right: 3.5rem;
+}
+
+.backBtn:hover {
+  background: #f0f2fa;
+}
+
+.backBtn:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.backIconRtl {
+  transform: scaleX(-1);
+}
+
+/* ====== Survey name ====== */
+
+/* Reading, renaming and the read-only name are one control in three states,
+   so they share every metric: switching between them must not move the text
+   by a pixel. */
+.title,
+.titleStatic,
+.titleInput,
+.titleField::after {
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font: 600 16px/32px Rubik, sans-serif;
+  color: #1b2150;
+}
+
+/* The 10px of padding is the room the hover and edit boxes need; the negative
+   margin keeps the name itself at the 12px gap after the back button. */
+.title,
+.titleStatic,
+.titleField {
+  margin-inline-start: -10px;
+}
+
+.title,
+.titleStatic {
+  max-width: min(420px, 38vw);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.title {
+  background: transparent;
+  text-align: start;
+  /* A text caret, not a pointer: clicking puts you in the name. */
+  cursor: text;
+}
+
+.title:hover {
+  border-color: #dfe2ee;
+}
+
+.title:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+/* The field grows with what is typed: the pseudo-element mirrors the value at
+   the same metrics and is what sets the grid track's width, so a long name
+   never scrolls out of sight and the header never jumps on a keystroke. */
+.titleField {
+  display: inline-grid;
+  max-width: min(420px, 38vw);
+}
+
+.titleField::after,
+.titleInput {
+  grid-area: 1 / 1;
+}
+
+.titleField::after {
+  content: attr(data-value) " ";
+  visibility: hidden;
+  white-space: pre;
+}
+
+.titleInput {
+  min-width: 8ch;
+  background: #fff;
+  border-color: #3a46d8;
+  outline: none;
+}
+
+/* ====== Save state ====== */
+
+.saveState {
+  flex: none;
+  white-space: nowrap;
+  font: 400 13px/1 Rubik, sans-serif;
+  color: #6b7194;
+}
+
+/* ====== Preview ====== */
+
+.previewBtn {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 6px;
+  background: #1b2559;
+  font: 600 16px/1 Rubik, sans-serif;
+  color: #fff;
+  cursor: pointer;
+}
+
+.previewBtn:hover {
+  background: #242f6d;
+}
+
+.previewBtn:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
 }

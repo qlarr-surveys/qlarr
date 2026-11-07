@@ -23,6 +23,12 @@
   "timezone_tooltip": "La encuesta expirará a las 00:00 en la fecha de finalización seleccionada en tu zona horaria local",
   "goBack": "Volver",
   "preview": "Vista previa",
+  "survey_header": {
+    "saved": "Todos los cambios guardados",
+    "saving": "Guardando…",
+    "rename": "Cambiar el nombre de la encuesta",
+    "name_label": "Nombre de la encuesta"
+  },
   "mobile_view": "Consola No Optimizada para Pantallas Pequeñas",
   "mobile_view_working": "Nuestra consola es compleja y no admite pantallas más pequeñas para la mejor experiencia. ¡Pero no te preocupes - las encuestas que te ayudamos a crear son increíbles en pantallas pequeñas!",
   "added": "Agregado:",
