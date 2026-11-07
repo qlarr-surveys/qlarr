@@ -156,14 +156,8 @@
     "return_to_signin": "Terug naar inloggen"
   },
   "label": {
-    "additional_languages": "Extra Talen",
-    "additional_languages_description": "Kies in welke talen respondenten de enquête kunnen invullen.",
     "analyst": "Analist",
-    "base_language": "Basis Taal",
-    "base_language_description": "De primaire taal waarin uw enquête is geschreven.",
     "code": "Code",
-    "edit_translation": "Vertaling bewerken",
-    "edit_translation_description": "Schakel tussen talen om de vertaalde inhoud in te vullen of te beoordelen.",
     "confirm_new_password": "Nieuw Wachtwoord Bevestigen",
     "current_password": "Huidig Wachtwoord",
     "email": "E-mail",
@@ -591,18 +585,6 @@
     "survey_title": "Interne titel gebruikt door je team om de enquête te identificeren. Deze titel wordt niet getoond aan respondenten.",
     "survey_description": "Interne beschrijving gebruikt door je team om context over de enquête te geven. Deze beschrijving wordt niet getoond aan respondenten.",
     "more_info": "Meer informatie"
-  },
-  "translations": {
-    "title": "Vertalingen",
-    "translate_to": "Enquête vertalen naar:",
-    "language": "Taal",
-    "design_language": "Ontwerptaal",
-    "export_csv": "CSV exporteren",
-    "import_csv": "CSV importeren",
-    "import_csv_override_main": "Tekst van de Basis Taal overschrijven",
-    "import_csv_no_changes": "Geen wijzigingen om te importeren.",
-    "import_csv_done_one": "{{count}} veld bijgewerkt.",
-    "import_csv_done_other": "{{count}} velden bijgewerkt."
   },
   "responses_export": {
     "format_csv": "CSV",

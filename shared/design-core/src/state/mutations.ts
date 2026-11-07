@@ -28,7 +28,6 @@ import {
   CONVERTIBLE_DATE_TIME_TYPES,
   CARRY_FORWARD_SOURCE_TYPES,
   isArrayType,
-  languageSetup,
   quotaMessageKey,
   setupOptions,
 } from "../constants/design";
@@ -212,14 +211,13 @@ export function setDesignModeToDesign(state) {
   state.designMode = DESIGN_SURVEY_MODE.DESIGN;
 }
 
+// The theme and translation workspaces each have their own panel rather than a
+// setup rule, so they only clear whatever the previous workspace had selected.
 export function setDesignModeToLang(state) {
   resetSetup(state);
-  setup(state, languageSetup);
   state.designMode = DESIGN_SURVEY_MODE.LANGUAGES;
 }
 
-// The theme workspace has its own panel rather than a setup rule, so it only
-// clears whatever the previous workspace had selected.
 export function setDesignModeToTheme(state) {
   resetSetup(state);
   state.designMode = DESIGN_SURVEY_MODE.THEME;

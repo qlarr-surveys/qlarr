@@ -36,7 +36,6 @@ import { useDispatch } from "react-redux";
 import { resetSetup, clearHighlighted } from "~/state/design/designState";
 import { useSelector } from "react-redux";
 import { createSelector } from "@reduxjs/toolkit";
-import { ManageLanguages } from "~/pages/manage/ManageTranslations";
 import { useTheme } from "@emotion/react";
 import { questionIconByType } from "~/components/Questions/utils";
 import OrderSetup from "../orderPriority/OrderSetup";
@@ -177,8 +176,6 @@ const SetupComponent = React.memo(({ code, rule, t, isQuickOptions }) => {
       return <EntityCodeEditor code={code} />;
     case "logo_setup":
       return <LogoSetup t={t} key={code + rule} />;
-    case "language":
-      return <ManageLanguages t={t} key={code + rule} />;
     case "maxChars":
       return (
         <FieldSize

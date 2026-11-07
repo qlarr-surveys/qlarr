@@ -2,16 +2,16 @@ import React from "react";
 import { useSelector } from "react-redux";
 import NewComponentsPanel from "~/components/design/NewComponentsPanel";
 import ThemePanel from "~/components/design/ThemePanel";
+import TranslationPanel from "~/components/design/TranslationPanel";
 import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
 import { isGroup, isQuestion } from "@qlarr/design-core";
 import SetupPanel from "../setup/SetupPanel";
 import styles from "./LeftPanel.module.css";
 
 /**
- * The editor's left panel: the theme settings in the Theme workspace, and
- * otherwise the settings of whatever is selected, or the question-type list
- * when nothing is. The translation workspace seeds `setup` with its own single
- * rule, so there it always shows settings.
+ * The editor's left panel: the theme settings in the Theme workspace, the
+ * survey's languages in the Translation workspace, and otherwise the settings
+ * of whatever is selected, or the question-type list when nothing is.
  */
 function LeftPanel({ t }) {
   const designMode = useSelector(
@@ -22,11 +22,15 @@ function LeftPanel({ t }) {
 
   const isBuilder = designMode === DESIGN_SURVEY_MODE.DESIGN;
   const isTheme = designMode === DESIGN_SURVEY_MODE.THEME;
+  const isLanguages = designMode === DESIGN_SURVEY_MODE.LANGUAGES;
   const hasSetup = Boolean(setupCode);
 
   const ariaLabel = () => {
     if (isTheme) {
       return t("survey_theme");
+    }
+    if (isLanguages) {
+      return t("survey_languages");
     }
     if (!isBuilder) {
       return t("workspace_tools");
@@ -46,6 +50,9 @@ function LeftPanel({ t }) {
   const body = () => {
     if (isTheme) {
       return <ThemePanel t={t} />;
+    }
+    if (isLanguages) {
+      return <TranslationPanel t={t} />;
     }
     if (hasSetup) {
       return <SetupPanel t={t} />;

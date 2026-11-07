@@ -168,14 +168,8 @@
   "goBack": "Zurückgehen",
   "import_survey": "Umfrage importieren",
   "label": {
-    "additional_languages": "Weitere Sprachen",
-    "additional_languages_description": "Wählen Sie, in welchen Sprachen Befragte die Umfrage durchführen können.",
     "analyst": "Analytikerin",
-    "base_language": "Basissprache",
-    "base_language_description": "Die Hauptsprache, in der Ihre Umfrage verfasst ist.",
     "code": "Code",
-    "edit_translation": "Übersetzung bearbeiten",
-    "edit_translation_description": "Wechseln Sie zwischen Sprachen, um die übersetzten Inhalte auszufüllen oder zu überprüfen.",
     "confirm_new_password": "Bestätige neues Passwort",
     "current_password": "Aktuelles Passwort",
     "email": "Email",
@@ -589,18 +583,6 @@
     "survey_title": "Interner Titel, der von Ihrem Team verwendet wird, um die Umfrage zu identifizieren. Dieser Titel wird den Befragten nicht angezeigt.",
     "survey_url": "Teilen Sie diesen Link, um auf die Umfrage zuzugreifen",
     "more_info": "Weitere Informationen"
-  },
-  "translations": {
-    "design_language": "Design-Sprache",
-    "language": "Sprache",
-    "title": "Übersetzungen",
-    "translate_to": "Umfrage übersetzen nach:",
-    "export_csv": "CSV exportieren",
-    "import_csv": "CSV importieren",
-    "import_csv_override_main": "Text der Basissprache überschreiben",
-    "import_csv_no_changes": "Keine Änderungen zum Importieren.",
-    "import_csv_done_one": "{{count}} Feld aktualisiert.",
-    "import_csv_done_other": "{{count}} Felder aktualisiert."
   },
   "upload_zip_folder": "ZIP-Ordner hochladen",
   "users_manage": {
