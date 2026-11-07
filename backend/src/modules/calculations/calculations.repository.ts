@@ -23,9 +23,18 @@ const RUN_EXPIRED = `survey_calculations.started_at < now() - make_interval(secs
 /** SQL: no run is going (a `running` row past the time limit counts as not running). */
 const NOT_RUNNING = `(survey_calculations.status <> 'running' OR ${RUN_EXPIRED})`;
 
+/** Delete the survey's results: they came from a set or design that has changed. */
+function clearComputations(manager: EntityManager, surveyId: string): Promise<unknown> {
+  return manager.query(
+    `UPDATE responses SET computations = NULL
+     WHERE survey_id = $1 AND computations IS NOT NULL`,
+    [surveyId],
+  );
+}
+
 /**
- * A design change: set the survey's calculations `idle`, so the results stop
- * showing and the next Compute is a full run, and mark every calculation
+ * A design change: set the survey's calculations `idle` and delete their
+ * results, so the next Compute is a full run, and mark every calculation
  * `OutOfDate` until the next Save validates it. `revision` stays: the authored
  * set is unchanged. A run in progress stops at its next chunk (its writes need
  * `running`). A plain function rather than a repository method, since
@@ -40,6 +49,7 @@ export async function resetCalculationsOnDesignChange(
      WHERE survey_id = $1 AND status <> 'idle'`,
     [surveyId],
   );
+  await clearComputations(manager, surveyId);
   const rows = await manager.query<{ calculations: Calculation[] }[]>(
     `SELECT calculations FROM survey_calculations WHERE survey_id = $1 FOR UPDATE`,
     [surveyId],
@@ -98,8 +108,9 @@ export async function renameCodeInCalculations(
  * the per-response results in `responses.computations`. The only writer of that
  * column: the response entity marks it `update: false`.
  *
- * Results are only shown when `status = completed`: a save (of the set, or of
- * the survey design) sets `idle`, so it hides them without touching `responses`.
+ * Results are only shown when `status = completed`. A save (of the set, or of
+ * the survey design) sets `idle` and deletes them, so `responses` never holds a
+ * result of an older set or design.
  *
  * A Compute run is identified by its `started_at`, which `startRun` returns as
  * full-precision Postgres text. Every write a run makes is conditional on the
@@ -120,8 +131,8 @@ export class CalculationsRepository {
   }
 
   /**
-   * Store a validated set, bump `revision` and set `status = idle` (hiding the
-   * stored results), only if `expectedRevision` is still current and no run is
+   * Store a validated set, bump `revision`, set `status = idle` and delete the
+   * stored results, only if `expectedRevision` is still current and no run is
    * going. A survey without a row is at revision 0, so the first save (expected
    * 0) inserts it. Returns the new revision; a stale revision or a run in
    * progress throws the matching 409 exception.
@@ -149,15 +160,14 @@ export class CalculationsRepository {
                updated_at = now()
            WHERE survey_id = $1 AND revision = $3 AND ${NOT_RUNNING}
            RETURNING revision`;
-    const rows = returnedRows<{ revision: number }>(
-      await this.db.manager.query(sql, [
-        surveyId,
-        JSON.stringify(calculations),
-        expectedRevision,
-      ]),
-    );
-    if (rows.length === 0) throw await this.conflict(surveyId);
-    return rows[0].revision;
+    return this.db.manager.transaction(async (tx) => {
+      const rows = returnedRows<{ revision: number }>(
+        await tx.query(sql, [surveyId, JSON.stringify(calculations), expectedRevision]),
+      );
+      if (rows.length === 0) throw await this.conflict(surveyId);
+      await clearComputations(tx, surveyId);
+      return rows[0].revision;
+    });
   }
 
   /**
@@ -238,8 +248,10 @@ export class CalculationsRepository {
   /**
    * Write Compute results for a chunk of the survey's responses, replacing any
    * earlier ones, only while the run started at `startedAt` is still current
-   * (checked in the same statement). Returns the number of responses written;
-   * 0 means the run has expired or been replaced.
+   * (checked in the same statement, with the run's row locked so a design
+   * change can't delete results while this write slips in behind it). Returns
+   * the number of responses written; 0 means the run has expired or been
+   * replaced.
    */
   async writeComputations(
     surveyId: string,
@@ -254,14 +266,16 @@ export class CalculationsRepository {
     });
     const written = returnedRows(
       await this.db.manager.query(
-        `UPDATE responses AS r
+        `WITH run AS (
+           SELECT survey_id FROM survey_calculations
+           WHERE survey_id = $1::uuid AND status = 'running'
+             AND started_at = $2::timestamp
+           FOR SHARE
+         )
+         UPDATE responses AS r
          SET computations = v.computations
-         FROM (VALUES ${values.join(', ')}) AS v(id, computations),
-              survey_calculations AS c
-         WHERE r.id = v.id
-           AND r.survey_id = $1::uuid
-           AND c.survey_id = r.survey_id
-           AND c.status = 'running' AND c.started_at = $2::timestamp
+         FROM (VALUES ${values.join(', ')}) AS v(id, computations), run
+         WHERE r.id = v.id AND r.survey_id = run.survey_id
          RETURNING r.id`,
         params,
       ),

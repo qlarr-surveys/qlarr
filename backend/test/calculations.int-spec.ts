@@ -125,6 +125,15 @@ describe('Calculations', () => {
     throw new Error('run did not settle');
   };
 
+  const storedComputations = async (id: string) => {
+    const [{ count }] = await root.query(
+      `SELECT COUNT(*) AS count FROM responses
+       WHERE survey_id = $1 AND computations IS NOT NULL`,
+      [id],
+    );
+    return Number(count);
+  };
+
   const calculationsOf = async (responseId: string) =>
     (
       await request(server())
@@ -269,7 +278,7 @@ describe('Calculations', () => {
       expect((await calculationsOf(r4))[0]).toMatchObject({ state: 'value', value: 4 });
     });
 
-    it('a save hides the results until the next Compute', async () => {
+    it('a save deletes the results until the next Compute', async () => {
       const { id, r1 } = await createSurvey();
       await save(id, [DOUBLE], 0).expect(200);
       await compute(id).expect(200);
@@ -279,6 +288,18 @@ describe('Calculations', () => {
 
       expect((await calculationsOf(r1))[0].state).toBe('not_computed');
       expect(await state(id)).toMatchObject({ status: 'idle', newSinceLastRun: null });
+      expect(await storedComputations(id)).toBe(0);
+    });
+
+    it('a rejected save keeps the results', async () => {
+      const { id } = await createSurvey();
+      await save(id, [DOUBLE], 0).expect(200);
+      await compute(id).expect(200);
+      await settle(id);
+
+      await save(id, [DOUBLE], 0).expect(409);
+
+      expect(await storedComputations(id)).toBe(3);
     });
 
     it('a response submitted after the run shows not computed', async () => {
@@ -328,7 +349,7 @@ describe('Calculations', () => {
       expect((await calculationsOf(r1))[0]).toMatchObject({ state: 'value', value: 42 });
     });
 
-    it('a design save hides the results, and the next Compute runs everything', async () => {
+    it('a design save deletes the results, and the next Compute runs everything', async () => {
       const { id, r1 } = await createSurvey();
       await save(id, [DOUBLE], 0).expect(200);
       await compute(id).expect(200);
@@ -338,6 +359,7 @@ describe('Calculations', () => {
 
       expect(await calculationsOf(r1)).toEqual([]);
       expect(await state(id)).toMatchObject({ status: 'idle', newSinceLastRun: null });
+      expect(await storedComputations(id)).toBe(0);
       await save(id, [DOUBLE], 1).expect(200);
       await compute(id).expect(200);
       expect(await settle(id)).toMatchObject({
@@ -439,7 +461,7 @@ describe('Calculations', () => {
       expect((await state(id)).calculations[0].errors).toEqual([OUT_OF_DATE]);
     });
 
-    it('discarding unpublished changes hides the results', async () => {
+    it('discarding unpublished changes deletes the results', async () => {
       const { id, r1 } = await createSurvey();
       const design = app.get(DesignService);
       await design.setDesign(id, {}, 1);
@@ -451,6 +473,7 @@ describe('Calculations', () => {
 
       expect(await calculationsOf(r1)).toEqual([]);
       expect(await state(id)).toMatchObject({ status: 'idle', newSinceLastRun: null });
+      expect(await storedComputations(id)).toBe(0);
     });
 
     it('everything is refused (409) while a run is in progress', async () => {

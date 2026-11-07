@@ -31,7 +31,7 @@ import { CalculationsRepository } from './calculations.repository';
  * until the next Save.
  * Everything runs against the survey's latest version. Nothing is allowed while
  * a run is in progress, and results only show once a run has completed on the
- * current set (a save sets `idle`).
+ * current set (a save sets `idle` and deletes the stored results).
  */
 @Injectable()
 export class CalculationsService implements OnApplicationBootstrap {
@@ -82,9 +82,9 @@ export class CalculationsService implements OnApplicationBootstrap {
 
   /**
    * Validate and store the whole set, each calculation with its `errors`
-   * (invalid ones are stored too, and never run). Saving sets `status = idle`,
-   * so every response shows "not computed" until the next Compute. It never
-   * computes.
+   * (invalid ones are stored too, and never run). Saving sets `status = idle`
+   * and deletes the stored results, so every response shows "not computed" until
+   * the next Compute. It never computes.
    */
   async save(
     surveyId: string,

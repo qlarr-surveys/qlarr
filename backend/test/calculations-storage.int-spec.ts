@@ -281,7 +281,7 @@ describe('Calculations storage', () => {
       expect(await computationsOf(r3)).toBeNull();
     });
 
-    it('a save sets the status back to idle and leaves results in place', async () => {
+    it('a save sets the status back to idle and deletes the results', async () => {
       const id = await surveyWithSet('Save hides');
       const r4 = '30000000-0000-0000-0000-000000000004';
       await addResponse(r4, id);
@@ -292,7 +292,7 @@ describe('Calculations storage', () => {
       await repo.saveSet(id, [calc('a', '2')], 1);
 
       expect((await repo.find(id))?.status).toBe('idle');
-      expect(await computationsOf(r4)).toEqual({ a: 1 });
+      expect(await computationsOf(r4)).toBeNull();
     });
 
     it("never writes another survey's responses", async () => {
