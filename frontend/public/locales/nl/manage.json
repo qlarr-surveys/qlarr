@@ -23,6 +23,12 @@
   "timezone_tooltip": "De enquête verloopt om 00:00 op de geselecteerde einddatum in je lokale tijdzone",
   "goBack": "Terug",
   "preview": "Voorvertoning",
+  "survey_header": {
+    "saved": "Alle wijzigingen opgeslagen",
+    "saving": "Opslaan…",
+    "rename": "Enquête hernoemen",
+    "name_label": "Naam van de enquête"
+  },
   "mobile_view": "Console Niet Geoptimaliseerd voor Kleine Schermen",
   "mobile_view_working": "Onze console is complex en ondersteunt geen kleinere schermen voor de beste ervaring. Maar maak je geen zorgen - de enquêtes die we je helpen maken zijn geweldig op kleine schermen!",
   "added": "Toegevoegd:",

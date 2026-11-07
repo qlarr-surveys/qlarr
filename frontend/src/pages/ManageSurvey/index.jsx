@@ -10,7 +10,6 @@ import { useDispatch } from "react-redux";
 import { designStateReceived, resetSetup } from "~/state/design/designState";
 import { GetData } from "~/networking/design";
 import { setLoading, surveyReceived } from "~/state/edit/editState";
-import SavingSurvey from "~/components/design/SavingSurvey";
 import { availablePages, isAnalyst, isSurveyAdmin } from "~/constants/roles";
 import TokenService from "~/services/TokenService";
 import { useParams } from "react-router-dom";
@@ -135,8 +134,6 @@ function ManageSurvey({ landingPage }) {
             )}
           </Box>
         </Suspense>
-
-        <SavingSurvey />
       </Box>
     </>
   );

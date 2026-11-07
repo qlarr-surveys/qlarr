@@ -271,6 +271,12 @@
   "ok": "OK",
   "password_required": "Passwort ist erforderlich",
   "preview": "Vorschau",
+  "survey_header": {
+    "saved": "Alle Änderungen gespeichert",
+    "saving": "Wird gespeichert…",
+    "rename": "Umfrage umbenennen",
+    "name_label": "Name der Umfrage"
+  },
   "processed_errors": {
     "autocomplete_malformed_input": "Fehlerhaft formatierte Eingabe: Datei muss ein JSON-Array sein, das nur Zeichenketten enthält",
     "hierarchical_autocomplete_malformed_input": "Ungültige Eingabe: Die CSV muss eine Spalte pro Ebene und Sprache haben (Überschriften wie „Country (en)“); die Sprachgruppe jeder Zeile muss vollständig ausgefüllt oder leer sein, mit eindeutigen Pfaden pro Sprache",
