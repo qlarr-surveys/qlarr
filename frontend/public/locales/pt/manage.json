@@ -25,9 +25,7 @@
   "preview": "Pré-visualização",
   "survey_header": {
     "saved": "Todas as alterações salvas",
-    "saving": "Salvando…",
-    "rename": "Renomear pesquisa",
-    "name_label": "Nome da pesquisa"
+    "saving": "Salvando…"
   },
   "mobile_view": "Console Não Otimizado para Telas Pequenas",
   "mobile_view_working": "Nosso console é complexo e não suporta telas menores para a melhor experiência. Mas não se preocupe - as pesquisas que ajudamos você a criar são incríveis em telas pequenas!",

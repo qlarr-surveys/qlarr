@@ -273,9 +273,7 @@
   "preview": "Vorschau",
   "survey_header": {
     "saved": "Alle Änderungen gespeichert",
-    "saving": "Wird gespeichert…",
-    "rename": "Umfrage umbenennen",
-    "name_label": "Name der Umfrage"
+    "saving": "Wird gespeichert…"
   },
   "processed_errors": {
     "autocomplete_malformed_input": "Fehlerhaft formatierte Eingabe: Datei muss ein JSON-Array sein, das nur Zeichenketten enthält",

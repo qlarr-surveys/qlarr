@@ -25,9 +25,7 @@
   "preview": "Preview",
   "survey_header": {
     "saved": "All changes saved",
-    "saving": "Saving…",
-    "rename": "Rename survey",
-    "name_label": "Survey name"
+    "saving": "Saving…"
   },
   "mobile_view": "Console Not Optimized for Small Screens",
   "mobile_view_working": "Our console is complex and doesn't support smaller screens for the best experience. But don't worry - the surveys we help you create are awesome on small screens!",

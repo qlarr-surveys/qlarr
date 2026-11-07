@@ -11,7 +11,6 @@ import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import { routes } from "~/routes";
 import TokenService from "~/services/TokenService";
 import { availablePages } from "~/constants/roles";
-import SurveyTitle from "./SurveyTitle";
 
 // Lucide draws on the rendered pixel grid rather than MUI's 24px one, so the
 // size is the icon's real size and the stroke is set with it. These two are
@@ -34,6 +33,8 @@ export const SurveyHeader = ({ showPreview, showSaveState }) => {
   const { surveyId } = useParams();
 
   const user = TokenService.getUser();
+
+  const name = useSelector((state) => state.editState.survey?.name);
 
   const availablePagesMemo = useMemo(() => {
     return availablePages(user);
@@ -64,7 +65,9 @@ export const SurveyHeader = ({ showPreview, showSaveState }) => {
         </button>
       </CustomTooltip>
 
-      <SurveyTitle />
+      {/* Nothing until the survey arrives: an empty box where the name goes
+          reads as a control that failed to draw. */}
+      {name && <span className={styles.title}>{name}</span>}
 
       <div className={styles.spacer} />
 

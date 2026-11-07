@@ -25,9 +25,7 @@
   "preview": "Aperçu",
   "survey_header": {
     "saved": "Toutes les modifications sont enregistrées",
-    "saving": "Enregistrement…",
-    "rename": "Renommer le sondage",
-    "name_label": "Nom du sondage"
+    "saving": "Enregistrement…"
   },
   "mobile_view": "Console Non Optimisée pour les Petits Écrans",
   "mobile_view_working": "Notre console est complexe et ne prend pas en charge les petits écrans pour la meilleure expérience. Mais ne vous inquiétez pas - les sondages que nous vous aidons à créer sont excellents sur les petits écrans !",
