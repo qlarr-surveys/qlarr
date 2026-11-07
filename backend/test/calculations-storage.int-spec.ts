@@ -237,6 +237,19 @@ describe('Calculations storage', () => {
     });
   });
 
+  describe('uncomputedResponseIds', () => {
+    it('returns at most the limit, skipping computed responses', async () => {
+      const id = await surveyWithSet('Uncomputed');
+      const rid = (n: number) => `31000000-0000-0000-0000-00000000000${n}`;
+      for (const n of [1, 2, 3]) await addResponse(rid(n), id);
+      const startedAt = await repo.startRun(id, 1, 1);
+      await repo.writeComputations(id, [{ id: rid(1), computations: { a: 1 } }], startedAt);
+
+      expect((await repo.uncomputedResponseIds(id, 10)).sort()).toEqual([rid(2), rid(3)]);
+      expect(await repo.uncomputedResponseIds(id, 1)).toHaveLength(1);
+    });
+  });
+
   describe('writeComputations', () => {
     const [r1, r2, r3] = [
       '30000000-0000-0000-0000-000000000001',
@@ -281,7 +294,7 @@ describe('Calculations storage', () => {
       expect(await computationsOf(r3)).toBeNull();
     });
 
-    it('a save sets the status back to idle and leaves results in place', async () => {
+    it('a save sets the status back to idle and deletes the results', async () => {
       const id = await surveyWithSet('Save hides');
       const r4 = '30000000-0000-0000-0000-000000000004';
       await addResponse(r4, id);
@@ -292,7 +305,7 @@ describe('Calculations storage', () => {
       await repo.saveSet(id, [calc('a', '2')], 1);
 
       expect((await repo.find(id))?.status).toBe('idle');
-      expect(await computationsOf(r4)).toEqual({ a: 1 });
+      expect(await computationsOf(r4)).toBeNull();
     });
 
     it("never writes another survey's responses", async () => {
@@ -344,7 +357,7 @@ describe('Calculations storage', () => {
       expect(await repo.saveSet(cloned.body.id, [calc('b', '2')], 0)).toBe(1);
     });
 
-    it('export drops errors; import re-validates and keeps invalid calculations with their errors', async () => {
+    it('export drops errors; import re-validates and keeps only the valid calculations', async () => {
       const id = await createSurvey('Export');
       // Stored directly, so the set can hold invalid calculations and a
       // made-up error that must not travel.
@@ -360,12 +373,8 @@ describe('Calculations storage', () => {
 
       const row = await repo.find(await exportThenImport(id));
       expect(row).toMatchObject({ revision: 0, status: 'idle' });
-      // The made-up error is gone (re-validated); the invalid ones keep fresh errors.
-      expect(row?.calculations.map((c) => [c.code, c.errors?.map((e) => e.name)])).toEqual([
-        ['double', []],
-        ['unknown', ['ScriptError']],
-        ['Bad', ['InvalidCode']],
-      ]);
+      // The made-up error is gone (re-validated); the invalid ones are dropped.
+      expect(row?.calculations.map((c) => [c.code, c.errors])).toEqual([['double', []]]);
     });
 
     it('import enforces the limits: long expressions dropped, first 10 kept', async () => {

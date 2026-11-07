@@ -9,6 +9,7 @@ import {
   MAX_CALCULATIONS,
   MAX_EXPRESSION_LENGTH,
 } from '../calculations/calculations.constants';
+import { validCalculations } from '../calculations/calculation-values';
 import { CalculationsRepository } from '../calculations/calculations.repository';
 import { DesignService } from '../design/design.service';
 import { VersionRepository } from '../design/version.repository';
@@ -214,12 +215,11 @@ export class SurveysService {
   /**
    * Import the zip's calculations. They come from outside, so we always
    * validate them ourselves against the imported design (`design.json` is the
-   * processed survey), ignoring any `errors` in the file, and store them all
-   * with their fresh `errors` (invalid ones never run or show). Entries without
-   * the expected shape or with an expression over the length limit are
-   * dropped, and only the first MAX_CALCULATIONS are kept. If validation or
-   * storing fails, the calculations are skipped and the rest of the import
-   * stands.
+   * processed survey), ignoring any `errors` in the file, and store only the
+   * valid ones. Entries without the expected shape or with an expression over
+   * the length limit are dropped too, and only the first MAX_CALCULATIONS are
+   * considered. If validation or storing fails, the calculations are skipped
+   * and the rest of the import stands.
    */
   private async importCalculations(
     surveyId: string,
@@ -229,10 +229,10 @@ export class SurveysService {
     const candidates = wellFormedCalculations(raw).slice(0, MAX_CALCULATIONS);
     if (candidates.length === 0) return;
     try {
-      await this.calculations.insertImported(
-        surveyId,
+      const valid = validCalculations(
         await this.engine.validateCalculations(processedSurvey, candidates),
       );
+      if (valid.length > 0) await this.calculations.insertImported(surveyId, valid);
     } catch (err) {
       this.logger.warn(
         `Skipped importing calculations for survey ${surveyId}: ${String(err)}`,

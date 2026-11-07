@@ -24,12 +24,12 @@ const RUN_EXPIRED = `survey_calculations.started_at < now() - make_interval(secs
 const NOT_RUNNING = `(survey_calculations.status <> 'running' OR ${RUN_EXPIRED})`;
 
 /**
- * A design change: set the survey's calculations `idle`, so the results stop
- * showing and the next Compute is a full run, and mark every calculation
- * `OutOfDate` until the next Save validates it. `revision` stays: the authored
- * set is unchanged. A run in progress stops at its next chunk (its writes need
- * `running`). A plain function rather than a repository method, since
- * DesignModule can't import CalculationsModule (which imports it).
+ * A design change: set the survey's calculations `idle`, delete their results,
+ * and mark every calculation `OutOfDate` until the next Save validates it.
+ * `revision` stays: the authored set is unchanged. A run in progress stops at
+ * its next chunk (its writes need `running`). A plain function rather than a
+ * repository method, since DesignModule can't import CalculationsModule (which
+ * imports it).
  */
 export async function resetCalculationsOnDesignChange(
   manager: EntityManager,
@@ -40,6 +40,7 @@ export async function resetCalculationsOnDesignChange(
      WHERE survey_id = $1 AND status <> 'idle'`,
     [surveyId],
   );
+  await clearComputations(manager, surveyId);
   const rows = await manager.query<{ calculations: Calculation[] }[]>(
     `SELECT calculations FROM survey_calculations WHERE survey_id = $1 FOR UPDATE`,
     [surveyId],
@@ -55,6 +56,15 @@ export async function resetCalculationsOnDesignChange(
     `UPDATE survey_calculations SET calculations = $2::jsonb, updated_at = now()
      WHERE survey_id = $1`,
     [surveyId, JSON.stringify(marked)],
+  );
+}
+
+/** Delete the survey's results, so what has none is what Compute has left to do. */
+async function clearComputations(manager: EntityManager, surveyId: string): Promise<void> {
+  await manager.query(
+    `UPDATE responses SET computations = NULL
+     WHERE survey_id = $1 AND computations IS NOT NULL`,
+    [surveyId],
   );
 }
 
@@ -98,8 +108,9 @@ export async function renameCodeInCalculations(
  * the per-response results in `responses.computations`. The only writer of that
  * column: the response entity marks it `update: false`.
  *
- * Results are only shown when `status = completed`: a save (of the set, or of
- * the survey design) sets `idle`, so it hides them without touching `responses`.
+ * Results are only shown when `status = completed`. A save (of the set, or of
+ * the survey design) sets `idle` and deletes them, so a response with results
+ * always has them from the current set, and Compute only has to do the rest.
  *
  * A Compute run is identified by its `started_at`, which `startRun` returns as
  * full-precision Postgres text. Every write a run makes is conditional on the
@@ -120,8 +131,8 @@ export class CalculationsRepository {
   }
 
   /**
-   * Store a validated set, bump `revision` and set `status = idle` (hiding the
-   * stored results), only if `expectedRevision` is still current and no run is
+   * Store a validated set, bump `revision`, set `status = idle` and delete the
+   * stored results, only if `expectedRevision` is still current and no run is
    * going. A survey without a row is at revision 0, so the first save (expected
    * 0) inserts it. Returns the new revision; a stale revision or a run in
    * progress throws the matching 409 exception.
@@ -149,13 +160,13 @@ export class CalculationsRepository {
                updated_at = now()
            WHERE survey_id = $1 AND revision = $3 AND ${NOT_RUNNING}
            RETURNING revision`;
-    const rows = returnedRows<{ revision: number }>(
-      await this.db.manager.query(sql, [
-        surveyId,
-        JSON.stringify(calculations),
-        expectedRevision,
-      ]),
-    );
+    const rows = await this.db.manager.transaction(async (tx) => {
+      const saved = returnedRows<{ revision: number }>(
+        await tx.query(sql, [surveyId, JSON.stringify(calculations), expectedRevision]),
+      );
+      if (saved.length > 0) await clearComputations(tx, surveyId);
+      return saved;
+    });
     if (rows.length === 0) throw await this.conflict(surveyId);
     return rows[0].revision;
   }
@@ -278,19 +289,15 @@ export class CalculationsRepository {
   }
 
   /**
-   * Ids of the survey's completed responses (previews included), by id. With
-   * `uncomputedOnly`, just those without `computations`.
+   * Ids of up to `limit` of the survey's completed responses (previews
+   * included) without `computations`.
    */
-  async completedResponseIds(
-    surveyId: string,
-    uncomputedOnly: boolean,
-  ): Promise<string[]> {
+  async uncomputedResponseIds(surveyId: string, limit: number): Promise<string[]> {
     const rows: Array<{ id: string }> = await this.db.manager.query(
       `SELECT id FROM responses
-       WHERE survey_id = $1 AND submit_date IS NOT NULL
-         ${uncomputedOnly ? 'AND computations IS NULL' : ''}
-       ORDER BY id`,
-      [surveyId],
+       WHERE survey_id = $1 AND submit_date IS NOT NULL AND computations IS NULL
+       LIMIT $2`,
+      [surveyId, limit],
     );
     return rows.map((r) => r.id);
   }
@@ -331,7 +338,8 @@ export class CalculationsRepository {
 
   /**
    * Completed responses without `computations`. Only meaningful after a
-   * completed run, where these are the responses submitted since.
+   * completed run, where these are the ones past the run's limit and the
+   * responses submitted since.
    */
   async countWithoutComputations(surveyId: string): Promise<number> {
     const [{ count }]: Array<{ count: string }> = await this.db.manager.query(

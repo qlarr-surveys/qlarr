@@ -474,7 +474,7 @@
     "status_running": "Wird berechnet… {{done}}/{{total}}",
     "status_failed": "Berechnung fehlgeschlagen. Klicken Sie auf Berechnen, um sie erneut auszuführen.",
     "compute_success": "Berechnung abgeschlossen.",
-    "status_new_responses": "{{count}} Antworten seit der letzten Berechnung eingereicht. Klicken Sie auf Berechnen, um sie einzubeziehen.",
+    "status_new_responses": "{{count}} Antworten noch nicht berechnet. Klicken Sie auf Berechnen, um sie einzubeziehen.",
     "sample_response": "Antwort",
     "sample_empty": "Noch keine abgeschlossenen Antworten zum Testen.",
     "unsaved_title": "Ungespeicherte Änderungen",

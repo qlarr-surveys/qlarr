@@ -3,9 +3,10 @@ import { EngineService } from '../../engine/engine.service';
 import { Calculation } from '../../engine/engine.types';
 import { DesignService } from '../design/design.service';
 import { SurveyNotFoundException } from '../surveys/survey.exceptions';
-import { toComputations } from './calculation-values';
+import { toComputations, validCalculations } from './calculation-values';
 import {
   COMPUTE_CHUNK_SIZE,
+  MAX_RESPONSES_PER_RUN,
   RUN_TIME_LIMIT_SECONDS,
   SAMPLE_SIZE,
 } from './calculations.constants';
@@ -17,6 +18,7 @@ import {
 } from './calculations.dto';
 import {
   CalculationRunInProgressException,
+  InvalidCalculationsException,
   NoCalculationsException,
 } from './calculations.exceptions';
 import { CalculationsRepository } from './calculations.repository';
@@ -24,14 +26,13 @@ import { CalculationsRepository } from './calculations.repository';
 /**
  * Calculated fields: authoring (validate, test, save) and the Compute run.
  *
- * Validation runs only on Save and import, and the whole validated set is
- * stored, each calculation with its `errors`. Test and Compute pass the stored
- * set to the engine as it is; the engine never runs a calculation with errors.
- * A design change marks every calculation `OutOfDate`, so they stop running
- * until the next Save.
+ * Validation runs only on Save and import, and only valid calculations are
+ * stored. Test and Compute pass the stored set to the engine as it is; the
+ * engine never runs a calculation with errors. A design change marks every
+ * calculation `OutOfDate`, so they stop running until the next Save.
  * Everything runs against the survey's latest version. Nothing is allowed while
  * a run is in progress, and results only show once a run has completed on the
- * current set (a save sets `idle`).
+ * current set (a save sets `idle` and deletes them).
  */
 @Injectable()
 export class CalculationsService implements OnApplicationBootstrap {
@@ -81,10 +82,10 @@ export class CalculationsService implements OnApplicationBootstrap {
   }
 
   /**
-   * Validate and store the whole set, each calculation with its `errors`
-   * (invalid ones are stored too, and never run). Saving sets `status = idle`,
-   * so every response shows "not computed" until the next Compute. It never
-   * computes.
+   * Validate and store the whole set, or nothing if any calculation is invalid
+   * (400, with the set and its `errors`). Saving sets `status = idle` and
+   * deletes the results, so every response shows "not computed" until the next
+   * Compute. It never computes.
    */
   async save(
     surveyId: string,
@@ -96,6 +97,9 @@ export class CalculationsService implements OnApplicationBootstrap {
       await this.latestProcessedSurvey(surveyId),
       toCalculations(input),
     );
+    if (validCalculations(calculations).length < calculations.length) {
+      throw new InvalidCalculationsException(calculations);
+    }
     await this.calculations.saveSet(surveyId, calculations, revision);
     return this.getState(surveyId);
   }
@@ -109,12 +113,12 @@ export class CalculationsService implements OnApplicationBootstrap {
     if (!row || row.calculations.length === 0) throw new NoCalculationsException();
 
     const processedSurvey = await this.latestProcessedSurvey(surveyId);
-    // After a completed run, every computed response is current for this set
-    // (completed responses are never edited), so only compute the rest.
-    // Otherwise (never run, set saved since, or the last run failed) compute all.
-    const ids = await this.calculations.completedResponseIds(
+    // Every computed response is current for this set (completed responses are
+    // never edited, and a save deletes the results), so only compute the rest,
+    // up to the limit: the next Compute continues where this one stops.
+    const ids = await this.calculations.uncomputedResponseIds(
       surveyId,
-      row.status === 'completed',
+      MAX_RESPONSES_PER_RUN,
     );
     // Only starts if the set is still the one read above: a save in between
     // would otherwise have this run compute the old set under the new one.

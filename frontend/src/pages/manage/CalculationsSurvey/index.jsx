@@ -82,7 +82,7 @@ function sampleCell(calculation, row) {
 
 /**
  * The Calculated fields tab: author a survey's calculations, save them
- * (validated server-side, stored with their errors), test the saved set on the
+ * (validated server-side, saved only if all are valid), test the saved set on the
  * latest responses, and start the background Compute run.
  */
 function CalculationsSurvey({ onDirtyChange }) {
@@ -114,7 +114,7 @@ function CalculationsSurvey({ onDirtyChange }) {
     reset,
     formState: { isDirty },
   } = methods;
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
     name: "calculations",
   });
@@ -192,6 +192,9 @@ function CalculationsSurvey({ onDirtyChange }) {
       load(false);
     } else if (error?.name === PROCESSED_ERRORS.CALCULATIONS_CHANGED.name) {
       setConflict(true);
+    } else if (error?.name === PROCESSED_ERRORS.INVALID_CALCULATIONS.name) {
+      // Nothing was saved: keep the edits, with the errors on their cards.
+      replace(toFormValues(error.calculations).calculations);
     }
   };
 
@@ -437,7 +440,7 @@ function StatusBanner({ state, t }) {
         <Alert severity="warning">
           {t(
             "calculations.status_new_responses",
-            "{{count}} responses submitted since the last computation. Click Compute to include them.",
+            "{{count}} responses not computed yet. Click Compute to include them.",
             { count: state.newSinceLastRun }
           )}
         </Alert>

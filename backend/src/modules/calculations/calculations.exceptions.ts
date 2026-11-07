@@ -1,4 +1,5 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { Calculation } from '../../engine/engine.types';
 
 /**
  * Calculation domain exceptions. Each renders a `{ message, error }` body (where
@@ -28,6 +29,20 @@ export class CalculationRunInProgressException extends CalculationsException {
       'A computation is in progress',
       'CalculationRunInProgressException',
       HttpStatus.CONFLICT,
+    );
+  }
+}
+
+/** A save with an invalid calculation stores nothing; `calculations` has the errors. */
+export class InvalidCalculationsException extends HttpException {
+  constructor(calculations: Calculation[]) {
+    super(
+      {
+        message: 'Some calculations are invalid',
+        error: 'InvalidCalculationsException',
+        calculations,
+      },
+      HttpStatus.BAD_REQUEST,
     );
   }
 }

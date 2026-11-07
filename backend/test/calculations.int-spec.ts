@@ -168,7 +168,7 @@ describe('Calculations', () => {
   describe('Test', () => {
     it('runs the saved set on the sample without validating; nothing is stored', async () => {
       const { id, r1, r2, r4 } = await createSurvey();
-      await save(id, [DOUBLE, FIXED, BAD_REF], 0).expect(200);
+      await save(id, [DOUBLE, FIXED], 0).expect(200);
       const before = await repo.find(id);
 
       const res = await request(server())
@@ -180,7 +180,6 @@ describe('Calculations', () => {
         res.body.sample.map((s: { responseId: string }) => [s.responseId, s]),
       );
       expect(Object.keys(byId).sort()).toEqual([r1, r2, r4].sort());
-      // The invalid calculation never runs.
       expect(byId[r1]).toMatchObject({ results: { double: 42, fixed: '21.0' }, errors: {} });
       expect(byId[r2].results).toEqual({});
       expect(Object.keys(byId[r2].errors)).toEqual(['fixed']);
@@ -197,29 +196,37 @@ describe('Calculations', () => {
   });
 
   describe('Save', () => {
-    it('stores the whole set, invalid calculations with their errors, and returns the state', async () => {
+    it('stores the set and returns the state', async () => {
       const { id, r1 } = await createSurvey();
-      const res = await save(
-        id,
-        [DOUBLE, { code: 'Bad', label: 'B', expression: '1' }],
-        0,
-      ).expect(200);
+      const res = await save(id, [DOUBLE], 0).expect(200);
       expect(res.body).toEqual({
-        calculations: [
-          { ...DOUBLE, errors: [] },
-          { code: 'Bad', label: 'B', expression: '1', errors: [{ name: 'InvalidCode' }] },
-        ],
+        calculations: [{ ...DOUBLE, errors: [] }],
         revision: 1,
         status: 'idle',
         progress: { done: 0, total: 0 },
         startedAt: null,
         newSinceLastRun: null,
       });
-      expect((await state(id)).calculations[1].errors).toEqual([{ name: 'InvalidCode' }]);
-      // Only the valid calculation shows on responses.
       expect(await calculationsOf(r1)).toEqual([
         { code: 'double', label: 'Double', state: 'not_computed', value: null },
       ]);
+    });
+
+    it('400 with the errors when any calculation is invalid, storing nothing', async () => {
+      const { id } = await createSurvey();
+      await save(id, [DOUBLE], 0).expect(200);
+
+      const res = await save(id, [FIXED, BAD_REF], 1).expect(400);
+
+      expect(res.body.error).toBe('InvalidCalculationsException');
+      expect(res.body.calculations).toEqual([
+        { ...FIXED, errors: [] },
+        { ...BAD_REF, errors: [expect.objectContaining({ name: 'ScriptError' })] },
+      ]);
+      expect(await state(id)).toMatchObject({
+        revision: 1,
+        calculations: [{ ...DOUBLE, errors: [] }],
+      });
     });
 
     it('409 on a stale revision', async () => {
@@ -244,8 +251,7 @@ describe('Calculations', () => {
 
     it('runs in the background; results show once it completes', async () => {
       const { id, r1, r2, r3, r4 } = await createSurvey();
-      // BAD_REF has a validation error: it never runs and never shows.
-      await save(id, [DOUBLE, BAD_REF, FIXED], 0).expect(200);
+      await save(id, [DOUBLE, FIXED], 0).expect(200);
 
       const started = await compute(id).expect(200);
       expect(['running', 'completed']).toContain(started.body.status);
@@ -328,7 +334,7 @@ describe('Calculations', () => {
       expect((await calculationsOf(r1))[0]).toMatchObject({ state: 'value', value: 42 });
     });
 
-    it('a design save hides the results, and the next Compute runs everything', async () => {
+    it('a design save deletes the results, and the next Compute runs everything', async () => {
       const { id, r1 } = await createSurvey();
       await save(id, [DOUBLE], 0).expect(200);
       await compute(id).expect(200);
@@ -338,6 +344,12 @@ describe('Calculations', () => {
 
       expect(await calculationsOf(r1)).toEqual([]);
       expect(await state(id)).toMatchObject({ status: 'idle', newSinceLastRun: null });
+      expect(
+        await root.query(
+          `SELECT id FROM responses WHERE survey_id = $1 AND computations IS NOT NULL`,
+          [id],
+        ),
+      ).toEqual([]);
       await save(id, [DOUBLE], 1).expect(200);
       await compute(id).expect(200);
       expect(await settle(id)).toMatchObject({
@@ -349,7 +361,8 @@ describe('Calculations', () => {
     it('a code rename rewrites the expressions and bumps the revision', async () => {
       const { id } = await createSurvey();
       const similar = { code: 'similar', label: 'Similar', expression: 'Q880htpx.value' };
-      await save(id, [DOUBLE, similar], 0).expect(200);
+      // Stored directly: a Save would refuse it, as Q880htpx doesn't exist.
+      await repo.saveSet(id, [DOUBLE, similar], 0);
 
       await rename(id, 'Q880htp', 'Q880new').expect(201);
 
@@ -377,7 +390,15 @@ describe('Calculations', () => {
 
     it('a design change marks every calculation out of date, once, keeping its other errors', async () => {
       const { id } = await createSurvey();
-      await save(id, [DOUBLE, BAD_REF], 0).expect(200);
+      // Stored directly: a Save would refuse the invalid one.
+      await repo.saveSet(
+        id,
+        [
+          { ...DOUBLE, errors: [] },
+          { ...BAD_REF, errors: [{ name: 'InvalidCode' }] },
+        ],
+        0,
+      );
       const design = app.get(DesignService);
 
       await design.setDesign(id, {}, 1);
@@ -385,10 +406,7 @@ describe('Calculations', () => {
 
       const { calculations, revision } = await state(id);
       expect(calculations[0].errors).toEqual([OUT_OF_DATE]);
-      expect(calculations[1].errors).toEqual([
-        expect.objectContaining({ name: 'ScriptError' }),
-        OUT_OF_DATE,
-      ]);
+      expect(calculations[1].errors).toEqual([{ name: 'InvalidCode' }, OUT_OF_DATE]);
       expect(revision).toBe(1);
     });
 
@@ -476,6 +494,53 @@ describe('Calculations', () => {
       expect((await calculationsOf(r1))[0].state).toBe('not_computed');
     });
 
+    it('after a failed run, Compute continues with the responses it did not reach', async () => {
+      const { id, r1, r2, r4 } = await createSurvey();
+      await save(id, [DOUBLE], 0).expect(200);
+      const startedAt = await repo.startRun(id, 3, 1);
+      await repo.writeComputations(id, [{ id: r1, computations: { double: 42 } }], startedAt);
+      await repo.updateRun(id, startedAt, { status: 'failed' });
+      const calculate = jest.spyOn(app.get(EngineService), 'calculate');
+
+      await compute(id).expect(200);
+
+      expect(await settle(id)).toMatchObject({
+        status: 'completed',
+        progress: { done: 2, total: 2 },
+        newSinceLastRun: 0,
+      });
+      expect(Object.keys(calculate.mock.calls[0][2]).sort()).toEqual([r2, r4].sort());
+      expect((await calculationsOf(r1))[0]).toMatchObject({ state: 'value', value: 42 });
+      expect((await calculationsOf(r4))[0]).toMatchObject({ state: 'value', value: 4 });
+    });
+
+    it('takes at most 10,000 responses; what is left shows and the next Compute takes it', async () => {
+      const { id, r1, r2 } = await createSurvey();
+      await save(id, [DOUBLE], 0).expect(200);
+      const uncomputed = jest.spyOn(repo, 'uncomputedResponseIds');
+      // Stands in for the limit, which three responses can't reach.
+      uncomputed.mockResolvedValueOnce([r1]);
+
+      await compute(id).expect(200);
+
+      expect(uncomputed).toHaveBeenCalledWith(id, 10_000);
+      expect(await settle(id)).toMatchObject({
+        status: 'completed',
+        progress: { done: 1, total: 1 },
+        newSinceLastRun: 2,
+      });
+      expect((await calculationsOf(r1))[0]).toMatchObject({ state: 'value', value: 42 });
+      expect((await calculationsOf(r2))[0].state).toBe('not_computed');
+
+      await compute(id).expect(200);
+
+      expect(await settle(id)).toMatchObject({
+        status: 'completed',
+        progress: { done: 2, total: 2 },
+        newSinceLastRun: 0,
+      });
+    });
+
     it('a run past the time limit fails', async () => {
       const { id } = await createSurvey();
       await save(id, [DOUBLE], 0).expect(200);
@@ -506,7 +571,7 @@ describe('Calculations', () => {
 
     it('adds one column per valid calculation, after the regular columns', async () => {
       const { id, r1, r2, r3 } = await createSurvey();
-      await save(id, [DOUBLE, BAD_REF, FIXED], 0).expect(200);
+      await save(id, [DOUBLE, FIXED], 0).expect(200);
 
       // Before Compute: not computed.
       let lines = await exportCsv(id, true);

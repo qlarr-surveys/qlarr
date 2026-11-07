@@ -54,8 +54,9 @@ export interface CalculationsStateDto {
   progress: { done: number; total: number };
   startedAt: string | null;
   /**
-   * Only when `status = completed`: completed responses submitted since the
-   * last run (they show "not computed"). Null for every other status.
+   * Only when `status = completed`: completed responses still without results
+   * (they show "not computed"), past the run's limit or submitted since. Null
+   * for every other status.
    */
   newSinceLastRun: number | null;
 }

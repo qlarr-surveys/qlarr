@@ -438,7 +438,7 @@
     "status_running": "Bezig met berekenen… {{done}}/{{total}}",
     "status_failed": "Berekening mislukt. Klik op Berekenen om het opnieuw uit te voeren.",
     "compute_success": "Berekening voltooid.",
-    "status_new_responses": "{{count}} antwoorden ingediend sinds de laatste berekening. Klik op Berekenen om ze mee te nemen.",
+    "status_new_responses": "{{count}} antwoorden nog niet berekend. Klik op Berekenen om ze mee te nemen.",
     "sample_response": "Antwoord",
     "sample_empty": "Nog geen voltooide antwoorden om op te testen.",
     "unsaved_title": "Niet-opgeslagen wijzigingen",

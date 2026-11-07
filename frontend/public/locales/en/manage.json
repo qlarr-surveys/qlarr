@@ -438,7 +438,7 @@
     "status_running": "Computing… {{done}}/{{total}}",
     "status_failed": "Computation failed. Click Compute to run it again.",
     "compute_success": "Computation finished.",
-    "status_new_responses": "{{count}} responses submitted since the last computation. Click Compute to include them.",
+    "status_new_responses": "{{count}} responses not computed yet. Click Compute to include them.",
     "sample_response": "Response",
     "sample_empty": "No completed responses to test on yet.",
     "unsaved_title": "Unsaved changes",

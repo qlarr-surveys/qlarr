@@ -438,7 +438,7 @@
     "status_running": "Calcul en cours… {{done}}/{{total}}",
     "status_failed": "Le calcul a échoué. Cliquez sur Calculer pour le relancer.",
     "compute_success": "Calcul terminé.",
-    "status_new_responses": "{{count}} réponses soumises depuis le dernier calcul. Cliquez sur Calculer pour les inclure.",
+    "status_new_responses": "{{count}} réponses pas encore calculées. Cliquez sur Calculer pour les inclure.",
     "sample_response": "Réponse",
     "sample_empty": "Aucune réponse complète à tester pour l'instant.",
     "unsaved_title": "Modifications non enregistrées",

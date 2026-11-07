@@ -442,7 +442,7 @@
     "status_running": "جارٍ الحساب… {{done}}/{{total}}",
     "status_failed": "فشل الحساب. انقر على احسب لتشغيله مرة أخرى.",
     "compute_success": "اكتمل الحساب.",
-    "status_new_responses": "{{count}} من الردود أُرسلت منذ آخر حساب. انقر على احسب لتضمينها.",
+    "status_new_responses": "{{count}} من الردود لم تُحسب بعد. انقر على احسب لتضمينها.",
     "sample_response": "الرد",
     "sample_empty": "لا توجد ردود مكتملة للاختبار بعد.",
     "unsaved_title": "تغييرات غير محفوظة",

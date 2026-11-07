@@ -82,6 +82,7 @@ export const PROCESSED_ERRORS = {
     handleGlobally: false,
   },
   NO_CALCULATIONS: { name: "no_calculations", handleGlobally: false },
+  INVALID_CALCULATIONS: { name: "invalid_calculations", handleGlobally: false },
 };
 
 export const onApiError = ({
@@ -214,6 +215,11 @@ export const processError = (e) => {
         return PROCESSED_ERRORS.CALCULATION_RUN_IN_PROGRESS;
       case "NoCalculationsException":
         return PROCESSED_ERRORS.NO_CALCULATIONS;
+      case "InvalidCalculationsException":
+        return {
+          ...PROCESSED_ERRORS.INVALID_CALCULATIONS,
+          calculations: e.response.data.calculations,
+        };
       default:
         return PROCESSED_ERRORS.UNIDENTIFIED_ERROR;
     }
