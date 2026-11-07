@@ -384,7 +384,7 @@ describe('Design snapshots', () => {
   });
 
   describe('publish', () => {
-    it('drops the history; the next edits start a new draft without a snapshot', async () => {
+    it('drops the history; the first edit after it snapshots the published design', async () => {
       const id = await newSurvey();
       await save(id, await removeQuestion(id, 'Q293sqi')).expect(201);
       expect((await list(id)).snapshots).toHaveLength(1);
@@ -393,7 +393,7 @@ describe('Design snapshots', () => {
       expect((await list(id)).snapshots).toEqual([]);
 
       await save(id, await removeQuestion(id, 'Q510beg')).expect(201);
-      expect((await list(id)).snapshots).toEqual([]);
+      expect((await list(id)).snapshots).toHaveLength(1);
     });
 
     it('restore_published drops the draft and the whole history, leaving the published version', async () => {

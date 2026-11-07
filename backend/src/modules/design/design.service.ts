@@ -149,7 +149,7 @@ export class DesignService {
     if (!published || latest.published) throw new NothingToRevertException();
     const output = await this.loadOutput(surveyId, published.version);
 
-    // No undo: every restore point is newer than the published version (publish
+    // No undo: no restore point is older than the published version (publish
     // clears the history), so they all go with the draft.
     survey.lastModified = nowUtcString();
     await this.db.manager.transaction(async (tx) => {
@@ -215,7 +215,6 @@ export class DesignService {
     latest: VersionEntity,
     before: ValidationJsonOutput,
   ): Promise<SnapshotInput | null> {
-    if (latest.published) return null;
     if (!(await this.snapshots.isDue(survey.id))) return null;
     return {
       surveyId: survey.id,
