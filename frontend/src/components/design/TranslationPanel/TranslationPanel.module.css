@@ -70,17 +70,37 @@
 
 /* ====== Primary language ====== */
 
+.selectWrap {
+  position: relative;
+  display: block;
+}
+
+/* The end padding is the chevron's room. Logical properties, not left/right:
+   the wrapper is flipped for a right-to-left survey language. */
 .select {
   display: block;
   width: 100%;
   height: 36px;
-  padding: 0 10px;
+  padding-block: 0;
+  padding-inline: 10px 32px;
   border: 1px solid #cfd5e8;
   border-radius: 6px;
   background: #fff;
   font: 400 13px/1 Rubik, sans-serif;
   color: #0e1338;
+  appearance: none;
+  -webkit-appearance: none;
   cursor: pointer;
+}
+
+/* Decorative, and the select underneath owns the clicks. */
+.chevron {
+  position: absolute;
+  inset-inline-end: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #4c5474;
+  pointer-events: none;
 }
 
 .select:hover {
