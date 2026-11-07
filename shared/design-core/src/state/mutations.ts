@@ -1343,6 +1343,12 @@ export function onAdditionalLangRemoved(state, payload) {
     (language) => language.code !== payload.code,
   );
   syncLanguages(state);
+  // The language being removed can be the one currently being edited, which
+  // would leave the editor showing a language the survey no longer has.
+  if (state.langInfo.lang === payload.code) {
+    state.langInfo.lang = state.langInfo.mainLang;
+    state.langInfo.onMainLang = true;
+  }
 }
 
 export function changeLang(state, payload) {
