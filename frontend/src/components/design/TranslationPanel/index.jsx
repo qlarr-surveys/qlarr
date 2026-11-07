@@ -1,4 +1,5 @@
 import React from "react";
+import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { LANGUAGE_DEF } from "@qlarr/design-core/constants/language";
@@ -73,21 +74,30 @@ function TranslationPanel({ t }) {
             {t("lang_primary")}
           </label>
           <p className={styles.groupHint}>{t("lang_primary_hint")}</p>
-          <select
-            id="primary-lang"
-            value={mainLang || ""}
-            dir={dirOf(mainLang)}
-            onChange={(event) =>
-              dispatch(onBaseLangChanged(LANGUAGE_DEF[event.target.value]))
-            }
-            className={styles.select}
-          >
-            {LANGUAGE_CODES.map((code) => (
-              <option key={code} value={code}>
-                {languageLabel(code, uiLang)}
-              </option>
-            ))}
-          </select>
+          {/* The direction sits on the wrapper so the chevron follows the
+              language the select is showing, not the interface language. */}
+          <div className={styles.selectWrap} dir={dirOf(mainLang)}>
+            <select
+              id="primary-lang"
+              value={mainLang || ""}
+              onChange={(event) =>
+                dispatch(onBaseLangChanged(LANGUAGE_DEF[event.target.value]))
+              }
+              className={styles.select}
+            >
+              {LANGUAGE_CODES.map((code) => (
+                <option key={code} value={code}>
+                  {languageLabel(code, uiLang)}
+                </option>
+              ))}
+            </select>
+            <ChevronDown
+              aria-hidden="true"
+              size={14}
+              strokeWidth={1.6}
+              className={styles.chevron}
+            />
+          </div>
         </section>
 
         <div className={styles.divider} />
