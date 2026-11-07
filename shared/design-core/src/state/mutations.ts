@@ -31,7 +31,6 @@ import {
   languageSetup,
   quotaMessageKey,
   setupOptions,
-  themeSetup,
 } from "../constants/design";
 import { convertChoiceQuestion } from "./convertChoiceQuestion";
 import { convertArrayQuestion } from "./convertArrayQuestion";
@@ -219,9 +218,10 @@ export function setDesignModeToLang(state) {
   state.designMode = DESIGN_SURVEY_MODE.LANGUAGES;
 }
 
+// The theme workspace has its own panel rather than a setup rule, so it only
+// clears whatever the previous workspace had selected.
 export function setDesignModeToTheme(state) {
   resetSetup(state);
-  setup(state, themeSetup);
   state.designMode = DESIGN_SURVEY_MODE.THEME;
 }
 
