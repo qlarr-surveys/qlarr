@@ -36,7 +36,6 @@ import { useDispatch } from "react-redux";
 import { resetSetup, clearHighlighted } from "~/state/design/designState";
 import { useSelector } from "react-redux";
 import { createSelector } from "@reduxjs/toolkit";
-import Theming from "../Theming";
 import { ManageLanguages } from "~/pages/manage/ManageTranslations";
 import { useTheme } from "@emotion/react";
 import { questionIconByType } from "~/components/Questions/utils";
@@ -176,8 +175,6 @@ const SetupComponent = React.memo(({ code, rule, t, isQuickOptions }) => {
       return <ConditionalRelevance code={code} t={t} key={code + rule} />;
     case "changeCode":
       return <EntityCodeEditor code={code} />;
-    case "theme":
-      return <Theming t={t} key={code + rule} />;
     case "logo_setup":
       return <LogoSetup t={t} key={code + rule} />;
     case "language":
