@@ -1,15 +1,17 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import NewComponentsPanel from "~/components/design/NewComponentsPanel";
+import ThemePanel from "~/components/design/ThemePanel";
 import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
 import { isGroup, isQuestion } from "@qlarr/design-core";
 import SetupPanel from "../setup/SetupPanel";
 import styles from "./LeftPanel.module.css";
 
 /**
- * The editor's left panel: the settings of whatever is selected, or the
- * question-type list when nothing is. The theme and translation workspaces seed
- * `setup` with their own single rule, so there they always show settings.
+ * The editor's left panel: the theme settings in the Theme workspace, and
+ * otherwise the settings of whatever is selected, or the question-type list
+ * when nothing is. The translation workspace seeds `setup` with its own single
+ * rule, so there it always shows settings.
  */
 function LeftPanel({ t }) {
   const designMode = useSelector(
@@ -19,9 +21,13 @@ function LeftPanel({ t }) {
   const setupCode = useSelector((state) => state.designState?.setup?.code);
 
   const isBuilder = designMode === DESIGN_SURVEY_MODE.DESIGN;
+  const isTheme = designMode === DESIGN_SURVEY_MODE.THEME;
   const hasSetup = Boolean(setupCode);
 
   const ariaLabel = () => {
+    if (isTheme) {
+      return t("survey_theme");
+    }
     if (!isBuilder) {
       return t("workspace_tools");
     }
@@ -37,15 +43,23 @@ function LeftPanel({ t }) {
     return t("workspace_tools");
   };
 
+  const body = () => {
+    if (isTheme) {
+      return <ThemePanel t={t} />;
+    }
+    if (hasSetup) {
+      return <SetupPanel t={t} />;
+    }
+    return isBuilder && <NewComponentsPanel t={t} />;
+  };
+
   return (
     <aside
       data-tour="left-panel"
       aria-label={ariaLabel()}
       className={styles.aside}
     >
-      <div className={styles.body}>
-        {hasSetup ? <SetupPanel t={t} /> : isBuilder && <NewComponentsPanel t={t} />}
-      </div>
+      <div className={styles.body}>{body()}</div>
     </aside>
   );
 }

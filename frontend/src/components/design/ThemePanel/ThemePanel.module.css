@@ -1,0 +1,518 @@
+/* ====== Panel ====== */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  /* Fills the aside so the reset footer sits at the bottom of a short panel
+     and sticks to it once the sections grow past the viewport. */
+  min-height: 100%;
+  font-family: Rubik, sans-serif;
+  color: #1b2150;
+}
+
+.head {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid #eceefb;
+}
+
+.headTitle {
+  margin: 0;
+  font: 700 11px/14px Rubik, sans-serif;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #666e91;
+}
+
+.headHint {
+  margin: 8px 0 0;
+  font: 400 12px/17px Rubik, sans-serif;
+  color: #4c5474;
+}
+
+.sections {
+  flex: 1;
+  padding: 8px 10px 16px;
+}
+
+.footer {
+  position: sticky;
+  bottom: 0;
+  padding: 10px 12px;
+  border-top: 1px solid #e7e9f5;
+  background: #fff;
+}
+
+/* ====== Section ====== */
+
+.section {
+  border: 1px solid transparent;
+  border-radius: 7px;
+}
+
+.sectionOpen {
+  border-color: #cfd5e8;
+  background: #fbfbfe;
+}
+
+.sectionHeading {
+  margin: 0;
+}
+
+.sectionButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  text-align: start;
+  cursor: pointer;
+}
+
+.sectionButton:hover {
+  background: #f4f6fc;
+}
+
+.sectionButton:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: -2px;
+}
+
+.chevron {
+  flex: none;
+  color: #4c5474;
+  transition: transform 120ms ease;
+}
+
+.chevronOpen {
+  transform: rotate(90deg);
+}
+
+/* The arrow points along the reading direction, so it has to turn around in
+   Arabic — and still end up pointing down when the section is open. */
+[dir="rtl"] .chevron {
+  transform: rotate(180deg);
+}
+
+[dir="rtl"] .chevronOpen {
+  transform: rotate(90deg);
+}
+
+.sectionTitle {
+  flex: 1;
+  min-width: 0;
+  font: 500 13.5px/18px Rubik, sans-serif;
+  color: #1b2150;
+}
+
+.sectionOpen .sectionTitle {
+  font-weight: 600;
+}
+
+.sectionMeta {
+  flex: none;
+  font: 400 12px/16px Rubik, sans-serif;
+  color: #666e91;
+}
+
+.sectionBody {
+  padding: 2px 10px 12px;
+}
+
+/* ====== Field ====== */
+
+.field {
+  padding-top: 12px;
+}
+
+.fieldHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+
+.fieldLabel {
+  font: 600 10px/14px Rubik, sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #666e91;
+}
+
+.fieldValue {
+  font: 400 11px/14px Rubik, sans-serif;
+  color: #4c5474;
+  /* Hex values read left to right whatever the interface language does. */
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* ====== Chips ====== */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chipGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  min-width: 32px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  background: #fff;
+  font: 400 12.5px/1 Rubik, sans-serif;
+  color: #3c447a;
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: #b9bff0;
+}
+
+.chip:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.chipOn {
+  border-color: #3a46d8;
+  background: #eceefb;
+  font-weight: 600;
+  color: #2b34a8;
+}
+
+.more {
+  height: 28px;
+  max-width: 100%;
+  padding: 0 8px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  background: #fff;
+  font: 400 12.5px/1 Rubik, sans-serif;
+  color: #3c447a;
+  cursor: pointer;
+}
+
+.more:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.moreOn {
+  border-color: #0e1338;
+  background: #eceefb;
+  font-weight: 600;
+  color: #2b34a8;
+}
+
+/* ====== Colours ====== */
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #dfe2ee;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.swatch:hover {
+  border-color: #b9bff0;
+}
+
+.swatch:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
+}
+
+.swatchOn {
+  border-color: #1b2150;
+  box-shadow: 0 0 0 1px #1b2150;
+}
+
+.customChip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 9px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  background: #fff;
+  font: 500 12px/1 Rubik, sans-serif;
+  color: #3c447a;
+  cursor: pointer;
+}
+
+.customChip:hover {
+  border-color: #b9bff0;
+}
+
+.customChip:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.customChipOn {
+  border-color: #3a46d8;
+  background: #eceefb;
+  font-weight: 600;
+  color: #2b34a8;
+}
+
+.customEditor {
+  margin-top: 8px;
+  padding: 9px 10px;
+  border: 1px solid #dfe2ee;
+  border-radius: 7px;
+  background: #fff;
+}
+
+.customRow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.picker {
+  flex: none;
+  width: 34px;
+  height: 30px;
+  padding: 2px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.hexInput {
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  font: 500 12.5px/1 Rubik, sans-serif;
+  color: #1b2150;
+  direction: ltr;
+  text-transform: uppercase;
+}
+
+.hexInput:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: -1px;
+}
+
+.hexInvalid {
+  border-color: #b3261e;
+}
+
+.apply {
+  flex: none;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid #1b2150;
+  border-radius: 6px;
+  background: #1b2150;
+  font: 600 12.5px/1 Rubik, sans-serif;
+  color: #fff;
+  cursor: pointer;
+}
+
+.apply:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
+}
+
+.help {
+  margin: 7px 0 0;
+  font: 400 11.5px/16px Rubik, sans-serif;
+  color: #4c5474;
+}
+
+.helpError {
+  color: #8a231c;
+}
+
+/* ====== Notes ====== */
+
+.note {
+  margin: 12px 0 0;
+  padding: 8px 10px;
+  border: 1px solid #c6ccf5;
+  border-radius: 7px;
+  background: #f5f6ff;
+  font: 400 11.5px/16px Rubik, sans-serif;
+  color: #2b34a8;
+}
+
+.noteGood {
+  border-color: #cfe0d5;
+  background: #f2f8f4;
+  color: #215c3e;
+}
+
+.noteBad {
+  border-color: #efcfcc;
+  background: #fdf4f3;
+  color: #8a231c;
+}
+
+/* ====== Background image ====== */
+
+.dropZone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 12px;
+  border: 1px dashed #b9bff0;
+  border-radius: 8px;
+  background: #fbfbff;
+  color: #3a46d8;
+  text-align: center;
+  cursor: pointer;
+}
+
+.dropZone:focus-within {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
+}
+
+.dropZoneOver {
+  border-color: #3a46d8;
+  background: #f5f6ff;
+}
+
+.dropTitle {
+  font: 600 12.5px/17px Rubik, sans-serif;
+  color: #2b34a8;
+}
+
+.dropHint {
+  font: 400 11px/15px Rubik, sans-serif;
+  color: #4c5474;
+}
+
+.progressTrack {
+  width: 100%;
+  max-width: 180px;
+  height: 4px;
+  border-radius: 2px;
+  background: #e6e9f6;
+  overflow: hidden;
+}
+
+.progressBar {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: #3a46d8;
+  transition: width 120ms linear;
+}
+
+.imageCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border: 1px solid #d8dcef;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.imageThumb {
+  flex: none;
+  width: 56px;
+  height: 42px;
+  border-radius: 5px;
+  object-fit: cover;
+  background: #eceefb;
+}
+
+.imageActions {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.imageReplace,
+.imageRemove {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 9px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  background: #fff;
+  font: 500 12px/1 Rubik, sans-serif;
+  color: #3c447a;
+  cursor: pointer;
+}
+
+.imageReplace:hover,
+.imageRemove:hover {
+  border-color: #b9bff0;
+}
+
+.imageReplace:focus-within,
+.imageRemove:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.imageRemove {
+  color: #8a231c;
+}
+
+/* ====== Reset ====== */
+
+.resetButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  height: 34px;
+  border: 1px solid #cfd5e8;
+  border-radius: 7px;
+  background: #fff;
+  font: 500 13px/1 Rubik, sans-serif;
+  color: #1b2150;
+  cursor: pointer;
+}
+
+.resetButton:hover {
+  border-color: #b9bff0;
+  background: #f7f8fd;
+}
+
+.resetButton:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
+}
