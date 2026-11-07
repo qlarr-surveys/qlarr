@@ -1,0 +1,304 @@
+/* ====== Panel ====== */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  font-family: Rubik, sans-serif;
+  color: #1b2150;
+}
+
+.head {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid #eceefb;
+}
+
+.headTitle {
+  margin: 0;
+  font: 700 11px/14px Rubik, sans-serif;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #666e91;
+}
+
+.headHint {
+  margin: 8px 0 0;
+  font: 400 12px/17px Rubik, sans-serif;
+  color: #4c5474;
+}
+
+.sections {
+  flex: 1;
+  padding: 12px 13px 20px;
+}
+
+/* ====== Group ====== */
+
+.group {
+  display: block;
+}
+
+.groupTitle {
+  display: block;
+  margin: 0;
+  padding: 0 4px 4px;
+  font: 600 11.5px/1.3 Rubik, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #4c5474;
+}
+
+.groupHint {
+  margin: 0;
+  padding: 0 4px 8px;
+  font: 400 11px/16px Rubik, sans-serif;
+  color: #555d7d;
+}
+
+.divider {
+  height: 1px;
+  margin: 16px 0 14px;
+  background: #e9ebf5;
+}
+
+.empty {
+  margin: 0;
+  padding: 0 4px;
+  font: 400 11.5px/16px Rubik, sans-serif;
+  color: #666e91;
+}
+
+/* ====== Primary language ====== */
+
+.select {
+  display: block;
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  background: #fff;
+  font: 400 13px/1 Rubik, sans-serif;
+  color: #0e1338;
+  cursor: pointer;
+}
+
+.select:hover {
+  border-color: #9aa1c0;
+}
+
+.select:focus-visible {
+  border-color: #3a46d8;
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+/* ====== Additional languages ====== */
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.langRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 34px;
+  padding: 0 7px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  text-align: start;
+  cursor: pointer;
+}
+
+.langRow:hover {
+  background: #f4f6fc;
+}
+
+.langRow:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: -1px;
+}
+
+.box {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid #8f96b8;
+  border-radius: 4px;
+  background: #fff;
+  color: #fff;
+}
+
+.boxOn {
+  border-color: #3a46d8;
+  background: #3a46d8;
+}
+
+.langName {
+  flex: 1;
+  min-width: 0;
+  font: 400 13px/18px Rubik, sans-serif;
+  color: #0e1338;
+}
+
+.langMeta {
+  flex: none;
+  font: 400 11px/16px Rubik, sans-serif;
+  color: #666e91;
+}
+
+/* ====== Edit translation ====== */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 4px;
+}
+
+.chip {
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid #cfd5e8;
+  border-radius: 15px;
+  background: #fff;
+  font: 500 12.5px/1 Rubik, sans-serif;
+  color: #2b34a8;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: #b9bff0;
+  background: #eceefb;
+}
+
+.chip:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.chipOn {
+  border-color: #3a46d8;
+  background: #eceefb;
+  font-weight: 600;
+}
+
+/* ====== Import / export ====== */
+
+.csvActions {
+  display: flex;
+  gap: 8px;
+  padding: 0 4px;
+}
+
+.csvButton {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  background: #fff;
+  font: 500 12.5px/1 Rubik, sans-serif;
+  color: #1b2150;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.csvButton:hover:not(:disabled) {
+  border-color: #b9bff0;
+  background: #f4f6fc;
+}
+
+.csvButton:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.csvButton:disabled {
+  color: #8a90a8;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.overwrite {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 6px 7px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  text-align: start;
+  cursor: pointer;
+}
+
+.overwrite:hover {
+  background: #f4f6fc;
+}
+
+.overwrite:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: -1px;
+}
+
+.overwriteBox {
+  margin-top: 1px;
+}
+
+.overwriteText {
+  flex: 1;
+  min-width: 0;
+}
+
+.overwriteLabel {
+  display: block;
+  font: 500 13px/18px Rubik, sans-serif;
+  color: #0e1338;
+}
+
+.overwriteHint {
+  display: block;
+  margin-top: 2px;
+  font: 400 11px/15px Rubik, sans-serif;
+  color: #555d7d;
+}
+
+/* ====== Notes ====== */
+
+.note {
+  margin: 10px 4px 0;
+  padding: 8px 10px;
+  border: 1px solid #c6ccf5;
+  border-radius: 7px;
+  background: #f5f6ff;
+  font: 400 11.5px/16px Rubik, sans-serif;
+  color: #2b34a8;
+}
+
+.noteGood {
+  border-color: #cfe0d5;
+  background: #f2f8f4;
+  color: #215c3e;
+}
+
+.noteBad {
+  border-color: #efcfcc;
+  background: #fdf4f3;
+  color: #8a231c;
+}
