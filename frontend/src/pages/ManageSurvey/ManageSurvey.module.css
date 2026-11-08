@@ -5,3 +5,7 @@
   background-color: #f7f8fc;
   overflow-y: auto;
 }
+
+.fullHeight {
+  height: 100vh;
+}

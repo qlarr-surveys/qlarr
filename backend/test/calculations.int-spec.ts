@@ -22,10 +22,12 @@ const DESIGN_JSON = JSON.stringify(
 const files = {
   getText: jest.fn().mockResolvedValue(DESIGN_JSON),
   uploadText: jest.fn().mockResolvedValue(undefined),
+  delete: jest.fn().mockResolvedValue(undefined),
 };
 
 const DOUBLE = { code: 'double', label: 'Double', expression: 'Q880htp.value * 2' };
 const FIXED = { code: 'fixed', label: 'Fixed', expression: 'Q880htp.value.toFixed(1)' };
+const OUT_OF_DATE = { name: 'OutOfDate' };
 const BAD_REF = { code: 'bad', label: 'Bad', expression: 'Q999.value' };
 
 /**
@@ -101,6 +103,11 @@ describe('Calculations', () => {
       .put(base(id))
       .set('Authorization', SUPER)
       .send({ calculations, revision });
+
+  const rename = (id: string, from: string, to: string) =>
+    request(server())
+      .post(`/survey/${id}/change_code?from=${from}&to=${to}`)
+      .set('Authorization', SUPER);
 
   const compute = (id: string) =>
     request(server()).post(`${base(id)}/compute`).set('Authorization', SUPER);
@@ -329,13 +336,121 @@ describe('Calculations', () => {
 
       await app.get(DesignService).setDesign(id, {}, 1);
 
-      expect((await calculationsOf(r1))[0].state).toBe('not_computed');
+      expect(await calculationsOf(r1)).toEqual([]);
       expect(await state(id)).toMatchObject({ status: 'idle', newSinceLastRun: null });
+      await save(id, [DOUBLE], 1).expect(200);
       await compute(id).expect(200);
       expect(await settle(id)).toMatchObject({
         status: 'completed',
         progress: { done: 3, total: 3 },
       });
+    });
+
+    it('a code rename rewrites the expressions and bumps the revision', async () => {
+      const { id } = await createSurvey();
+      const similar = { code: 'similar', label: 'Similar', expression: 'Q880htpx.value' };
+      await save(id, [DOUBLE, similar], 0).expect(200);
+
+      await rename(id, 'Q880htp', 'Q880new').expect(201);
+
+      const after = await state(id);
+      expect(after.calculations[0]).toMatchObject({
+        expression: 'Q880new.value * 2',
+        errors: [OUT_OF_DATE],
+      });
+      expect(after.calculations[1].expression).toBe('Q880htpx.value');
+      expect(after.revision).toBe(2);
+      await save(id, [DOUBLE], 1).expect(409);
+    });
+
+    it('a code rename no calculation references keeps the revision', async () => {
+      const { id } = await createSurvey();
+      await save(id, [DOUBLE], 0).expect(200);
+
+      await rename(id, 'G2', 'G9').expect(201);
+
+      expect(await state(id)).toMatchObject({
+        revision: 1,
+        calculations: [{ expression: DOUBLE.expression }],
+      });
+    });
+
+    it('a design change marks every calculation out of date, once, keeping its other errors', async () => {
+      const { id } = await createSurvey();
+      await save(id, [DOUBLE, BAD_REF], 0).expect(200);
+      const design = app.get(DesignService);
+
+      await design.setDesign(id, {}, 1);
+      await design.setDesign(id, {}, 2);
+
+      const { calculations, revision } = await state(id);
+      expect(calculations[0].errors).toEqual([OUT_OF_DATE]);
+      expect(calculations[1].errors).toEqual([
+        expect.objectContaining({ name: 'ScriptError' }),
+        OUT_OF_DATE,
+      ]);
+      expect(revision).toBe(1);
+    });
+
+    it('out of date calculations hide from responses, and a Save brings them back', async () => {
+      const { id, r1 } = await createSurvey();
+      await save(id, [DOUBLE], 0).expect(200);
+      await app.get(DesignService).setDesign(id, {}, 1);
+      expect(await calculationsOf(r1)).toEqual([]);
+
+      await save(id, [DOUBLE], 1).expect(200);
+
+      expect((await state(id)).calculations[0].errors).toEqual([]);
+      expect((await calculationsOf(r1))[0].state).toBe('not_computed');
+    });
+
+    it('Test runs nothing on out of date calculations', async () => {
+      const { id } = await createSurvey();
+      await save(id, [DOUBLE], 0).expect(200);
+      await app.get(DesignService).setDesign(id, {}, 1);
+
+      const { body } = await request(server())
+        .post(`${base(id)}/test`)
+        .set('Authorization', SUPER)
+        .expect(200);
+      expect(body.sample[0]).toMatchObject({ results: {}, errors: {} });
+    });
+
+    it('Compute runs nothing on out of date calculations', async () => {
+      const { id, r1 } = await createSurvey();
+      await save(id, [DOUBLE], 0).expect(200);
+      await app.get(DesignService).setDesign(id, {}, 1);
+
+      await compute(id).expect(200);
+
+      expect((await settle(id)).status).toBe('completed');
+      expect(await calculationsOf(r1)).toEqual([]);
+    });
+
+    it('discarding unpublished changes marks the calculations out of date', async () => {
+      const { id } = await createSurvey();
+      await save(id, [DOUBLE], 0).expect(200);
+      const design = app.get(DesignService);
+      await design.setDesign(id, {}, 1);
+      await save(id, [DOUBLE], 1).expect(200);
+
+      await design.restorePublished(id, 2, 1);
+
+      expect((await state(id)).calculations[0].errors).toEqual([OUT_OF_DATE]);
+    });
+
+    it('discarding unpublished changes hides the results', async () => {
+      const { id, r1 } = await createSurvey();
+      const design = app.get(DesignService);
+      await design.setDesign(id, {}, 1);
+      await save(id, [DOUBLE], 0).expect(200);
+      await compute(id).expect(200);
+      await settle(id);
+
+      await design.restorePublished(id, 2, 1);
+
+      expect(await calculationsOf(r1)).toEqual([]);
+      expect(await state(id)).toMatchObject({ status: 'idle', newSinceLastRun: null });
     });
 
     it('everything is refused (409) while a run is in progress', async () => {
@@ -410,6 +525,30 @@ describe('Calculations', () => {
       const text = await exportCsv(id, false);
       expect(text[0].endsWith(',Double,Fixed')).toBe(true);
       expect(text.find((l) => l.includes(r1))!.endsWith(',42,21.0')).toBe(true);
+    });
+
+    it('picks header and value types independently', async () => {
+      const { id } = await createSurvey();
+      const exportWith = async (dbValues: boolean, headers?: string) =>
+        (
+          await request(server())
+            .get(
+              `/survey/${id}/response/export/csv/0/999999?db_values=${dbValues}` +
+                (headers ? `&headers=${headers}` : ''),
+            )
+            .set('Authorization', SUPER)
+            .expect(200)
+        ).text.split('\r\n')[0];
+
+      const codeDb = await exportWith(true);
+      const textText = await exportWith(false);
+      expect(codeDb).toContain('Q880htp.value');
+      expect(textText).not.toContain('Q880htp.value');
+
+      expect(await exportWith(true, 'code')).toBe(codeDb);
+      expect(await exportWith(false, 'text')).toBe(textText);
+      expect(await exportWith(false, 'code')).toContain('Q880htp.value');
+      expect(await exportWith(true, 'text')).not.toContain('Q880htp.value');
     });
   });
 

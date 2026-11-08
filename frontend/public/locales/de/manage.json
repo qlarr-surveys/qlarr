@@ -90,6 +90,7 @@
     "record_gps": "GPS aufzeichnen",
     "save_ip": "IP speichern",
     "save_timings": "Zeiten speichern",
+    "version_history": "Versionsverlauf",
     "edit_name": "Umfragenamen bearbeiten: {{name}}",
     "edit_description": "Umfragebeschreibung bearbeiten",
     "delete_survey_title": "„{{survey_name}}“ löschen?"
@@ -166,6 +167,7 @@
     "title": "Passwort vergessen"
   },
   "goBack": "Zurückgehen",
+  "go_to_dashboard": "Zum Dashboard",
   "import_survey": "Umfrage importieren",
   "label": {
     "additional_languages": "Weitere Sprachen",
@@ -237,7 +239,10 @@
     "publish_tooltip": "Ihre Änderungen sind noch nicht live. Veröffentlichen Sie, um Ihre Umfrage für alle zu aktualisieren.",
     "qr_code": "QR-Code",
     "settings": "Einstellungen",
-    "unpublished_text": "Veröffentlichen Sie die Umfrage, um die neuesten Änderungen anzuwenden"
+    "unpublished_text": "Veröffentlichen Sie die Umfrage, um die neuesten Änderungen anzuwenden",
+    "discard_changes": "Unveröffentlichte Änderungen verwerfen",
+    "discard_title": "Unveröffentlichte Änderungen verwerfen?",
+    "discard_description": "Das Design wird auf die zuletzt veröffentlichte Version zurückgesetzt. Das aktuelle Design und der gesamte Versionsverlauf werden endgültig gelöscht."
   },
   "login": {
     "dont_have_acc": "Sie haben noch kein Konto?",
@@ -299,10 +304,15 @@
     "wrong_password": "Falsches Passwort",
     "wrong_reset_token": "Dieses Reset-Token ist falsch.",
     "invalid_translations_csv": "Keine Übersetzungs-CSV.",
-    "translations_csv_not_utf8": "Diese Datei ist nicht UTF-8-kodiert. Wählen Sie in Excel Datei → Speichern unter → „CSV UTF-8 (durch Trennzeichen getrennt)“ und importieren Sie sie erneut."
+    "translations_csv_not_utf8": "Diese Datei ist nicht UTF-8-kodiert. Wählen Sie in Excel Datei → Speichern unter → „CSV UTF-8 (durch Trennzeichen getrennt)“ und importieren Sie sie erneut.",
+    "snapshot_not_found": "Diese Version existiert nicht mehr. Laden Sie die Seite neu und versuchen Sie es erneut.",
+    "nothing_to_revert": "Es gibt keine unveröffentlichten Änderungen zum Verwerfen.",
+    "user_already_confirmed": "Dieser Benutzer hat die Einladung bereits angenommen.",
+    "survey_not_found": "Diese Umfrage existiert nicht oder wurde gelöscht"
   },
   "processed_successes": {
     "copied": "In die Zwischenablage kopiert",
+    "invitation_resent": "Einladung erneut gesendet",
     "updated": "Erfolgreich aktualisiert"
   },
   "profile": {
@@ -340,10 +350,7 @@
     "filter_completed_show_completed": "Nur vollständige Antworten",
     "filter_completed_show_incomplete": "Nur unvollständige Antworten",
     "filter_completed_show_disqualified": "Nur disqualifizierte Antworten",
-    "filter_preview": "Erledigte Antworten filtern",
-    "filter_preview_show_actual": "Nur tatsächliche Antworten",
-    "filter_preview_show_all": "Alle Antworten",
-    "filter_preview_show_preview": "Nur Vorschau der Antworten",
+    "filter_preview_show_preview": "Nur Testantworten (Vorschau)",
     "from": "Von",
     "incomplete_response": "Unvollständige Antwort",
     "incomplete_responses": "Unvollständige Antworten",
@@ -360,8 +367,8 @@
     "no": "Nein",
     "no_files_found": "Keine Dateien für den ausgewählten Bereich gefunden",
     "no_responses_found": "Keine Antworten entsprechen dem ausgewählten Bereich und den Antworttypen",
-    "preview": "Vorschau",
-    "preview_not_exportable": "Vorschauantworten können nicht exportiert werden",
+    "test_response": "Testantwort (Vorschau)",
+    "preview_not_exportable": "Testantworten (Vorschau) können nicht exportiert werden",
     "question": "Frage",
     "range_invalid": "“From” kann nicht größer sein als “To”.",
     "all_responses": "Alle Antworten",
@@ -373,6 +380,10 @@
     "status": "Status",
     "submit_date": "Sendedatum",
     "text_format": "Textformat",
+    "header_type": "Kopfzeilentyp",
+    "text_headers": "Fragetext",
+    "code_headers": "Fragecodes",
+    "export_options": "Weitere Exportoptionen",
     "title": "Antworten",
     "title_delete_response": "Antwort löschen?",
     "to": "Zu",
@@ -411,6 +422,7 @@
     "effective_base": "Effektive Basis",
     "efficiency": "Effizienz",
     "weight_note": "Größte Gewichtung {{maxWeight}}. Signifikanztests verwenden die effektive Basis, nicht die gewichtete Basis.",
+    "weight_filtered_note": "Filter sind aktiv. Ist-Werte und Gewichte stammen aus allen {{total}} Antworten, nicht nur aus den {{filtered}} in der Tabelle. Jede befragte Person behält ihre Gewichtung aus der Gesamtstichprobe, daher entspricht die gefilterte Tabelle möglicherweise nicht den Zielwerten.",
     "base": "Basis",
     "eff": "eff",
     "subtitle": "Nach {{column}} · {{weighting}}",
@@ -429,7 +441,15 @@
     "warn_lowEfficiency": "Die Effizienz beträgt {{efficiency}} %. Unter 60 % beginnt eine kleine Gruppe, den gesamten Bericht zu bestimmen.",
     "warn_highWeight": "Eine Gewichtung beträgt {{maxWeight}}. Gewichtungen über 5 bedeuten meist, dass das Ziel für diese Stichprobe unrealistisch ist.",
     "warn_droppedWeight": "{{count}} Antwort(en) hatten keine Angabe zur Gewichtungsfrage und wurden aus dieser Tabelle ausgeschlossen.",
-    "warn_truncated": "Es werden die ersten {{shown}} von {{total}} Antworten angezeigt. Zahlen und Tests basieren auf dieser Stichprobe."
+    "warn_truncated": "Es werden die ersten {{shown}} von {{total}} Antworten angezeigt. Zahlen und Tests basieren auf dieser Stichprobe.",
+    "filters": "Filter",
+    "add_filter": "Filter hinzufügen",
+    "filter_any_of": "Eines von…",
+    "remove_filter": "Filter entfernen",
+    "filtered_base": "Gefiltert auf {{count}} von {{total}} Antworten",
+    "warn_noMatches": "Keine Antworten entsprechen diesen Filtern.",
+    "plan_name": "Planname",
+    "plan_name_taken": "Ein Plan mit diesem Namen existiert bereits."
   },
   "calculations": {
     "title": "Berechnete Felder",
@@ -448,6 +468,9 @@
     "label_required": "Bezeichnung ist erforderlich",
     "expression_required": "Ausdruck ist erforderlich",
     "error_ScriptError": "Skriptfehler",
+    "error_OutOfDate": "Das Umfragedesign wurde geändert. Überprüfen Sie diese Berechnung und klicken Sie auf Speichern.",
+    "design_warning": "Berechnungen müssen bei jeder Änderung des Umfragedesigns neu validiert werden.",
+    "first_save_title": "Gut zu wissen",
     "state_error": "Fehler",
     "state_invalid": "Ungültig",
     "state_not_computed": "Nicht berechnet",
@@ -609,6 +632,7 @@
     "delete_title": "Sind Sie sicher, dass Sie den Benutzer löschen wollen: {{name}} ?",
     "email": "Email",
     "invitation_sent": "Einladung gesendet",
+    "resend_invitation": "Einladung erneut senden",
     "name": "Name",
     "roles": "Rollen",
     "status": "Status",
@@ -760,7 +784,7 @@
     "stat_avg_completion": "Durchschn. Abschluss",
     "stat_answered": "Beantwortet",
     "stat_incomplete": "Unvollständig",
-    "stat_preview": "Vorschau",
+    "stat_preview": "Testantworten",
     "error_loading": "Fehler beim Laden der Analysen",
     "error_loading_data": "Analysedaten konnten nicht geladen werden",
     "no_data": "Keine Analysedaten verfügbar",
@@ -802,6 +826,16 @@
     "question_type_text_display": "Textanzeige",
     "question_type_image_display": "Bildanzeige",
     "question_type_video_display": "Videoanzeige"
+  },
+  "version_history": {
+    "description": "Wiederherstellungspunkte für Ihre unveröffentlichten Änderungen, die beim Bearbeiten automatisch angelegt werden. Der Verlauf wird bei jeder Veröffentlichung geleert.",
+    "current": "Aktuelle Version",
+    "empty": "Noch keine Wiederherstellungspunkte.",
+    "restore": "Wiederherstellen",
+    "preview_title": "Vorschau: {{title}}",
+    "restore_title": "Diese Version wiederherstellen?",
+    "restore_description": "Das Design wird auf den Stand vom {{date}} zurückgesetzt. Das aktuelle Design und alle späteren Wiederherstellungspunkte werden endgültig gelöscht.",
+    "restore_acknowledge": "Mir ist bewusst, dass dies nicht rückgängig gemacht werden kann"
   },
   "status_info": {
     "draft": "Die Umfrage wurde noch nicht veröffentlicht. Nur zur Vorschau verfügbar.",

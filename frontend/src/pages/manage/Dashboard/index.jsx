@@ -11,7 +11,7 @@ import {
 import styles from "./Dashboard.module.css";
 import { HeaderContent } from "~/components/manage/HeaderContent";
 import { setLoading } from "~/state/edit/editState";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import CreateSurvey from "~/components/manage/CreateSurvey/CreateSurvey";
 import { PROCESSED_ERRORS } from "~/utils/errorsProcessor";
@@ -116,6 +116,19 @@ function Dashboard() {
 
     fetchSurveys();
   }, [page, perPage, sortBy, status]);
+
+  // An action on a survey someone else deleted: drop it from the list.
+  const globalError = useSelector((state) => state.editState.error);
+  useEffect(() => {
+    // Dismissing the dialog marks the error seen, which is a new object too.
+    if (
+      globalError &&
+      !globalError.seen &&
+      globalError.name === PROCESSED_ERRORS.SURVEY_NOT_FOUND.name
+    ) {
+      fetchSurveys();
+    }
+  }, [globalError]);
 
   // .highlight animates for 3s and then keeps its background colour, so drop
   // the marker once the animation is done.

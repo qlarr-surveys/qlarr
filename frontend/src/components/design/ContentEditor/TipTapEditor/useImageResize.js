@@ -256,9 +256,12 @@ export const useImageResize = ({
   ]);
 
   useEffect(() => {
-    if (!editor) return;
+    // editor.view throws until the view is mounted, and after unmount; both
+    // read as isDestroyed.
+    if (!editor || editor.isDestroyed) return;
 
     const checkEditorActive = () => {
+      if (editor.isDestroyed) return;
       const isFocused = editor.isFocused;
 
       const editorElement = editor.view.dom;

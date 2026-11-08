@@ -51,6 +51,7 @@ import {
   conditionalRelevanceEquation,
   instructionByCode,
   isQuotaInstruction,
+  logicRefersToQuestion,
   processValidation,
   quotaInstruction,
   quotaRefersToQuestion,
@@ -120,19 +121,28 @@ export function buildDesignState(state, payload) {
     (el) => !UI_STATE_KEYS.includes(el) && !newKeys.includes(el),
   );
 
+  const defaultLang = newState.Survey.defaultLang || LANGUAGE_DEF.en;
+  // A survey can arrive with the same language listed twice, or with its
+  // primary language also listed as a translation. That renders as two
+  // identical chips writing to one set of content, so the extras go here and
+  // the cleaned list is saved along with the next change.
+  newState.Survey.additionalLang = dedupeLanguages(
+    newState.Survey.additionalLang,
+    defaultLang.code,
+  );
+  const languagesList = [defaultLang].concat(newState.Survey.additionalLang);
+
   if (!state.langInfo || response.overWriteLang) {
-    const defaultLang = newState.Survey.defaultLang || LANGUAGE_DEF.en;
-    const mainLang = defaultLang.code;
-    const lang = defaultLang.code;
-    const languagesList = [defaultLang].concat(
-      newState.Survey.additionalLang || [],
-    );
     state.langInfo = {
       languagesList,
-      mainLang,
-      lang,
-      onMainLang: lang == mainLang,
+      mainLang: defaultLang.code,
+      lang: defaultLang.code,
+      onMainLang: true,
     };
+  } else {
+    // Which languages exist is the survey's to say, not the editor's: only
+    // which one is being edited survives a reload of the design.
+    state.langInfo.languagesList = languagesList;
   }
 
   toBeRemoved.forEach((key) => {
@@ -145,8 +155,13 @@ export function buildDesignState(state, payload) {
     delete state["setup"];
   }
 
+  // Keep the existing object wherever the server sent back the same thing:
+  // every save answers with the whole design, and swapping in a fresh copy of
+  // each component would redraw every one of them in the editor.
   newKeys.forEach((key) => {
-    state[key] = newState[key];
+    if (!isEquivalent(state[key], newState[key])) {
+      state[key] = newState[key];
+    }
   });
   state.versionDto = response.versionDto;
   state.componentIndex = response.designerInput.componentIndexList;
@@ -155,8 +170,13 @@ export function buildDesignState(state, payload) {
   // re-derive from `repeatSource` would drop. In-session source edits keep the
   // range current via resyncRepeatablesForSource / updateRepetitionSource.
   state["latest"] = structuredClone(newState);
-  state.lastAddedComponent = null;
-  state.index = buildCodeIndex(state);
+  if (state.lastAddedComponent) {
+    state.lastAddedComponent = null;
+  }
+  const index = buildCodeIndex(state);
+  if (!isEquivalent(state.index, index)) {
+    state.index = index;
+  }
   state.designStateReceived = true;
   return state;
 }
@@ -1043,6 +1063,7 @@ export function convertQuestion(state, payload) {
     );
   } else if (inTextGroup) {
     convertTextQuestion(currentQuestion, newType);
+    addMaskedValuesInstructions(questionCode, currentQuestion, state);
   } else if (inDateTimeGroup) {
     convertDateTimeQuestion(currentQuestion, currentType, newType);
     addMaskedValuesInstructions(questionCode, currentQuestion, state);
@@ -1061,6 +1082,9 @@ export function convertQuestion(state, payload) {
   if (quotaRefersToQuestion(state, questionCode)) {
     refreshQuotaInstructions(state);
   }
+  // Compiled relevance depends on the referenced question's type, so every
+  // condition reading the converted question must be recompiled.
+  refreshRelevanceReferencing(state, questionCode);
 }
 
 export function changeContent(state, payload) {
@@ -1271,35 +1295,56 @@ export function updateInstruction(state, payload) {
   changeInstruction(state[code], instruction);
 }
 
+/**
+ * A survey's translations: each language once, and never the primary language
+ * among them. Both ends of the wire run this — the editor so a stale panel
+ * cannot offer to add a language the survey already has, the backend so no
+ * client can store one that does.
+ */
+export function dedupeLanguages(additionalLang, mainLang) {
+  const seen = new Set([mainLang]);
+  return (additionalLang || []).filter((language) => {
+    if (seen.has(language.code)) {
+      return false;
+    }
+    seen.add(language.code);
+    return true;
+  });
+}
+
+// Both lists come off the survey itself, so a language can never end up in one
+// and not the other — the panel reads langInfo and would otherwise offer to add
+// a language the survey already has.
+function syncLanguages(state) {
+  state.Survey.additionalLang = dedupeLanguages(
+    state.Survey.additionalLang,
+    state.Survey.defaultLang?.code,
+  );
+  state.langInfo.languagesList = [state.Survey.defaultLang].concat(
+    state.Survey.additionalLang,
+  );
+}
+
 export function onBaseLangChanged(state, payload) {
   state.langInfo.mainLang = payload.code;
   state.Survey.defaultLang = payload;
-  state.Survey.additionalLang = state.Survey.additionalLang?.filter(
-    (language) => language.code !== payload.code,
-  );
   state.langInfo.lang = payload.code;
   state.langInfo.onMainLang = true;
-  state.langInfo.languagesList = [payload].concat(
-    state.Survey.additionalLang || [],
-  );
+  syncLanguages(state);
 }
 
 export function onAdditionalLangAdded(state, payload) {
   state.Survey.additionalLang = (state.Survey.additionalLang || []).concat(
     payload,
   );
-  state.langInfo.languagesList = [state.Survey.defaultLang].concat(
-    state.Survey.additionalLang || [],
-  );
+  syncLanguages(state);
 }
 
 export function onAdditionalLangRemoved(state, payload) {
-  state.Survey.additionalLang = state.Survey.additionalLang.filter(
+  state.Survey.additionalLang = (state.Survey.additionalLang || []).filter(
     (language) => language.code !== payload.code,
   );
-  state.langInfo.languagesList = [state.Survey.defaultLang].concat(
-    state.Survey.additionalLang || [],
-  );
+  syncLanguages(state);
 }
 
 export function changeLang(state, payload) {
@@ -1840,6 +1885,15 @@ const cleanupValidation = (state, code) => {
   }
   const ruleKeys = Object.keys(component["validation"]);
   ruleKeys.forEach((key) => processValidation(state, code, key, true));
+};
+
+const refreshRelevanceReferencing = (state, questionCode) => {
+  Object.keys(state).forEach((code) => {
+    const relevance = state[code]?.relevance;
+    if (relevance?.logic && logicRefersToQuestion(relevance.logic, questionCode)) {
+      addRelevanceInstructions(state, code, relevance);
+    }
+  });
 };
 
 const addRelevanceInstructions = (state, code, relevance) => {

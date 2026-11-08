@@ -40,3 +40,13 @@ export interface DesignDiffDto {
   publishInfo: PublishInfo;
   validationJsonOutput?: ValidationJsonOutput;
 }
+
+export interface SnapshotDto {
+  id: string;
+  savedAt: string;
+  createdBy: { id: string; name: string | null } | null;
+}
+
+export interface SnapshotListDto {
+  snapshots: SnapshotDto[];
+}

@@ -1,7 +1,8 @@
 export const MANAGE_SURVEY_LANDING_PAGES = {
   DESIGN: "design-survey",
   RESPONSES: "responses",
-  SETTINGS: "edit-survey"
+  SETTINGS: "edit-survey",
+  HISTORY: "design-history",
 };
 
 // DESIGN_SURVEY_MODE lives in @qlarr/design-core (so the shared module never
@@ -25,6 +26,7 @@ export const PREVIEW_MODE = {
 export const routes = {
   designSurvey: `/${MANAGE_SURVEY_LANDING_PAGES.DESIGN}/:surveyId`,
   editSurvey: `/${MANAGE_SURVEY_LANDING_PAGES.SETTINGS}/:surveyId`,
+  designHistory: `/${MANAGE_SURVEY_LANDING_PAGES.HISTORY}/:surveyId`,
   responses: `/${MANAGE_SURVEY_LANDING_PAGES.RESPONSES}/:surveyId`,
   runSurvey: "/run-survey/:surveyId",
   resumeSurvey: "/run-survey/:surveyId/:responseId",

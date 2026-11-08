@@ -5,6 +5,7 @@ import ThemePanel from "~/components/design/ThemePanel";
 import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
 import { isGroup, isQuestion } from "@qlarr/design-core";
 import SetupPanel from "../setup/SetupPanel";
+import { useDesignReadOnly } from "~/components/design/DesignReadOnly";
 import styles from "./LeftPanel.module.css";
 
 /**
@@ -23,6 +24,8 @@ function LeftPanel({ t }) {
   const isBuilder = designMode === DESIGN_SURVEY_MODE.DESIGN;
   const isTheme = designMode === DESIGN_SURVEY_MODE.THEME;
   const hasSetup = Boolean(setupCode);
+  // A read-only preview can't add components; it shows only the settings.
+  const readOnly = useDesignReadOnly();
 
   const ariaLabel = () => {
     if (isTheme) {
@@ -42,6 +45,8 @@ function LeftPanel({ t }) {
     }
     return t("workspace_tools");
   };
+
+  if (readOnly && !hasSetup) return null;
 
   const body = () => {
     if (isTheme) {

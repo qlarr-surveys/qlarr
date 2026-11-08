@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import QuestionDesign from "~/components/Question/QuestionDesign";
 import styles from "./GroupDesign.module.css";
 import { useSelector } from "react-redux";
@@ -239,20 +239,25 @@ function GroupDesign({
             {children?.map((quest, childIndex) => {
               return (
                 <React.Fragment key={quest.code}>
-                  <QuestionDesign
-                    t={t}
-                    key={quest.code}
-                    parentCode={code}
-                    parentIndex={index}
-                    index={childIndex}
-                    langInfo={langInfo}
-                    isLast={children.length == childIndex + 1}
-                    type={quest.type}
+                  <LazyQuestion
                     code={quest.code}
-                    designMode={designMode}
-                    onMainLang={inDesign}
-                    lastAddedComponent={lastAddedComponent}
-                  />
+                    eager={childIndex < EAGER_QUESTIONS}
+                  >
+                    <QuestionDesign
+                      t={t}
+                      key={quest.code}
+                      parentCode={code}
+                      parentIndex={index}
+                      index={childIndex}
+                      langInfo={langInfo}
+                      isLast={children.length == childIndex + 1}
+                      type={quest.type}
+                      code={quest.code}
+                      designMode={designMode}
+                      onMainLang={inDesign}
+                      lastAddedComponent={lastAddedComponent}
+                    />
+                  </LazyQuestion>
                   <QuestionDropArea
                     isLast={children.length == childIndex + 1}
                     index={childIndex + 1}
@@ -285,6 +290,42 @@ function GroupDesign({
 }
 
 export default React.memo(GroupDesign);
+
+// Questions drawn straight away, so a page opens without placeholders showing.
+const EAGER_QUESTIONS = 5;
+
+// The list virtualizes whole pages, so a long page would still draw every
+// question at once. This draws a question once it comes near the visible part
+// of the list and keeps it drawn after that. The placeholder carries the
+// question's code so search can still scroll to it.
+function LazyQuestion({ code, eager, children }) {
+  const ref = useRef();
+  const [shown, setShown] = useState(eager);
+
+  useEffect(() => {
+    if (shown || !ref.current) {
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShown(true);
+        }
+      },
+      {
+        root: ref.current.closest("[data-virtuoso-scroller]"),
+        rootMargin: "600px 0px",
+      },
+    );
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [shown]);
+
+  if (shown) {
+    return children;
+  }
+  return <div ref={ref} data-code={code} className={styles.questionPlaceholder} />;
+}
 
 function overlay(base, top, topAlpha) {
   const b = decomposeColor(base).values;
