@@ -1,4 +1,10 @@
-import { onError, setSaving, setUpdating, surveyReceived } from "./editState";
+import {
+  onError,
+  setLastSave,
+  setSaving,
+  setUpdating,
+  surveyReceived,
+} from "./editState";
 import SurveyService from "~/services/SurveyService";
 
 let saveTimer;
@@ -13,8 +19,9 @@ async function setData(store, state) {
       setState(store, state);
     })
     .catch((error) => {
+      // Back to the server's copy, which is not a save.
       surveyService.getSurvey().then((state) => {
-        setState(store, state);
+        setState(store, state, false);
       });
       setError(store, error);
     });
@@ -50,10 +57,13 @@ export const editDataSaver = (store) => (next) => (action) => {
   }
   return next(action);
 };
-const setState = (store, state) => {
+const setState = (store, state, saved = true) => {
   store.dispatch(setUpdating(false));
   store.dispatch(surveyReceived(state));
   store.dispatch(setSaving(false));
+  if (saved) {
+    store.dispatch(setLastSave("saved"));
+  }
   buffer.forEach((action) => {
     store.dispatch(action);
   });
@@ -62,6 +72,7 @@ const setState = (store, state) => {
 };
 const setError = (store, processedError) => {
   store.dispatch(onError(processedError));
+  store.dispatch(setLastSave("error"));
   store.dispatch(setSaving(false));
   store.dispatch(setUpdating(false));
 };

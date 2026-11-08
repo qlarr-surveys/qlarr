@@ -21,13 +21,14 @@
 
 /* ====== Back ====== */
 
-.backBtn {
+.iconBtn {
   flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  /* The snapshot page's MUI IconButton size. */
+  width: 40px;
+  height: 40px;
   padding: 0;
   border: none;
   border-radius: 6px;
@@ -36,11 +37,11 @@
   cursor: pointer;
 }
 
-.backBtn:hover {
+.iconBtn:hover {
   background: #f0f2fa;
 }
 
-.backBtn:focus-visible {
+.iconBtn:focus-visible {
   outline: 2px solid #3a46d8;
   outline-offset: 1px;
 }
@@ -67,6 +68,10 @@
   white-space: nowrap;
   font: 400 13px/1 Rubik, sans-serif;
   color: #6b7194;
+}
+
+.saveStateError {
+  color: #d32f2f;
 }
 
 /* ====== Preview ====== */
