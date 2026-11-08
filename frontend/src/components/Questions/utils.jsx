@@ -1,88 +1,84 @@
 import React from "react";
-import PagesIcon from "@mui/icons-material/Pages";
-import FlagIcon from "@mui/icons-material/Flag";
-import StartIcon from "@mui/icons-material/Start";
-import SurveyIcon from "../common/SurveyIcons/SurveyIcon";
+import {
+  AlignLeft,
+  Calendar,
+  Camera,
+  ChartNoAxesColumn,
+  CircleDot,
+  Clock,
+  FilePlus,
+  FileText,
+  Grid2x2,
+  Grid3x3,
+  Hash,
+  Image,
+  LayoutGrid,
+  ListTree,
+  Mail,
+  Menu,
+  Search,
+  Signature,
+  Smile,
+  SquareCheck,
+  Star,
+  Type,
+  Upload,
+  Video,
+} from "lucide-react";
 import { getContrastRatio } from "@mui/material";
 
-export const groupIconByType = (type, size = "medium") => {
-  switch (type) {
-    case "welcome":
-      return <StartIcon fontSize={size} />;
-    case "END":
-      return <FlagIcon fontSize={size} />;
-    default:
-      return <PagesIcon fontSize={size} />;
-  }
+// Taken from the phase-3.3 editor design, type by type; see ICON_REFERENCE.
+// Several glyphs repeat there (icon_scq/icon_mcq, the three image types,
+// video_display/video_capture, multiple_text/barcode, date/date_time,
+// ranking/image_ranking) — that is the design, not an oversight here.
+const QUESTION_ICONS = {
+  text: Type,
+  paragraph: AlignLeft,
+  number: Hash,
+  email: Mail,
+  multiple_text: Menu,
+  scq: CircleDot,
+  mcq: SquareCheck,
+  autocomplete: Search,
+  // Absent from the design, which has no hierarchical autocomplete row.
+  hierarchical_autocomplete: ListTree,
+  scq_array: LayoutGrid,
+  mcq_array: Grid3x3,
+  nps: Star,
+  icon_scq: Smile,
+  image_scq: Image,
+  scq_icon_array: Grid2x2,
+  icon_mcq: Smile,
+  image_mcq: Image,
+  date: Calendar,
+  time: Clock,
+  date_time: Calendar,
+  text_display: FileText,
+  image_display: Image,
+  video_display: Video,
+  barcode: Menu,
+  photo_capture: Camera,
+  video_capture: Video,
+  ranking: ChartNoAxesColumn,
+  image_ranking: ChartNoAxesColumn,
+  file_upload: Upload,
+  // Absent from the design, which has no signature row.
+  signature: Signature,
 };
 
-export const questionIconByType = (type, size = "1.25em", color) => {
-  switch (type) {
-    case "text":
-      return <SurveyIcon name="shortText" size={size} color={color} />;
-    case "multiple_text":
-      return <SurveyIcon name="multipleText" size={size} color={color} />;
-    case "paragraph":
-      return <SurveyIcon name="longText" size={size} color={color} />;
-    case "autocomplete":
-      return <SurveyIcon name="autocomplete" size={size} color={color} />;
-    case "hierarchical_autocomplete":
-      return <SurveyIcon name="autocomplete" size={size} color={color} />;
-    case "barcode":
-      return <SurveyIcon name="qrCode" size={size} color={color} />;
-    case "number":
-      return <SurveyIcon name="number" size={size} color={color} />;
-    case "email":
-      return <SurveyIcon name="email" size={size} color={color} />;
-    case "scq":
-      return <SurveyIcon name="singleChoice" size={size} color={color} />;
-    case "icon_scq":
-      return <SurveyIcon name="singleIconChoice" size={size} color={color} />;
-    case "image_scq":
-      return <SurveyIcon name="singleImageChoice" size={size} color={color} />;
-    case "scq_icon_array":
-    case "scq_array":
-      return <SurveyIcon name="singleChoiceArray" size={size} color={color} />;
-    case "mcq_array":
-      return (
-        <SurveyIcon name="multipleChoiceArray" size={size} color={color} />
-      );
-    case "mcq":
-      return <SurveyIcon name="multipleChoice" size={size} color={color} />;
-    case "icon_mcq":
-      return <SurveyIcon name="multipleIconChoice" size={size} color={color} />;
+// Pages are not a question type, so the design lists them under Sections.
+export const PAGE_ICON = FilePlus;
 
-    case "image_mcq":
-      return (
-        <SurveyIcon name="multipleImageChoice" size={size} color={color} />
-      );
-    case "nps":
-      return <SurveyIcon name="nps" size={size} color={color} />;
-    case "date":
-      return <SurveyIcon name="date" size={size} color={color} />;
-    case "date_time":
-      return <SurveyIcon name="datetime" size={size} color={color} />;
-    case "time":
-      return <SurveyIcon name="time" size={size} color={color} />;
-    case "file_upload":
-      return <SurveyIcon name="fileUpload" size={size} color={color} />;
-    case "signature":
-      return <SurveyIcon name="signature" size={size} color={color} />;
-    case "photo_capture":
-      return <SurveyIcon name="capturePhoto" size={size} color={color} />;
-    case "video_capture":
-      return <SurveyIcon name="captureVideo" size={size} color={color} />;
-    case "ranking":
-      return <SurveyIcon name="ranking" size={size} color={color} />;
-    case "image_ranking":
-      return <SurveyIcon name="imageRanking" size={size} color={color} />;
-    case "text_display":
-      return <SurveyIcon name="textDisplay" size={size} color={color} />;
-    case "image_display":
-      return <SurveyIcon name="imageDisplay" size={size} color={color} />;
-    case "video_display":
-      return <SurveyIcon name="videoDisplay" size={size} color={color} />;
-  }
+// 1.33 against a 16px glyph is the stroke the workspace tabs draw; keeping the
+// ratio is what makes an icon in the type list read as the same set as one in
+// the strip above it.
+export const ICON_STROKE = 1.33;
+
+export const questionIconByType = (type, size = "1.25em", color) => {
+  const Icon = QUESTION_ICONS[type];
+  return Icon ? (
+    <Icon size={size} color={color} strokeWidth={ICON_STROKE} />
+  ) : undefined;
 };
 
 function hexToRgb(hex) {
@@ -240,7 +236,6 @@ export const QUESTION_TYPES = [
       },
     ],
   },
-  ,
   {
     name: "section_image_choice_based",
     type: "choice",

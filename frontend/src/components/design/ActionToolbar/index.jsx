@@ -1,20 +1,25 @@
 import { IconButton } from "@mui/material";
 import styles from "./ActionToolbar.module.css";
-import VerifiedIcon from "@mui/icons-material/Verified";
 import React, { useCallback, useState } from "react";
-import ShuffleIcon from "@mui/icons-material/Shuffle";
-import LowPriorityIcon from "@mui/icons-material/LowPriority";
-import MoveDownIcon from "@mui/icons-material/MoveDown";
+import {
+  ArrowDownWideNarrow,
+  Copy,
+  CornerDownRight,
+  EyeOff,
+  GitBranch,
+  ShieldCheck,
+  Shuffle,
+  Trash2,
+} from "lucide-react";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { setupOptions } from "@qlarr/design-core/constants/design";
 import { setup, cloneQuestion, deleteQuestion, deleteGroup, resetSetup } from "~/state/design/designState";
 import { useTheme } from "@emotion/react";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
-import { RuleOutlined, VisibilityOff } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import ConfirmActionModal from "~/components/common/ConfirmActionModal";
-import SurveyIcon from "~/components/common/SurveyIcons/SurveyIcon";
+import { ICON_STROKE } from "~/components/Questions/utils";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import { useIsReleased } from "~/hooks/useIsReleased";
 import { useReleaseAcknowledgement } from "~/hooks/useReleaseAcknowledgement";
@@ -174,7 +179,7 @@ function ActionToolbar({ code, isGroup, parentCode, showActions }) {
             className={styles.statusIcon}
             onClick={() => expandRelevance()}
           >
-            <RuleOutlined />
+            <GitBranch size={20} strokeWidth={ICON_STROKE} />
           </IconButton>
         </CustomTooltip>
       )}
@@ -185,7 +190,7 @@ function ActionToolbar({ code, isGroup, parentCode, showActions }) {
             className={styles.statusIcon}
             onClick={() => expandDisabled()}
           >
-            <VisibilityOff />
+            <EyeOff size={20} strokeWidth={ICON_STROKE} />
           </IconButton>
         </CustomTooltip>
       )}
@@ -196,7 +201,7 @@ function ActionToolbar({ code, isGroup, parentCode, showActions }) {
             className={styles.statusIcon}
             onClick={() => expandValidation()}
           >
-            <VerifiedIcon />
+            <ShieldCheck size={20} strokeWidth={ICON_STROKE} />
           </IconButton>
         </CustomTooltip>
       )}
@@ -206,7 +211,7 @@ function ActionToolbar({ code, isGroup, parentCode, showActions }) {
             className={styles.statusIcon}
             onClick={() => expandRandom(randomRule)}
           >
-            <ShuffleIcon />
+            <Shuffle size={20} strokeWidth={ICON_STROKE} />
           </IconButton>
         </CustomTooltip>
       )}
@@ -216,7 +221,7 @@ function ActionToolbar({ code, isGroup, parentCode, showActions }) {
             className={styles.statusIcon}
             onClick={() => expandRandom(priorityRule)}
           >
-            <LowPriorityIcon />
+            <ArrowDownWideNarrow size={20} strokeWidth={ICON_STROKE} />
           </IconButton>
         </CustomTooltip>
       )}
@@ -226,7 +231,7 @@ function ActionToolbar({ code, isGroup, parentCode, showActions }) {
             className={styles.statusIcon}
             onClick={() => expandSkipLogic()}
           >
-            <MoveDownIcon />
+            <CornerDownRight size={20} strokeWidth={ICON_STROKE} />
           </IconButton>
         </CustomTooltip>
       )}
@@ -239,7 +244,7 @@ function ActionToolbar({ code, isGroup, parentCode, showActions }) {
               onClone();
             }}
           >
-            <SurveyIcon name="duplicate" size="1em" color="currentColor" />
+            <Copy size={20} strokeWidth={ICON_STROKE} />
           </IconButton>
         </CustomTooltip>
       )}
@@ -253,7 +258,7 @@ function ActionToolbar({ code, isGroup, parentCode, showActions }) {
                 setDeleteModalOpen(true);
               }}
             >
-              <SurveyIcon name="delete" size="1em" color="currentColor" />
+              <Trash2 size={20} strokeWidth={ICON_STROKE} />
             </IconButton>
           </CustomTooltip>
           <ConfirmActionModal

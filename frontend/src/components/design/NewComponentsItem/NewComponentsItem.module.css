@@ -1,31 +1,59 @@
-.leftPannelItem {
-  display: inline-flex;
-  border-radius: 4px;
-  width: 100%;
-  font-size: 15px;
+.row {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding-inline: 16px 13px;
+}
+
+/* The negative inline start pulls the hover/focus box out to sit flush with the
+   group heading above it, while the text itself stays on the 16px gutter. */
+.drag {
+  flex: 1;
+  min-width: 0;
+  display: flex;
   align-items: center;
   gap: 8px;
-  padding-top: 6px;
-  padding-bottom: 6px;
-  padding-right: 12px;
-  padding-left: 12px;
-  cursor: pointer;
-}
-.leftPannelItem:hover {
-  background: #e0e2ef;
-  border-radius: 4px;
-}
-
-.icon {
-  margin: 8px;
+  height: 28px;
+  margin-inline-start: -4px;
+  padding-inline: 4px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  text-align: start;
+  cursor: grab;
 }
 
-.title {
-  margin: 8px;
+.drag:hover {
+  background: #f7f8fc;
 }
 
-.leftPannelItem.isDrayLayer {
-  border: 3px dotted rgba(0, 0, 0, 0.5);
-  margin-bottom: 0;
+.drag:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 0;
+}
+
+.chip {
+  flex: none;
+  width: 20px;
+  height: 20px;
   box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dce0ee;
+  border-radius: 4px;
+  background: #f0f2fa;
+  color: #4c5474;
+  /* The glyphs are sized in em so one rule fits every icon in the chip. */
+  font-size: 12px;
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  font: 400 14px/16px Rubik, sans-serif;
+  color: #1b2150;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

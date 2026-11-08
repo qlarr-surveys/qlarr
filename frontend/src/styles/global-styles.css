@@ -1,3 +1,13 @@
+/* The editor is a fixed-height shell: ManagePageWrapper sets body overflow:hidden and
+   every pane sizes itself off the viewport rather than growing. These are the two bands
+   stacked above those panes — the app header and the workspace tab strip — so a pane
+   subtracts the pair instead of a magic number, and moving a band is one edit here. */
+:root {
+  --app-header-h: 64px;
+  --editor-tabs-h: 49px;
+  --editor-pane-h: calc(100vh - var(--app-header-h) - var(--editor-tabs-h));
+}
+
 .MuiFormControl-root {
   width: 100%;
 }
