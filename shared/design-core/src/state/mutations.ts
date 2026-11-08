@@ -122,19 +122,28 @@ export function buildDesignState(state, payload) {
     (el) => !UI_STATE_KEYS.includes(el) && !newKeys.includes(el),
   );
 
+  const defaultLang = newState.Survey.defaultLang || LANGUAGE_DEF.en;
+  // A survey can arrive with the same language listed twice, or with its
+  // primary language also listed as a translation. That renders as two
+  // identical chips writing to one set of content, so the extras go here and
+  // the cleaned list is saved along with the next change.
+  newState.Survey.additionalLang = dedupeLanguages(
+    newState.Survey.additionalLang,
+    defaultLang.code,
+  );
+  const languagesList = [defaultLang].concat(newState.Survey.additionalLang);
+
   if (!state.langInfo || response.overWriteLang) {
-    const defaultLang = newState.Survey.defaultLang || LANGUAGE_DEF.en;
-    const mainLang = defaultLang.code;
-    const lang = defaultLang.code;
-    const languagesList = [defaultLang].concat(
-      newState.Survey.additionalLang || [],
-    );
     state.langInfo = {
       languagesList,
-      mainLang,
-      lang,
-      onMainLang: lang == mainLang,
+      mainLang: defaultLang.code,
+      lang: defaultLang.code,
+      onMainLang: true,
     };
+  } else {
+    // Which languages exist is the survey's to say, not the editor's: only
+    // which one is being edited survives a reload of the design.
+    state.langInfo.languagesList = languagesList;
   }
 
   toBeRemoved.forEach((key) => {
@@ -1276,35 +1285,56 @@ export function updateInstruction(state, payload) {
   changeInstruction(state[code], instruction);
 }
 
+/**
+ * A survey's translations: each language once, and never the primary language
+ * among them. Both ends of the wire run this — the editor so a stale panel
+ * cannot offer to add a language the survey already has, the backend so no
+ * client can store one that does.
+ */
+export function dedupeLanguages(additionalLang, mainLang) {
+  const seen = new Set([mainLang]);
+  return (additionalLang || []).filter((language) => {
+    if (seen.has(language.code)) {
+      return false;
+    }
+    seen.add(language.code);
+    return true;
+  });
+}
+
+// Both lists come off the survey itself, so a language can never end up in one
+// and not the other — the panel reads langInfo and would otherwise offer to add
+// a language the survey already has.
+function syncLanguages(state) {
+  state.Survey.additionalLang = dedupeLanguages(
+    state.Survey.additionalLang,
+    state.Survey.defaultLang?.code,
+  );
+  state.langInfo.languagesList = [state.Survey.defaultLang].concat(
+    state.Survey.additionalLang,
+  );
+}
+
 export function onBaseLangChanged(state, payload) {
   state.langInfo.mainLang = payload.code;
   state.Survey.defaultLang = payload;
-  state.Survey.additionalLang = state.Survey.additionalLang?.filter(
-    (language) => language.code !== payload.code,
-  );
   state.langInfo.lang = payload.code;
   state.langInfo.onMainLang = true;
-  state.langInfo.languagesList = [payload].concat(
-    state.Survey.additionalLang || [],
-  );
+  syncLanguages(state);
 }
 
 export function onAdditionalLangAdded(state, payload) {
   state.Survey.additionalLang = (state.Survey.additionalLang || []).concat(
     payload,
   );
-  state.langInfo.languagesList = [state.Survey.defaultLang].concat(
-    state.Survey.additionalLang || [],
-  );
+  syncLanguages(state);
 }
 
 export function onAdditionalLangRemoved(state, payload) {
-  state.Survey.additionalLang = state.Survey.additionalLang.filter(
+  state.Survey.additionalLang = (state.Survey.additionalLang || []).filter(
     (language) => language.code !== payload.code,
   );
-  state.langInfo.languagesList = [state.Survey.defaultLang].concat(
-    state.Survey.additionalLang || [],
-  );
+  syncLanguages(state);
 }
 
 export function changeLang(state, payload) {
