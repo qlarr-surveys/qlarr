@@ -142,12 +142,12 @@ export class ResponseController {
     @Param('surveyId') surveyId: string,
     @Param('from') from: string,
     @Param('to') to: string,
-    @Query('complete') complete: string | undefined,
+    @Query('status') status: string | undefined,
     @Res() res: Response,
   ): Promise<void> {
     const zip = await this.responses.bulkDownloadResponses(
       surveyId,
-      toBool(complete),
+      exportStatusesFrom(status),
       toInt(from) ?? 0,
       toInt(to) ?? 0,
     );

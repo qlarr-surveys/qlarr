@@ -286,20 +286,20 @@ export class ResponseService {
   }
 
   /**
-   * Collect every file attached to responses in the index range [from,to]
-   * (optionally filtered by completeness), enforce the 200MB cap, and stream
+   * Collect every file attached to responses in the index range [from,to],
+   * enforce the 200MB cap, and stream
    * them as a ZIP. Returns null when there's nothing to export (→ 204). Per-file
    * download errors are logged and skipped.
    */
   async bulkDownloadResponses(
     surveyId: string,
-    complete: boolean | undefined,
+    statuses: ExportStatus[],
     from: number,
     to: number,
   ): Promise<Readable | null> {
     const rows = await this.responses.findFilesInIndexRange(
       surveyId,
-      complete,
+      statuses,
       from,
       to,
     );
