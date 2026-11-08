@@ -278,7 +278,9 @@
   "preview": "Vorschau",
   "survey_header": {
     "saved": "Alle Änderungen gespeichert",
-    "saving": "Wird gespeichert…"
+    "saving": "Wird gespeichert…",
+    "error": "Änderungen konnten nicht gespeichert werden",
+    "restored": "Version wiederhergestellt"
   },
   "processed_errors": {
     "autocomplete_malformed_input": "Fehlerhaft formatierte Eingabe: Datei muss ein JSON-Array sein, das nur Zeichenketten enthält",

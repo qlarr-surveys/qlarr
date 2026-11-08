@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { designStateReceived } from "~/state/design/designState";
-import { onError } from "~/state/edit/editState";
+import { onError, setLastSave } from "~/state/edit/editState";
 import { useService } from "~/hooks/use-service";
 import { isSurveyAdmin } from "~/constants/roles";
 import { SURVEY_STATUS } from "~/constants/survey";
@@ -28,6 +28,7 @@ export function useDesignRestore() {
     return request
       .then((data) => {
         dispatch(designStateReceived({ ...data, overWriteLang: true }));
+        dispatch(setLastSave("restored"));
         return true;
       })
       .catch((error) => {

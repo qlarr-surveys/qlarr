@@ -8,6 +8,9 @@ export const editState = createSlice({
     error: null,
     isSaving: false,
     isUpdating: false,
+    // How the last save ended: "saved", "error" or "restored"; null until the
+    // first one. Shared by the design and settings savers, which the header reads.
+    lastSave: null,
     loading: false
   },
   reducers: {
@@ -17,8 +20,15 @@ export const editState = createSlice({
     setUpdating: (state, action) => {
       state.isUpdating = action.payload;
     },
+    setLastSave: (state, action) => {
+      state.lastSave = action.payload;
+    },
     surveyReceived: (state, action) => {
       let survey = action.payload;
+      // Another survey's last save says nothing about this one.
+      if (state.survey?.id != survey?.id) {
+        state.lastSave = null;
+      }
       if (!isEquivalent(state.survey, survey)) {
         state.survey = survey;
       }
@@ -50,6 +60,7 @@ export const {
   surveyReceived,
   setSaving,
   setUpdating,
+  setLastSave,
   onError,
   setLoading,
   onEditErrorSeen,
