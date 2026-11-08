@@ -34,6 +34,8 @@ async function bootstrap() {
     exposedHeaders: ['Content-Disposition'],
   });
   configureBodyParsers(app);
+  // On SIGTERM, run the shutdown hooks: pg-boss stops its workers gracefully.
+  app.enableShutdownHooks();
   // The request-body ValidationPipe is registered globally via APP_PIPE in
   // AppModule (so tests bootstrapping AppModule get it too).
   // Target home is 8080. Override with PORT to run on a different port locally.

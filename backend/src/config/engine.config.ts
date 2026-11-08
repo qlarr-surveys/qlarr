@@ -6,6 +6,8 @@ export interface EngineConfig {
   workersEnabled: boolean;
   /** Max engine worker threads. */
   poolSize: number;
+  /** Max worker threads of the jobs pool (Compute), separate from respondents'. */
+  jobPoolSize: number;
   /** Hard per-call budget in ms; on expiry the worker is terminated. */
   timeoutMs: number;
   /** Per-worker V8 old-space cap in MB. */
@@ -26,6 +28,9 @@ export default registerAs('engine', (): EngineConfig => {
     poolSize: process.env.ENGINE_POOL_SIZE
       ? parseInt(process.env.ENGINE_POOL_SIZE, 10)
       : Math.max(1, cpus - 1),
+    jobPoolSize: process.env.ENGINE_JOB_POOL_SIZE
+      ? parseInt(process.env.ENGINE_JOB_POOL_SIZE, 10)
+      : 1,
     timeoutMs: process.env.ENGINE_TIMEOUT_MS
       ? parseInt(process.env.ENGINE_TIMEOUT_MS, 10)
       : 5000,

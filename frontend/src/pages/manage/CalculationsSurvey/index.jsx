@@ -32,6 +32,7 @@ import ConfirmActionModal from "~/components/common/ConfirmActionModal";
 import LoadingDots from "~/components/common/LoadingDots";
 import CalculationValue from "~/components/manage/CalculationValue";
 import { PROCESSED_ERRORS } from "~/utils/errorsProcessor";
+import { hasComputeAtStake, isActive } from "~/utils/computeJobs";
 import ExpressionHelp from "./ExpressionHelp";
 
 const MAX_CALCULATIONS = 10;
@@ -80,10 +81,12 @@ function sampleCell(calculation, row) {
   return { state: "empty" };
 }
 
+
 /**
  * The Calculated fields tab: author a survey's calculations, save them
  * (validated server-side, stored with their errors), test the saved set on the
- * latest responses, and start the background Compute run.
+ * latest responses, and start or cancel the Compute job. A Save deletes the
+ * results and cancels a Compute in progress.
  */
 function CalculationsSurvey({ onDirtyChange }) {
   const { t } = useTranslation(NAMESPACES.MANAGE);
@@ -94,15 +97,17 @@ function CalculationsSurvey({ onDirtyChange }) {
   const [loadError, setLoadError] = useState(null);
   const [sample, setSample] = useState(null);
   const [conflict, setConflict] = useState(false);
-  const [busy, setBusy] = useState(null); // "save" | "test" | "compute"
+  const [busy, setBusy] = useState(null); // "save" | "test" | "compute" | "cancel"
   const [helpOpen, setHelpOpen] = useState(false);
   const [computeDone, setComputeDone] = useState(false);
   // The form values of a first save, held until the author confirms the warning.
   const [firstSave, setFirstSave] = useState(null);
-  // Status seen last, and whether this session started a run, so the success
-  // notice shows only for a run that finishes here, not on first load.
+  // The form values of a save that would cancel a job or delete results,
+  // held until the author confirms.
+  const [invalidatingSave, setInvalidatingSave] = useState(null);
+  // Status seen last, so the success notice shows only for a job that
+  // finishes while the tab is open, not on first load.
   const prevStatus = useRef(null);
-  const computeRequested = useRef(false);
 
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -119,7 +124,7 @@ function CalculationsSurvey({ onDirtyChange }) {
     name: "calculations",
   });
 
-  const running = state?.status === "running";
+  const active = isActive(state?.status);
   const savedEmpty = (state?.calculations.length ?? 0) === 0;
   // Only a Save clears it, so it has to be possible without any edits.
   const outOfDate = state?.calculations.some(isOutOfDate) ?? false;
@@ -152,25 +157,25 @@ function CalculationsSurvey({ onDirtyChange }) {
     load(true);
   }, [load]);
 
-  // Poll while a run is in progress.
+  // Poll while a job is waiting or running.
   useEffect(() => {
-    if (!running) return undefined;
+    if (!active) return undefined;
     const timer = setInterval(() => load(false), POLL_INTERVAL_MS);
     return () => clearInterval(timer);
-  }, [running, load]);
+  }, [active, load]);
 
-  // Notify when a run finishes: running → completed, or a Compute that
-  // completed straight away.
+  // Notify when a job finishes with every response computed (a cancelled job
+  // leaves some uncomputed).
   useEffect(() => {
     const status = state?.status;
     if (!status) return;
     if (
-      status === "completed" &&
-      (prevStatus.current === "running" || computeRequested.current)
+      status === "none" &&
+      isActive(prevStatus.current) &&
+      state.uncomputedCount === 0
     ) {
       setComputeDone(true);
     }
-    if (status !== "running") computeRequested.current = false;
     prevStatus.current = status;
   }, [state]);
 
@@ -186,9 +191,9 @@ function CalculationsSurvey({ onDirtyChange }) {
     return () => window.removeEventListener("beforeunload", warn);
   }, [isDirty, onDirtyChange]);
 
-  /** A 409 because a run is going: refresh, which shows the running banner. */
+  /** A 409 because a job is already going: refresh, which shows its banner. */
   const handleError = (error) => {
-    if (error?.name === PROCESSED_ERRORS.CALCULATION_RUN_IN_PROGRESS.name) {
+    if (error?.name === PROCESSED_ERRORS.JOB_ALREADY_ACTIVE.name) {
       load(false);
     } else if (error?.name === PROCESSED_ERRORS.CALCULATIONS_CHANGED.name) {
       setConflict(true);
@@ -214,9 +219,21 @@ function CalculationsSurvey({ onDirtyChange }) {
   };
 
   const onSave = handleSubmit((values) => {
-    if (savedEmpty) setFirstSave(values);
-    else save(values);
+    if (savedEmpty) {
+      setFirstSave(values);
+      return;
+    }
+    surveyService
+      .getJobs(surveyId)
+      .then((jobs) => hasComputeAtStake(jobs))
+      .catch(() => true)
+      .then((atStake) => (atStake ? setInvalidatingSave(values) : save(values)));
   });
+
+  const onConfirmInvalidatingSave = () => {
+    save(invalidatingSave);
+    setInvalidatingSave(null);
+  };
 
   const onConfirmFirstSave = () => {
     save(firstSave);
@@ -234,14 +251,19 @@ function CalculationsSurvey({ onDirtyChange }) {
 
   const onCompute = () => {
     setBusy("compute");
-    computeRequested.current = true;
     surveyService
       .computeCalculations(surveyId)
       .then((next) => applyState(next, { resetForm: false }))
-      .catch((error) => {
-        computeRequested.current = false;
-        handleError(error);
-      })
+      .catch(handleError)
+      .finally(() => setBusy(null));
+  };
+
+  const onCancelCompute = () => {
+    setBusy("cancel");
+    surveyService
+      .cancelJob(surveyId, state.jobId)
+      .catch(() => undefined)
+      .then(() => load(false))
       .finally(() => setBusy(null));
   };
 
@@ -260,7 +282,7 @@ function CalculationsSurvey({ onDirtyChange }) {
   }
   if (!state) return <LoadingDots fullHeight />;
 
-  const actionsDisabled = running || busy !== null;
+  const actionsDisabled = busy !== null;
 
   return (
     <Box sx={{ p: 3, maxWidth: 1240, mx: "auto" }}>
@@ -276,7 +298,12 @@ function CalculationsSurvey({ onDirtyChange }) {
         </Stack>
         <ExpressionHelp open={helpOpen} onClose={() => setHelpOpen(false)} />
 
-        <StatusBanner state={state} t={t} />
+        <StatusBanner
+          state={state}
+          onCancel={onCancelCompute}
+          cancelling={busy === "cancel"}
+          t={t}
+        />
 
         {conflict && (
           <Alert
@@ -302,7 +329,6 @@ function CalculationsSurvey({ onDirtyChange }) {
                 index={index}
                 control={control}
                 errors={field.errors ?? []}
-                disabled={running}
                 onRemove={() => remove(index)}
                 t={t}
               />
@@ -327,7 +353,7 @@ function CalculationsSurvey({ onDirtyChange }) {
                     errors: [],
                   })
                 }
-                disabled={running || fields.length >= MAX_CALCULATIONS}
+                disabled={fields.length >= MAX_CALCULATIONS}
               >
                 {t("calculations.add", "Add calculation")}
               </Button>
@@ -352,7 +378,7 @@ function CalculationsSurvey({ onDirtyChange }) {
                 variant="outlined"
                 onClick={onCompute}
                 loading={busy === "compute"}
-                disabled={actionsDisabled || isDirty || savedEmpty}
+                disabled={actionsDisabled || active || isDirty || savedEmpty}
               >
                 {t("calculations.compute", "Compute")}
               </LoadingButton>
@@ -383,6 +409,19 @@ function CalculationsSurvey({ onDirtyChange }) {
         onConfirm={onConfirmFirstSave}
       />
 
+      <ConfirmActionModal
+        open={invalidatingSave !== null}
+        title={t("calculations.save_invalidates_title", "Delete computed results?")}
+        description={t(
+          "calculations.save_invalidates",
+          "Saving cancels the running computation and deletes all computed results."
+        )}
+        cancelLabel={t("action_btn.cancel")}
+        confirmLabel={t("calculations.save", "Save")}
+        onClose={() => setInvalidatingSave(null)}
+        onConfirm={onConfirmInvalidatingSave}
+      />
+
       <Snackbar
         open={computeDone}
         autoHideDuration={4000}
@@ -402,29 +441,46 @@ function CalculationsSurvey({ onDirtyChange }) {
 }
 
 /** The one banner for the current status. */
-function StatusBanner({ state, t }) {
+function StatusBanner({ state, onCancel, cancelling, t }) {
+  const active = isActive(state.status);
   // No saved calculations: Compute is disabled, so don't prompt for it.
-  if (state.calculations.length === 0 && state.status !== "running") return null;
+  if (state.calculations.length === 0 && !active) return null;
   // Each card asks for a Save first, so don't prompt for Compute yet.
-  if (state.status === "idle" && state.calculations.some(isOutOfDate)) return null;
+  if (state.status === "none" && state.calculations.some(isOutOfDate)) return null;
+  const cancel = (
+    <LoadingButton
+      color="inherit"
+      size="small"
+      onClick={onCancel}
+      loading={cancelling}
+    >
+      {t("calculations.cancel_compute", "Cancel")}
+    </LoadingButton>
+  );
   switch (state.status) {
-    case "idle":
+    case "waiting":
       return (
-        <Alert severity="info">
-          {t("calculations.status_idle", "Not computed. Click Compute.")}
+        <Alert severity="info" action={cancel}>
+          {t("calculations.status_waiting", "Waiting to compute…")}
         </Alert>
       );
     case "running":
       return (
-        <Alert severity="info">
-          {t("calculations.status_running", "Computing… {{done}}/{{total}}", {
-            done: state.progress.done,
-            total: state.progress.total,
+        <Alert severity="info" action={cancel}>
+          {t("calculations.status_running", "Computing… {{count}} responses left", {
+            count: state.uncomputedCount,
           })}
         </Alert>
       );
     case "failed":
-      return (
+      return state.errorCode === "time_limit" ? (
+        <Alert severity="warning">
+          {t(
+            "calculations.status_time_limit",
+            "Computation stopped at its time limit. Results so far are kept. Click Compute to continue."
+          )}
+        </Alert>
+      ) : (
         <Alert severity="error">
           {t(
             "calculations.status_failed",
@@ -432,23 +488,21 @@ function StatusBanner({ state, t }) {
           )}
         </Alert>
       );
-    case "completed":
-      return state.newSinceLastRun > 0 ? (
-        <Alert severity="warning">
+    default:
+      return state.uncomputedCount > 0 ? (
+        <Alert severity="info">
           {t(
-            "calculations.status_new_responses",
-            "{{count}} responses submitted since the last computation. Click Compute to include them.",
-            { count: state.newSinceLastRun }
+            "calculations.status_uncomputed",
+            "{{count}} responses not computed. Click Compute.",
+            { count: state.uncomputedCount }
           )}
         </Alert>
       ) : null;
-    default:
-      return null;
   }
 }
 
 /** One calculation: label, expression, remove, and its stored errors. */
-function CalculationCard({ index, control, errors, disabled, onRemove, t }) {
+function CalculationCard({ index, control, errors, onRemove, t }) {
   const scriptErrors = errors.filter((e) => e.name === "ScriptError");
 
   return (
@@ -459,11 +513,9 @@ function CalculationCard({ index, control, errors, disabled, onRemove, t }) {
             name={`calculations.${index}.label`}
             label={t("calculations.label", "Label")}
             size="small"
-            disabled={disabled}
           />
           <IconButton
             onClick={onRemove}
-            disabled={disabled}
             aria-label={t("calculations.remove", "Remove calculation")}
           >
             <DeleteOutlineIcon />
@@ -479,7 +531,6 @@ function CalculationCard({ index, control, errors, disabled, onRemove, t }) {
               multiline
               minRows={2}
               fullWidth
-              disabled={disabled}
               inputProps={{ maxLength: MAX_EXPRESSION_LENGTH }}
               error={!!error || scriptErrors.length > 0}
               helperText={error ? t(error.message) : undefined}

@@ -33,6 +33,7 @@ import { MIGRATIONS } from './migrations';
           // Postgres); verification is relaxed so a CA outside the container's
           // trust store still connects — the connection is still encrypted.
           ssl: db.ssl ? { rejectUnauthorized: false } : false,
+          extra: { max: db.poolSize },
           synchronize: false,
           autoLoadEntities: true,
           entities: [],

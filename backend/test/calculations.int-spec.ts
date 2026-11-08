@@ -7,7 +7,6 @@ import { runValidate } from '../src/engine/engine-runtime';
 import { FILE_HELPER } from '../src/integrations/filesystem/file-helper';
 import { DesignService } from '../src/modules/design/design.service';
 import { CalculationsRepository } from '../src/modules/calculations/calculations.repository';
-import { CalculationsService } from '../src/modules/calculations/calculations.service';
 import { bearer, startTestApp, TestApp } from './harness';
 
 const SUPER = bearer({ authorities: ['super_admin'] });
@@ -31,9 +30,9 @@ const OUT_OF_DATE = { name: 'OutOfDate' };
 const BAD_REF = { code: 'bad', label: 'Bad', expression: 'Q999.value' };
 
 /**
- * The Calculated fields API end to end: state, Test, Save, Compute (the
- * background run), response review and both exports, against a real Postgres
- * with the engine running in-process.
+ * The Calculated fields API end to end: state, Test, Save, Compute (a job, run
+ * by this app's dispatcher), cancel, response review and both exports, against
+ * a real Postgres with the engine running in-process.
  */
 describe('Calculations', () => {
   let ctx: TestApp;
@@ -115,15 +114,39 @@ describe('Calculations', () => {
   const state = async (id: string) =>
     (await request(server()).get(base(id)).set('Authorization', SUPER).expect(200)).body;
 
-  /** Poll until the run is no longer `running`. */
+  /** Poll until the job is neither waiting nor running. */
   const settle = async (id: string) => {
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 150; i++) {
       const s = await state(id);
-      if (s.status !== 'running') return s;
-      await new Promise((r) => setTimeout(r, 20));
+      if (s.status !== 'waiting' && s.status !== 'running') return s;
+      await new Promise((r) => setTimeout(r, 100));
     }
-    throw new Error('run did not settle');
+    throw new Error('job did not settle');
   };
+
+  /** The pg-boss state of the survey's most recent Compute job. */
+  const lastJob = async (id: string): Promise<string> =>
+    (
+      await root.query(
+        `SELECT state FROM pgboss.job
+         WHERE name = 'calc.compute' AND data->>'surveyId' = $1
+         ORDER BY created_on DESC LIMIT 1`,
+        [id],
+      )
+    )[0].state;
+
+  /** A Compute job row that looks active (no worker of this app runs it). */
+  const runningJob = async (id: string): Promise<string> =>
+    (
+      await root.query(
+        `INSERT INTO pgboss.job (name, state, data, singleton_key, policy, started_on)
+         VALUES ('calc.compute', 'active', $1, $2, 'exclusive', now()) RETURNING id`,
+        [JSON.stringify({ surveyId: id, subjectKey: '' }), `${id}:`],
+      )
+    )[0].id;
+
+  const cancel = (id: string, jobId: string, auth = SUPER) =>
+    request(server()).post(`/survey/${id}/jobs/${jobId}/cancel`).set('Authorization', auth);
 
   const calculationsOf = async (responseId: string) =>
     (
@@ -134,15 +157,17 @@ describe('Calculations', () => {
     ).body.calculations;
 
   describe('GET', () => {
-    it('reports an idle, empty state for a survey never saved', async () => {
+    it('reports an empty state for a survey never saved', async () => {
       const { id } = await createSurvey();
       expect(await state(id)).toEqual({
         calculations: [],
         revision: 0,
-        status: 'idle',
-        progress: { done: 0, total: 0 },
+        jobId: null,
+        status: 'none',
+        error: null,
+        errorCode: null,
         startedAt: null,
-        newSinceLastRun: null,
+        uncomputedCount: 3,
       });
     });
 
@@ -151,18 +176,6 @@ describe('Calculations', () => {
         .get(base('10000000-0000-0000-0000-00000000ffff'))
         .set('Authorization', SUPER)
         .expect(404));
-
-    it('reports a run past 2 minutes as failed', async () => {
-      const { id } = await createSurvey();
-      await save(id, [DOUBLE], 0).expect(200);
-      await repo.startRun(id, 3, 1);
-      await root.query(
-        `UPDATE survey_calculations SET started_at = started_at - interval '121 seconds'
-         WHERE survey_id = $1`,
-        [id],
-      );
-      expect((await state(id)).status).toBe('failed');
-    });
   });
 
   describe('Test', () => {
@@ -210,10 +223,12 @@ describe('Calculations', () => {
           { code: 'Bad', label: 'B', expression: '1', errors: [{ name: 'InvalidCode' }] },
         ],
         revision: 1,
-        status: 'idle',
-        progress: { done: 0, total: 0 },
+        jobId: null,
+        status: 'none',
+        error: null,
+        errorCode: null,
         startedAt: null,
-        newSinceLastRun: null,
+        uncomputedCount: 3,
       });
       expect((await state(id)).calculations[1].errors).toEqual([{ name: 'InvalidCode' }]);
       // Only the valid calculation shows on responses.
@@ -242,18 +257,15 @@ describe('Calculations', () => {
       await compute(id).expect(400);
     });
 
-    it('runs in the background; results show once it completes', async () => {
+    it('runs as a job; results show as it writes them', async () => {
       const { id, r1, r2, r3, r4 } = await createSurvey();
       // BAD_REF has a validation error: it never runs and never shows.
       await save(id, [DOUBLE, BAD_REF, FIXED], 0).expect(200);
 
       const started = await compute(id).expect(200);
-      expect(['running', 'completed']).toContain(started.body.status);
-      expect(await settle(id)).toMatchObject({
-        status: 'completed',
-        progress: { done: 3, total: 3 },
-        newSinceLastRun: 0,
-      });
+      expect(started.body).toMatchObject({ status: 'waiting', jobId: expect.any(String) });
+      expect(await settle(id)).toMatchObject({ status: 'none', uncomputedCount: 0 });
+      expect(await lastJob(id)).toBe('completed');
 
       expect(await calculationsOf(r1)).toEqual([
         { code: 'double', label: 'Double', state: 'value', value: 42 },
@@ -269,7 +281,7 @@ describe('Calculations', () => {
       expect((await calculationsOf(r4))[0]).toMatchObject({ state: 'value', value: 4 });
     });
 
-    it('a save hides the results until the next Compute', async () => {
+    it('a save deletes the results', async () => {
       const { id, r1 } = await createSurvey();
       await save(id, [DOUBLE], 0).expect(200);
       await compute(id).expect(200);
@@ -278,7 +290,7 @@ describe('Calculations', () => {
       await save(id, [DOUBLE], 1).expect(200);
 
       expect((await calculationsOf(r1))[0].state).toBe('not_computed');
-      expect(await state(id)).toMatchObject({ status: 'idle', newSinceLastRun: null });
+      expect(await state(id)).toMatchObject({ status: 'none', uncomputedCount: 3 });
     });
 
     it('a response submitted after the run shows not computed', async () => {
@@ -297,10 +309,10 @@ describe('Calculations', () => {
       );
 
       expect((await calculationsOf(late))[0].state).toBe('not_computed');
-      expect((await state(id)).newSinceLastRun).toBe(1);
+      expect((await state(id)).uncomputedCount).toBe(1);
     });
 
-    it('after a completed run, Compute only runs the responses without results', async () => {
+    it('Compute only runs the responses without results', async () => {
       const { id, r1 } = await createSurvey();
       await save(id, [DOUBLE], 0).expect(200);
       await compute(id).expect(200);
@@ -318,17 +330,14 @@ describe('Calculations', () => {
 
       await compute(id).expect(200);
 
-      expect(await settle(id)).toMatchObject({
-        status: 'completed',
-        progress: { done: 1, total: 1 },
-        newSinceLastRun: 0,
-      });
+      expect(await settle(id)).toMatchObject({ status: 'none', uncomputedCount: 0 });
+      expect(await lastJob(id)).toBe('completed');
       expect(Object.keys(calculate.mock.calls[0][2])).toEqual([late]);
       expect((await calculationsOf(late))[0]).toMatchObject({ state: 'value', value: 2 });
       expect((await calculationsOf(r1))[0]).toMatchObject({ state: 'value', value: 42 });
     });
 
-    it('a design save hides the results, and the next Compute runs everything', async () => {
+    it('a design save deletes the results, and the next Compute runs everything', async () => {
       const { id, r1 } = await createSurvey();
       await save(id, [DOUBLE], 0).expect(200);
       await compute(id).expect(200);
@@ -337,13 +346,34 @@ describe('Calculations', () => {
       await app.get(DesignService).setDesign(id, {}, 1);
 
       expect(await calculationsOf(r1)).toEqual([]);
-      expect(await state(id)).toMatchObject({ status: 'idle', newSinceLastRun: null });
+      expect(await state(id)).toMatchObject({ status: 'none', uncomputedCount: 3 });
       await save(id, [DOUBLE], 1).expect(200);
       await compute(id).expect(200);
-      expect(await settle(id)).toMatchObject({
-        status: 'completed',
-        progress: { done: 3, total: 3 },
-      });
+      await settle(id);
+      expect(await lastJob(id)).toBe('completed');
+    });
+
+    it('a job runs at most 10K responses; the next Compute runs the rest', async () => {
+      const { id } = await createSurvey();
+      // 3 completed responses already, plus 9,998: 10,001 in all.
+      await root.query(
+        `INSERT INTO responses
+           (id, version, survey_id, preview, nav_index, start_date, submit_date,
+            lang, events, "values")
+         SELECT gen_random_uuid(), 1, $1, false, '', '2024-01-01 00:00:00',
+                '2024-02-01 00:00:00', 'en', '[]'::jsonb, '{"Q880htp.value": 1}'::jsonb
+         FROM generate_series(1, 9998)`,
+        [id],
+      );
+      await save(id, [DOUBLE], 0).expect(200);
+
+      await compute(id).expect(200);
+      expect(await settle(id)).toMatchObject({ status: 'none', uncomputedCount: 1 });
+      expect(await lastJob(id)).toBe('completed');
+
+      await compute(id).expect(200);
+      expect(await settle(id)).toMatchObject({ status: 'none', uncomputedCount: 0 });
+      expect(await lastJob(id)).toBe('completed');
     });
 
     it('a code rename rewrites the expressions and bumps the revision', async () => {
@@ -423,7 +453,8 @@ describe('Calculations', () => {
 
       await compute(id).expect(200);
 
-      expect((await settle(id)).status).toBe('completed');
+      expect((await settle(id)).status).toBe('none');
+      expect(await lastJob(id)).toBe('completed');
       expect(await calculationsOf(r1)).toEqual([]);
     });
 
@@ -439,7 +470,7 @@ describe('Calculations', () => {
       expect((await state(id)).calculations[0].errors).toEqual([OUT_OF_DATE]);
     });
 
-    it('discarding unpublished changes hides the results', async () => {
+    it('discarding unpublished changes deletes the results', async () => {
       const { id, r1 } = await createSurvey();
       const design = app.get(DesignService);
       await design.setDesign(id, {}, 1);
@@ -450,20 +481,96 @@ describe('Calculations', () => {
       await design.restorePublished(id, 2, 1);
 
       expect(await calculationsOf(r1)).toEqual([]);
-      expect(await state(id)).toMatchObject({ status: 'idle', newSinceLastRun: null });
+      expect(await state(id)).toMatchObject({ status: 'none', uncomputedCount: 3 });
     });
 
-    it('everything is refused (409) while a run is in progress', async () => {
+    it('a second Compute is refused (409) while one is active', async () => {
       const { id } = await createSurvey();
       await save(id, [DOUBLE], 0).expect(200);
-      await repo.startRun(id, 3, 1);
+      const jobId = await runningJob(id);
 
-      await save(id, [FIXED], 1).expect(409);
-      await request(server()).post(`${base(id)}/test`).set('Authorization', SUPER).expect(409);
-      await compute(id).expect(409);
+      expect(await state(id)).toMatchObject({ status: 'running', jobId });
+      const res = await compute(id).expect(409);
+      expect(res.body.error).toBe('JobAlreadyActiveException');
     });
 
-    it('a chunk failure fails the whole run, and nothing is shown', async () => {
+    it('Save and Test are allowed while a job runs; a Save cancels it', async () => {
+      const { id } = await createSurvey();
+      await save(id, [DOUBLE], 0).expect(200);
+      await runningJob(id);
+
+      await request(server()).post(`${base(id)}/test`).set('Authorization', SUPER).expect(200);
+      await save(id, [FIXED], 1).expect(200);
+
+      expect(await lastJob(id)).toBe('cancelled');
+      expect((await state(id)).status).toBe('none');
+    });
+
+    it('a design change cancels the job', async () => {
+      const { id } = await createSurvey();
+      await save(id, [DOUBLE], 0).expect(200);
+      await runningJob(id);
+
+      await app.get(DesignService).setDesign(id, {}, 1);
+
+      expect(await lastJob(id)).toBe('cancelled');
+    });
+
+    it('cancel stops the job and keeps the results it wrote', async () => {
+      const { id, r1 } = await createSurvey();
+      await save(id, [DOUBLE], 0).expect(200);
+      await compute(id).expect(200);
+      await settle(id);
+      const jobId = await runningJob(id);
+
+      const res = await cancel(id, jobId).expect(200);
+
+      expect(res.body).toMatchObject({ status: 'none', jobId: null });
+      expect(await lastJob(id)).toBe('cancelled');
+      expect((await calculationsOf(r1))[0]).toMatchObject({ state: 'value', value: 42 });
+    });
+
+    it("cancel is 404 for another survey's job", async () => {
+      const { id } = await createSurvey();
+      const other = await createSurvey();
+      await save(other.id, [DOUBLE], 0).expect(200);
+      const jobId = await runningJob(other.id);
+
+      await cancel(id, jobId).expect(404);
+      expect(await lastJob(other.id)).toBe('active');
+      await cancel(other.id, jobId).expect(200);
+    });
+
+    it('lists the Compute subject on the jobs endpoint', async () => {
+      const { id } = await createSurvey();
+      await save(id, [DOUBLE], 0).expect(200);
+      await compute(id).expect(200);
+      await settle(id);
+
+      const { body } = await request(server())
+        .get(`/survey/${id}/jobs`)
+        .set('Authorization', ANALYST)
+        .expect(200);
+      expect(body).toEqual([
+        {
+          kind: 'calc.compute',
+          subjectKey: '',
+          jobId: null,
+          status: 'none',
+          error: null,
+          errorCode: null,
+          startedAt: null,
+          hasResults: true,
+        },
+      ]);
+      const surveyor = await request(server())
+        .get(`/survey/${id}/jobs`)
+        .set('Authorization', SURVEYOR)
+        .expect(200);
+      expect(surveyor.body).toEqual([]);
+    });
+
+    it('a chunk failure fails the job, with its error', async () => {
       const { id, r1 } = await createSurvey();
       await save(id, [DOUBLE], 0).expect(200);
       jest
@@ -472,24 +579,12 @@ describe('Calculations', () => {
 
       await compute(id).expect(200);
 
-      expect((await settle(id)).status).toBe('failed');
+      expect(await settle(id)).toMatchObject({
+        status: 'failed',
+        error: 'engine timeout',
+        errorCode: 'job_error',
+      });
       expect((await calculationsOf(r1))[0].state).toBe('not_computed');
-    });
-
-    it('a run past the time limit fails', async () => {
-      const { id } = await createSurvey();
-      await save(id, [DOUBLE], 0).expect(200);
-      // The run reads its clock once to set the deadline, then before each
-      // chunk: jump past 2 minutes after the first read.
-      const now = Date.now();
-      let reads = 0;
-      jest
-        .spyOn(app.get(CalculationsService) as unknown as { now: () => number }, 'now')
-        .mockImplementation(() => (reads++ === 0 ? now : now + 121_000));
-
-      await compute(id).expect(200);
-
-      expect((await settle(id)).status).toBe('failed');
     });
   });
 
@@ -563,6 +658,8 @@ describe('Calculations', () => {
         .send({ calculations: [], revision: 0 })
         .expect(403);
       await request(server()).post(`${base(id)}/compute`).set('Authorization', SURVEYOR).expect(403);
+      await save(id, [DOUBLE], 0).expect(200);
+      await cancel(id, await runningJob(id), SURVEYOR).expect(403);
     });
   });
 });

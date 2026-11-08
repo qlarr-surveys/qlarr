@@ -6,6 +6,7 @@ import { AllExceptionsFilter } from './common/all-exceptions.filter';
 import appConfig from './config/app.config';
 import dbConfig from './config/db.config';
 import engineConfig from './config/engine.config';
+import jobsConfig from './config/jobs.config';
 import jwtConfig from './config/jwt.config';
 import mailConfig from './config/mail.config';
 import storageConfig from './config/storage.config';
@@ -14,6 +15,7 @@ import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
 import { EngineModule } from './engine/engine.module';
 import { HealthModule } from './health/health.module';
+import { JobsModule } from './jobs/jobs.module';
 import { UsersModule } from './modules/users/users.module';
 import { SurveysModule } from './modules/surveys/surveys.module';
 import { ResponsesModule } from './modules/responses/responses.module';
@@ -31,6 +33,7 @@ import { RunModule } from './modules/run/run.module';
         appConfig,
         dbConfig,
         engineConfig,
+        jobsConfig,
         jwtConfig,
         mailConfig,
         storageConfig,
@@ -50,6 +53,7 @@ import { RunModule } from './modules/run/run.module';
     }),
     EngineModule,
     DatabaseModule,
+    JobsModule,
     AuthModule,
     UsersModule,
     SurveysModule,

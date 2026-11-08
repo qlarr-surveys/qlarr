@@ -8,10 +8,8 @@ import { ValidationJsonOutput } from '../../engine/engine.types';
 import { FILE_HELPER, FileHelper } from '../../integrations/filesystem/file-helper';
 import { SurveyFolder } from '../../integrations/filesystem/survey-folder';
 import { DbContext } from '../../database/db-context';
-import {
-  renameCodeInCalculations,
-  resetCalculationsOnDesignChange,
-} from '../calculations/calculations.repository';
+import { JobsService } from '../../jobs/jobs.service';
+import { renameCodeInCalculations } from '../calculations/calculations.repository';
 import { statusFromDb } from '../surveys/survey.enums';
 import { SurveyEntity } from '../surveys/survey.entity';
 import {
@@ -81,6 +79,7 @@ export class DesignService {
     private readonly engine: EngineService,
     private readonly snapshots: DesignSnapshotService,
     private readonly quotas: QuotaService,
+    private readonly jobs: JobsService,
   ) {}
 
   private surveys() {
@@ -154,11 +153,13 @@ export class DesignService {
     // clears the history), so they all go with the draft.
     survey.lastModified = nowUtcString();
     await this.db.manager.transaction(async (tx) => {
+      // First: it locks the calculations row before the responses, the order
+      // a Compute's results write takes them in, so the two can't deadlock.
+      await this.jobs.onDesignChange(tx, surveyId);
       await this.snapshots.deleteAll(surveyId, tx);
       await this.versions.repointResponses(surveyId, latest.version, published.version, tx);
       await this.versions.deleteVersion(surveyId, latest.version, tx);
       await tx.getRepository(SurveyEntity).save(survey);
-      await resetCalculationsOnDesignChange(tx, surveyId);
     });
     try {
       await this.files.delete(surveyId, SurveyFolder.Design, String(latest.version));
@@ -255,7 +256,7 @@ export class DesignService {
         tx,
       );
       await tx.getRepository(SurveyEntity).save(survey);
-      await resetCalculationsOnDesignChange(tx, survey.id);
+      await this.jobs.onDesignChange(tx, survey.id);
       // S3 can't join the transaction, and this may overwrite the draft's file
       // in place, so it goes last: a failed DB write leaves the file untouched.
       await this.files.uploadText(

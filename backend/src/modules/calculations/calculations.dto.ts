@@ -16,7 +16,7 @@ import {
 } from 'class-validator';
 import { CalcRuntimeError, Calculation } from '../../engine/engine.types';
 import { MAX_CALCULATIONS, MAX_EXPRESSION_LENGTH } from './calculations.constants';
-import { CalculationStatus } from './survey-calculations.entity';
+import { JobStatusDto } from '../../jobs/jobs.service';
 
 /** One calculation as authored. Code rules are the engine's to check. */
 export class CalculationInput {
@@ -45,19 +45,13 @@ export class SaveCalculationsRequest {
   revision: number;
 }
 
-/** The tab's view of a survey's calculations and its Compute run. */
-export interface CalculationsStateDto {
+/** The tab's view of a survey's calculations and its Compute job. */
+export interface CalculationsStateDto extends JobStatusDto {
   /** The stored set, each calculation with its validation `errors`. */
   calculations: Calculation[];
   revision: number;
-  status: CalculationStatus;
-  progress: { done: number; total: number };
-  startedAt: string | null;
-  /**
-   * Only when `status = completed`: completed responses submitted since the
-   * last run (they show "not computed"). Null for every other status.
-   */
-  newSinceLastRun: number | null;
+  /** Completed responses without results: what the next Compute runs. */
+  uncomputedCount: number;
 }
 
 /** One response in a Test dry run. */
