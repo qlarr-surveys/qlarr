@@ -156,8 +156,13 @@ export function buildDesignState(state, payload) {
     delete state["setup"];
   }
 
+  // Keep the existing object wherever the server sent back the same thing:
+  // every save answers with the whole design, and swapping in a fresh copy of
+  // each component would redraw every one of them in the editor.
   newKeys.forEach((key) => {
-    state[key] = newState[key];
+    if (!isEquivalent(state[key], newState[key])) {
+      state[key] = newState[key];
+    }
   });
   state.versionDto = response.versionDto;
   state.componentIndex = response.designerInput.componentIndexList;
@@ -166,8 +171,13 @@ export function buildDesignState(state, payload) {
   // re-derive from `repeatSource` would drop. In-session source edits keep the
   // range current via resyncRepeatablesForSource / updateRepetitionSource.
   state["latest"] = structuredClone(newState);
-  state.lastAddedComponent = null;
-  state.index = buildCodeIndex(state);
+  if (state.lastAddedComponent) {
+    state.lastAddedComponent = null;
+  }
+  const index = buildCodeIndex(state);
+  if (!isEquivalent(state.index, index)) {
+    state.index = index;
+  }
   state.designStateReceived = true;
   return state;
 }
