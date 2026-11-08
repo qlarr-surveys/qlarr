@@ -52,16 +52,17 @@ function BackgroundField({ t, values, onColorChange, onImageChange }) {
 
   const uploading = progress !== null;
 
+  const labelOf = (option) =>
+    option === "image"
+      ? t("theme_background_type_image")
+      : t("theme_background_type_color");
+
   return (
     <>
       <div className={styles.field}>
         <div className={styles.fieldHead}>
           <span className={styles.fieldLabel}>{t("theme_background_type")}</span>
-          <span className={styles.fieldValue}>
-            {mode === "image"
-              ? t("theme_background_type_image")
-              : t("theme_background_type_color")}
-          </span>
+          <span className={styles.fieldValue}>{labelOf(mode)}</span>
         </div>
         <div
           role="radiogroup"
@@ -77,9 +78,9 @@ function BackgroundField({ t, values, onColorChange, onImageChange }) {
               onClick={() => chooseMode(option)}
               className={`${styles.chip} ${mode === option ? styles.chipOn : ""}`}
             >
-              {option === "image"
-                ? t("theme_background_type_image")
-                : t("theme_background_type_color")}
+              <span className={styles.chipLabel} data-label={labelOf(option)}>
+                {labelOf(option)}
+              </span>
             </button>
           ))}
         </div>

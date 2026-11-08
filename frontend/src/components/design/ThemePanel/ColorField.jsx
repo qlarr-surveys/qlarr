@@ -94,7 +94,12 @@ function ColorField({ t, name, label, value, presets, onChange }) {
           className={`${styles.customChip} ${isCustom ? styles.customChipOn : ""}`}
         >
           <Pencil size={12} strokeWidth={1.75} aria-hidden="true" />
-          {t("theme_custom_color")}
+          <span
+            className={styles.chipLabel}
+            data-label={t("theme_custom_color")}
+          >
+            {t("theme_custom_color")}
+          </span>
         </button>
       </div>
 
