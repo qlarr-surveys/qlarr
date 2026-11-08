@@ -24,6 +24,12 @@
   "goBack": "Go Back",
   "go_to_dashboard": "Go to Dashboard",
   "preview": "Preview",
+  "survey_header": {
+    "saved": "All changes saved",
+    "saving": "Saving…",
+    "error": "Couldn't save changes",
+    "restored": "Version restored"
+  },
   "mobile_view": "Console Not Optimized for Small Screens",
   "mobile_view_working": "Our console is complex and doesn't support smaller screens for the best experience. But don't worry - the surveys we help you create are awesome on small screens!",
   "added": "Added:",

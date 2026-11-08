@@ -51,7 +51,12 @@ export const Header = ({ headerOptions }) => {
   const dropdownRef = useRef(null);
 
   if (headerOptions.showSurveyHeader) {
-    return <SurveyHeader showPreview={headerOptions.showPreview} />;
+    return (
+      <SurveyHeader
+        showPreview={headerOptions.showPreview}
+        showSaveState={headerOptions.showSaveState}
+      />
+    );
   }
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);

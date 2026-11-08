@@ -24,6 +24,12 @@
   "goBack": "Voltar",
   "go_to_dashboard": "Ir para o painel",
   "preview": "Pré-visualização",
+  "survey_header": {
+    "saved": "Todas as alterações salvas",
+    "saving": "Salvando…",
+    "error": "Não foi possível salvar as alterações",
+    "restored": "Versão restaurada"
+  },
   "mobile_view": "Console Não Otimizado para Telas Pequenas",
   "mobile_view_working": "Nosso console é complexo e não suporta telas menores para a melhor experiência. Mas não se preocupe - as pesquisas que ajudamos você a criar são incríveis em telas pequenas!",
   "added": "Adicionado:",

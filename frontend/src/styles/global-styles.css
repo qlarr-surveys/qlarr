@@ -3,7 +3,7 @@
    stacked above those panes — the app header and the workspace tab strip — so a pane
    subtracts the pair instead of a magic number, and moving a band is one edit here. */
 :root {
-  --app-header-h: 64px;
+  --app-header-h: 56px;
   --editor-tabs-h: 49px;
   --editor-pane-h: calc(100vh - var(--app-header-h) - var(--editor-tabs-h));
 }

@@ -1,24 +1,101 @@
+/* ====== Band ====== */
+
 .header {
   position: relative;
+  /* Above the panes below it: the band is a hairline now, with no shadow to
+     lift it off them. */
+  z-index: 1;
+  flex: none;
   display: flex;
   align-items: center;
-  z-index: 1;
-  height: 4rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-
-  justify-content: space-between;
+  gap: 12px;
+  height: var(--app-header-h);
+  padding-inline: 16px 24px;
+  background: #fff;
+  border-bottom: 1px solid #e3e6f0;
 }
 
-.container {
-  display: flex;
-  cursor: pointer;
-  flex-shrink: 0;
-  margin-left: 3.5rem;
+.spacer {
+  flex: 1;
 }
 
-.containerRtl {
+/* ====== Back ====== */
+
+.iconBtn {
+  flex: none;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  /* The snapshot page's MUI IconButton size. */
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #1b2150;
   cursor: pointer;
-  flex-shrink: 0;
-  margin-right: 3.5rem;
+}
+
+.iconBtn:hover {
+  background: #f0f2fa;
+}
+
+.iconBtn:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.backIconRtl {
+  transform: scaleX(-1);
+}
+
+/* ====== Survey name ====== */
+
+.title {
+  max-width: min(420px, 38vw);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font: 600 16px/1.4 Rubik, sans-serif;
+  color: #1b2150;
+}
+
+/* ====== Save state ====== */
+
+.saveState {
+  flex: none;
+  white-space: nowrap;
+  font: 400 13px/1 Rubik, sans-serif;
+  color: #6b7194;
+}
+
+.saveStateError {
+  color: #d32f2f;
+}
+
+/* ====== Preview ====== */
+
+.previewBtn {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 6px;
+  background: #1b2559;
+  font: 600 16px/1 Rubik, sans-serif;
+  color: #fff;
+  cursor: pointer;
+}
+
+.previewBtn:hover {
+  background: #242f6d;
+}
+
+.previewBtn:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
 }

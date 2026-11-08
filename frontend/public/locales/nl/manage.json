@@ -24,6 +24,12 @@
   "goBack": "Terug",
   "go_to_dashboard": "Naar dashboard",
   "preview": "Voorvertoning",
+  "survey_header": {
+    "saved": "Alle wijzigingen opgeslagen",
+    "saving": "Opslaan…",
+    "error": "Wijzigingen konden niet worden opgeslagen",
+    "restored": "Versie hersteld"
+  },
   "mobile_view": "Console Niet Geoptimaliseerd voor Kleine Schermen",
   "mobile_view_working": "Onze console is complex en ondersteunt geen kleinere schermen voor de beste ervaring. Maar maak je geen zorgen - de enquêtes die we je helpen maken zijn geweldig op kleine schermen!",
   "added": "Toegevoegd:",
