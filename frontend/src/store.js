@@ -18,8 +18,13 @@ export const runStore = configureStore({
 });
 export const manageStore = configureStore({
   reducer: { templateState, designState, editState },
+  // The dev-only checks walk the whole design (twice over, with `latest`) on
+  // every action, which makes a large survey crawl in development.
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(dataSaver, editDataSaver),
+    getDefaultMiddleware({
+      immutableCheck: false,
+      serializableCheck: false,
+    }).concat(dataSaver, editDataSaver),
 });
 
 // The only designer actions a preview accepts: opening, closing and browsing a

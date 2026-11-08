@@ -181,3 +181,9 @@
   height: 7px;
   border-radius: 50%;
 }
+
+/* Roughly a short question's height, so the list doesn't jump much when the
+   real question replaces it. */
+.questionPlaceholder {
+  min-height: 160px;
+}
