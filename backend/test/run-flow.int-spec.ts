@@ -119,6 +119,31 @@ describe('Survey run — start + navigate', () => {
     expect(JSON.parse(row.nav_index)).toEqual(res.body.navigationIndex);
   });
 
+  it('keeps the submit date when the end page is reloaded', async () => {
+    const start = await request(server()).post(`/survey/${SURVEY}/run/start`).send({}).expect(200);
+    const responseId = start.body.responseId;
+    const navigate = (name: string) =>
+      request(server())
+        .post(`/survey/${SURVEY}/run/navigate`)
+        .send({ responseId, navigationDirection: { name }, values: {}, events: [] })
+        .expect(200);
+
+    await navigate('NEXT');
+    await root.query(
+      `UPDATE responses SET submit_date = '2024-02-01 10:00:00' WHERE id = $1`,
+      [responseId],
+    );
+    const res = await navigate('RESUME');
+    expect(res.body.navigationIndex.name).toBe('end');
+
+    const [row] = await root.query(
+      `SELECT to_char(submit_date, 'YYYY-MM-DD HH24:MI:SS') AS submit_date
+       FROM responses WHERE id = $1`,
+      [responseId],
+    );
+    expect(row.submit_date).toBe('2024-02-01 10:00:00');
+  });
+
   it('400 navigating an unknown response', () =>
     request(server())
       .post(`/survey/${SURVEY}/run/navigate`)

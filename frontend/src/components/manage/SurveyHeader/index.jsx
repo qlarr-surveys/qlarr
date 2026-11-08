@@ -11,8 +11,9 @@ import { isSessionRtl } from "~/utils/common";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import { routes } from "~/routes";
 import TokenService from "~/services/TokenService";
-import { availablePages } from "~/constants/roles";
+import { availablePages, isSurveyAdmin } from "~/constants/roles";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import HistoryIcon from "@mui/icons-material/History";
 
 export const SurveyHeader = ({ showPreview }) => {
   const { t } = useTranslation(NAMESPACES.MANAGE);
@@ -56,21 +57,34 @@ export const SurveyHeader = ({ showPreview }) => {
           <Typography variant="h3">{surveyName}</Typography>
         </Box>
         {showPreview && (
-          <Button
-            data-tour="preview-button"
-            variant="contained"
-            color="primary"
-            sx={{ mr: 2 }}
-            endIcon={<VisibilityIcon sx={{ color: "#fff" }} />}
-            onClick={() => {
-              window.open(
-                routes.preview.replace(":surveyId", surveyId),
-                "_blank"
-              );
-            }}
-          >
-            {t("preview")}
-          </Button>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mr: 2 }}>
+            {isSurveyAdmin() && (
+              <Button
+                variant="outlined"
+                color="primary"
+                endIcon={<HistoryIcon />}
+                onClick={() =>
+                  nav(routes.designHistory.replace(":surveyId", surveyId))
+                }
+              >
+                {t("edit_survey.version_history")}
+              </Button>
+            )}
+            <Button
+              data-tour="preview-button"
+              variant="contained"
+              color="primary"
+              endIcon={<VisibilityIcon sx={{ color: "#fff" }} />}
+              onClick={() => {
+                window.open(
+                  routes.preview.replace(":surveyId", surveyId),
+                  "_blank"
+                );
+              }}
+            >
+              {t("preview")}
+            </Button>
+          </Box>
         )}
       </Box>
     )

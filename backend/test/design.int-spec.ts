@@ -134,6 +134,23 @@ describe('Survey design (get + set)', () => {
       expect(row.sub_version).toBe(2);
     });
 
+    // Regression: a client could list a language twice (or list the primary
+    // language among the translations) and the engine stored it, after which
+    // every client drew two chips for one set of text.
+    it('stores a language listed twice only once', async () => {
+      const en = { code: 'en', name: 'English' };
+      const de = { code: 'de', name: 'Deutsch' };
+      await request(server())
+        .post(`/survey/${SURVEY}/design?version=1`)
+        .set('Authorization', SUPER)
+        .send({ Survey: { defaultLang: en, additionalLang: [en, de, en, de] } })
+        .expect(201);
+
+      const [, , body] = files.uploadText.mock.calls[0];
+      const stored = JSON.parse(body).survey as { additionalLang?: { code: string }[] };
+      expect(stored.additionalLang?.map((l) => l.code)).toEqual(['de']);
+    });
+
     // Regression: the default body-parser 100kb cap 413'd every real design
     // save (the whole survey JSON) before the handler ran. A >100kb body must
     // now reach the pipeline — proven here by it getting past body-parser to

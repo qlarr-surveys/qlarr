@@ -8,7 +8,10 @@ import { questionIconByType } from "~/components/Questions/utils";
 import { useTheme } from "@emotion/react";
 import ErrorOutlineOutlined from "@mui/icons-material/ErrorOutlineOutlined";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { getClosestScrollableParent } from "~/components/run/Navigation";
+import {
+  getClosestScrollableParent,
+  scrollToCenter,
+} from "~/components/run/Navigation";
 
 function SurveyIndex(props) {
   const dispatch = useDispatch();
@@ -64,10 +67,7 @@ function SurveyIndex(props) {
     // el.scrollIntoView, which propagates to the parent window when this runs
     // inside the preview iframe and pushes the preview-mode-tabs off-screen.
     if (!container || container === document.documentElement) return;
-    container.scrollTo({
-      top: el.offsetTop - container.offsetTop,
-      behavior: "smooth",
-    });
+    scrollToCenter(container, el);
   };
 
   const onGroupClicked = (groupCode) => {

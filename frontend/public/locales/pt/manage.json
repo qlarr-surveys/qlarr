@@ -22,6 +22,7 @@
   "timezone_info": "Usamos seu fuso horário local para calcular o tempo de expiração da pesquisa.",
   "timezone_tooltip": "A pesquisa expirará às 00:00 na data de finalização selecionada em seu fuso horário local",
   "goBack": "Voltar",
+  "go_to_dashboard": "Ir para o painel",
   "preview": "Pré-visualização",
   "mobile_view": "Console Não Otimizado para Telas Pequenas",
   "mobile_view_working": "Nosso console é complexo e não suporta telas menores para a melhor experiência. Mas não se preocupe - as pesquisas que ajudamos você a criar são incríveis em telas pequenas!",
@@ -88,6 +89,7 @@
       "start_date": "Data de Início",
       "end_date": "Data de Finalização"
     },
+    "version_history": "Histórico de versões",
     "edit_name": "Editar o nome da pesquisa: {{name}}",
     "edit_description": "Editar a descrição da pesquisa",
     "delete_survey_title": "Excluir “{{survey_name}}”?"
@@ -263,10 +265,15 @@
     "wrong_confirmation_token": "Este Token de Confirmação está incorreto, Por favor Registre-se Mais Uma Vez",
     "survey_quota": "Desculpe, esta pesquisa não está mais aceitando respostas.",
     "invalid_translations_csv": "Não é um CSV de traduções.",
-    "translations_csv_not_utf8": "Este arquivo não está em UTF-8. No Excel, use Arquivo → Salvar como → “CSV UTF-8 (Delimitado por vírgulas)” e importe novamente."
+    "translations_csv_not_utf8": "Este arquivo não está em UTF-8. No Excel, use Arquivo → Salvar como → “CSV UTF-8 (Delimitado por vírgulas)” e importe novamente.",
+    "snapshot_not_found": "Esta versão já não existe. Recarregue a página e tente novamente.",
+    "nothing_to_revert": "Não há alterações não publicadas para descartar.",
+    "user_already_confirmed": "Este usuário já aceitou o convite.",
+    "survey_not_found": "Esta pesquisa não existe ou foi excluída"
   },
   "processed_successes": {
     "copied": "Copiado para a área de transferência",
+    "invitation_resent": "Convite reenviado",
     "updated": "Atualizado com sucesso"
   },
   "profile": {
@@ -294,16 +301,13 @@
     "filter_completed_show_completed": "Apenas Respostas Completas",
     "filter_completed_show_incomplete": "Apenas Respostas Incompletas",
     "filter_completed_show_disqualified": "Apenas respostas desqualificadas",
-    "filter_preview": "Filtrar Respostas de Pré-visualização",
-    "filter_preview_show_actual": "Apenas Respostas Reais",
-    "filter_preview_show_all": "Todas as Respostas",
-    "filter_preview_show_preview": "Apenas Respostas de Pré-visualização",
+    "filter_preview_show_preview": "Apenas Respostas de Teste (Pré-visualização)",
     "ip_addr": "Endereço IP",
     "label_displayed_rows": "{{from}}-{{to}} de {{count}}",
     "label_rows_per_page": "Linhas por página:",
     "label_surveys_per_page": "Pesquisas por página:",
     "lang": "Idioma",
-    "preview": "Pré-visualização",
+    "test_response": "Resposta de teste (pré-visualização)",
     "raw_values": "Mostrar Valores Brutos",
     "reset_surveyor_filter": "Redefinir Filtro de Pesquisador",
     "start_date": "Data de Início",
@@ -327,6 +331,10 @@
     "status_incomplete": "Incompleta",
     "database_format": "Formato de Banco de Dados",
     "text_format": "Formato de Texto",
+    "header_type": "Tipo de cabeçalho",
+    "text_headers": "Texto da pergunta",
+    "code_headers": "Códigos das perguntas",
+    "export_options": "Mais opções de exportação",
     "range_invalid": "\"De\" não pode ser maior que \"A\".",
     "all_responses": "Todas as respostas",
     "custom_range": "Intervalo personalizado",
@@ -338,7 +346,7 @@
     "yes": "Sim",
     "no": "Não",
     "disqualified": "Desqualificado",
-    "preview_not_exportable": "Respostas de pré-visualização não podem ser exportadas",
+    "preview_not_exportable": "Respostas de teste (pré-visualização) não podem ser exportadas",
     "question": "Pergunta",
     "answer": "Resposta",
     "events": "Eventos",
@@ -374,6 +382,7 @@
     "effective_base": "Base efetiva",
     "efficiency": "Eficiência",
     "weight_note": "Maior ponderação {{maxWeight}}. Os testes de significância usam a base efetiva, não a base ponderada.",
+    "weight_filtered_note": "Há filtros ativos. Os valores reais e as ponderações vêm de todas as {{total}} respostas, não apenas das {{filtered}} na tabela. Cada respondente mantém a ponderação da amostra completa, por isso a tabela filtrada pode não corresponder às metas.",
     "base": "Base",
     "eff": "efet",
     "subtitle": "Por {{column}} · {{weighting}}",
@@ -392,7 +401,15 @@
     "warn_lowEfficiency": "A eficiência é de {{efficiency}}%. Abaixo de 60%, um grupo pequeno começa a determinar todo o relatório.",
     "warn_highWeight": "Uma ponderação é {{maxWeight}}. Ponderações acima de 5 costumam indicar que o alvo é irrealista para esta amostra.",
     "warn_droppedWeight": "{{count}} resposta(s) não responderam à pergunta de ponderação e foram excluídas desta tabela.",
-    "warn_truncated": "A mostrar as primeiras {{shown}} de {{total}} respostas. Os valores e os testes baseiam-se nessa amostra."
+    "warn_truncated": "A mostrar as primeiras {{shown}} de {{total}} respostas. Os valores e os testes baseiam-se nessa amostra.",
+    "filters": "Filtros",
+    "add_filter": "Adicionar filtro",
+    "filter_any_of": "Qualquer um de…",
+    "remove_filter": "Remover filtro",
+    "filtered_base": "Filtrado para {{count}} de {{total}} respostas",
+    "warn_noMatches": "Nenhuma resposta corresponde a estes filtros.",
+    "plan_name": "Nome do plano",
+    "plan_name_taken": "Já existe um plano com este nome."
   },
   "calculations": {
     "title": "Campos calculados",
@@ -411,6 +428,9 @@
     "label_required": "O rótulo é obrigatório",
     "expression_required": "A expressão é obrigatória",
     "error_ScriptError": "Erro de script",
+    "error_OutOfDate": "O design do questionário foi alterado. Revise este cálculo e clique em Salvar.",
+    "design_warning": "Os cálculos precisam ser revalidados a cada alteração no design do questionário.",
+    "first_save_title": "É bom saber",
     "state_error": "Erro",
     "state_invalid": "Inválido",
     "state_not_computed": "Não calculado",
@@ -540,6 +560,7 @@
     "status": "Status",
     "active": "Ativo",
     "invitation_sent": "Convite Enviado",
+    "resend_invitation": "Reenviar Convite",
     "learn_about_roles": "Saiba mais sobre os papéis de usuário",
     "roles_info": "<strong>Super Admin</strong> — Acesso total a todos os recursos, incluindo gerenciamento de usuários, criação de pesquisas e configurações do sistema.<br/><br/><strong>Admin de Pesquisas</strong> — Pode criar e gerenciar pesquisas, acessar design, configurações, respostas e análises.<br/><br/><strong>Analista</strong> — Pode visualizar respostas e análises de pesquisas, e pré-visualizar pesquisas.<br/><br/><strong>Pesquisador</strong> — Pode coletar respostas de pesquisas pelo aplicativo móvel, e pré-visualizar pesquisas."
   },
@@ -558,7 +579,10 @@
     "broken_quotas_title": "Algumas cotas não serão aplicadas",
     "broken_quotas": "Estas cotas fazem referência a perguntas ou opções que já não existem, portanto não contarão nem excluirão nenhum respondente: {{quotas}}. Corrija as suas condições em Cotas ou publique mesmo assim.",
     "publish_anyway": "Publicar mesmo assim",
-    "download_qr_code": "Baixar código QR"
+    "download_qr_code": "Baixar código QR",
+    "discard_changes": "Descartar alterações não publicadas",
+    "discard_title": "Descartar as alterações não publicadas?",
+    "discard_description": "O design volta à última versão publicada. O design atual e todo o histórico de versões serão eliminados permanentemente."
   },
   "email": {
     "check": "Verifique seu E-mail",
@@ -755,7 +779,7 @@
     "stat_avg_completion": "Conclusão média",
     "stat_answered": "Respondido",
     "stat_incomplete": "Incompleto",
-    "stat_preview": "Pré-visualização",
+    "stat_preview": "Respostas de teste",
     "error_loading": "Erro ao carregar análises",
     "error_loading_data": "Falha ao carregar dados de análise",
     "no_data": "Sem dados de análise disponíveis",
@@ -797,6 +821,16 @@
     "question_type_text_display": "Exibição de Texto",
     "question_type_image_display": "Exibição de Imagem",
     "question_type_video_display": "Exibição de Vídeo"
+  },
+  "version_history": {
+    "description": "Pontos de restauro das suas alterações não publicadas, guardados automaticamente enquanto edita. O histórico é apagado sempre que publica.",
+    "current": "Versão atual",
+    "empty": "Ainda não há pontos de restauro.",
+    "restore": "Restaurar",
+    "preview_title": "Pré-visualização: {{title}}",
+    "restore_title": "Restaurar esta versão?",
+    "restore_description": "O design volta ao estado de {{date}}. O design atual e todos os pontos de restauro posteriores a este serão eliminados permanentemente.",
+    "restore_acknowledge": "Compreendo que esta ação não pode ser desfeita"
   },
   "status_info": {
     "draft": "A pesquisa ainda não foi publicada. Disponível apenas para pré-visualização.",

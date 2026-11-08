@@ -18,6 +18,7 @@ import {
   ensureCollapsiblesClosed,
 } from "~/hooks/useCollapsibleHandler";
 import { EDITOR_CONSTANTS } from "~/constants/editor";
+import { useDesignReadOnly } from "~/components/design/DesignReadOnly";
 import { useReferenceTooltips } from "./useReferenceTooltips";
 
 const { CONTENT_EDITOR_CLASS, RTL_CLASS, LTR_CLASS } = EDITOR_CONSTANTS;
@@ -60,6 +61,8 @@ function ContentEditor({
 
   const value = content?.[lang]?.[contentKey] || "";
   const [isActive, setActive] = useState(false);
+  const readOnly = useDesignReadOnly();
+  const canEdit = editable && !readOnly;
   const renderedContentRef = useRef(null);
 
   const rawInstructionList = useSelector((state) => {
@@ -84,10 +87,10 @@ function ContentEditor({
       : placeholder;
 
   useEffect(() => {
-    if (focus && !isActive && editable) {
+    if (focus && !isActive && canEdit) {
       setActive(true);
     }
-  }, [focus, isActive, editable]);
+  }, [focus, isActive, canEdit]);
 
   const OnEditorBlurred = useCallback(
     (text, editorLang) => {
@@ -122,7 +125,7 @@ function ContentEditor({
         ${customStyle}
       `}
       onClick={(e) => {
-        if (editable) {
+        if (canEdit) {
           onContainerClicked(e);
         }
       }}

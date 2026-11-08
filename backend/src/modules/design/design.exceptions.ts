@@ -65,3 +65,21 @@ export class TranslationsCsvNotUtf8Exception extends HttpException {
     );
   }
 }
+
+export class SnapshotNotFoundException extends HttpException {
+  constructor() {
+    super(
+      { message: 'Snapshot not found', error: 'SnapshotNotFoundException' },
+      HttpStatus.NOT_FOUND,
+    );
+  }
+}
+
+export class NothingToRevertException extends HttpException {
+  constructor() {
+    super(
+      { message: 'No unpublished changes to revert', error: 'NothingToRevertException' },
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+}

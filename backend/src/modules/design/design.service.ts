@@ -1,28 +1,46 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { buildDesignState, changeContent } from '@qlarr/design-core';
+import { buildDesignState, changeContent, dedupeLanguages } from '@qlarr/design-core';
+import { EntityManager } from 'typeorm';
 import { nowUtcString } from '../../common/datetime';
+import { isUuid } from '../../common/validation';
 import { EngineService } from '../../engine/engine.service';
 import { ValidationJsonOutput } from '../../engine/engine.types';
 import { FILE_HELPER, FileHelper } from '../../integrations/filesystem/file-helper';
 import { SurveyFolder } from '../../integrations/filesystem/survey-folder';
 import { DbContext } from '../../database/db-context';
-import { resetCalculationsOnDesignChange } from '../calculations/calculations.repository';
+import {
+  renameCodeInCalculations,
+  resetCalculationsOnDesignChange,
+} from '../calculations/calculations.repository';
 import { statusFromDb } from '../surveys/survey.enums';
 import { SurveyEntity } from '../surveys/survey.entity';
 import {
   SurveyIsClosedException,
   SurveyNotFoundException,
+  SurveyNotPublishedException,
 } from '../surveys/survey.exceptions';
 import { VersionEntity } from '../surveys/version.entity';
 import { VersionRepository } from './version.repository';
+import {
+  DesignSnapshotService,
+  SnapshotInput,
+} from './design-snapshot.service';
+import {
+  DesignDiffDto,
+  DesignDto,
+  PublishInfo,
+  SnapshotListDto,
+  VersionDto,
+} from './design.dto';
 import { QuotaService, QuotaStatusDto } from './quota.service';
-import { DesignDiffDto, DesignDto, PublishInfo, VersionDto } from './design.dto';
 import {
   DesignException,
   DesignOutOfSyncException,
   InvalidDesignException,
   InvalidTranslationsCsvException,
   NoPublishedVersionException,
+  NothingToRevertException,
+  SnapshotNotFoundException,
   TranslationsCsvNotUtf8Exception,
 } from './design.exceptions';
 import {
@@ -33,6 +51,11 @@ import {
   toCsv,
   toCsvRows,
 } from './translations-csv';
+
+export interface SaveOptions {
+  sampleSurvey?: boolean;
+  userId?: string | null;
+}
 
 export interface ProcessedSurvey {
   survey: SurveyEntity;
@@ -56,6 +79,7 @@ export class DesignService {
     private readonly versions: VersionRepository,
     @Inject(FILE_HELPER) private readonly files: FileHelper,
     private readonly engine: EngineService,
+    private readonly snapshots: DesignSnapshotService,
     private readonly quotas: QuotaService,
   ) {}
 
@@ -75,53 +99,171 @@ export class DesignService {
     surveyId: string,
     design: Record<string, unknown>,
     version: number,
-    sampleSurvey = false,
+    opts: SaveOptions = {},
   ): Promise<DesignDto> {
+    const { survey, latest } = await this.editableDraft(surveyId, version);
+    const toSave = withCleanLanguages(design);
+    if (opts.sampleSurvey) {
+      const output = await this.engine.validate(JSON.stringify(toSave));
+      return this.saveDraft(survey, latest, output, null, opts.userId);
+    }
+    const before = await this.loadOutput(surveyId, latest.version);
+    const output = await this.engine.process(toSave, before.survey);
+    const snapshot = await this.snapshotBefore(survey, latest, before);
+    return this.saveDraft(survey, latest, output, snapshot, opts.userId);
+  }
+
+  async restoreSnapshot(
+    surveyId: string,
+    snapshotId: string,
+    version: number,
+    subVersion: number,
+    userId: string | null = null,
+  ): Promise<DesignDto> {
+    const { survey, latest } = await this.editableDraft(surveyId, version, subVersion);
+    const target = await this.snapshots.load(surveyId, snapshotId);
+    if (!target) throw new SnapshotNotFoundException();
+    const output = await this.engine.validate(JSON.stringify(target));
+    return this.saveDraft(survey, latest, output, null, userId, (tx) =>
+      this.snapshots.deleteFrom(surveyId, snapshotId, tx),
+    );
+  }
+
+  /** A snapshot as the designer loads it, for a read-only preview. Writes nothing. */
+  async previewSnapshot(
+    surveyId: string,
+    snapshotId: string,
+  ): Promise<{ designerInput: DesignDto['designerInput'] }> {
+    const target = await this.snapshots.load(surveyId, snapshotId);
+    if (!target) throw new SnapshotNotFoundException();
+    const output = await this.engine.validate(JSON.stringify(target));
+    return { designerInput: this.engine.toDesignerInput(output) };
+  }
+
+  async restorePublished(
+    surveyId: string,
+    version: number,
+    subVersion: number,
+  ): Promise<DesignDto> {
+    const { survey, latest } = await this.editableDraft(surveyId, version, subVersion);
+    const published = await this.versions.findLatestPublished(surveyId);
+    if (!published || latest.published) throw new NothingToRevertException();
+    const output = await this.loadOutput(surveyId, published.version);
+
+    // No undo: every restore point is newer than the published version (publish
+    // clears the history), so they all go with the draft.
+    survey.lastModified = nowUtcString();
+    await this.db.manager.transaction(async (tx) => {
+      await this.snapshots.deleteAll(surveyId, tx);
+      await this.versions.repointResponses(surveyId, latest.version, published.version, tx);
+      await this.versions.deleteVersion(surveyId, latest.version, tx);
+      await tx.getRepository(SurveyEntity).save(survey);
+      await resetCalculationsOnDesignChange(tx, surveyId);
+    });
+    try {
+      await this.files.delete(surveyId, SurveyFolder.Design, String(latest.version));
+    } catch {
+      // best-effort cleanup: the next draft reuses this version and overwrites the file
+    }
+
+    return {
+      designerInput: this.engine.toDesignerInput(output),
+      versionDto: this.toVersionDto(published, survey.status),
+    };
+  }
+
+  async listSnapshots(surveyId: string): Promise<SnapshotListDto> {
+    const survey = await this.surveys().findOne({ where: { id: surveyId } });
+    if (!survey) throw new SurveyNotFoundException();
+    return { snapshots: await this.snapshots.list(surveyId) };
+  }
+
+  /**
+   * The draft to write to. Restores also pass `subVersion`: they replace the
+   * whole design, so any save since the client's last read is a conflict.
+   * Autosave sends a diff, which merges, so it only checks `version`.
+   */
+  private async editableDraft(
+    surveyId: string,
+    version: number,
+    subVersion?: number,
+  ): Promise<{ survey: SurveyEntity; latest: VersionEntity }> {
+    const draft = await this.loadDraft(surveyId);
+    if (
+      version !== draft.latest.version ||
+      (subVersion !== undefined && subVersion !== draft.latest.subVersion)
+    ) {
+      throw new DesignOutOfSyncException(draft.latest.subVersion);
+    }
+    return draft;
+  }
+
+  private async loadDraft(
+    surveyId: string,
+  ): Promise<{ survey: SurveyEntity; latest: VersionEntity }> {
     const survey = await this.surveys().findOne({ where: { id: surveyId } });
     if (!survey) throw new SurveyNotFoundException();
     if (survey.status === 'CLOSED') throw new SurveyIsClosedException();
 
     const latest = await this.versions.findLatest(surveyId);
     if (!latest) throw new DesignException();
-    if (version !== latest.version) {
-      throw new DesignOutOfSyncException(latest.subVersion);
-    }
+    return { survey, latest };
+  }
+
+  /** The design as it was before this save, if a snapshot is due. */
+  private async snapshotBefore(
+    survey: SurveyEntity,
+    latest: VersionEntity,
+    before: ValidationJsonOutput,
+  ): Promise<SnapshotInput | null> {
+    if (!(await this.snapshots.isDue(survey.id))) return null;
+    return {
+      surveyId: survey.id,
+      survey: before.survey,
+      savedAt: latest.lastModified,
+      userId: latest.lastModifiedBy,
+    };
+  }
+
+  private async saveDraft(
+    survey: SurveyEntity,
+    latest: VersionEntity,
+    output: ValidationJsonOutput,
+    snapshot: SnapshotInput | null,
+    userId: string | null | undefined,
+    alsoInTx?: (tx: EntityManager) => Promise<void>,
+  ): Promise<DesignDto> {
     const versionToSave = latest.published ? latest.version + 1 : latest.version;
     const subVersionToSave = latest.published ? 1 : latest.subVersion + 1;
-
-    const output = sampleSurvey
-      ? await this.engine.validate(JSON.stringify(design))
-      : await this.engine.process(
-          design,
-          (await this.getProcessedSurvey(surveyId, false)).output.survey,
-        );
-
-    // S3 upload before the DB writes (it can't join the transaction); an orphan
-    // design file on a mid-failure is overwritten by the next setDesign.
-    await this.files.uploadText(
-      surveyId,
-      SurveyFolder.Design,
-      JSON.stringify(output),
-      String(versionToSave),
-    );
 
     // Version row + survey stamp + calculations reset as one transaction.
     survey.lastModified = nowUtcString();
     const entity = await this.db.manager.transaction(async (tx) => {
+      if (snapshot) await this.snapshots.create(snapshot, tx);
+      if (alsoInTx) await alsoInTx(tx);
       const e = await this.versions.save(
         {
           version: versionToSave,
-          surveyId,
+          surveyId: survey.id,
           subVersion: subVersionToSave,
           valid: isValid(output),
           published: false,
           schema: output.schema,
           lastModified: nowUtcString(),
+          lastModifiedBy: userId ?? null,
         },
         tx,
       );
       await tx.getRepository(SurveyEntity).save(survey);
-      await resetCalculationsOnDesignChange(tx, surveyId);
+      await resetCalculationsOnDesignChange(tx, survey.id);
+      // S3 can't join the transaction, and this may overwrite the draft's file
+      // in place, so it goes last: a failed DB write leaves the file untouched.
+      await this.files.uploadText(
+        survey.id,
+        SurveyFolder.Design,
+        JSON.stringify(output),
+        String(versionToSave),
+      );
       return e;
     });
 
@@ -129,6 +271,11 @@ export class DesignService {
       designerInput: this.engine.toDesignerInput(output),
       versionDto: this.toVersionDto(entity, survey.status),
     };
+  }
+
+  private async loadOutput(surveyId: string, version: number): Promise<ValidationJsonOutput> {
+    const json = await this.files.getText(surveyId, SurveyFolder.Design, String(version));
+    return JSON.parse(json) as ValidationJsonOutput;
   }
 
   /** The survey's texts as CSV, one column per survey language. */
@@ -142,6 +289,7 @@ export class DesignService {
     surveyId: string,
     file: Uint8Array,
     overrideMainLang: boolean,
+    userId: string | null = null,
   ): Promise<{ updated: number; design: DesignDto }> {
     const csv = decodeCsv(file);
     if (csv === null) throw new TranslationsCsvNotUtf8Exception();
@@ -161,51 +309,29 @@ export class DesignService {
     const diff = Object.fromEntries(codes.map((code) => [code, state[code]]));
     return {
       updated: changes.length,
-      design: await this.setDesign(surveyId, diff, design.versionDto.version),
+      design: await this.setDesign(surveyId, diff, design.versionDto.version, { userId }),
     };
   }
 
   /** Rename a component code, re-validate, and store as a new version. */
-  async changeCode(surveyId: string, from: string, to: string): Promise<DesignDto> {
-    const survey = await this.surveys().findOne({ where: { id: surveyId } });
-    if (!survey) throw new SurveyNotFoundException();
-    if (survey.status === 'CLOSED') throw new SurveyIsClosedException();
-
-    const latest = await this.versions.findLatest(surveyId);
-    if (!latest) throw new DesignException();
-    const versionToSave = latest.published ? latest.version + 1 : latest.version;
-    const subVersionToSave = latest.published ? 1 : latest.subVersion + 1;
-
+  async changeCode(
+    surveyId: string,
+    from: string,
+    to: string,
+    userId: string | null = null,
+  ): Promise<DesignDto> {
+    const { survey, latest } = await this.loadDraft(surveyId);
     const savedDesign = await this.files.getText(
       surveyId,
       SurveyFolder.Design,
       String(latest.version),
     );
     const output = await this.engine.changeCode(savedDesign, from, to);
-
-    await this.files.uploadText(
-      surveyId,
-      SurveyFolder.Design,
-      JSON.stringify(output),
-      String(versionToSave),
+    const before = JSON.parse(savedDesign) as ValidationJsonOutput;
+    const snapshot = await this.snapshotBefore(survey, latest, before);
+    return this.saveDraft(survey, latest, output, snapshot, userId, (tx) =>
+      renameCodeInCalculations(tx, surveyId, from, to),
     );
-    const entity = await this.versions.save({
-      version: versionToSave,
-      surveyId,
-      subVersion: subVersionToSave,
-      valid: isValid(output),
-      published: false,
-      schema: output.schema,
-      lastModified: nowUtcString(),
-    });
-    survey.lastModified = nowUtcString();
-    await this.surveys().save(survey);
-    await resetCalculationsOnDesignChange(this.db.manager, surveyId);
-
-    return {
-      designerInput: this.engine.toDesignerInput(output),
-      versionDto: this.toVersionDto(entity, survey.status),
-    };
   }
 
   /**
@@ -251,13 +377,19 @@ export class DesignService {
 
     let saved: VersionEntity;
     if (!latestPublished) {
-      // First publish ever — a single row write, atomic on its own.
-      saved = await this.versions.save({
-        ...latest,
-        published: true,
-        version: 1,
-        subVersion: 1,
-        lastModified: nowUtcString(),
+      // First publish ever — the row write and clearing the history, together.
+      saved = await this.db.manager.transaction(async (tx) => {
+        await this.snapshots.deleteAll(surveyId, tx);
+        return this.versions.save(
+          {
+            ...latest,
+            published: true,
+            version: 1,
+            subVersion: 1,
+            lastModified: nowUtcString(),
+          },
+          tx,
+        );
       });
     } else {
       const oldJson = await this.files.getText(
@@ -284,6 +416,7 @@ export class DesignService {
         // back all of it, so responses never end up pointing at a deleted
         // version.
         saved = await this.db.manager.transaction(async (tx) => {
+          await this.snapshots.deleteAll(surveyId, tx);
           await this.versions.repointResponses(
             surveyId,
             latest.version,
@@ -308,6 +441,7 @@ export class DesignService {
       } else {
         // Material change → a new published version + survey stamp, together.
         saved = await this.db.manager.transaction(async (tx) => {
+          await this.snapshots.deleteAll(surveyId, tx);
           await tx.getRepository(SurveyEntity).save(survey);
           return this.versions.save(
             {
@@ -405,12 +539,18 @@ export class DesignService {
     surveyId: string,
     published: boolean,
   ): Promise<ProcessedSurvey> {
+    // A malformed id (e.g. a mistyped run link) would fail the uuid cast with a 500.
+    if (!isUuid(surveyId)) throw new SurveyNotFoundException();
     const survey = await this.surveys().findOne({ where: { id: surveyId } });
     if (!survey) throw new SurveyNotFoundException();
     const version = published
       ? await this.versions.findLatestPublished(surveyId)
       : await this.versions.findLatest(surveyId);
-    if (!version) throw new DesignException();
+    if (!version) {
+      // No published version is a normal state (a run link opened before the
+      // first publish); no version at all means broken data.
+      throw published ? new SurveyNotPublishedException() : new DesignException();
+    }
     const json = await this.files.getText(
       surveyId,
       SurveyFolder.Design,
@@ -447,6 +587,28 @@ export class DesignService {
       status: statusFromDb(statusDb),
     };
   }
+}
+
+interface SurveyLanguages {
+  defaultLang?: { code: string };
+  additionalLang?: { code: string }[];
+}
+
+/**
+ * A save can arrive listing a language twice, or listing the survey's primary
+ * language among its translations — an older client, a replayed edit, a
+ * hand-built payload. Stored that way, every client afterwards draws two chips
+ * for one set of text, so the save is cleaned rather than rejected: the
+ * duplicate is never something the user asked for or could correct.
+ */
+function withCleanLanguages(design: Record<string, unknown>): Record<string, unknown> {
+  const survey = design.Survey as SurveyLanguages | undefined;
+  if (!survey?.additionalLang?.length) return design;
+
+  const additionalLang = dedupeLanguages(survey.additionalLang, survey.defaultLang?.code);
+  if (additionalLang.length === survey.additionalLang.length) return design;
+
+  return { ...design, Survey: { ...survey, additionalLang } };
 }
 
 /** A design is valid when its survey has no `errors`. */
