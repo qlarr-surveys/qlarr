@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { buildDesignState, changeContent } from '@qlarr/design-core';
+import { buildDesignState, changeContent, dedupeLanguages } from '@qlarr/design-core';
 import { EntityManager } from 'typeorm';
 import { nowUtcString } from '../../common/datetime';
 import { isUuid } from '../../common/validation';
@@ -102,12 +102,13 @@ export class DesignService {
     opts: SaveOptions = {},
   ): Promise<DesignDto> {
     const { survey, latest } = await this.editableDraft(surveyId, version);
+    const toSave = withCleanLanguages(design);
     if (opts.sampleSurvey) {
-      const output = await this.engine.validate(JSON.stringify(design));
+      const output = await this.engine.validate(JSON.stringify(toSave));
       return this.saveDraft(survey, latest, output, null, opts.userId);
     }
     const before = await this.loadOutput(surveyId, latest.version);
-    const output = await this.engine.process(design, before.survey);
+    const output = await this.engine.process(toSave, before.survey);
     const snapshot = await this.snapshotBefore(survey, latest, before);
     return this.saveDraft(survey, latest, output, snapshot, opts.userId);
   }
@@ -586,6 +587,28 @@ export class DesignService {
       status: statusFromDb(statusDb),
     };
   }
+}
+
+interface SurveyLanguages {
+  defaultLang?: { code: string };
+  additionalLang?: { code: string }[];
+}
+
+/**
+ * A save can arrive listing a language twice, or listing the survey's primary
+ * language among its translations — an older client, a replayed edit, a
+ * hand-built payload. Stored that way, every client afterwards draws two chips
+ * for one set of text, so the save is cleaned rather than rejected: the
+ * duplicate is never something the user asked for or could correct.
+ */
+function withCleanLanguages(design: Record<string, unknown>): Record<string, unknown> {
+  const survey = design.Survey as SurveyLanguages | undefined;
+  if (!survey?.additionalLang?.length) return design;
+
+  const additionalLang = dedupeLanguages(survey.additionalLang, survey.defaultLang?.code);
+  if (additionalLang.length === survey.additionalLang.length) return design;
+
+  return { ...design, Survey: { ...survey, additionalLang } };
 }
 
 /** A design is valid when its survey has no `errors`. */
