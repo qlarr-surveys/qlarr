@@ -10,6 +10,8 @@ import {
   SurveyModeName,
   ValidationJsonOutput,
 } from './engine.types';
+import { replaceCode } from './replace-code';
+import { withSandbox } from './script-sandbox';
 
 /**
  * The heavy, author-JS-executing engine operations, extracted from
@@ -22,7 +24,8 @@ import {
  * calculation ops) compile and evaluate survey-author JavaScript through the KMP engine, so a malicious or
  * buggy design can loop forever or blow the heap. Running them off the main
  * thread is what lets the pool enforce a hard timeout (terminate the worker) and
- * a memory cap without taking the whole server down.
+ * a memory cap without taking the whole server down. `navigate` and `calculate`
+ * additionally execute that JavaScript in a WASM sandbox (`script-sandbox.ts`).
  */
 
 // The published engine is a KMP/JS build exposing everything under nested
@@ -172,10 +175,7 @@ function replaceInField(
 ): void {
   const obj = node[field];
   if (obj && typeof obj === 'object') {
-    // Whole codes only: renaming Q1 must not touch Q10 or Q1_x.
-    const escaped = from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const code = new RegExp(`${escaped}(?![a-z0-9_])`, 'g');
-    node[field] = JSON.parse(JSON.stringify(obj).replace(code, () => to));
+    node[field] = JSON.parse(replaceCode(JSON.stringify(obj), from, to));
   }
 }
 
@@ -189,9 +189,13 @@ export function runValidate(surveyJson: string): ValidationJsonOutput {
 /**
  * Run one navigation step (≈ `SurveyProcessor.navigate`): build the engine
  * mode/index/direction objects and drive the navigation state machine, returning
- * the next screen + the values to persist.
+ * the next screen + the values to persist. The engine only prepares and reads
+ * back the script; executing it happens in the sandbox. Both engine calls must
+ * use the same wrapper, which holds the step's randomization between them.
  */
-export function runNavigate(params: NavigateParams): NavigationJsonOutput {
+export async function runNavigate(
+  params: NavigateParams,
+): Promise<NavigationJsonOutput> {
   const wrapper = usecase.NavigationUseCaseWrapper.init(
     params.values,
     params.processedSurvey,
@@ -202,9 +206,10 @@ export function runNavigate(params: NavigateParams): NavigationJsonOutput {
     params.skipInvalid,
     toSurveyMode(params.surveyMode),
   );
-  return JSON.parse(
-    quietly(() => wrapper.navigate(scriptengine.createNavigationEngine())),
+  const scriptResult = await withSandbox(scriptengine.getEngineScript(), (run) =>
+    run('navigate', quietly(() => wrapper.getNavigationScript())),
   );
+  return JSON.parse(quietly(() => wrapper.processNavigationResult(scriptResult)));
 }
 
 /**
@@ -347,20 +352,45 @@ export function runValidateCalculations(
  * Evaluate a validated calculation set over responses (`{ responseId: values }`).
  * The engine does NOT re-validate: it runs every calculation whose `errors` is
  * empty and skips the rest, so `calculations` must come out of
- * `runValidateCalculations`.
+ * `runValidateCalculations`. All responses share one sandbox, and the script's
+ * output is that response's result; a failed run is reported against that
+ * response only.
  */
-export function runCalculate(
+export async function runCalculate(
   processedSurvey: string,
   calculations: string,
   responses: string,
-): CalculateOutput {
-  return JSON.parse(
-    quietly(() =>
-      usecase.CalculationUseCaseWrapper.create(processedSurvey).calculate(
-        scriptengine.createCalculationEngine(),
-        calculations,
-        responses,
-      ),
+): Promise<CalculateOutput> {
+  const wrapper = usecase.CalculationUseCaseWrapper.create(processedSurvey);
+  const entries = Object.entries(JSON.parse(responses));
+  const runnable = (JSON.parse(calculations) as ValidatedCalculation[]).filter(
+    (c) => c.errors.length === 0,
+  );
+  if (runnable.length === 0) {
+    return Object.fromEntries(
+      entries.map(([id]) => [id, { results: {}, errors: {} }]),
+    );
+  }
+  return withSandbox(scriptengine.getEngineScript(), (run) =>
+    Object.fromEntries(
+      entries.map(([id, values]) => {
+        try {
+          const script = wrapper.getCalculationScript(
+            calculations,
+            JSON.stringify(values),
+          );
+          return [id, JSON.parse(run('calculate', script))];
+        } catch (err) {
+          const failure = { name: 'EngineFailure', message: String(err) };
+          return [
+            id,
+            {
+              results: {},
+              errors: Object.fromEntries(runnable.map((c) => [c.code, failure])),
+            },
+          ];
+        }
+      }),
     ),
   );
 }

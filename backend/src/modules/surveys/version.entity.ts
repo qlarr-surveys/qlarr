@@ -48,4 +48,8 @@ export class VersionEntity {
     transformer: timestampTextTransformer,
   })
   lastModified: string;
+
+  /** Who last saved this version; a snapshot of it credits them. */
+  @Column({ name: 'last_modified_by', type: 'uuid', nullable: true })
+  lastModifiedBy: string | null;
 }

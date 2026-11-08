@@ -22,6 +22,7 @@
   "timezone_info": "We use your local timezone to calculate the survey expiration time.",
   "timezone_tooltip": "The survey will expire at 00:00 on the selected end date in your local timezone",
   "goBack": "Go Back",
+  "go_to_dashboard": "Go to Dashboard",
   "preview": "Preview",
   "survey_header": {
     "saved": "All changes saved",
@@ -92,6 +93,7 @@
       "start_date": "Start Date",
       "end_date": "End Date"
     },
+    "version_history": "Version History",
     "edit_name": "Edit survey name: {{name}}",
     "edit_description": "Edit survey description",
     "delete_survey_title": "Delete “{{survey_name}}”?"
@@ -267,10 +269,15 @@
     "wrong_confirmation_token": "This Confirmation Token is incorrect, Please Register Once more",
     "survey_quota": "Sorry, this survey is no longer accepting responses.",
     "invalid_translations_csv": "Not a translations CSV.",
-    "translations_csv_not_utf8": "This file isn't UTF-8. In Excel, use File → Save As → 'CSV UTF-8 (Comma delimited)' and import again."
+    "translations_csv_not_utf8": "This file isn't UTF-8. In Excel, use File → Save As → 'CSV UTF-8 (Comma delimited)' and import again.",
+    "snapshot_not_found": "This version no longer exists. Reload the page and try again.",
+    "nothing_to_revert": "There are no unpublished changes to discard.",
+    "user_already_confirmed": "This user has already accepted the invitation.",
+    "survey_not_found": "This survey doesn't exist or was deleted"
   },
   "processed_successes": {
     "copied": "Copied to clipboard",
+    "invitation_resent": "Invitation sent again",
     "updated": "Updated successfully"
   },
   "profile": {
@@ -298,16 +305,13 @@
     "filter_completed_show_completed": "Complete Responses only",
     "filter_completed_show_incomplete": "Incomplete Responses only",
     "filter_completed_show_disqualified": "Disqualified Responses only",
-    "filter_preview": "Filter Preview Responses",
-    "filter_preview_show_actual": "Actual Responses only",
-    "filter_preview_show_all": "All Responses",
-    "filter_preview_show_preview": "Preview Responses only",
+    "filter_preview_show_preview": "Test (Preview) Responses only",
     "ip_addr": "IP Address",
     "label_displayed_rows": "{{from}}-{{to}} of {{count}}",
     "label_rows_per_page": "Rows per page:",
     "label_surveys_per_page": "Surveys per page:",
     "lang": "Language",
-    "preview": "Preview",
+    "test_response": "Test (preview) response",
     "raw_values": "Show Raw Values",
     "reset_surveyor_filter": "Reset Surveyor Filter",
     "start_date": "Start Date",
@@ -331,6 +335,10 @@
     "status_incomplete": "Incomplete",
     "database_format": "Database Format",
     "text_format": "Text Format",
+    "header_type": "Header Type",
+    "text_headers": "Question text",
+    "code_headers": "Question codes",
+    "export_options": "More export options",
     "range_invalid": "“From” cannot be greater than “To”.",
     "all_responses": "All responses",
     "custom_range": "Custom range",
@@ -342,7 +350,7 @@
     "yes": "Yes",
     "no": "No",
     "disqualified": "Disqualified",
-    "preview_not_exportable": "Preview responses cannot be exported",
+    "preview_not_exportable": "Test (preview) responses cannot be exported",
     "question": "Question",
     "answer": "Answer",
     "events": "Events",
@@ -378,6 +386,7 @@
     "effective_base": "Effective base",
     "efficiency": "Efficiency",
     "weight_note": "Largest weight {{maxWeight}}. Significance tests use the effective base, not the weighted base.",
+    "weight_filtered_note": "Filters are on. Actual and the weights come from all {{total}} responses, not just the {{filtered}} in the table. Each respondent keeps their full-sample weight, so the filtered table may not match the targets.",
     "base": "Base",
     "eff": "eff",
     "subtitle": "By {{column}} · {{weighting}}",
@@ -396,7 +405,15 @@
     "warn_lowEfficiency": "Efficiency is {{efficiency}}%. Below 60%, a small group starts driving the whole report.",
     "warn_highWeight": "One weight is {{maxWeight}}. Weights above 5 usually mean the target is unrealistic for this sample.",
     "warn_droppedWeight": "{{count}} response(s) had no answer to the weight question and were left out of this table.",
-    "warn_truncated": "Showing the first {{shown}} of {{total}} responses. Figures and tests are based on that sample."
+    "warn_truncated": "Showing the first {{shown}} of {{total}} responses. Figures and tests are based on that sample.",
+    "filters": "Filters",
+    "add_filter": "Add filter",
+    "filter_any_of": "Any of…",
+    "remove_filter": "Remove filter",
+    "filtered_base": "Filtered to {{count}} of {{total}} responses",
+    "warn_noMatches": "No responses match these filters.",
+    "plan_name": "Plan name",
+    "plan_name_taken": "A plan with this name already exists."
   },
   "calculations": {
     "title": "Calculated fields",
@@ -415,6 +432,9 @@
     "label_required": "Label is required",
     "expression_required": "Expression is required",
     "error_ScriptError": "Script error",
+    "error_OutOfDate": "The survey design changed. Review this calculation and click Save.",
+    "design_warning": "Calculations need re-validating with every survey design change.",
+    "first_save_title": "Good to know",
     "state_error": "Error",
     "state_invalid": "Invalid",
     "state_not_computed": "Not computed",
@@ -544,6 +564,7 @@
     "status": "Status",
     "active": "Active",
     "invitation_sent": "Invitation Sent",
+    "resend_invitation": "Resend Invitation",
     "learn_about_roles": "Learn about user roles",
     "roles_info": "<strong>Super Admin</strong> — Full access to all features including user management, survey creation, and system settings.<br/><br/><strong>Survey Admin</strong> — Can create and manage surveys, access survey design, settings, responses, and analytics.<br/><br/><strong>Analyst</strong> — Can view survey responses, analytics, and preview surveys.<br/><br/><strong>Surveyor</strong> — Can collect survey responses via the mobile app, and preview surveys."
   },
@@ -562,7 +583,10 @@
     "broken_quotas_title": "Some quotas won't be enforced",
     "broken_quotas": "These quotas reference questions or options that no longer exist, so no respondent will be counted or screened out by them: {{quotas}}. Fix their conditions in Quotas, or publish anyway.",
     "publish_anyway": "Publish anyway",
-    "download_qr_code": "Download QR Code"
+    "download_qr_code": "Download QR Code",
+    "discard_changes": "Discard unpublished changes",
+    "discard_title": "Discard unpublished changes?",
+    "discard_description": "The design goes back to the last published version. Your current design and the whole version history will be permanently deleted."
   },
   "email": {
     "check": "Check Your Email",
@@ -732,7 +756,7 @@
     "stat_avg_completion": "Avg Completion",
     "stat_answered": "Answered",
     "stat_incomplete": "Incomplete",
-    "stat_preview": "Preview",
+    "stat_preview": "Test Responses",
     "error_loading": "Error Loading Analytics",
     "error_loading_data": "Failed to load analytics data",
     "no_data": "No analytics data available",
@@ -801,6 +825,16 @@
     "feature_own": "Own every result.",
     "need_help": "Need help getting started?",
     "contact_support": "contact support"
+  },
+  "version_history": {
+    "description": "Restore points for your unpublished changes, kept automatically while you edit. The history is cleared each time you publish.",
+    "current": "Current version",
+    "empty": "No restore points yet.",
+    "restore": "Restore",
+    "preview_title": "Preview: {{title}}",
+    "restore_title": "Restore this version?",
+    "restore_description": "The design goes back to how it was on {{date}}. Your current design and every restore point after this one will be permanently deleted.",
+    "restore_acknowledge": "I understand this can't be undone"
   },
   "status_info": {
     "draft": "Survey has not been published yet. Only available for preview.",

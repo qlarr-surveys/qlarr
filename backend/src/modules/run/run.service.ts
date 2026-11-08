@@ -130,7 +130,7 @@ export class RunService {
 
     response.navigationIndex = navIndex;
     response.lang = result.lang.code;
-    response.submitDate = isEnd ? nowUtcString() : null;
+    if (isEnd) response.submitDate ??= nowUtcString();
     response.values = result.navigationJsonOutput.toSave;
     response.preview = preview;
     response.events = events;

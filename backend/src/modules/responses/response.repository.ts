@@ -127,7 +127,7 @@ export class ResponseRepository {
     );
   }
 
-  /** id/index/values for responses in the index range (bulk file download). */
+  /** id/values for responses in the index range (bulk file download). */
   findFilesInIndexRange(
     surveyId: string,
     complete: boolean | undefined,

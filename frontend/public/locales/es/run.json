@@ -19,7 +19,10 @@
         "survey_design_error": "Error de Diseño de Encuesta... Verifica el Diseño de la Encuesta",
         "survey_expired": "Esta encuesta ha expirado",
         "survey_not_active": "Esta encuesta no está activa",
-        "survey_scheduled": "Esta encuesta está programada para comenzar en el futuro"
+        "survey_scheduled": "Esta encuesta está programada para comenzar en el futuro",
+        "client_time_skew": "El reloj de su dispositivo no está sincronizado. Corrija la configuración de fecha y hora y vuelva a cargar la página.",
+        "survey_not_published": "Esta encuesta aún no ha sido publicada",
+        "survey_not_found": "Esta encuesta no está disponible"
     },
     "preview":"Estás en modo de vista previa",
     "upload": "Subir",
@@ -66,6 +69,7 @@
     "ranking_ranked": "{{count}} clasificadas",
     "ranking_drag_hint": "Arrastra los elementos aquí para clasificarlos",
     "ranking_all_ranked": "Todos los elementos han sido clasificados",
+    "preview_not_exportable": "Las respuestas de prueba (vista previa) no se pueden exportar",
     "preview_end_actions": {
         "heading": "Opciones de vista previa",
         "check_response": "Ver respuesta",

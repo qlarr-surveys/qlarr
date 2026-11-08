@@ -30,6 +30,13 @@ class UserService extends BaseService {
     return response.data;
   }
 
+  async resendInvitation({ userId }) {
+    const response = await this.handleRequest(() =>
+      authenticatedApi.post(`/user/${userId}/resend_invitation`)
+    );
+    return response.data;
+  }
+
   async createUser(data) {
     const response = await this.handleRequest(() =>
       authenticatedApi.post(`/user/create`, data)

@@ -3,6 +3,7 @@ import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { EngineService } from '../src/engine/engine.service';
 import { runNavigate, runValidate } from '../src/engine/engine-runtime';
+import { NavigationJsonOutput } from '../src/engine/engine.types';
 import { FILE_HELPER } from '../src/integrations/filesystem/file-helper';
 import { bearer, startTestApp, TestApp } from './harness';
 
@@ -19,16 +20,7 @@ const SURVEYOR = token(['surveyor']);
 // its index + saved values to build a genuinely valid offline response payload.
 const engine = new EngineService();
 const DESIGN_JSON = JSON.stringify(runValidate(engine.newSurvey('Offline')));
-const endNav = runNavigate({
-  values: '{}',
-  processedSurvey: DESIGN_JSON,
-  navigationDirection: { name: 'START' },
-  navigationIndex: null,
-  lang: 'en',
-  navigationMode: 'ALL_IN_ONE',
-  skipInvalid: false,
-  surveyMode: 'OFFLINE',
-});
+let endNav: NavigationJsonOutput;
 
 const validPayload = () => ({
   versionId: 1,
@@ -67,11 +59,7 @@ const navigateQuota = (values: object, navigationIndex: unknown, direction: stri
     skipInvalid: false,
     surveyMode: 'OFFLINE',
   } as Parameters<typeof runNavigate>[0]);
-const quotaEnd = navigateQuota(
-  { 'Q1.value': 'male' },
-  navigateQuota({}, null, 'START').navigationIndex,
-  'NEXT',
-);
+let quotaEnd: NavigationJsonOutput;
 
 const files = {
   getText: jest.fn((surveyId: string) =>
@@ -104,6 +92,21 @@ describe('Offline survey response upload', () => {
       );
 
   beforeAll(async () => {
+    endNav = await runNavigate({
+      values: '{}',
+      processedSurvey: DESIGN_JSON,
+      navigationDirection: { name: 'START' },
+      navigationIndex: null,
+      lang: 'en',
+      navigationMode: 'ALL_IN_ONE',
+      skipInvalid: false,
+      surveyMode: 'OFFLINE',
+    });
+    quotaEnd = await navigateQuota(
+      { 'Q1.value': 'male' },
+      (await navigateQuota({}, null, 'START')).navigationIndex,
+      'NEXT',
+    );
     ctx = await startTestApp({
       overrides: (b) => b.overrideProvider(FILE_HELPER).useValue(files),
     });

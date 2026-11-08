@@ -27,6 +27,8 @@ import { CalculationsRepository } from './calculations.repository';
  * Validation runs only on Save and import, and the whole validated set is
  * stored, each calculation with its `errors`. Test and Compute pass the stored
  * set to the engine as it is; the engine never runs a calculation with errors.
+ * A design change marks every calculation `OutOfDate`, so they stop running
+ * until the next Save.
  * Everything runs against the survey's latest version. Nothing is allowed while
  * a run is in progress, and results only show once a run has completed on the
  * current set (a save sets `idle`).

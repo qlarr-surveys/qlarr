@@ -94,7 +94,7 @@ function AddEditUser({ userId, open, onClose }) {
       if (userId) {
         await userService.updateUser({
           userId,
-          data: { email, firstName, lastName, roles },
+          data: { firstName, lastName, roles },
         });
       } else {
         await userService.createUser({ email, firstName, lastName, roles });
@@ -154,7 +154,11 @@ function AddEditUser({ userId, open, onClose }) {
 
             <RHFTextField name="lastName" label={t("label.last_name")} />
 
-            <RHFTextField name="email" label={t("label.email")} />
+            <RHFTextField
+              name="email"
+              label={t("label.email")}
+              disabled={Boolean(userId)}
+            />
 
             <RHFMultiSelect
               chip

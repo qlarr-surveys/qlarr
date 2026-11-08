@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { ArrowLeft, Eye } from "lucide-react";
+import { ArrowLeft, Eye, History } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import styles from "./SurveyHeader.module.css";
@@ -10,7 +10,7 @@ import { isSessionRtl } from "~/utils/common";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import { routes } from "~/routes";
 import TokenService from "~/services/TokenService";
-import { availablePages } from "~/constants/roles";
+import { availablePages, isSurveyAdmin } from "~/constants/roles";
 
 // Lucide draws on the rendered pixel grid rather than MUI's 24px one, so the
 // size is the icon's real size and the stroke is set with it. These two are
@@ -72,6 +72,19 @@ export const SurveyHeader = ({ showPreview, showSaveState }) => {
       <div className={styles.spacer} />
 
       {showSaveState && <SaveState />}
+
+      {showPreview && isSurveyAdmin() && (
+        <button
+          type="button"
+          className={styles.previewBtn}
+          onClick={() =>
+            nav(routes.designHistory.replace(":surveyId", surveyId))
+          }
+        >
+          <History size={15} strokeWidth={ICON_STROKE} aria-hidden="true" />
+          {t("edit_survey.version_history")}
+        </button>
+      )}
 
       {showPreview && (
         <button

@@ -28,6 +28,7 @@ import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import AddEditUser from "~/pages/manage/AddEditUser";
 import { useService } from "~/hooks/use-service";
 import TokenService from "~/services/TokenService";
+import SuccessSnackbar from "~/components/manage/SuccessSnackbar";
 
 export const UsersTable = () => {
   const userService = useService("user");
@@ -43,7 +44,7 @@ export const UsersTable = () => {
 
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const userId = TokenService.getUser().id;
+  const userId = TokenService.getUser()?.id;
 
   const getUsers = () => {
     dispatch(setLoading(true));
@@ -75,6 +76,19 @@ export const UsersTable = () => {
       .catch((e) => {
         setDeleteLoading(false);
       });
+  };
+
+  // Bumped per successful resend; also keys the snackbar so each resend shows it again.
+  const [resentCount, setResentCount] = useState(0);
+  const resendInvitation = (user) => {
+    setOpen(null);
+    dispatch(setLoading(true));
+    userService
+      .resendInvitation({ userId: user.id })
+      .then(() => setResentCount((count) => count + 1))
+      .finally(() => dispatch(setLoading(false)))
+      // The list may be stale (e.g. the invitee already accepted), so refresh it.
+      .catch(() => getUsers());
   };
 
   useEffect(() => {
@@ -168,7 +182,9 @@ export const UsersTable = () => {
 
       <TableContainer
         sx={{
-          overflow: "unset",
+          // The table keeps its min width; on a phone it scrolls sideways
+          // here instead of widening the page.
+          overflowX: "auto",
           [`& .${tableCellClasses.head}`]: {
             color: "text.primary",
           },
@@ -221,7 +237,7 @@ export const UsersTable = () => {
           </TableHead>
           <TableBody>
             {sortedUsers.map((user) => {
-              const disabled = !user.isConfirmed || user.id === userId;
+              const disabled = user.id === userId;
               return (
                 <React.Fragment key={user.id}>
                   <TableRow key={user.id}>
@@ -268,6 +284,13 @@ export const UsersTable = () => {
                       {t("users_manage.title_edit")}
                     </MenuItem>
 
+                    {!user.isConfirmed && (
+                      <MenuItem onClick={() => resendInvitation(user)}>
+                        <Iconify icon="carbon:email" sx={{ mr: 1 }} />{" "}
+                        {t("users_manage.resend_invitation")}
+                      </MenuItem>
+                    )}
+
                     <Divider sx={{ borderStyle: "dashed", mt: 0.5 }} />
 
                     <MenuItem
@@ -310,6 +333,14 @@ export const UsersTable = () => {
           </Typography>
         </Box>
       </CustomTooltip>
+
+      {resentCount > 0 && (
+        <SuccessSnackbar
+          key={resentCount}
+          success="invitation_resent"
+          left="56"
+        />
+      )}
 
       {Boolean(userToDelete) && (
         <ConfirmActionModal

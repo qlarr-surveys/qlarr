@@ -8,6 +8,7 @@ import { useReleaseGuard } from "~/hooks/useReleaseGuard";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import { inDesign } from "~/routes";
+import { useDesignReadOnly } from "~/components/design/DesignReadOnly";
 import {
   ALLOWED_CODE_CHARS_REGEX,
   computePrefixAndSuffix,
@@ -40,8 +41,9 @@ function InlineCodeEditor({ qualifiedCode, designMode, compact }) {
     shallowEqual
   );
 
+  const readOnly = useDesignReadOnly();
   const isSpecial = SPECIAL_TYPES.includes(answerType);
-  const isEditable = inDesign(designMode) && !isSpecial;
+  const isEditable = inDesign(designMode) && !isSpecial && !readOnly;
 
   const { prefix, suffix } = computePrefixAndSuffix(qualifiedCode);
 

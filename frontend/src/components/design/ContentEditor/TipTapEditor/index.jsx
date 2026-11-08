@@ -27,6 +27,32 @@ const {
   LTR_CLASS,
 } = EDITOR_CONSTANTS;
 
+// The editor view a drag started in. TipTap deletes the dragged content from
+// the source editor 10ms after a drop into another editor; the drop can unmount
+// the source question's editor first, and that delete then throws. Dragging
+// between editors isn't supported, so such drops are ignored.
+let dragSourceView = null;
+
+const handleDragStart = (view) => {
+  dragSourceView = view;
+  return false;
+};
+
+const handleDrop = (view, event) => {
+  const fromOtherEditor = dragSourceView && dragSourceView !== view;
+  dragSourceView = null;
+  if (fromOtherEditor) {
+    event.preventDefault();
+    return true;
+  }
+  return false;
+};
+
+const handleDragEnd = () => {
+  dragSourceView = null;
+  return false;
+};
+
 function TipTapEditor({
   value,
   onBlurListener,
@@ -101,6 +127,11 @@ function TipTapEditor({
     editorProps: {
       attributes: {
         class: `${EDITOR_CLASS} ${isRtl ? RTL_CLASS : LTR_CLASS}`,
+      },
+      handleDOMEvents: {
+        dragstart: handleDragStart,
+        drop: handleDrop,
+        dragend: handleDragEnd,
       },
       handlePaste: (view, event) => {
         try {

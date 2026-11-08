@@ -114,9 +114,12 @@
 
   .field {
     flex: 1;
+    min-width: 0;
   }
 
+  /* Overrides the inline min-width, which together overflow a phone. */
   .select {
     width: 100%;
+    min-width: 0 !important;
   }
 }

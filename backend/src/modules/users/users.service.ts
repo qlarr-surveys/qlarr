@@ -35,6 +35,7 @@ import {
   InvalidFirstName,
   InvalidLastName,
   ExpiredResetTokenException,
+  UserAlreadyConfirmedException,
   UserNotFoundException,
   WrongCredentialsException,
   WrongEmailChangePinException,
@@ -102,22 +103,49 @@ export class UsersService {
       firstName,
       lastName,
       email,
-      password: await bcrypt.hash(randomPassword(firstName, lastName), 10),
+      password: await bcrypt.hash(randomPassword(), 10),
       deleted: false,
       roles: rolesToDb(roles),
       isConfirmed: false,
     });
     await this.users.insert(entity);
-    // Invitation email carrying a new-user password-reset token; the invitee
-    // sets their password via the same reset-password page as forgot-password.
-    const token = this.tokens.generatePasswordResetToken({ email }, true);
+    await this.sendInvitation(entity);
+    return userToDto(entity);
+  }
+
+  /**
+   * Re-sends the invitation to a user who hasn't accepted yet (e.g. the invitee
+   * deleted the original email, or its token expired). The placeholder password
+   * is rotated, which voids every earlier invitation link — only the latest one
+   * works. Safe because an unconfirmed user's password is a placeholder nobody
+   * knows. The email goes out before the new placeholder is saved, so a failed
+   * send leaves the earlier links working instead of voiding them.
+   */
+  async resendInvitation(userId: string): Promise<void> {
+    const user = await this.users.findById(userId);
+    if (!user) throw new UserNotFoundException();
+    if (user.isConfirmed) throw new UserAlreadyConfirmedException();
+    user.password = await bcrypt.hash(randomPassword(), 10);
+    await this.sendInvitation(user);
+    await this.users.save(user);
+  }
+
+  /**
+   * Invitation email carrying a new-user password-reset token; the invitee
+   * sets their password via the same reset-password page as forgot-password.
+   */
+  private async sendInvitation(user: {
+    email: string;
+    password: string;
+  }): Promise<void> {
+    const { email } = user;
+    const token = this.tokens.generatePasswordResetToken(user, true);
     const frontendUrl = this.config.getOrThrow<AppConfig>('app').frontendUrl;
     await this.email.sendEmail(
       email,
       'Invitation to join Qlarr.com',
       `You have been invited to join Qlarr. Set your password: ${frontendUrl}/reset-password?token=${token}`,
     );
-    return userToDto(entity);
   }
 
   async update(
@@ -246,12 +274,9 @@ export class UsersService {
    */
   async forgotPassword(req: ForgotPasswordRequest): Promise<void> {
     const email = req.email.trim().toLowerCase();
-    const user = await this.users.findByEmail(email);
+    const user = await this.users.findByEmailWithPassword(email);
     if (!user) return;
-    const token = this.tokens.generatePasswordResetToken(
-      { email: user.email },
-      false,
-    );
+    const token = this.tokens.generatePasswordResetToken(user, false);
     const frontendUrl = this.config.getOrThrow<AppConfig>('app').frontendUrl;
     await this.email.sendEmail(
       user.email,
@@ -264,7 +289,9 @@ export class UsersService {
    * Public reset-password. The reset JWT (the field is named `refreshToken`)
    * carries the email. We validate the token fully here so an expired vs. forged
    * token surfaces the right error, then set the new password (marking the
-   * account confirmed) and log the user in.
+   * account confirmed), log out every other session and log the user in.
+   * The token is single-use: it carries a fingerprint of the password hash it
+   * was issued against, so once the password changes it no longer matches.
    */
   async resetPassword(req: ResetPasswordRequest): Promise<LoggedInUserResponse> {
     const details = this.tokens.decodeResetToken(req.refreshToken);
@@ -276,12 +303,31 @@ export class UsersService {
     if (!details.resetPassword) {
       throw new WrongResetTokenException();
     }
-    const user = await this.users.findByEmail(details.email);
-    if (!user) throw new WrongResetTokenException();
+    const user = await this.users.findByEmailWithPassword(details.email);
+    if (
+      !user ||
+      !this.tokens.resetTokenMatchesPassword(
+        details.passwordFingerprint,
+        user.password,
+      )
+    ) {
+      throw new WrongResetTokenException();
+    }
 
-    user.password = await bcrypt.hash(req.newPassword, 10);
+    // Conditional write: if a concurrent request already consumed this token,
+    // the stored hash no longer matches and the update touches no row.
+    const newHash = await bcrypt.hash(req.newPassword, 10);
+    const applied = await this.users.resetPasswordIfUnchanged(
+      user.id,
+      user.password,
+      newHash,
+    );
+    if (!applied) {
+      throw new WrongResetTokenException();
+    }
+    user.password = newHash;
     user.isConfirmed = true;
-    await this.users.save(user);
+    await this.refreshTokens.deleteByUser(user.id);
     return this.issueLogin(user);
   }
 
