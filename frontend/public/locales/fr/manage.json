@@ -439,7 +439,6 @@
     "first_save_title": "Bon à savoir",
     "save_invalidates_title": "Supprimer les résultats calculés ?",
     "save_invalidates": "L'enregistrement annule le calcul en cours et supprime tous les résultats calculés.",
-    "design_banner": "Modifier le design annule les calculs en cours et supprime les résultats calculés.",
     "state_error": "Erreur",
     "state_invalid": "Invalide",
     "state_not_computed": "Non calculé",

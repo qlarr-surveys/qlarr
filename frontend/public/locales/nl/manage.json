@@ -439,7 +439,6 @@
     "first_save_title": "Goed om te weten",
     "save_invalidates_title": "Berekende resultaten verwijderen?",
     "save_invalidates": "Opslaan annuleert de lopende berekening en verwijdert alle berekende resultaten.",
-    "design_banner": "Het ontwerp bewerken annuleert lopende berekeningen en verwijdert berekende resultaten.",
     "state_error": "Fout",
     "state_invalid": "Ongeldig",
     "state_not_computed": "Niet berekend",

@@ -443,7 +443,6 @@
     "first_save_title": "من الجيد معرفة ذلك",
     "save_invalidates_title": "حذف النتائج المحسوبة؟",
     "save_invalidates": "الحفظ يلغي الحساب الجاري ويحذف جميع النتائج المحسوبة.",
-    "design_banner": "تعديل التصميم يلغي الحسابات الجارية ويحذف النتائج المحسوبة.",
     "state_error": "خطأ",
     "state_invalid": "غير صالح",
     "state_not_computed": "غير محسوب",

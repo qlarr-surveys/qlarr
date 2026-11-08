@@ -439,7 +439,6 @@
     "first_save_title": "Good to know",
     "save_invalidates_title": "Delete computed results?",
     "save_invalidates": "Saving cancels the running computation and deletes all computed results.",
-    "design_banner": "Editing the design cancels running computations and deletes computed results.",
     "state_error": "Error",
     "state_invalid": "Invalid",
     "state_not_computed": "Not computed",

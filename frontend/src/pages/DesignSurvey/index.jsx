@@ -26,7 +26,6 @@ import {
 } from "~/state/design/designState";
 import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
 import { QUOTA_MESSAGE_PARAM } from "@qlarr/design-core/constants/design";
-import ComputeBanner from "./ComputeBanner";
 
 const ContentPanel = React.lazy(() =>
   import("~/components/design/ContentPanel")
@@ -138,34 +137,31 @@ function DesignSurvey() {
     : {};
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <ComputeBanner />
-      <Box
-        className={styles.mainContainer}
-        ref={containerRef}
-        sx={{ ...backgroundStyle, flex: 1, minHeight: 0 }}
-      >
-        <DndProvider backend={isTouchDevice() ? TouchBackend : HTML5Backend}>
-          <Suspense fallback={<LoadingDots fullHeight />}>
-            <LeftPanel t={t} />
-          </Suspense>
-          <CacheProvider value={cacheRtlMemo}>
-            <ThemeProvider theme={surveyTheme}>
-              <Suspense fallback={<LoadingDots fullHeight />}>
-                <ContentPanel
-                  designMode={designMode}
-                  navigatorRef={navigatorRef}
-                  ref={contentRef}
-                  className={styles.contentPanel}
-                />
-              </Suspense>
-            </ThemeProvider>
-          </CacheProvider>
-          {designStateReceived && (
-            <ElementSearch t={t} onNavigate={navigateToElement} />
-          )}
-        </DndProvider>
-      </Box>
+    <Box
+      className={styles.mainContainer}
+      ref={containerRef}
+      sx={backgroundStyle}
+    >
+      <DndProvider backend={isTouchDevice() ? TouchBackend : HTML5Backend}>
+        <Suspense fallback={<LoadingDots fullHeight />}>
+          <LeftPanel t={t} />
+        </Suspense>
+        <CacheProvider value={cacheRtlMemo}>
+          <ThemeProvider theme={surveyTheme}>
+            <Suspense fallback={<LoadingDots fullHeight />}>
+              <ContentPanel
+                designMode={designMode}
+                navigatorRef={navigatorRef}
+                ref={contentRef}
+                className={styles.contentPanel}
+              />
+            </Suspense>
+          </ThemeProvider>
+        </CacheProvider>
+        {designStateReceived && (
+          <ElementSearch t={t} onNavigate={navigateToElement} />
+        )}
+      </DndProvider>
     </Box>
   );
 }

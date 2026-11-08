@@ -475,7 +475,6 @@
     "first_save_title": "Gut zu wissen",
     "save_invalidates_title": "Berechnete Ergebnisse löschen?",
     "save_invalidates": "Beim Speichern wird die laufende Berechnung abgebrochen und alle berechneten Ergebnisse werden gelöscht.",
-    "design_banner": "Änderungen am Design brechen laufende Berechnungen ab und löschen berechnete Ergebnisse.",
     "state_error": "Fehler",
     "state_invalid": "Ungültig",
     "state_not_computed": "Nicht berechnet",

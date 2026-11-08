@@ -439,7 +439,6 @@
     "first_save_title": "Es bueno saberlo",
     "save_invalidates_title": "¿Eliminar los resultados calculados?",
     "save_invalidates": "Guardar cancela el cálculo en curso y elimina todos los resultados calculados.",
-    "design_banner": "Editar el diseño cancela los cálculos en curso y elimina los resultados calculados.",
     "state_error": "Error",
     "state_invalid": "No válido",
     "state_not_computed": "No calculado",
