@@ -105,8 +105,9 @@ function ManageSurvey({ landingPage }) {
   const shouldShowEditSurvey = () =>
     selectedPage == MANAGE_SURVEY_LANDING_PAGES.SETTINGS;
 
-  const shouldShowHistory = () =>
-    selectedPage == MANAGE_SURVEY_LANDING_PAGES.HISTORY && designAvailable;
+  const isHistoryPage = selectedPage == MANAGE_SURVEY_LANDING_PAGES.HISTORY;
+
+  const shouldShowHistory = () => isHistoryPage && designAvailable;
 
 
   const changePage = useCallback((tab) => {
@@ -120,17 +121,20 @@ function ManageSurvey({ landingPage }) {
   const content = (
     <>
       <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <WorkspaceTabs
-          availablePages={availablePagesMemo}
-          selectedPage={selectedPage}
-          surveyId={params.surveyId}
-          onPageChange={changePage}
-        />
+        {!isHistoryPage && (
+          <WorkspaceTabs
+            availablePages={availablePagesMemo}
+            selectedPage={selectedPage}
+            surveyId={params.surveyId}
+            onPageChange={changePage}
+          />
+        )}
         <Suspense fallback={<LoadingDots fullHeight />}>
-          {/* The history page has no header, so it takes the full height. */}
+          {/* The history page has no header or tabs, so it takes the full height. */}
           <Box
-            className={styles.wrapper}
-            sx={shouldShowHistory() ? { height: "100vh" } : undefined}
+            className={`${styles.wrapper} ${
+              isHistoryPage ? styles.fullHeight : ""
+            }`}
           >
             {shouldShowResponses() ? (
               <ResponsesSurvey />
