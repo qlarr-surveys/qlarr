@@ -1,3 +1,4 @@
+import { isTimeZone } from '../../common/datetime';
 import { NavigationIndexJson } from '../../engine/engine.types';
 import { CalculatedValue } from '../calculations/calculation-values';
 
@@ -38,17 +39,20 @@ export function exportStatusesFrom(input?: string): ExportStatus[] {
 export interface ExportOptions {
   textHeaders: boolean;
   textValues: boolean;
+  timeZone: string;
 }
 
 export function exportOptionsFrom(
   dbValues?: string,
   headers?: string,
+  timezone?: string,
 ): ExportOptions {
   const textValues = dbValues?.toLowerCase() === 'false';
   const h = headers?.toLowerCase();
   return {
     textValues,
     textHeaders: h === 'text' || (h !== 'code' && textValues),
+    timeZone: timezone && isTimeZone(timezone) ? timezone : 'UTC',
   };
 }
 

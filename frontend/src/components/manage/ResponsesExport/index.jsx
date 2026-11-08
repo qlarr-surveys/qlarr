@@ -33,7 +33,10 @@ const DEFAULT_VALUES = {
   format: "csv",
   headers: "text",
   mode: "text",
+  timezone: "utc",
 };
+
+const LOCAL_TIME_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 const MIME_BY_FORMAT = {
   csv: "text/csv",
@@ -43,7 +46,7 @@ const MIME_BY_FORMAT = {
 export async function exportResponsesFile(
   surveyService,
   surveyId,
-  { range, from, to, statuses, format, headers, mode } = DEFAULT_VALUES
+  { range, from, to, statuses, format, headers, mode, timezone } = DEFAULT_VALUES
 ) {
   const { blob, fileName } = await surveyService.exportResponses(surveyId, {
     format,
@@ -51,7 +54,7 @@ export async function exportResponsesFile(
     dbValues: mode === "database",
     headers,
     statuses,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
+    timezone: timezone === "local" && LOCAL_TIME_ZONE ? LOCAL_TIME_ZONE : "UTC",
   });
 
   if (!blob || blob.size === 0) return false;
@@ -80,6 +83,7 @@ export default function ResponsesExport({
     format: yup.string().oneOf(["csv", "xlsx"]).required(),
     headers: yup.string().oneOf(["code", "text"]).required(),
     mode: yup.string().oneOf(["database", "text"]).required(),
+    timezone: yup.string().oneOf(["utc", "local"]).required(),
   });
 
   const methods = useForm({
@@ -185,6 +189,30 @@ export default function ResponsesExport({
                     value="database"
                     control={<Radio />}
                     label={t("responses.database_format")}
+                  />
+                </RadioGroup>
+              )}
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel>{t("responses.time_zone")}</FormLabel>
+            <Controller
+              name="timezone"
+              control={control}
+              render={({ field }) => (
+                <RadioGroup row {...field}>
+                  <FormControlLabel
+                    value="utc"
+                    control={<Radio />}
+                    label={t("responses.time_zone_utc")}
+                  />
+                  <FormControlLabel
+                    value="local"
+                    control={<Radio />}
+                    label={t("responses.time_zone_local", {
+                      zone: LOCAL_TIME_ZONE,
+                    })}
                   />
                 </RadioGroup>
               )}

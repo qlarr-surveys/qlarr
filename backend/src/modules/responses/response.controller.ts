@@ -113,6 +113,7 @@ export class ResponseController {
     @Query('status') status: string | undefined,
     @Query('db_values') dbValues: string | undefined,
     @Query('headers') headers: string | undefined,
+    @Query('timezone') timezone: string | undefined,
     @Res() res: Response,
   ): Promise<void> {
     const fmt = responseFormatFrom(format);
@@ -122,7 +123,7 @@ export class ResponseController {
       fmt,
       toInt(from) ?? 0,
       toInt(to) ?? 0,
-      exportOptionsFrom(dbValues, headers),
+      exportOptionsFrom(dbValues, headers, timezone),
     );
     if (!buffer) {
       res.status(204).end();

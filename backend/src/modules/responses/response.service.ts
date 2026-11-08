@@ -3,6 +3,7 @@ import { replaceFormatInstructions } from "@qlarr/design-core";
 import { extname } from "node:path";
 import { PassThrough, Readable } from "node:stream";
 import { ZipFile } from "yazl";
+import { wallClockInZone } from "../../common/datetime";
 import { stripTags } from "../../common/strip-tags";
 import { EngineService } from "../../engine/engine.service";
 import { ComponentIndex, ResponseField } from "../../engine/engine.types";
@@ -35,11 +36,11 @@ import {
   SizeLimitExceededException,
 } from "./response.exceptions";
 
-const ADDITIONAL_COL_NAMES = [
+const additionalColNames = (timeZone: string) => [
   "index",
   "id",
-  "start_date",
-  "submit_date",
+  `start_date (${timeZone})`,
+  `submit_date (${timeZone})`,
   "Lang",
   "disqualified",
 ];
@@ -165,16 +166,17 @@ export class ResponseService {
     };
 
     const calculated = await this.calculationsFor(surveyId);
+    const inZone = wallClockInZone(options.timeZone);
     const finalCols = [
-      ...ADDITIONAL_COL_NAMES,
+      ...additionalColNames(options.timeZone),
       ...colNames,
       ...calculated.columns.map((c) => c.label),
     ];
     const rows = responses.map((r) => [
       r.index,
       r.id,
-      r.startDate,
-      r.submitDate,
+      r.startDate && inZone(r.startDate),
+      r.submitDate && inZone(r.submitDate),
       r.lang,
       r.values["Survey.disqualified"] ?? false,
       ...fields.map((f, i) => cellFor(r.values, f, keys[i], questionCodes[i])),
