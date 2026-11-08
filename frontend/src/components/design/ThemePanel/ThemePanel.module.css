@@ -166,6 +166,9 @@
 }
 
 .chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 32px;
   height: 28px;
   padding: 0 10px;
@@ -191,6 +194,23 @@
   background: #eceefb;
   font-weight: 600;
   color: #2b34a8;
+}
+
+/* Bold marks the chip in use, and bold text is wider: left alone the chips
+   resize and the row rewraps every time the selection moves. Each label is
+   sized by an invisible bold copy of itself, so it takes the same room either
+   way. */
+.chipLabel {
+  display: grid;
+  justify-items: center;
+}
+
+.chipLabel::after {
+  content: attr(data-label);
+  height: 0;
+  overflow: hidden;
+  font-weight: 600;
+  visibility: hidden;
 }
 
 .more {

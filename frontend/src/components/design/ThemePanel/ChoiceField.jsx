@@ -35,7 +35,9 @@ function ChoiceField({
               onClick={() => onChange(option)}
               className={`${styles.chip} ${option === value ? styles.chipOn : ""}`}
             >
-              {option}
+              <span className={styles.chipLabel} data-label={option}>
+                {option}
+              </span>
             </button>
           ))}
         </div>
