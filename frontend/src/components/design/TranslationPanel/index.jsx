@@ -169,7 +169,9 @@ function TranslationPanel({ t }) {
                     language.code === lang ? styles.chipOn : ""
                   }`}
                 >
-                  {language.name}
+                  <span className={styles.chipLabel} data-label={language.name}>
+                    {language.name}
+                  </span>
                 </button>
               ))}
             </div>
