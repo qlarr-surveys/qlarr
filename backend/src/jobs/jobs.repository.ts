@@ -37,6 +37,27 @@ export class JobsRepository {
     return rows.map((r) => r.id);
   }
 
+  /** The id of the newest pg-boss job of `kind` on `singletonKey`, if any. */
+  async latestId(m: EntityManager, kind: string, singletonKey: string): Promise<string | null> {
+    const rows: Array<{ id: string }> = await m.query(
+      `SELECT id FROM ${BOSS_SCHEMA}.job
+       WHERE name = $1 AND singleton_key = $2
+       ORDER BY created_on DESC, id DESC LIMIT 1`,
+      [kind, singletonKey],
+    );
+    return rows[0]?.id ?? null;
+  }
+
+  /** The ids of the failed pg-boss jobs of `kind` on `singletonKey`. */
+  async failedIds(m: EntityManager, kind: string, singletonKey: string): Promise<string[]> {
+    const rows: Array<{ id: string }> = await m.query(
+      `SELECT id FROM ${BOSS_SCHEMA}.job
+       WHERE name = $1 AND singleton_key = $2 AND state = 'failed'`,
+      [kind, singletonKey],
+    );
+    return rows.map((r) => r.id);
+  }
+
   async setTotal(m: EntityManager, id: string, total: number): Promise<void> {
     await m.query('UPDATE jobs SET progress_total = $2 WHERE id = $1', [id, total]);
   }

@@ -60,10 +60,12 @@ export class CalcComputeHandler implements JobHandler<ComputeContext>, OnModuleI
   }
 
   async prepare(job: Job, limit: number): Promise<PreparedJob<ComputeContext>> {
+    // The epoch before the design: a design change between the two reads bumps
+    // it, so this job's writes are fenced off instead of landing as current.
+    const row = await this.context.run(job, (m) => this.calculations.find(job.surveyId, m));
     const processed = await this.context.run(job, () =>
       this.design.getProcessedSurvey(job.surveyId, false),
     );
-    const row = await this.context.run(job, (m) => this.calculations.find(job.surveyId, m));
     const responseIds = await this.context.run(job, (m) =>
       this.calculations.uncomputedResponseIds(job.surveyId, limit, m),
     );

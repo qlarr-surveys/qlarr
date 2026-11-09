@@ -85,6 +85,7 @@ export class JobsService {
   /**
    * The subject's input changed: cancel its job, in `tx`. The caller deletes
    * the results in the same `tx`, and fences off writes the job still makes.
+   * Failed jobs are deleted: their failures no longer describe the results.
    */
   async invalidate(
     tx: EntityManager,
@@ -93,10 +94,10 @@ export class JobsService {
     subjectKey: string,
   ): Promise<void> {
     const db = txDb(tx);
-    const active = (await this.jobsOf(kind, surveyId, subjectKey, db)).filter((j) =>
-      ACTIVE_STATES.includes(j.state),
-    );
-    if (active.length > 0) await this.boss.cancel(kind, active.map((j) => j.id), { db });
+    const job = await this.latestJob(tx, kind, surveyId, subjectKey);
+    if (job && ACTIVE_STATES.includes(job.state)) await this.boss.cancel(kind, job.id, { db });
+    const failed = await this.rows.failedIds(tx, kind, subjectOf(surveyId, subjectKey));
+    if (failed.length > 0) await this.boss.deleteJob(kind, failed, { db });
   }
 
   /** A survey design change, passed to every kind in the change's `tx`. */
@@ -107,8 +108,7 @@ export class JobsService {
   }
 
   async status(kind: string, surveyId: string, subjectKey: string): Promise<JobStatusDto> {
-    const jobs = await this.jobsOf(kind, surveyId, subjectKey);
-    const job = jobs[jobs.length - 1];
+    const job = await this.latestJob(this.db.manager, kind, surveyId, subjectKey);
     return toStatus(job, job && (await this.rows.progress(job.id)));
   }
 
@@ -143,18 +143,20 @@ export class JobsService {
     throw new JobNotFoundException();
   }
 
-  /** The subject's jobs, oldest first. */
-  private jobsOf(
+  /**
+   * The subject's newest job. Under the queue's `exclusive` policy a queued or
+   * active job is always the newest, so this is also its active one.
+   */
+  private async latestJob(
+    m: EntityManager,
     kind: string,
     surveyId: string,
     subjectKey: string,
-    db?: Db,
-  ): Promise<JobWithMetadata<JobData>[]> {
-    return this.boss.findJobs<JobData>(kind, {
-      key: subjectOf(surveyId, subjectKey),
-      limit: 100_000,
-      db,
-    });
+  ): Promise<JobWithMetadata<JobData> | undefined> {
+    const id = await this.rows.latestId(m, kind, subjectOf(surveyId, subjectKey));
+    if (!id) return undefined;
+    const [job] = await this.boss.findJobs<JobData>(kind, { id, db: txDb(m) });
+    return job;
   }
 }
 
