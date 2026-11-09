@@ -210,6 +210,8 @@ function failureOf(job: JobWithMetadata<JobData>): { message: string; code: JobE
   const message =
     stored?.message ?? (typeof value === 'string' ? value : value?.message) ?? 'The job failed';
   if (stored?.[JOB_ERROR_MARKER]) return { message, code: 'job_error' };
+  // pg-boss types startedOn as non-null, but a job failed while queued never started.
+  if (!job.startedOn) return { message, code: 'stopped' };
   const ranMs = (job.completedOn?.getTime() ?? Date.now()) - job.startedOn.getTime();
   if (ranMs >= job.expireInSeconds * 1000) return { message, code: 'time_limit' };
   return { message, code: 'stopped' };
