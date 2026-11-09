@@ -444,7 +444,7 @@
     "state_not_computed": "Not computed",
     "status_uncomputed": "{{count}} responses not computed. Click Compute.",
     "status_waiting": "Waiting to compute…",
-    "status_running": "Computing… {{count}} responses left",
+    "status_running": "Computing… {{done}}/{{total}}",
     "status_failed": "Computation failed. Click Compute to run it again.",
     "status_time_limit": "Computation stopped at its time limit. Results so far are kept. Click Compute to continue.",
     "cancel_compute": "Cancel",

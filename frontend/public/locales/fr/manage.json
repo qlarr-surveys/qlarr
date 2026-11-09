@@ -444,7 +444,7 @@
     "state_not_computed": "Non calculé",
     "status_uncomputed": "{{count}} réponses non calculées. Cliquez sur Calculer.",
     "status_waiting": "En attente du calcul…",
-    "status_running": "Calcul en cours… {{count}} réponses restantes",
+    "status_running": "Calcul en cours… {{done}}/{{total}}",
     "status_failed": "Le calcul a échoué. Cliquez sur Calculer pour le relancer.",
     "status_time_limit": "Le calcul s'est arrêté à sa limite de temps. Les résultats obtenus sont conservés. Cliquez sur Calculer pour continuer.",
     "cancel_compute": "Annuler",

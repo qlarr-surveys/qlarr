@@ -448,7 +448,7 @@
     "state_not_computed": "غير محسوب",
     "status_uncomputed": "{{count}} من الردود غير محسوبة. انقر على احسب.",
     "status_waiting": "في انتظار الحساب…",
-    "status_running": "جارٍ الحساب… تبقى {{count}} من الردود",
+    "status_running": "جارٍ الحساب… {{done}}/{{total}}",
     "status_failed": "فشل الحساب. انقر على احسب لتشغيله مرة أخرى.",
     "status_time_limit": "توقف الحساب عند حده الزمني. النتائج حتى الآن محفوظة. انقر على احسب للمتابعة.",
     "cancel_compute": "إلغاء",

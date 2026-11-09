@@ -2,8 +2,11 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { Role } from '../src/auth/role.enum';
+import type { PgBoss } from 'pg-boss';
 import { Job, JobHandler } from '../src/jobs/job-handler';
 import { JobRegistry } from '../src/jobs/job-registry';
+import { PG_BOSS } from '../src/jobs/jobs.constants';
+import { JobsRepository } from '../src/jobs/jobs.repository';
 import { JobsService } from '../src/jobs/jobs.service';
 import { bearer, startTestApp, TestApp } from './harness';
 
@@ -19,6 +22,7 @@ describe('Jobs', () => {
   let app: INestApplication;
   let root: DataSource;
   let jobs: JobsService;
+  let boss: PgBoss;
 
   /** Per job id: resolves once its chunk started, and whether its signal aborted. */
   const entered = new Map<string, () => void>();
@@ -87,6 +91,7 @@ describe('Jobs', () => {
     app = ctx.app;
     root = ctx.root;
     jobs = app.get(JobsService);
+    boss = app.get(PG_BOSS);
   }, 180_000);
 
   afterAll(async () => {
@@ -117,6 +122,15 @@ describe('Jobs', () => {
     }
     throw new Error('job never got there');
   };
+
+  /** The job's row in `jobs`, or undefined. */
+  const rowOf = async (id: string) =>
+    (
+      await root.query(
+        `SELECT progress_done AS done, progress_total AS total FROM jobs WHERE id = $1`,
+        [id],
+      )
+    )[0];
 
   /** Poll until the job's signal aborted (a heartbeat reaches it within ~5 s). */
   const waitAborted = async (id: string) => {
@@ -166,6 +180,49 @@ describe('Jobs', () => {
     await jobs.enqueue('test.count', survey, '');
     await waitFor('test.count', survey, (s) => s.status === 'none');
     expect(pending.get(survey)).toEqual([]);
+  });
+
+  it('reports the progress of a running job, and records it per chunk', async () => {
+    const survey = await createSurvey('Progress');
+    const blocked = await jobs.enqueue('test.block', survey, '');
+    await startedOf(blocked);
+    expect((await jobs.status('test.block', survey, '')).progress).toEqual({ done: 0, total: 1 });
+    await jobs.cancel(survey, blocked, ['super_admin']);
+    expect((await jobs.status('test.block', survey, '')).progress).toBeNull();
+
+    pending.set(survey, ['a', 'b', 'c', 'd']);
+    const id = await jobs.enqueue('test.count', survey, '');
+    await waitFor('test.count', survey, (s) => s.status === 'none');
+    expect(await rowOf(id)).toEqual({ done: 3, total: 3 });
+  });
+
+  it("sweeps the rows of jobs pg-boss deleted, and keeps the others", async () => {
+    const survey = await createSurvey('Sweep');
+    const gone = await jobs.enqueue('test.count', survey, '');
+    await waitFor('test.count', survey, (s) => s.status === 'none');
+    const kept = await jobs.enqueue('test.block', survey, '');
+    await boss.deleteJob('test.count', gone);
+
+    await app.get(JobsRepository).sweep();
+
+    expect(await rowOf(gone)).toBeUndefined();
+    expect(await rowOf(kept)).toBeDefined();
+    await jobs.cancel(survey, kept, ['super_admin']);
+  });
+
+  it('deleting a survey deletes its jobs and aborts a running one', async () => {
+    const survey = await createSurvey('Deleted');
+    const id = await jobs.enqueue('test.block', survey, '');
+    const queued = await jobs.enqueue('test.count', survey, '');
+    await startedOf(id);
+
+    await request(server()).delete(`/survey/${survey}`).set('Authorization', BEARER).expect(204);
+
+    expect(await rowOf(id)).toBeUndefined();
+    expect(await rowOf(queued)).toBeUndefined();
+    expect(await boss.findJobs('test.block', { id })).toEqual([]);
+    expect(await boss.findJobs('test.count', { id: queued })).toEqual([]);
+    expect(await waitAborted(id)).toBe(true);
   });
 
   it('a cancel aborts the job in flight', async () => {

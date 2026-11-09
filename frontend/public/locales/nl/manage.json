@@ -444,7 +444,7 @@
     "state_not_computed": "Niet berekend",
     "status_uncomputed": "{{count}} antwoorden niet berekend. Klik op Berekenen.",
     "status_waiting": "Wachten op berekening…",
-    "status_running": "Bezig met berekenen… nog {{count}} antwoorden",
+    "status_running": "Bezig met berekenen… {{done}}/{{total}}",
     "status_failed": "Berekening mislukt. Klik op Berekenen om het opnieuw uit te voeren.",
     "status_time_limit": "De berekening is gestopt bij de tijdslimiet. De resultaten tot nu toe blijven bewaard. Klik op Berekenen om verder te gaan.",
     "cancel_compute": "Annuleren",

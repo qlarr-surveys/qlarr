@@ -6,6 +6,7 @@ import { JobContext } from './job-context';
 import { JobRegistry } from './job-registry';
 import { BOSS_POOL_SIZE, BOSS_SCHEMA, PG_BOSS } from './jobs.constants';
 import { JobsController } from './jobs.controller';
+import { JobsRepository } from './jobs.repository';
 import { JobsService } from './jobs.service';
 import { JobsWorker } from './jobs.worker';
 
@@ -38,6 +39,7 @@ import { JobsWorker } from './jobs.worker';
     },
     JobContext,
     JobRegistry,
+    JobsRepository,
     JobsService,
     JobsWorker,
   ],

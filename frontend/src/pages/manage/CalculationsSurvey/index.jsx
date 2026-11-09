@@ -467,8 +467,9 @@ function StatusBanner({ state, onCancel, cancelling, t }) {
     case "running":
       return (
         <Alert severity="info" action={cancel}>
-          {t("calculations.status_running", "Computing… {{count}} responses left", {
-            count: state.uncomputedCount,
+          {t("calculations.status_running", "Computing… {{done}}/{{total}}", {
+            done: state.progress?.done ?? 0,
+            total: state.progress?.total ?? 0,
           })}
         </Alert>
       );

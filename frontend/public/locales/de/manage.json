@@ -480,7 +480,7 @@
     "state_not_computed": "Nicht berechnet",
     "status_uncomputed": "{{count}} Antworten nicht berechnet. Klicken Sie auf Berechnen.",
     "status_waiting": "Warten auf Berechnung…",
-    "status_running": "Wird berechnet… noch {{count}} Antworten",
+    "status_running": "Wird berechnet… {{done}}/{{total}}",
     "status_failed": "Berechnung fehlgeschlagen. Klicken Sie auf Berechnen, um sie erneut auszuführen.",
     "status_time_limit": "Die Berechnung wurde am Zeitlimit angehalten. Bisherige Ergebnisse bleiben erhalten. Klicken Sie auf Berechnen, um fortzufahren.",
     "cancel_compute": "Abbrechen",

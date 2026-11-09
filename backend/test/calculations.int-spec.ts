@@ -136,14 +136,15 @@ describe('Calculations', () => {
     )[0].state;
 
   /** A Compute job row that looks active (no worker of this app runs it). */
-  const runningJob = async (id: string): Promise<string> =>
-    (
-      await root.query(
-        `INSERT INTO pgboss.job (name, state, data, singleton_key, policy, started_on)
-         VALUES ('calc.compute', 'active', $1, $2, 'exclusive', now()) RETURNING id`,
-        [JSON.stringify({ surveyId: id, subjectKey: '' }), `${id}:`],
-      )
-    )[0].id;
+  const runningJob = async (id: string): Promise<string> => {
+    const [{ id: jobId }] = await root.query(
+      `INSERT INTO pgboss.job (name, state, data, singleton_key, policy, started_on)
+       VALUES ('calc.compute', 'active', $1, $2, 'exclusive', now()) RETURNING id`,
+      [JSON.stringify({ surveyId: id, subjectKey: '' }), `${id}:`],
+    );
+    await root.query('INSERT INTO jobs (id, survey_id) VALUES ($1, $2)', [jobId, id]);
+    return jobId;
+  };
 
   const cancel = (id: string, jobId: string, auth = SUPER) =>
     request(server()).post(`/survey/${id}/jobs/${jobId}/cancel`).set('Authorization', auth);
@@ -167,6 +168,7 @@ describe('Calculations', () => {
         error: null,
         errorCode: null,
         startedAt: null,
+        progress: null,
         uncomputedCount: 3,
       });
     });
@@ -228,6 +230,7 @@ describe('Calculations', () => {
         error: null,
         errorCode: null,
         startedAt: null,
+        progress: null,
         uncomputedCount: 3,
       });
       expect((await state(id)).calculations[1].errors).toEqual([{ name: 'InvalidCode' }]);
@@ -560,6 +563,7 @@ describe('Calculations', () => {
           error: null,
           errorCode: null,
           startedAt: null,
+          progress: null,
           hasResults: true,
         },
       ]);

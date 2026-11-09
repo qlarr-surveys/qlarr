@@ -3,10 +3,12 @@ import type { Db, JobWithMetadata, PgBoss } from 'pg-boss';
 import { EntityManager } from 'typeorm';
 import { formatWallClockUtc } from '../common/datetime';
 import { returnedRows } from '../common/returned-rows';
+import { DbContext } from '../database/db-context';
 import { JobErrorCode } from './job-handler';
 import { JobRegistry } from './job-registry';
 import { JOB_ERROR_MARKER, PG_BOSS } from './jobs.constants';
 import { JobAlreadyActiveException, JobNotFoundException } from './jobs.exceptions';
+import { JobProgress, JobsRepository } from './jobs.repository';
 
 /** A job's pg-boss data: its subject, nothing else. */
 export interface JobData {
@@ -23,6 +25,8 @@ export interface JobStatusDto {
   /** Why it failed; null unless `failed`. */
   errorCode: JobErrorCode | null;
   startedAt: string | null;
+  /** Responses done of the job's total; null unless queued or running. */
+  progress: JobProgress | null;
 }
 
 /** One subject in `GET survey/:surveyId/jobs`. */
@@ -44,14 +48,38 @@ export class JobsService {
   constructor(
     @Inject(PG_BOSS) private readonly boss: PgBoss,
     private readonly registry: JobRegistry,
+    private readonly rows: JobsRepository,
+    private readonly db: DbContext,
   ) {}
 
-  /** Queue a job; 409 if one is already queued or running on the subject. */
-  async enqueue(kind: string, surveyId: string, subjectKey: string): Promise<string> {
-    const data: JobData = { surveyId, subjectKey };
-    const id = await this.boss.send(kind, data, { singletonKey: subjectOf(surveyId, subjectKey) });
-    if (!id) throw new JobAlreadyActiveException();
-    return id;
+  /**
+   * Queue a job, and its row, in one transaction; 409 if one is already queued
+   * or running on the subject.
+   */
+  enqueue(kind: string, surveyId: string, subjectKey: string): Promise<string> {
+    return this.db.manager.transaction(async (tx) => {
+      const data: JobData = { surveyId, subjectKey };
+      const id = await this.boss.send(kind, data, {
+        singletonKey: subjectOf(surveyId, subjectKey),
+        db: txDb(tx),
+      });
+      if (!id) throw new JobAlreadyActiveException();
+      await this.rows.insert(tx, id, surveyId);
+      return id;
+    });
+  }
+
+  /**
+   * The survey is being deleted: delete its jobs, in the delete's `tx`. A
+   * running job is aborted once its heartbeat finds it gone; its rows go with
+   * the survey. Each kind deletes only the ids in its own queue.
+   */
+  async deleteForSurvey(tx: EntityManager, surveyId: string): Promise<void> {
+    const ids = await this.rows.idsOfSurvey(tx, surveyId);
+    if (ids.length === 0) return;
+    for (const handler of this.registry.all()) {
+      await this.boss.deleteJob(handler.kind, ids, { db: txDb(tx) });
+    }
   }
 
   /**
@@ -80,7 +108,8 @@ export class JobsService {
 
   async status(kind: string, surveyId: string, subjectKey: string): Promise<JobStatusDto> {
     const jobs = await this.jobsOf(kind, surveyId, subjectKey);
-    return toStatus(jobs[jobs.length - 1]);
+    const job = jobs[jobs.length - 1];
+    return toStatus(job, job && (await this.rows.progress(job.id)));
   }
 
   /** Every subject of every kind the caller's roles can see; 404 for an unknown survey. */
@@ -140,10 +169,20 @@ function txDb(tx: EntityManager): Db {
   };
 }
 
-function toStatus(job: JobWithMetadata<JobData> | undefined): JobStatusDto {
+function toStatus(
+  job: JobWithMetadata<JobData> | undefined,
+  progress: JobProgress | null | undefined,
+): JobStatusDto {
   const active = !!job && ACTIVE_STATES.includes(job.state);
   if (!job || !(active || job.state === 'failed')) {
-    return { jobId: null, status: 'none', error: null, errorCode: null, startedAt: null };
+    return {
+      jobId: null,
+      status: 'none',
+      error: null,
+      errorCode: null,
+      startedAt: null,
+      progress: null,
+    };
   }
   const failure = active ? null : failureOf(job);
   return {
@@ -152,6 +191,7 @@ function toStatus(job: JobWithMetadata<JobData> | undefined): JobStatusDto {
     error: failure?.message ?? null,
     errorCode: failure?.code ?? null,
     startedAt: job.state === 'created' || !job.startedOn ? null : formatWallClockUtc(job.startedOn),
+    progress: active ? (progress ?? null) : null,
   };
 }
 

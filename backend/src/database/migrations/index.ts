@@ -3,6 +3,7 @@ import { Calculations0000000000002 } from './2-Calculations';
 import { RefreshRotation0000000000003 } from './3-RefreshRotation';
 import { DesignSnapshots0000000000004 } from './4-DesignSnapshots';
 import { DropCalculationJobs0000000000005 } from './5-DropCalculationJobs';
+import { Jobs0000000000006 } from './6-Jobs';
 
 /** Migrations applied to the database, in order. */
 export const MIGRATIONS = [
@@ -11,4 +12,5 @@ export const MIGRATIONS = [
   RefreshRotation0000000000003,
   DesignSnapshots0000000000004,
   DropCalculationJobs0000000000005,
+  Jobs0000000000006,
 ];

@@ -19,5 +19,8 @@ export const POLLING_INTERVAL_SECONDS = 1;
 /** Finished jobs are deleted this long after they finished. */
 export const RETENTION_SECONDS = 7 * 24 * 60 * 60;
 
+/** How often the `jobs` rows of jobs pg-boss deleted are swept. */
+export const SWEEP_INTERVAL_SECONDS = 60 * 60;
+
 /** Set on an error a job handler threw, kept in the failed job's output. */
 export const JOB_ERROR_MARKER = 'qlarrJobError';
