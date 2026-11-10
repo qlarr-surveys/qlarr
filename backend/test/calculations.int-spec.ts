@@ -169,6 +169,7 @@ describe('Calculations', () => {
         errorCode: null,
         startedAt: null,
         progress: null,
+        failedCount: 0,
         uncomputedCount: 3,
       });
     });
@@ -231,6 +232,7 @@ describe('Calculations', () => {
         errorCode: null,
         startedAt: null,
         progress: null,
+        failedCount: 0,
         uncomputedCount: 3,
       });
       expect((await state(id)).calculations[1].errors).toEqual([{ name: 'InvalidCode' }]);
@@ -564,6 +566,7 @@ describe('Calculations', () => {
           errorCode: null,
           startedAt: null,
           progress: null,
+          failedCount: 0,
           hasResults: true,
         },
       ]);
@@ -589,6 +592,53 @@ describe('Calculations', () => {
         errorCode: 'job_error',
       });
       expect((await calculationsOf(r1))[0].state).toBe('not_computed');
+    });
+
+    it('a response with no result is a failure: the next Compute skips it, a retry runs it', async () => {
+      const { id, r1, r2 } = await createSurvey();
+      await save(id, [DOUBLE], 0).expect(200);
+      const engine = app.get(EngineService);
+      const calculate = engine.calculate.bind(engine);
+      jest.spyOn(engine, 'calculate').mockImplementationOnce(async (...args) => {
+        const { [r1]: _dropped, ...rest } = await calculate(...args);
+        return rest;
+      });
+
+      await compute(id).expect(200);
+
+      expect(await settle(id)).toMatchObject({
+        status: 'completed_with_failures',
+        failedCount: 1,
+        uncomputedCount: 0,
+      });
+      expect((await calculationsOf(r1))[0].state).toBe('not_computed');
+      expect((await calculationsOf(r2))[0].state).not.toBe('not_computed');
+
+      await request(server())
+        .post(`/survey/${id}/jobs/retry`)
+        .set('Authorization', ANALYST)
+        .send({ kind: 'calc.compute', subjectKey: '' })
+        .expect(200);
+
+      expect(await settle(id)).toMatchObject({ status: 'none', failedCount: 0 });
+      expect((await calculationsOf(r1))[0]).toMatchObject({ state: 'value', value: 42 });
+    });
+
+    it('a Save clears the failures', async () => {
+      const { id, r1 } = await createSurvey();
+      await save(id, [DOUBLE], 0).expect(200);
+      const engine = app.get(EngineService);
+      const calculate = engine.calculate.bind(engine);
+      jest.spyOn(engine, 'calculate').mockImplementationOnce(async (...args) => {
+        const { [r1]: _dropped, ...rest } = await calculate(...args);
+        return rest;
+      });
+      await compute(id).expect(200);
+      expect(await settle(id)).toMatchObject({ failedCount: 1 });
+
+      await save(id, [DOUBLE, FIXED], 1).expect(200);
+
+      expect(await state(id)).toMatchObject({ status: 'none', failedCount: 0, uncomputedCount: 3 });
     });
   });
 

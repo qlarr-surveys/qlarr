@@ -19,3 +19,17 @@ export class JobNotFoundException extends JobsException {
     super('Job not found', 'JobNotFoundException', HttpStatus.NOT_FOUND);
   }
 }
+
+/** A retry on a subject with no failed responses. */
+export class NoFailuresException extends JobsException {
+  constructor() {
+    super('No failed responses to retry', 'NoFailuresException', HttpStatus.CONFLICT);
+  }
+}
+
+/** A kind no handler is registered for. */
+export class JobKindNotFoundException extends JobsException {
+  constructor() {
+    super('Job kind not found', 'JobKindNotFoundException', HttpStatus.NOT_FOUND);
+  }
+}

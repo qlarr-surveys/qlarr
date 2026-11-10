@@ -9,7 +9,8 @@ import { ConfigType } from '@nestjs/config';
 import type { PgBoss } from 'pg-boss';
 import jobsConfig from '../config/jobs.config';
 import { JobContext } from './job-context';
-import { JobHandler } from './job-handler';
+import { JobFailuresRepository } from './job-failures.repository';
+import { Job, JobErrorCode, JobHandler } from './job-handler';
 import { JobRegistry } from './job-registry';
 import {
   HEARTBEAT_SECONDS,
@@ -40,6 +41,7 @@ export class JobsWorker implements OnApplicationBootstrap, OnModuleDestroy {
     private readonly registry: JobRegistry,
     private readonly context: JobContext,
     private readonly rows: JobsRepository,
+    private readonly failures: JobFailuresRepository,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -77,29 +79,63 @@ export class JobsWorker implements OnApplicationBootstrap, OnModuleDestroy {
   }
 
   /**
-   * Prepare, trim to `maxResponses`, then run the chunks until done or aborted,
-   * recording the total and each chunk done on the job's row.
-   * A throw is stored marked `job_error`, so `JobsService` tells it apart from
-   * a failure pg-boss records itself without reading pg-boss's messages.
+   * Prepare, list the responses (a normal run's pending ones, or a retry's
+   * failed ones), trim to `maxResponses`, then run the chunks until done or
+   * aborted. Each chunk's failures and progress are written in one
+   * transaction, fenced so none land once the job was cancelled. Past
+   * `maxFailures` the job fails; its results and failures so far stay.
+   * A throw is stored marked with its code (`job_error` unless said), so
+   * `JobsService` tells it apart from a failure pg-boss records itself
+   * without reading pg-boss's messages.
    */
-  private async run(
-    handler: JobHandler,
-    job: Parameters<JobHandler['prepare']>[0],
-    signal: AbortSignal,
-  ): Promise<void> {
+  private async run(handler: JobHandler, job: Job, signal: AbortSignal): Promise<void> {
     try {
-      const { responseIds, ctx } = await handler.prepare(job, handler.maxResponses);
-      const ids = responseIds.slice(0, handler.maxResponses);
+      const ctx = await handler.prepare(job);
+      const listed = await this.context.run(job, (m) =>
+        job.retry
+          ? this.failures.responseIds(m, job, handler.maxResponses)
+          : handler.pending(job, handler.maxResponses, m),
+      );
+      const ids = listed.slice(0, handler.maxResponses);
       await this.context.run(job, (m) => this.rows.setTotal(m, job.id, ids.length));
+      let failedTotal = 0;
       for (let i = 0; i < ids.length; i += handler.chunkSize) {
         signal.throwIfAborted();
         const chunk = ids.slice(i, i + handler.chunkSize);
-        await handler.runChunk(job, chunk, ctx, signal);
-        await this.context.run(job, (m) => this.rows.addDone(m, job.id, chunk.length));
+        const failed = await handler.runChunk(job, chunk, ctx, signal);
+        const failedIds = new Set(failed.map((f) => f.id));
+        await this.context.run(job, (m) =>
+          m.transaction(async (tx) => {
+            if (!(await this.rows.lockIfActive(tx, job.kind, job.id))) return;
+            await this.failures.record(tx, job, failed);
+            await this.failures.clear(
+              tx,
+              job,
+              chunk.filter((id) => !failedIds.has(id)),
+            );
+            await this.rows.addDone(tx, job.id, chunk.length);
+            await this.rows.addFailed(tx, job.id, failed.length);
+          }),
+        );
+        failedTotal += failed.length;
+        if (failedTotal > handler.maxFailures) {
+          throw new JobFailedError('Too many responses failed', 'too_many_failures');
+        }
       }
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
-      throw Object.assign(error, { [JOB_ERROR_MARKER]: true });
+      const code: JobErrorCode = err instanceof JobFailedError ? err.code : 'job_error';
+      throw Object.assign(error, { [JOB_ERROR_MARKER]: code });
     }
+  }
+}
+
+/** A job failure with its own code, rather than `job_error`. */
+class JobFailedError extends Error {
+  constructor(
+    message: string,
+    readonly code: JobErrorCode,
+  ) {
+    super(message);
   }
 }

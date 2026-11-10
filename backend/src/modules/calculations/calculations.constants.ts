@@ -13,6 +13,9 @@ export const COMPUTE_TIME_LIMIT_SECONDS = 120;
 /** At most this many responses per Compute job; the next Compute runs the rest. */
 export const MAX_RESPONSES_PER_JOB = 10_000;
 
+/** A Compute job fails once more than this many of its responses failed. */
+export const MAX_COMPUTE_FAILURES = 50;
+
 /** Responses per engine call in a Compute job. */
 export const COMPUTE_CHUNK_SIZE = 200;
 

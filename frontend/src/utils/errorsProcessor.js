@@ -79,6 +79,7 @@ export const PROCESSED_ERRORS = {
   CALCULATIONS_CHANGED: { name: "calculations_changed", handleGlobally: false },
   JOB_ALREADY_ACTIVE: { name: "job_already_active", handleGlobally: false },
   NO_CALCULATIONS: { name: "no_calculations", handleGlobally: false },
+  NO_FAILURES: { name: "no_failures", handleGlobally: false },
 };
 
 export const onApiError = ({
@@ -211,6 +212,8 @@ export const processError = (e) => {
         return PROCESSED_ERRORS.JOB_ALREADY_ACTIVE;
       case "NoCalculationsException":
         return PROCESSED_ERRORS.NO_CALCULATIONS;
+      case "NoFailuresException":
+        return PROCESSED_ERRORS.NO_FAILURES;
       default:
         return PROCESSED_ERRORS.UNIDENTIFIED_ERROR;
     }

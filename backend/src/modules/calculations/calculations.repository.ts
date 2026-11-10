@@ -4,8 +4,13 @@ import { returnedRows } from '../../common/returned-rows';
 import { DbContext } from '../../database/db-context';
 import { Calculation } from '../../engine/engine.types';
 import { replaceCode } from '../../engine/replace-code';
+import { pendingFilter } from '../../jobs/job-failures.repository';
+import { CALC_COMPUTE } from './calculations.constants';
 import { CalculationsRevisionConflictException } from './calculations.exceptions';
 import { SurveyCalculationsEntity } from './survey-calculations.entity';
+
+/** A response Compute failed on, which only a retry runs again; `$1` is the survey. */
+const NOT_FAILED = pendingFilter('responses.id', `'${CALC_COMPUTE}'`, '$1', `''`);
 
 function isOutOfDate(calculation: Calculation): boolean {
   return (calculation.errors ?? []).some((e) => e.name === 'OutOfDate');
@@ -190,7 +195,7 @@ export class CalculationsRepository {
 
   /**
    * Ids of the survey's completed responses (previews included) without
-   * results, by id, at most `limit`.
+   * results and not failed, by id, at most `limit`: what Compute runs on.
    */
   async uncomputedResponseIds(
     surveyId: string,
@@ -200,6 +205,7 @@ export class CalculationsRepository {
     const rows: Array<{ id: string }> = await manager.query(
       `SELECT id FROM responses
        WHERE survey_id = $1 AND submit_date IS NOT NULL AND computations IS NULL
+         AND ${NOT_FAILED}
        ORDER BY id
        LIMIT $2`,
       [surveyId, limit],
@@ -242,11 +248,12 @@ export class CalculationsRepository {
     );
   }
 
-  /** Completed responses without results: what the next Compute runs. */
+  /** Completed responses without results and not failed: what the next Compute runs. */
   async countWithoutComputations(surveyId: string): Promise<number> {
     const [{ count }]: Array<{ count: string }> = await this.db.manager.query(
       `SELECT COUNT(*) AS count FROM responses
-       WHERE survey_id = $1 AND submit_date IS NOT NULL AND computations IS NULL`,
+       WHERE survey_id = $1 AND submit_date IS NOT NULL AND computations IS NULL
+         AND ${NOT_FAILED}`,
       [surveyId],
     );
     return Number(count);

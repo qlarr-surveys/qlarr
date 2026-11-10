@@ -4,29 +4,44 @@ import { EntityManager } from 'typeorm';
 import { formatWallClockUtc } from '../common/datetime';
 import { returnedRows } from '../common/returned-rows';
 import { DbContext } from '../database/db-context';
-import { JobErrorCode } from './job-handler';
+import { JobFailureRow, JobFailuresRepository } from './job-failures.repository';
+import { JobErrorCode, JobHandler } from './job-handler';
 import { JobRegistry } from './job-registry';
 import { JOB_ERROR_MARKER, PG_BOSS } from './jobs.constants';
-import { JobAlreadyActiveException, JobNotFoundException } from './jobs.exceptions';
+import {
+  JobAlreadyActiveException,
+  JobKindNotFoundException,
+  JobNotFoundException,
+  NoFailuresException,
+} from './jobs.exceptions';
 import { JobProgress, JobsRepository } from './jobs.repository';
 
-/** A job's pg-boss data: its subject, nothing else. */
+/** A job's pg-boss data: its subject, and whether it retries the subject's failures. */
 export interface JobData {
   surveyId: string;
   subjectKey: string;
+  retry: boolean;
 }
 
 /** A subject's job as the UI shows it. */
 export interface JobStatusDto {
   /** The active job, to cancel it; null when nothing is queued or running. */
   jobId: string | null;
-  status: 'waiting' | 'running' | 'failed' | 'none';
+  status: 'waiting' | 'running' | 'failed' | 'completed_with_failures' | 'none';
   error: string | null;
   /** Why it failed; null unless `failed`. */
   errorCode: JobErrorCode | null;
   startedAt: string | null;
-  /** Responses done of the job's total; null unless queued or running. */
+  /** Responses done (and failed) of the job's total; null unless queued or running. */
   progress: JobProgress | null;
+  /** The subject's failed responses, whatever its jobs' states. */
+  failedCount: number;
+}
+
+/** A page of a subject's failed responses. */
+export interface JobFailuresDto {
+  totalCount: number;
+  failures: JobFailureRow[];
 }
 
 /** One subject in `GET survey/:surveyId/jobs`. */
@@ -49,16 +64,23 @@ export class JobsService {
     @Inject(PG_BOSS) private readonly boss: PgBoss,
     private readonly registry: JobRegistry,
     private readonly rows: JobsRepository,
+    private readonly failures: JobFailuresRepository,
     private readonly db: DbContext,
   ) {}
 
   /**
    * Queue a job, and its row, in one transaction; 409 if one is already queued
-   * or running on the subject.
+   * or running on the subject. A `retry` works on the subject's failed
+   * responses only.
    */
-  enqueue(kind: string, surveyId: string, subjectKey: string): Promise<string> {
+  enqueue(
+    kind: string,
+    surveyId: string,
+    subjectKey: string,
+    { retry = false }: { retry?: boolean } = {},
+  ): Promise<string> {
     return this.db.manager.transaction(async (tx) => {
-      const data: JobData = { surveyId, subjectKey };
+      const data: JobData = { surveyId, subjectKey, retry };
       const id = await this.boss.send(kind, data, {
         singletonKey: subjectOf(surveyId, subjectKey),
         db: txDb(tx),
@@ -85,7 +107,9 @@ export class JobsService {
   /**
    * The subject's input changed: cancel its job, in `tx`. The caller deletes
    * the results in the same `tx`, and fences off writes the job still makes.
-   * Failed jobs are deleted: their failures no longer describe the results.
+   * Failed jobs and failed responses are deleted: they no longer describe the
+   * results. The cancel comes first: it locks the job's row, so the job's
+   * fenced failure writes either commit before it or are dropped after it.
    */
   async invalidate(
     tx: EntityManager,
@@ -98,6 +122,7 @@ export class JobsService {
     if (job && ACTIVE_STATES.includes(job.state)) await this.boss.cancel(kind, job.id, { db });
     const failed = await this.rows.failedIds(tx, kind, subjectOf(surveyId, subjectKey));
     if (failed.length > 0) await this.boss.deleteJob(kind, failed, { db });
+    await this.failures.deleteSubject(tx, kind, surveyId, subjectKey);
   }
 
   /** A survey design change, passed to every kind in the change's `tx`. */
@@ -109,7 +134,11 @@ export class JobsService {
 
   async status(kind: string, surveyId: string, subjectKey: string): Promise<JobStatusDto> {
     const job = await this.latestJob(this.db.manager, kind, surveyId, subjectKey);
-    return toStatus(job, job && (await this.rows.progress(job.id)));
+    return toStatus(
+      job,
+      job && (await this.rows.progress(job.id)),
+      await this.failures.count(kind, surveyId, subjectKey),
+    );
   }
 
   /** Every subject of every kind the caller's roles can see; 404 for an unknown survey. */
@@ -144,6 +173,55 @@ export class JobsService {
   }
 
   /**
+   * Retry the subject's failed responses, as a job of its kind; 409 if there
+   * are none, or a job is already queued or running. Returns the subject's status.
+   */
+  async retry(
+    surveyId: string,
+    kind: string,
+    subjectKey: string,
+    authorities: string[],
+  ): Promise<JobStatusDto> {
+    await this.allowedHandler(surveyId, kind, authorities);
+    if ((await this.failures.count(kind, surveyId, subjectKey)) === 0) {
+      throw new NoFailuresException();
+    }
+    await this.enqueue(kind, surveyId, subjectKey, { retry: true });
+    return this.status(kind, surveyId, subjectKey);
+  }
+
+  /** One page (1-based) of the subject's failed responses, by response id. */
+  async listFailures(
+    surveyId: string,
+    kind: string,
+    subjectKey: string,
+    page: number,
+    perPage: number,
+    authorities: string[],
+  ): Promise<JobFailuresDto> {
+    await this.allowedHandler(surveyId, kind, authorities);
+    return {
+      totalCount: await this.failures.count(kind, surveyId, subjectKey),
+      failures: await this.failures.page(kind, surveyId, subjectKey, page, perPage),
+    };
+  }
+
+  /** The kind's handler; 404 for an unknown kind or survey, 403 without the kind's role. */
+  private async allowedHandler(
+    surveyId: string,
+    kind: string,
+    authorities: string[],
+  ): Promise<JobHandler> {
+    const handler = this.registry.get(kind);
+    if (!handler) throw new JobKindNotFoundException();
+    if (!handler.roles.some((r) => authorities.includes(r))) {
+      throw new ForbiddenException('Insufficient role');
+    }
+    await handler.subjects(surveyId);
+    return handler;
+  }
+
+  /**
    * The subject's newest job. Under the queue's `exclusive` policy a queued or
    * active job is always the newest, so this is also its active one.
    */
@@ -171,19 +249,25 @@ function txDb(tx: EntityManager): Db {
   };
 }
 
+/**
+ * Active first, then a failed newest job, then the subject's failed responses
+ * (which outlive the job that recorded them), else nothing.
+ */
 function toStatus(
   job: JobWithMetadata<JobData> | undefined,
   progress: JobProgress | null | undefined,
+  failedCount: number,
 ): JobStatusDto {
   const active = !!job && ACTIVE_STATES.includes(job.state);
   if (!job || !(active || job.state === 'failed')) {
     return {
       jobId: null,
-      status: 'none',
+      status: failedCount > 0 ? 'completed_with_failures' : 'none',
       error: null,
       errorCode: null,
       startedAt: null,
       progress: null,
+      failedCount,
     };
   }
   const failure = active ? null : failureOf(job);
@@ -194,22 +278,24 @@ function toStatus(
     errorCode: failure?.code ?? null,
     startedAt: job.state === 'created' || !job.startedOn ? null : formatWallClockUtc(job.startedOn),
     progress: active ? (progress ?? null) : null,
+    failedCount,
   };
 }
 
 /**
- * Why a job failed, without reading pg-boss's messages: a handler's throw
- * carries our marker; otherwise pg-boss failed it, at its time limit if it
+ * Why a job failed, without reading pg-boss's messages: a throw from our
+ * worker carries our marker, set to its code; otherwise pg-boss failed it, at its time limit if it
  * ran that long, else because its worker stopped. The message is for display.
  */
 function failureOf(job: JobWithMetadata<JobData>): { message: string; code: JobErrorCode } {
   const stored = job.output as
-    | { message?: string; value?: string | { message?: string }; [JOB_ERROR_MARKER]?: boolean }
+    | { message?: string; value?: string | { message?: string }; [JOB_ERROR_MARKER]?: JobErrorCode }
     | null;
   const value = stored?.value;
   const message =
     stored?.message ?? (typeof value === 'string' ? value : value?.message) ?? 'The job failed';
-  if (stored?.[JOB_ERROR_MARKER]) return { message, code: 'job_error' };
+  const marked = stored?.[JOB_ERROR_MARKER];
+  if (marked) return { message, code: marked };
   // pg-boss types startedOn as non-null, but a job failed while queued never started.
   if (!job.startedOn) return { message, code: 'stopped' };
   const ranMs = (job.completedOn?.getTime() ?? Date.now()) - job.startedOn.getTime();

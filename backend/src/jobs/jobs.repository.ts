@@ -7,6 +7,8 @@ import { BOSS_SCHEMA } from './jobs.constants';
 export interface JobProgress {
   done: number;
   total: number;
+  /** Of `done`, the responses that failed. */
+  failed: number;
 }
 
 /**
@@ -23,7 +25,8 @@ export class JobsRepository {
 
   async progress(id: string): Promise<JobProgress | null> {
     const rows: JobProgress[] = await this.db.manager.query(
-      'SELECT progress_done AS done, progress_total AS total FROM jobs WHERE id = $1',
+      `SELECT progress_done AS done, progress_total AS total, progress_failed AS failed
+       FROM jobs WHERE id = $1`,
       [id],
     );
     return rows[0] ?? null;
@@ -64,6 +67,26 @@ export class JobsRepository {
 
   async addDone(m: EntityManager, id: string, done: number): Promise<void> {
     await m.query('UPDATE jobs SET progress_done = progress_done + $2 WHERE id = $1', [id, done]);
+  }
+
+  async addFailed(m: EntityManager, id: string, failed: number): Promise<void> {
+    await m.query('UPDATE jobs SET progress_failed = progress_failed + $2 WHERE id = $1', [
+      id,
+      failed,
+    ]);
+  }
+
+  /**
+   * Whether the job is still active, locking its pg-boss row against a cancel
+   * until `tx` ends. A cancel in flight is waited for, so a job's writes in
+   * `tx` never land after the cancel's transaction committed.
+   */
+  async lockIfActive(tx: EntityManager, kind: string, id: string): Promise<boolean> {
+    const rows: Array<{ state: string }> = await tx.query(
+      `SELECT state FROM ${BOSS_SCHEMA}.job WHERE name = $1 AND id = $2 FOR SHARE`,
+      [kind, id],
+    );
+    return rows[0]?.state === 'active';
   }
 
   /** Delete the rows of jobs pg-boss has deleted (past their retention). */

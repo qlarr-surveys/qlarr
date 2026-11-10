@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PgBoss } from './pg-boss';
 import { DbConfig } from '../config/db.config';
 import { JobContext } from './job-context';
+import { JobFailuresRepository } from './job-failures.repository';
 import { JobRegistry } from './job-registry';
 import { BOSS_POOL_SIZE, BOSS_SCHEMA, PG_BOSS } from './jobs.constants';
 import { JobsController } from './jobs.controller';
@@ -38,6 +39,7 @@ import { JobsWorker } from './jobs.worker';
       },
     },
     JobContext,
+    JobFailuresRepository,
     JobRegistry,
     JobsRepository,
     JobsService,

@@ -34,7 +34,9 @@ import CalculationValue from "~/components/manage/CalculationValue";
 import { PROCESSED_ERRORS } from "~/utils/errorsProcessor";
 import { hasComputeAtStake, isActive } from "~/utils/computeJobs";
 import ExpressionHelp from "./ExpressionHelp";
+import FailuresDialog from "./FailuresDialog";
 
+const CALC_COMPUTE = "calc.compute";
 const MAX_CALCULATIONS = 10;
 const MAX_EXPRESSION_LENGTH = 500;
 const POLL_INTERVAL_MS = 2000;
@@ -97,8 +99,9 @@ function CalculationsSurvey({ onDirtyChange }) {
   const [loadError, setLoadError] = useState(null);
   const [sample, setSample] = useState(null);
   const [conflict, setConflict] = useState(false);
-  const [busy, setBusy] = useState(null); // "save" | "test" | "compute" | "cancel"
+  const [busy, setBusy] = useState(null); // "save" | "test" | "compute" | "cancel" | "retry"
   const [helpOpen, setHelpOpen] = useState(false);
+  const [failuresOpen, setFailuresOpen] = useState(false);
   const [computeDone, setComputeDone] = useState(false);
   // The form values of a first save, held until the author confirms the warning.
   const [firstSave, setFirstSave] = useState(null);
@@ -191,9 +194,15 @@ function CalculationsSurvey({ onDirtyChange }) {
     return () => window.removeEventListener("beforeunload", warn);
   }, [isDirty, onDirtyChange]);
 
-  /** A 409 because a job is already going: refresh, which shows its banner. */
+  /**
+   * A 409 because a job is already going, or there's nothing left to retry:
+   * refresh, which shows the current banner.
+   */
   const handleError = (error) => {
-    if (error?.name === PROCESSED_ERRORS.JOB_ALREADY_ACTIVE.name) {
+    if (
+      error?.name === PROCESSED_ERRORS.JOB_ALREADY_ACTIVE.name ||
+      error?.name === PROCESSED_ERRORS.NO_FAILURES.name
+    ) {
       load(false);
     } else if (error?.name === PROCESSED_ERRORS.CALCULATIONS_CHANGED.name) {
       setConflict(true);
@@ -267,6 +276,15 @@ function CalculationsSurvey({ onDirtyChange }) {
       .finally(() => setBusy(null));
   };
 
+  const onRetry = () => {
+    setBusy("retry");
+    surveyService
+      .retryJob(surveyId, CALC_COMPUTE, "")
+      .then(() => load(false))
+      .catch(handleError)
+      .finally(() => setBusy(null));
+  };
+
   const onReload = () => {
     setConflict(false);
     setSample(null);
@@ -304,6 +322,26 @@ function CalculationsSurvey({ onDirtyChange }) {
           cancelling={busy === "cancel"}
           t={t}
         />
+
+        {state.failedCount > 0 && (
+          <FailuresBanner
+            state={state}
+            onRetry={onRetry}
+            retrying={busy === "retry"}
+            retryDisabled={actionsDisabled || active}
+            onView={() => setFailuresOpen(true)}
+            t={t}
+          />
+        )}
+        {failuresOpen && (
+          <FailuresDialog
+            onClose={() => setFailuresOpen(false)}
+            surveyId={surveyId}
+            kind={CALC_COMPUTE}
+            subjectKey=""
+            t={t}
+          />
+        )}
 
         {conflict && (
           <Alert
@@ -474,6 +512,16 @@ function StatusBanner({ state, onCancel, cancelling, t }) {
         </Alert>
       );
     case "failed":
+      if (state.errorCode === "too_many_failures") {
+        return (
+          <Alert severity="error">
+            {t(
+              "calculations.status_too_many_failures",
+              "Computation stopped: too many responses failed. Results so far are kept."
+            )}
+          </Alert>
+        );
+      }
       return state.errorCode === "time_limit" ? (
         <Alert severity="warning">
           {t(
@@ -500,6 +548,46 @@ function StatusBanner({ state, onCancel, cancelling, t }) {
         </Alert>
       ) : null;
   }
+}
+
+/**
+ * The responses Compute failed on, with Retry and View failures. Shown
+ * whenever there are any, whatever the last run's status; Retry waits while a
+ * job is queued or running.
+ */
+function FailuresBanner({ state, onRetry, retrying, retryDisabled, onView, t }) {
+  const count = state.failedCount;
+  return (
+    <Alert
+      severity="warning"
+      action={
+        <Stack direction="row" spacing={1}>
+          <Button color="inherit" size="small" onClick={onView}>
+            {t("calculations.view_failures", "View failures")}
+          </Button>
+          <LoadingButton
+            color="inherit"
+            size="small"
+            onClick={onRetry}
+            loading={retrying}
+            disabled={retryDisabled}
+          >
+            {t("action_btn.retry", "Retry")}
+          </LoadingButton>
+        </Stack>
+      }
+    >
+      {state.status === "completed_with_failures"
+        ? t(
+            "calculations.status_completed_with_failures",
+            "Computed. {{count}} responses failed.",
+            { count }
+          )
+        : t("calculations.status_failures", "{{count}} responses failed.", {
+            count,
+          })}
+    </Alert>
+  );
 }
 
 /** One calculation: label, expression, remove, and its stored errors. */
