@@ -243,7 +243,7 @@
 }
 
 .collapsible-content p {
-  word-break: break-all;
+
 }
 
 .collapsible-content.open {
@@ -442,7 +442,7 @@
 }
 
 .content-editor .collapsible-content p {
-  word-break: break-all;
+
 }
 
 .content-editor .collapsible-content.open {
