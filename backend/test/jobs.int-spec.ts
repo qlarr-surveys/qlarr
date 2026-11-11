@@ -4,7 +4,7 @@ import { DataSource } from 'typeorm';
 import { Role } from '../src/auth/role.enum';
 import type { PgBoss } from 'pg-boss';
 import { EntityManager } from 'typeorm';
-import { pendingFilter } from '../src/jobs/job-failures.repository';
+import { JobFailuresRepository, pendingFilter } from '../src/jobs/job-failures.repository';
 import { Job, JobHandler, ResponseFailure } from '../src/jobs/job-handler';
 import { JobRegistry } from '../src/jobs/job-registry';
 import { PG_BOSS } from '../src/jobs/jobs.constants';
@@ -120,11 +120,14 @@ describe('Jobs', () => {
       await gates.get(job.surveyId);
       if (throwing.has(job.surveyId)) throw new Error('boom');
       const failures: ResponseFailure[] = [];
+      const succeeded: string[] = [];
       for (const id of ids) {
         const error = failing.get(id);
         if (error) failures.push({ id, error });
-        else done.add(id);
+        else succeeded.push(id);
       }
+      succeeded.forEach((id) => done.add(id));
+      await app.get(JobFailuresRepository).clear(root.manager, job, succeeded);
       return failures;
     },
     hasResults: async () => false,

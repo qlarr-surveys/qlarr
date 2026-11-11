@@ -103,16 +103,10 @@ export class JobsWorker implements OnApplicationBootstrap, OnModuleDestroy {
         signal.throwIfAborted();
         const chunk = ids.slice(i, i + handler.chunkSize);
         const failed = await handler.runChunk(job, chunk, ctx, signal);
-        const failedIds = new Set(failed.map((f) => f.id));
         await this.context.run(job, (m) =>
           m.transaction(async (tx) => {
             if (!(await this.rows.lockIfActive(tx, job.kind, job.id))) return;
             await this.failures.record(tx, job, failed);
-            await this.failures.clear(
-              tx,
-              job,
-              chunk.filter((id) => !failedIds.has(id)),
-            );
             await this.rows.addDone(tx, job.id, chunk.length);
             await this.rows.addFailed(tx, job.id, failed.length);
           }),

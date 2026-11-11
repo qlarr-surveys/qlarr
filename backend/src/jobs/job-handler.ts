@@ -59,8 +59,10 @@ export interface JobHandler<Ctx = unknown> {
   pending(job: Job, limit: number, m: EntityManager): Promise<string[]>;
   /**
    * Do one chunk and write its results, guarded so none land once the input
-   * changed (the job can outlive its cancel). Returns the responses that
-   * failed; a throw fails the whole job.
+   * changed (the job can outlive its cancel), deleting the written responses'
+   * failures in the same transaction (`JobFailuresRepository.clear`), so a
+   * response never has both. Returns the responses that failed; a throw fails
+   * the whole job.
    * `signal` aborts once the job is cancelled or past its time limit.
    */
   runChunk(

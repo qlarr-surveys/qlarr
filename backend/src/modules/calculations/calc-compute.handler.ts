@@ -4,11 +4,11 @@ import { Role } from '../../auth/role.enum';
 import { EngineService } from '../../engine/engine.service';
 import { Calculation } from '../../engine/engine.types';
 import { JobContext } from '../../jobs/job-context';
+import { JobFailuresRepository } from '../../jobs/job-failures.repository';
 import { Job, JobHandler, ResponseFailure } from '../../jobs/job-handler';
 import { JobRegistry } from '../../jobs/job-registry';
 import { JobsService } from '../../jobs/jobs.service';
 import { DesignService } from '../design/design.service';
-import { toComputations } from './calculation-values';
 import { SurveyNotFoundException } from '../surveys/survey.exceptions';
 import {
   CALC_COMPUTE,
@@ -30,8 +30,9 @@ interface ComputeContext {
  * The Compute job (one subject per survey, `''`): runs the stored set on the
  * next 10K completed responses without results, in chunks of 200, within 2
  * minutes. Always incremental, since any results that exist are valid: the
- * next Compute runs the rest. A response the engine returns no result for is a
- * failure, skipped by later Computes until retried; an engine throw fails the job.
+ * next Compute runs the rest. Only error-free results are written; a response
+ * with any error (or no result) is a failure instead, skipped by later Computes
+ * until retried. An engine throw fails the job.
  */
 @Injectable()
 export class CalcComputeHandler implements JobHandler<ComputeContext>, OnModuleInit {
@@ -46,6 +47,7 @@ export class CalcComputeHandler implements JobHandler<ComputeContext>, OnModuleI
     private readonly registry: JobRegistry,
     private readonly jobs: JobsService,
     private readonly context: JobContext,
+    private readonly failures: JobFailuresRepository,
     private readonly calculations: CalculationsRepository,
     private readonly design: DesignService,
     private readonly engine: EngineService,
@@ -91,18 +93,32 @@ export class CalcComputeHandler implements JobHandler<ComputeContext>, OnModuleI
       pool: 'job',
       signal,
     });
-    await this.context.run(job, (m) =>
-      this.calculations.writeComputations(
-        m,
-        ctx.epoch,
-        job.surveyId,
-        Object.entries(output).map(([id, result]) => ({
+    const failures: ResponseFailure[] = [];
+    const rows: Array<{ id: string; computations: Record<string, unknown> }> = [];
+    for (const id of ids) {
+      const result = output[id];
+      const errors = Object.entries(result?.errors ?? {});
+      if (!result) failures.push({ id, error: 'No result' });
+      else if (errors.length > 0) {
+        failures.push({
           id,
-          computations: toComputations(result),
-        })),
-      ),
+          error: errors.map(([code, e]) => `${code}: ${e.name}: ${e.message}`).join('; '),
+        });
+      } else rows.push({ id, computations: result.results });
+    }
+    // A response has either results or a failure: its failure goes with the write.
+    await this.context.run(job, (m) =>
+      m.transaction(async (tx) => {
+        const written = await this.calculations.writeComputations(
+          tx,
+          ctx.epoch,
+          job.surveyId,
+          rows,
+        );
+        await this.failures.clear(tx, job, written);
+      }),
     );
-    return ids.filter((id) => !(id in output)).map((id) => ({ id, error: 'No result' }));
+    return failures;
   }
 
   hasResults(surveyId: string): Promise<boolean> {

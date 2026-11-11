@@ -153,21 +153,21 @@ export class CalculationsRepository {
    * Write Compute results for a chunk of the survey's responses, only while
    * `results_epoch` is still `epoch`. The row is read `FOR SHARE`, so a clear
    * either waits for this write to land (and deletes it) or commits first (and
-   * this writes nothing). Returns the number of responses written.
+   * this writes nothing). Returns the ids written.
    */
   async writeComputations(
     manager: EntityManager,
     epoch: number,
     surveyId: string,
     rows: Array<{ id: string; computations: Record<string, unknown> }>,
-  ): Promise<number> {
-    if (rows.length === 0) return 0;
+  ): Promise<string[]> {
+    if (rows.length === 0) return [];
     const params: unknown[] = [surveyId, epoch];
     const values = rows.map((row) => {
       params.push(row.id, JSON.stringify(row.computations));
       return `($${params.length - 1}::uuid, $${params.length}::jsonb)`;
     });
-    const written = returnedRows(
+    const written: Array<{ id: string }> = returnedRows(
       await manager.query(
         `WITH c AS (
            SELECT survey_id FROM survey_calculations
@@ -182,7 +182,7 @@ export class CalculationsRepository {
         params,
       ),
     );
-    return written.length;
+    return written.map((r) => r.id);
   }
 
   async surveyExists(surveyId: string): Promise<boolean> {

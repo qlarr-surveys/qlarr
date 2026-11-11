@@ -45,6 +45,6 @@ import { JobsWorker } from './jobs.worker';
     JobsService,
     JobsWorker,
   ],
-  exports: [JobsService, JobRegistry, JobContext],
+  exports: [JobsService, JobRegistry, JobContext, JobFailuresRepository],
 })
 export class JobsModule {}

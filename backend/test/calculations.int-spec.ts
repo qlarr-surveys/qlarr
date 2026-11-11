@@ -269,19 +269,28 @@ describe('Calculations', () => {
 
       const started = await compute(id).expect(200);
       expect(started.body).toMatchObject({ status: 'waiting', jobId: expect.any(String) });
-      expect(await settle(id)).toMatchObject({ status: 'none', uncomputedCount: 0 });
+      expect(await settle(id)).toMatchObject({
+        status: 'completed_with_failures',
+        failedCount: 1,
+        uncomputedCount: 0,
+      });
       expect(await lastJob(id)).toBe('completed');
 
       expect(await calculationsOf(r1)).toEqual([
         { code: 'double', label: 'Double', state: 'value', value: 42 },
         { code: 'fixed', label: 'Fixed', state: 'value', value: '21.0' },
       ]);
-      // No answer: NaN serializes to null (no value); reading a property of
-      // undefined throws (error).
+      // No answer: reading a property of undefined throws, so the response is
+      // a failure (with the engine's message) and gets no results at all.
       expect(await calculationsOf(r2)).toEqual([
-        { code: 'double', label: 'Double', state: 'empty', value: null },
-        { code: 'fixed', label: 'Fixed', state: 'error', value: null },
+        { code: 'double', label: 'Double', state: 'not_computed', value: null },
+        { code: 'fixed', label: 'Fixed', state: 'not_computed', value: null },
       ]);
+      const [failure] = await root.query(
+        `SELECT response_id AS id, error FROM job_failures WHERE survey_id = $1`,
+        [id],
+      );
+      expect(failure).toEqual({ id: r2, error: expect.stringMatching(/^fixed: TypeError: /) });
       expect(await calculationsOf(r3)).toEqual([]);
       expect((await calculationsOf(r4))[0]).toMatchObject({ state: 'value', value: 4 });
     });
@@ -667,7 +676,8 @@ describe('Calculations', () => {
 
       lines = await exportCsv(id, true);
       expect(lines.find((l) => l.includes(r1))!.endsWith(',42,21.0')).toBe(true);
-      expect(lines.find((l) => l.includes(r2))!.endsWith(',,#ERROR')).toBe(true);
+      // Failed: no results.
+      expect(lines.find((l) => l.includes(r2))!.endsWith('#NOT_COMPUTED,#NOT_COMPUTED')).toBe(true);
       // Incomplete: empty cells.
       expect(lines.find((l) => l.includes(r3))!.endsWith(',,')).toBe(true);
 

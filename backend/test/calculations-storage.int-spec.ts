@@ -133,11 +133,11 @@ describe('Calculations storage', () => {
       expect(
         await repo.writeComputations(root.manager, 0, id, [
           { id: r1, computations: { a: 1 } },
-          { id: r2, computations: { a: '#ERROR' } },
+          { id: r2, computations: { a: 2 } },
         ]),
-      ).toBe(2);
+      ).toEqual(expect.arrayContaining([r1, r2]));
       expect(await computationsOf(r1)).toEqual({ a: 1 });
-      expect(await computationsOf(r2)).toEqual({ a: '#ERROR' });
+      expect(await computationsOf(r2)).toEqual({ a: 2 });
 
       await repo.writeComputations(root.manager, 0, id, [{ id: r1, computations: { a: 5 } }]);
       expect(await computationsOf(r1)).toEqual({ a: 5 });
@@ -151,7 +151,7 @@ describe('Calculations storage', () => {
       expect((await repo.find(id))?.resultsEpoch).toBe(1);
       expect(
         await repo.writeComputations(root.manager, 0, id, [{ id: r3, computations: { a: 1 } }]),
-      ).toBe(0);
+      ).toEqual([]);
       expect(await computationsOf(r3)).toBeNull();
     });
 
@@ -171,7 +171,7 @@ describe('Calculations storage', () => {
       await runner.commitTransaction();
       await runner.release();
 
-      expect(await write).toBe(0);
+      expect(await write).toEqual([]);
       expect(await computationsOf(r7)).toBeNull();
     });
 
@@ -207,7 +207,7 @@ describe('Calculations storage', () => {
         await repo.writeComputations(root.manager, 0, id, [
           { id: r5, computations: { a: 1 } },
         ]),
-      ).toBe(0);
+      ).toEqual([]);
       expect(await computationsOf(r5)).toBeNull();
     });
   });
