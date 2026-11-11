@@ -27,6 +27,7 @@ import {
 import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
 import { buildResourceUrl } from "~/networking/common";
 import { useLogoUpload } from "~/hooks/useLogoUpload";
+import { groupTypeOf, pageLabels } from "~/utils/design/utils";
 import {
   logoSetup,
   setupOptions,
@@ -127,11 +128,11 @@ function ContentPanel({ designMode, navigatorRef }, ref) {
       list.push({ name: ELEMENTS.DROP_AREA, index: 0 });
     }
 
-    let pageNumber = 1;
+    const labels = pageLabels(groups, t);
     // Find the last regular group index (right before the end page)
     let lastRegularIndex = -1;
     for (let i = groups.length - 1; i >= 0; i--) {
-      const gt = (groups[i].type || groups[i].groupType || "").toLowerCase();
+      const gt = groupTypeOf(groups[i]);
       if (gt !== "welcome" && gt !== "end") {
         lastRegularIndex = i;
         break;
@@ -139,20 +140,9 @@ function ContentPanel({ designMode, navigatorRef }, ref) {
     }
 
     for (let i = 0; i < groups.length; i++) {
-      const groupType = (groups[i].type || groups[i].groupType || "").toLowerCase();
-      let label = null;
-
-      if (groupType === "welcome") {
-        label = t("welcome_page_label");
-      } else if (groupType === "end") {
-        label = t("thank_you_page_label");
-      } else {
-        label = t("page_label", { number: pageNumber });
-        pageNumber++;
-      }
-
+      const groupType = groupTypeOf(groups[i]);
       const isLastGroup = i === lastRegularIndex;
-      list.push({ name: ELEMENTS.GROUP, group: groups[i], index: i, label, isLastGroup });
+      list.push({ name: ELEMENTS.GROUP, group: groups[i], index: i, label: labels[i], isLastGroup });
       if (groupType !== "end") {
         list.push({ name: ELEMENTS.DROP_AREA, group: groups[i], index: i + 1 });
       }
@@ -261,6 +251,14 @@ function ContentPanel({ designMode, navigatorRef }, ref) {
               align: "start",
             });
           }
+        } else if (
+          lastAddedComponent.type === "question" &&
+          lastAddedComponent.code
+        ) {
+          scrollToElement(
+            lastAddedComponent.code,
+            lastAddedComponent.groupCode
+          );
         } else if (lastAddedComponent.type === "question") {
           // Calculate the exact index for the newly added question
           const groupBaseIndex = lastAddedComponent.groupIndex * 2; // Groups and their drop areas
@@ -283,9 +281,7 @@ function ContentPanel({ designMode, navigatorRef }, ref) {
       return;
     }
     const itemIndex = items.findIndex(
-      (it) =>
-        it.name === ELEMENTS.GROUP &&
-        (it.group.type || it.group.groupType || "").toLowerCase() === "end",
+      (it) => it.name === ELEMENTS.GROUP && groupTypeOf(it.group) === "end",
     );
     const timeoutId = setTimeout(() => {
       if (itemIndex !== -1) {
@@ -301,78 +297,92 @@ function ContentPanel({ designMode, navigatorRef }, ref) {
     return () => clearTimeout(timeoutId);
   }, [revealQuotaMessage, items]);
 
+  const groupItemIndex = (groupCode) =>
+    items.findIndex(
+      (it) => it.name === ELEMENTS.GROUP && it.group.code === groupCode
+    );
+
+  const scrollToElement = (code, groupCode, onArrive) => {
+    const itemIndex = groupItemIndex(groupCode);
+    if (itemIndex === -1 || !virtuosoRef.current) {
+      return;
+    }
+    virtuosoRef.current.scrollToIndex({
+      index: itemIndex,
+      align: "start",
+      behavior: "auto",
+    });
+
+    let frames = 0;
+    let lastScrollTop = null;
+    let stableFrames = 0;
+    const reveal = () => {
+      const wrapper = virtuosoWrapperRef.current;
+      const scroller = wrapper?.querySelector("[data-virtuoso-scroller]");
+      const element = wrapper?.querySelector(`[data-code="${code}"]`);
+      const outOfFrames = frames++ > 60;
+      if (!scroller || !element) {
+        if (!outOfFrames) requestAnimationFrame(reveal);
+        return;
+      }
+      stableFrames =
+        scroller.scrollTop === lastScrollTop ? stableFrames + 1 : 0;
+      lastScrollTop = scroller.scrollTop;
+      if (!outOfFrames) {
+        if (stableFrames < 2) {
+          requestAnimationFrame(reveal);
+          return;
+        }
+        const elementRect = element.getBoundingClientRect();
+        const scrollerRect = scroller.getBoundingClientRect();
+        const margin =
+          code === groupCode
+            ? 0
+            : Math.max((scrollerRect.height - elementRect.height) / 2, 0);
+        const target = Math.min(
+          Math.max(
+            scroller.scrollTop +
+              elementRect.top -
+              scrollerRect.top -
+              margin,
+            0
+          ),
+          scroller.scrollHeight - scroller.clientHeight
+        );
+        if (Math.abs(target - scroller.scrollTop) > 1) {
+          scroller.scrollTop = target;
+          requestAnimationFrame(reveal);
+          return;
+        }
+      }
+      onArrive?.(element);
+    };
+    requestAnimationFrame(reveal);
+  };
+
+  const flashSearchHit = (element) => {
+    element.classList.remove(styles.searchHit);
+    void element.offsetWidth;
+    element.classList.add(styles.searchHit);
+    const clearHit = (event) => {
+      if (event.target !== element) return;
+      element.classList.remove(styles.searchHit);
+      element.removeEventListener("animationend", clearHit);
+    };
+    element.addEventListener("animationend", clearHit);
+  };
+
   useImperativeHandle(
     navigatorRef,
     () => ({
       navigateTo: ({ code, groupCode, type }) => {
-        const itemIndex = items.findIndex(
-          (it) => it.name === ELEMENTS.GROUP && it.group.code === groupCode
-        );
-        if (itemIndex === -1 || !virtuosoRef.current) {
+        if (groupItemIndex(groupCode) === -1 || !virtuosoRef.current) {
           return;
         }
         if (designMode == DESIGN_SURVEY_MODE.DESIGN) {
           dispatch(setup({ code, rules: setupOptions(type) }));
         }
-        virtuosoRef.current.scrollToIndex({
-          index: itemIndex,
-          align: "start",
-          behavior: "auto",
-        });
-
-        let frames = 0;
-        let lastScrollTop = null;
-        let stableFrames = 0;
-        const reveal = () => {
-          const wrapper = virtuosoWrapperRef.current;
-          const scroller = wrapper?.querySelector("[data-virtuoso-scroller]");
-          const element = wrapper?.querySelector(`[data-code="${code}"]`);
-          const outOfFrames = frames++ > 60;
-          if (!scroller || !element) {
-            if (!outOfFrames) requestAnimationFrame(reveal);
-            return;
-          }
-          stableFrames =
-            scroller.scrollTop === lastScrollTop ? stableFrames + 1 : 0;
-          lastScrollTop = scroller.scrollTop;
-          if (!outOfFrames) {
-            if (stableFrames < 2) {
-              requestAnimationFrame(reveal);
-              return;
-            }
-            const elementRect = element.getBoundingClientRect();
-            const scrollerRect = scroller.getBoundingClientRect();
-            const margin =
-              code === groupCode
-                ? 0
-                : Math.max((scrollerRect.height - elementRect.height) / 2, 0);
-            const target = Math.min(
-              Math.max(
-                scroller.scrollTop +
-                  elementRect.top -
-                  scrollerRect.top -
-                  margin,
-                0
-              ),
-              scroller.scrollHeight - scroller.clientHeight
-            );
-            if (Math.abs(target - scroller.scrollTop) > 1) {
-              scroller.scrollTop = target;
-              requestAnimationFrame(reveal);
-              return;
-            }
-          }
-          element.classList.remove(styles.searchHit);
-          void element.offsetWidth;
-          element.classList.add(styles.searchHit);
-          const clearHit = (event) => {
-            if (event.target !== element) return;
-            element.classList.remove(styles.searchHit);
-            element.removeEventListener("animationend", clearHit);
-          };
-          element.addEventListener("animationend", clearHit);
-        };
-        requestAnimationFrame(reveal);
+        scrollToElement(code, groupCode, flashSearchHit);
       },
     }),
     [items, designMode, dispatch]

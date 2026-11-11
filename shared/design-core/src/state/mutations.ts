@@ -1372,10 +1372,12 @@ export function onDrag(state, payload) {
     case "reorder_questions":
       reorderQuestions(state, state.Survey, payload);
       state.index = buildCodeIndex(state);
+      if (payload.reveal) revealMovedQuestion(state, payload);
       break;
     case "reparent_question":
       reparentQuestion(state, state.Survey, payload);
       state.index = buildCodeIndex(state);
+      if (payload.reveal) revealMovedQuestion(state, payload);
       break;
     case "reorder_groups":
       reorderGroups(state.Survey, payload);
@@ -1577,6 +1579,21 @@ const reparentQuestion = (state, survey, payload) => {
   state["reorder_refresh_code"] = Math.floor(Math.random() * 1000000);
   cleanupRandomRules(destinationGroup);
   cleanupRandomRules(sourceGroup);
+};
+
+const revealMovedQuestion = (state, { id, destination }) => {
+  state.skipScroll = false;
+  state.lastAddedComponent = {
+    type: "question",
+    code: id,
+    groupCode: destination,
+    groupIndex: state.Survey.children.findIndex(
+      (group) => group.code === destination,
+    ),
+    questionIndex: state[destination].children.findIndex(
+      (question) => question.code === id,
+    ),
+  };
 };
 
 const reorderQuestions = (state, survey, payload) => {

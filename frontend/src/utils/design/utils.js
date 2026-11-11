@@ -92,6 +92,19 @@ export const diff = (obj1, obj2) => {
   return diffs;
 };
 
+export const groupTypeOf = (group) =>
+  (group?.type || group?.groupType || "").toLowerCase();
+
+export const pageLabels = (groups, t) => {
+  let pageNumber = 1;
+  return groups.map((group) => {
+    const groupType = groupTypeOf(group);
+    if (groupType === "welcome") return t("welcome_page_label");
+    if (groupType === "end") return t("thank_you_page_label");
+    return t("page_label", { number: pageNumber++ });
+  });
+};
+
 export function truncateWithEllipsis(text, maxLength) {
   if (text?.length > maxLength) {
     return text.substring(0, maxLength) + "...";
