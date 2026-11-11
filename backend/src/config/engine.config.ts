@@ -30,7 +30,7 @@ export default registerAs('engine', (): EngineConfig => {
       : Math.max(1, cpus - 1),
     jobPoolSize: process.env.ENGINE_JOB_POOL_SIZE
       ? parseInt(process.env.ENGINE_JOB_POOL_SIZE, 10)
-      : 1,
+      : 2,
     timeoutMs: process.env.ENGINE_TIMEOUT_MS
       ? parseInt(process.env.ENGINE_TIMEOUT_MS, 10)
       : 5000,
