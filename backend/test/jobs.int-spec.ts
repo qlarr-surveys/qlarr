@@ -89,12 +89,13 @@ describe('Jobs', () => {
    * A kind over a survey's real responses, 3 per job, 2 per chunk, failing at
    * most 2: a response in `failing` fails (with its error), one in `done` is
    * left out, and a survey in `throwing` throws. `gates` holds a job's chunk
-   * until released.
+   * until released; `chunks` counts each job's chunks.
    */
   const done = new Set<string>();
   const failing = new Map<string, string>();
   const throwing = new Set<string>();
   const gates = new Map<string, Promise<void>>();
+  const chunks = new Map<string, number>();
   const flaky: JobHandler<null> = {
     kind: 'test.flaky',
     roles: [Role.SUPER_ADMIN],
@@ -117,6 +118,7 @@ describe('Jobs', () => {
     runChunk: async (job: Job, ids: string[]): Promise<ResponseFailure[]> => {
       startedOf(job.id);
       entered.get(job.id)!();
+      chunks.set(job.id, (chunks.get(job.id) ?? 0) + 1);
       await gates.get(job.surveyId);
       if (throwing.has(job.surveyId)) throw new Error('boom');
       const failures: ResponseFailure[] = [];
@@ -485,6 +487,23 @@ describe('Jobs', () => {
 
       expect(await failuresOf(survey)).toEqual([]);
       expect(await rowOf(id)).toEqual({ done: 0, total: 1 });
+    });
+
+    it('a cancel caught by the fence stops the job before its signal aborts', async () => {
+      const survey = await createSurvey('Fence stops');
+      await addResponses(survey, 3);
+
+      // Two chunks; the first returns only after the cancel committed.
+      let release!: () => void;
+      gates.set(survey, new Promise((r) => (release = r)));
+      const id = await jobs.enqueue('test.flaky', survey, '');
+      await startedOf(id);
+      await root.manager.transaction((tx) => jobs.invalidate(tx, 'test.flaky', survey, ''));
+      release();
+      await new Promise((r) => setTimeout(r, 1000));
+
+      expect(chunks.get(id)).toBe(1);
+      expect(await rowOf(id)).toEqual({ done: 0, total: 3 });
     });
 
     it('go with their response and their survey', async () => {

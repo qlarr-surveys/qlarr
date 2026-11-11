@@ -82,7 +82,8 @@ export class JobsWorker implements OnApplicationBootstrap, OnModuleDestroy {
    * Prepare, list the responses (a normal run's pending ones, or a retry's
    * failed ones), trim to `maxResponses`, then run the chunks until done or
    * aborted. Each chunk's failures and progress are written in one
-   * transaction, fenced so none land once the job was cancelled. Past
+   * transaction, fenced so none land once the job was cancelled, which also
+   * stops the run (pg-boss settles nothing on a job no longer active). Past
    * `maxFailures` the job fails; its results and failures so far stay.
    * A throw is stored marked with its code (`job_error` unless said), so
    * `JobsService` tells it apart from a failure pg-boss records itself
@@ -103,14 +104,17 @@ export class JobsWorker implements OnApplicationBootstrap, OnModuleDestroy {
         signal.throwIfAborted();
         const chunk = ids.slice(i, i + handler.chunkSize);
         const failed = await handler.runChunk(job, chunk, ctx, signal);
-        await this.context.run(job, (m) =>
+        const active = await this.context.run(job, (m) =>
           m.transaction(async (tx) => {
-            if (!(await this.rows.lockIfActive(tx, job.kind, job.id))) return;
+            if (!(await this.rows.lockIfActive(tx, job.kind, job.id))) return false;
             await this.failures.record(tx, job, failed);
             await this.rows.addDone(tx, job.id, chunk.length);
             await this.rows.addFailed(tx, job.id, failed.length);
+            return true;
           }),
         );
+        // Cancelled before its signal fired: no more chunks.
+        if (!active) return;
         failedTotal += failed.length;
         if (failedTotal > handler.maxFailures) {
           throw new JobFailedError('Too many responses failed', 'too_many_failures');
@@ -125,7 +129,7 @@ export class JobsWorker implements OnApplicationBootstrap, OnModuleDestroy {
 }
 
 /** A job failure with its own code, rather than `job_error`. */
-class JobFailedError extends Error {
+export class JobFailedError extends Error {
   constructor(
     message: string,
     readonly code: JobErrorCode,
