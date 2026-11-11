@@ -290,7 +290,7 @@ describe('Calculations', () => {
         `SELECT response_id AS id, error FROM job_failures WHERE survey_id = $1`,
         [id],
       );
-      expect(failure).toEqual({ id: r2, error: expect.stringMatching(/^fixed: TypeError: /) });
+      expect(failure).toEqual({ id: r2, error: expect.stringMatching(/^Fixed \(fixed\): TypeError: /) });
       expect(await calculationsOf(r3)).toEqual([]);
       expect((await calculationsOf(r4))[0]).toMatchObject({ state: 'value', value: 4 });
     });

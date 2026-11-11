@@ -93,6 +93,7 @@ export class CalcComputeHandler implements JobHandler<ComputeContext>, OnModuleI
       pool: 'job',
       signal,
     });
+    const labels = new Map(ctx.calculations.map((c) => [c.code, c.label]));
     const failures: ResponseFailure[] = [];
     const rows: Array<{ id: string; computations: Record<string, unknown> }> = [];
     for (const id of ids) {
@@ -102,7 +103,9 @@ export class CalcComputeHandler implements JobHandler<ComputeContext>, OnModuleI
       else if (errors.length > 0) {
         failures.push({
           id,
-          error: errors.map(([code, e]) => `${code}: ${e.name}: ${e.message}`).join('; '),
+          error: errors
+            .map(([code, e]) => `${labels.get(code)} (${code}): ${e.name}: ${e.message}`)
+            .join('; '),
         });
       } else rows.push({ id, computations: result.results });
     }
