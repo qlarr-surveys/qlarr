@@ -19,7 +19,10 @@
         "survey_design_error": "Erro de Design de Pesquisa... Verifique o Design da Pesquisa",
         "survey_expired": "Esta pesquisa expirou",
         "survey_not_active": "Esta pesquisa não está ativa",
-        "survey_scheduled": "Esta pesquisa está agendada para começar no futuro"
+        "survey_scheduled": "Esta pesquisa está agendada para começar no futuro",
+        "client_time_skew": "O relógio do seu dispositivo não está sincronizado. Corrija as configurações de data e hora e recarregue a página.",
+        "survey_not_published": "Esta pesquisa ainda não foi publicada",
+        "survey_not_found": "Esta pesquisa não está disponível"
     },
     "preview":"Você está no modo de pré-visualização",
     "upload": "Enviar",
@@ -66,6 +69,7 @@
     "ranking_ranked": "{{count}} classificadas",
     "ranking_drag_hint": "Arraste os itens para aqui para classificá-los",
     "ranking_all_ranked": "Todos os itens foram classificados",
+    "preview_not_exportable": "Respostas de teste (pré-visualização) não podem ser exportadas",
     "preview_end_actions": {
         "heading": "Opções de pré-visualização",
         "check_response": "Ver resposta",

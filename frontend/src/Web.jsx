@@ -103,6 +103,22 @@ function Web() {
         }
       />
       <Route
+        path={routes.designHistory}
+        element={
+          <Suspense fallback={<LoadingIndicator />}>
+            <PrivateComponent>
+              <ForceRole roles={[ROLES.SUPER_ADMIN, ROLES.SURVEY_ADMIN]}>
+                <ManagePageWrapper headerOptions={HEADER_OPTIONS.NONE} resolveSurveyId={true}>
+                  <ManageSurvey
+                    landingPage={MANAGE_SURVEY_LANDING_PAGES.HISTORY}
+                  />
+                </ManagePageWrapper>
+              </ForceRole>
+            </PrivateComponent>
+          </Suspense>
+        }
+      />
+      <Route
         path={routes.preview}
         element={
           <Suspense fallback={<LoadingIndicator />}>
@@ -172,7 +188,7 @@ function Web() {
           <Suspense fallback={<LoadingIndicator />}>
             <PrivateComponent>
               <ForceRole roles={[ROLES.SUPER_ADMIN]}>
-                <ManagePageWrapper headerOptions={HEADER_OPTIONS.GENERAL}>
+                <ManagePageWrapper headerOptions={HEADER_OPTIONS.GENERAL} allowSmallScreens>
                   <ManageUsers />
                 </ManagePageWrapper>
               </ForceRole>
@@ -185,7 +201,7 @@ function Web() {
         element={
           <Suspense fallback={<LoadingIndicator />}>
             <PrivateComponent>
-              <ManagePageWrapper headerOptions={HEADER_OPTIONS.GENERAL}>
+              <ManagePageWrapper headerOptions={HEADER_OPTIONS.GENERAL} allowSmallScreens>
                 <ProfileView />
               </ManagePageWrapper>
             </PrivateComponent>
@@ -213,7 +229,7 @@ function Web() {
         element={
           <Suspense fallback={<LoadingIndicator />}>
             <PrivateComponent>
-              <ManagePageWrapper headerOptions={HEADER_OPTIONS.GENERAL}>
+              <ManagePageWrapper headerOptions={HEADER_OPTIONS.GENERAL} allowSmallScreens>
                 <Dashboard />
               </ManagePageWrapper>
             </PrivateComponent>
@@ -226,7 +242,7 @@ function Web() {
         element={
           <PublicOnlyRoute>
             <Suspense fallback={<LoadingIndicator />}>
-              <ManagePageWrapper headerOptions={HEADER_OPTIONS.AUTH}>
+              <ManagePageWrapper headerOptions={HEADER_OPTIONS.AUTH} allowSmallScreens>
                 <AuthIllustrationLayout>
                   <LoginView />
                 </AuthIllustrationLayout>
@@ -239,7 +255,7 @@ function Web() {
         path={routes.forgotPassword}
         element={
           <Suspense fallback={<LoadingIndicator />}>
-            <ManagePageWrapper headerOptions={HEADER_OPTIONS.AUTH}>
+            <ManagePageWrapper headerOptions={HEADER_OPTIONS.AUTH} allowSmallScreens>
               <AuthIllustrationLayout>
                 <ForgotPasswordView />
               </AuthIllustrationLayout>
@@ -251,8 +267,10 @@ function Web() {
         path={routes.resetPassword}
         element={
           <Suspense fallback={<LoadingIndicator />}>
-            <ManagePageWrapper headerOptions={HEADER_OPTIONS.AUTH}>
-              <ResetPasswordView />
+            <ManagePageWrapper headerOptions={HEADER_OPTIONS.AUTH} allowSmallScreens>
+              <AuthIllustrationLayout>
+                <ResetPasswordView />
+              </AuthIllustrationLayout>
             </ManagePageWrapper>
           </Suspense>
         }
@@ -261,8 +279,10 @@ function Web() {
         path={routes.confirmNewUser}
         element={
           <Suspense fallback={<LoadingIndicator />}>
-            <ManagePageWrapper headerOptions={HEADER_OPTIONS.AUTH}>
-              <ResetPasswordView confirmNewUser={true} />
+            <ManagePageWrapper headerOptions={HEADER_OPTIONS.AUTH} allowSmallScreens>
+              <AuthIllustrationLayout>
+                <ResetPasswordView confirmNewUser={true} />
+              </AuthIllustrationLayout>
             </ManagePageWrapper>
           </Suspense>
         }
@@ -289,6 +309,9 @@ const PrivateComponent = ({ children }) => {
 
 const ForceRole = ({ roles, children }) => {
   const user = TokenService.getUser();
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
   let hasCorrectRole = false;
   user.roles.forEach((el) => {
     if (roles.indexOf(el) > -1) {

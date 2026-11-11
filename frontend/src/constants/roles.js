@@ -8,8 +8,11 @@ export const ROLES = {
   ANALYST: "analyst",
 };
 
+// Empty after logout: the session is gone while mounted components still render.
+const currentRoles = () => TokenService.getUser()?.roles ?? [];
+
 export const isSurveyAdmin = () => {
-  const roles = TokenService.getUser().roles;
+  const roles = currentRoles();
   return (
     roles.indexOf(ROLES.SUPER_ADMIN) != -1 ||
     roles.indexOf(ROLES.SURVEY_ADMIN) != -1
@@ -33,35 +36,35 @@ export const availablePages = (user) => {
 };
 
 export const isSuperAdmin = () => {
-  const roles = TokenService.getUser().roles;
+  const roles = currentRoles();
   return (
     roles.indexOf(ROLES.SUPER_ADMIN) != -1
   );
 };
 
 export const isUserAnalyst = () => {
-  const roles = TokenService.getUser().roles;
+  const roles = currentRoles();
   return (
     roles.indexOf(ROLES.SUPER_ADMIN) != -1 || roles.indexOf(ROLES.ANALYST) != -1 || roles.indexOf(ROLES.SURVEY_ADMIN) != -1
   );
 };
 
-export const isSurveyor = (user) => {
-  const roles = user.roles;
+export const isSurveyor = () => {
+  const roles = currentRoles();
   return (
     roles.indexOf(ROLES.SUPER_ADMIN) != -1 ||
     roles.indexOf(ROLES.SURVEYOR) != -1
   );
 };
 
-export const isAnalyst = (user) => {
-  const roles = user.roles;
+export const isAnalyst = () => {
+  const roles = currentRoles();
   return (
     roles.indexOf(ROLES.SUPER_ADMIN) != -1 || roles.indexOf(ROLES.ANALYST) != -1 || roles.indexOf(ROLES.SURVEY_ADMIN) != -1
   );
 };
 
 export const isSurveyorOnly = () => {
-  const roles = TokenService.getUser().roles;
+  const roles = currentRoles();
   return roles.length == 1 && roles.indexOf(ROLES.SURVEYOR) != -1;
 };

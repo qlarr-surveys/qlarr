@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import { LoggedInUserResponse } from './access.dto';
 import { UserDTO } from './user.dto';
 import { UserEntity } from './user.entity';
@@ -32,6 +33,8 @@ export function loggedInResponse(
   };
 }
 
-/** ≈ UserMapper.randomPassword — the placeholder set for invited users. */
-export const randomPassword = (firstName: string, lastName: string): string =>
-  `${firstName}UpdateMe${lastName}`;
+/**
+ * The placeholder password for invited users: nobody knows it, the invitee sets
+ * a real one through the invitation link.
+ */
+export const randomPassword = (): string => randomBytes(32).toString('base64url');

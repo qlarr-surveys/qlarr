@@ -25,6 +25,7 @@ import DesignTourProvider from "~/components/design/DesignTour";
 const ResponsesSurvey = React.lazy(() => import("../manage/ResponsesSurvey"));
 const EditSurvey = React.lazy(() => import("../manage/EditSurvey"));
 const DesignSurvey = React.lazy(() => import("../DesignSurvey"));
+const DesignHistory = React.lazy(() => import("../manage/DesignHistory"));
 
 
 function ManageSurvey({ landingPage }) {
@@ -103,6 +104,10 @@ function ManageSurvey({ landingPage }) {
   const shouldShowEditSurvey = () =>
     selectedPage == MANAGE_SURVEY_LANDING_PAGES.SETTINGS;
 
+  const isHistoryPage = selectedPage == MANAGE_SURVEY_LANDING_PAGES.HISTORY;
+
+  const shouldShowHistory = () => isHistoryPage && designAvailable;
+
 
   const changePage = useCallback((tab) => {
     setSelectedTab(tab);
@@ -115,20 +120,29 @@ function ManageSurvey({ landingPage }) {
   const content = (
     <>
       <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <WorkspaceTabs
-          availablePages={availablePagesMemo}
-          selectedPage={selectedPage}
-          surveyId={params.surveyId}
-          onPageChange={changePage}
-        />
+        {!isHistoryPage && (
+          <WorkspaceTabs
+            availablePages={availablePagesMemo}
+            selectedPage={selectedPage}
+            surveyId={params.surveyId}
+            onPageChange={changePage}
+          />
+        )}
         <Suspense fallback={<LoadingDots fullHeight />}>
-          <Box className={styles.wrapper}>
+          {/* The history page has no header or tabs, so it takes the full height. */}
+          <Box
+            className={`${styles.wrapper} ${
+              isHistoryPage ? styles.fullHeight : ""
+            }`}
+          >
             {shouldShowResponses() ? (
               <ResponsesSurvey />
             ) : shouldShowEditSurvey() ? (
               <EditSurvey onPublish={() => loadSurvey()} />
             ) : shouldShowDesign() ? (
               <DesignSurvey />
+            ) : shouldShowHistory() ? (
+              <DesignHistory />
             ) : (
               <></>
             )}
@@ -153,7 +167,8 @@ export const landingTab = (landingPage, user) => {
     isSurveyAdmin(user) &&
     (landingPage == MANAGE_SURVEY_LANDING_PAGES.DESIGN ||
       landingPage == MANAGE_SURVEY_LANDING_PAGES.SETTINGS ||
-      landingPage == MANAGE_SURVEY_LANDING_PAGES.RESPONSES)
+      landingPage == MANAGE_SURVEY_LANDING_PAGES.RESPONSES ||
+      landingPage == MANAGE_SURVEY_LANDING_PAGES.HISTORY)
   ) {
     return landingPage;
   } else {

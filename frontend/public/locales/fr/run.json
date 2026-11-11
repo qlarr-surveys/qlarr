@@ -19,7 +19,10 @@
         "survey_design_error": "Erreur de Conception de Sondage... Vérifiez la Conception du Sondage",
         "survey_expired": "Ce sondage a expiré",
         "survey_not_active": "Ce sondage n'est pas actif",
-        "survey_scheduled": "Ce sondage est programmé pour commencer dans le futur"
+        "survey_scheduled": "Ce sondage est programmé pour commencer dans le futur",
+        "client_time_skew": "L'horloge de votre appareil n'est pas synchronisée. Veuillez corriger vos paramètres de date et d'heure, puis recharger la page.",
+        "survey_not_published": "Ce sondage n'a pas encore été publié",
+        "survey_not_found": "Ce sondage n'est pas disponible"
     },
     "preview":"Vous êtes en mode aperçu",
     "upload": "Télécharger",
@@ -66,6 +69,7 @@
     "ranking_ranked": "{{count}} classés",
     "ranking_drag_hint": "Faites glisser les éléments ici pour les classer",
     "ranking_all_ranked": "Tous les éléments ont été classés",
+    "preview_not_exportable": "Les réponses de test (aperçu) ne peuvent pas être exportées",
     "preview_end_actions": {
         "heading": "Options d'aperçu",
         "check_response": "Voir la réponse",

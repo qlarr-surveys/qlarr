@@ -2,6 +2,8 @@
   margin: auto;
   min-width: 300px;
   height: calc(100vh - 64px);
+  /* dvh tracks the visible viewport on mobile, so the page itself never scrolls. */
+  height: calc(100dvh - 64px);
   overflow: auto;
   background: linear-gradient(135deg, #F7F8FC 0%, #EFF1FC 100%);
   padding-top: 40px;

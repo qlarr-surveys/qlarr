@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useMatch, useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { ArrowLeft, Eye } from "lucide-react";
+import { ArrowLeft, Eye, History } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import styles from "./SurveyHeader.module.css";
@@ -10,7 +10,8 @@ import { isSessionRtl } from "~/utils/common";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import { routes } from "~/routes";
 import TokenService from "~/services/TokenService";
-import { availablePages } from "~/constants/roles";
+import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
+import { availablePages, isSurveyAdmin } from "~/constants/roles";
 
 // Lucide draws on the rendered pixel grid rather than MUI's 24px one, so the
 // size is the icon's real size and the stroke is set with it. These two are
@@ -36,6 +37,15 @@ export const SurveyHeader = ({ showPreview, showSaveState }) => {
 
   const name = useSelector((state) => state.editState.survey?.name);
 
+  // Builder, Theme and Translation share the design route; only the Builder
+  // gets the version history.
+  const onDesignRoute = Boolean(useMatch(routes.designSurvey));
+  const designMode = useSelector(
+    (state) => state.designState.designMode || DESIGN_SURVEY_MODE.DESIGN
+  );
+  const showHistory =
+    onDesignRoute && designMode === DESIGN_SURVEY_MODE.DESIGN && isSurveyAdmin();
+
   const availablePagesMemo = useMemo(() => {
     return availablePages(user);
   }, [user]);
@@ -50,14 +60,14 @@ export const SurveyHeader = ({ showPreview, showSaveState }) => {
         <button
           type="button"
           aria-label={t("goBack")}
-          className={styles.backBtn}
+          className={styles.iconBtn}
           onClick={() => {
             dispatch(onEditErrorSeen());
             nav("/");
           }}
         >
           <ArrowLeft
-            size={17}
+            size={24}
             strokeWidth={ICON_STROKE}
             aria-hidden="true"
             className={isRtl ? styles.backIconRtl : undefined}
@@ -72,6 +82,21 @@ export const SurveyHeader = ({ showPreview, showSaveState }) => {
       <div className={styles.spacer} />
 
       {showSaveState && <SaveState />}
+
+      {showHistory && (
+        <CustomTooltip showIcon={false} title={t("edit_survey.version_history")}>
+          <button
+            type="button"
+            aria-label={t("edit_survey.version_history")}
+            className={styles.iconBtn}
+            onClick={() =>
+              nav(routes.designHistory.replace(":surveyId", surveyId))
+            }
+          >
+            <History size={24} strokeWidth={ICON_STROKE} aria-hidden="true" />
+          </button>
+        </CustomTooltip>
+      )}
 
       {showPreview && (
         <button
@@ -103,10 +128,19 @@ function SaveState() {
   const isSaving = useSelector(
     (state) => state.designState.isSaving || state.editState.isSaving
   );
+  const lastSave = useSelector((state) => state.editState.lastSave);
+
+  // Nothing to say before the first save.
+  const status = isSaving ? "saving" : lastSave;
 
   return (
-    <span role="status" className={styles.saveState}>
-      {isSaving ? t("survey_header.saving") : t("survey_header.saved")}
+    <span
+      role="status"
+      className={`${styles.saveState} ${
+        status == "error" ? styles.saveStateError : ""
+      }`}
+    >
+      {status && t(`survey_header.${status}`)}
     </span>
   );
 }

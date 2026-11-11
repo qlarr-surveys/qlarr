@@ -22,10 +22,13 @@
   "timezone_info": "Nous utilisons votre fuseau horaire local pour calculer l'heure d'expiration du sondage.",
   "timezone_tooltip": "Le sondage expirera à 00:00 à la date de fin sélectionnée dans votre fuseau horaire local",
   "goBack": "Retour",
+  "go_to_dashboard": "Aller au tableau de bord",
   "preview": "Aperçu",
   "survey_header": {
     "saved": "Toutes les modifications sont enregistrées",
-    "saving": "Enregistrement…"
+    "saving": "Enregistrement…",
+    "error": "Impossible d'enregistrer les modifications",
+    "restored": "Version restaurée"
   },
   "mobile_view": "Console Non Optimisée pour les Petits Écrans",
   "mobile_view_working": "Notre console est complexe et ne prend pas en charge les petits écrans pour la meilleure expérience. Mais ne vous inquiétez pas - les sondages que nous vous aidons à créer sont excellents sur les petits écrans !",
@@ -92,6 +95,7 @@
       "start_date": "Date de Début",
       "end_date": "Date de Fin"
     },
+    "version_history": "Historique des versions",
     "edit_name": "Modifier le nom du sondage : {{name}}",
     "edit_description": "Modifier la description du sondage",
     "delete_survey_title": "Supprimer « {{survey_name}} » ?"
@@ -261,10 +265,15 @@
     "wrong_confirmation_token": "Ce Jeton de Confirmation est incorrect, Veuillez Vous Inscrire à Nouveau",
     "survey_quota": "Désolé, ce sondage n'accepte plus de réponses.",
     "invalid_translations_csv": "Ce n'est pas un CSV de traductions.",
-    "translations_csv_not_utf8": "Ce fichier n'est pas encodé en UTF-8. Dans Excel, utilisez Fichier → Enregistrer sous → « CSV UTF-8 (délimité par des virgules) » puis importez-le à nouveau."
+    "translations_csv_not_utf8": "Ce fichier n'est pas encodé en UTF-8. Dans Excel, utilisez Fichier → Enregistrer sous → « CSV UTF-8 (délimité par des virgules) » puis importez-le à nouveau.",
+    "snapshot_not_found": "Cette version n'existe plus. Rechargez la page et réessayez.",
+    "nothing_to_revert": "Aucune modification non publiée à annuler.",
+    "user_already_confirmed": "Cet utilisateur a déjà accepté l'invitation.",
+    "survey_not_found": "Ce sondage n'existe pas ou a été supprimé"
   },
   "processed_successes": {
     "copied": "Copié dans le presse-papiers",
+    "invitation_resent": "Invitation renvoyée",
     "updated": "Mis à jour avec succès"
   },
   "profile": {
@@ -292,16 +301,13 @@
     "filter_completed_show_completed": "Réponses Complètes uniquement",
     "filter_completed_show_incomplete": "Réponses Incomplètes uniquement",
     "filter_completed_show_disqualified": "Réponses disqualifiées uniquement",
-    "filter_preview": "Filtrer les Réponses d'Aperçu",
-    "filter_preview_show_actual": "Réponses Réelles uniquement",
-    "filter_preview_show_all": "Toutes les Réponses",
-    "filter_preview_show_preview": "Réponses d'Aperçu uniquement",
+    "filter_preview_show_preview": "Réponses de Test (Aperçu) uniquement",
     "ip_addr": "Adresse IP",
     "label_displayed_rows": "{{from}}-{{to}} sur {{count}}",
     "label_rows_per_page": "Lignes par page :",
     "label_surveys_per_page": "Sondages par page :",
     "lang": "Langue",
-    "preview": "Aperçu",
+    "test_response": "Réponse de test (aperçu)",
     "raw_values": "Afficher les Valeurs Brutes",
     "reset_surveyor_filter": "Réinitialiser le Filtre de Sondeur",
     "start_date": "Date de Début",
@@ -325,6 +331,10 @@
     "status_incomplete": "Incomplète",
     "database_format": "Format de Base de Données",
     "text_format": "Format de Texte",
+    "header_type": "Type d'en-tête",
+    "text_headers": "Texte de la question",
+    "code_headers": "Codes des questions",
+    "export_options": "Plus d'options d'export",
     "range_invalid": "\"De\" ne peut pas être supérieur à \"À\".",
     "all_responses": "Toutes les réponses",
     "custom_range": "Plage personnalisée",
@@ -336,7 +346,7 @@
     "yes": "Oui",
     "no": "Non",
     "disqualified": "Disqualifié",
-    "preview_not_exportable": "Les réponses d'aperçu ne peuvent pas être exportées",
+    "preview_not_exportable": "Les réponses de test (aperçu) ne peuvent pas être exportées",
     "question": "Question",
     "answer": "Réponse",
     "events": "Événements",
@@ -372,6 +382,7 @@
     "effective_base": "Base effective",
     "efficiency": "Efficacité",
     "weight_note": "Pondération maximale {{maxWeight}}. Les tests de significativité utilisent la base effective, et non la base pondérée.",
+    "weight_filtered_note": "Des filtres sont actifs. Les valeurs réelles et les pondérations proviennent des {{total}} réponses, pas seulement des {{filtered}} du tableau. Chaque répondant conserve sa pondération de l'échantillon complet : le tableau filtré peut donc ne pas correspondre aux cibles.",
     "base": "Base",
     "eff": "eff",
     "subtitle": "Par {{column}} · {{weighting}}",
@@ -390,7 +401,15 @@
     "warn_lowEfficiency": "L'efficacité est de {{efficiency}} %. En dessous de 60 %, un petit groupe finit par déterminer l'ensemble du rapport.",
     "warn_highWeight": "Une pondération vaut {{maxWeight}}. Des pondérations supérieures à 5 indiquent généralement que la cible est irréaliste pour cet échantillon.",
     "warn_droppedWeight": "{{count}} réponse(s) n'avaient pas de réponse à la question de pondération et ont été exclues de ce tableau.",
-    "warn_truncated": "Affichage des {{shown}} premières réponses sur {{total}}. Les chiffres et les tests reposent sur cet échantillon."
+    "warn_truncated": "Affichage des {{shown}} premières réponses sur {{total}}. Les chiffres et les tests reposent sur cet échantillon.",
+    "filters": "Filtres",
+    "add_filter": "Ajouter un filtre",
+    "filter_any_of": "L'un de…",
+    "remove_filter": "Supprimer le filtre",
+    "filtered_base": "Filtré sur {{count}} réponses sur {{total}}",
+    "warn_noMatches": "Aucune réponse ne correspond à ces filtres.",
+    "plan_name": "Nom du plan",
+    "plan_name_taken": "Un plan portant ce nom existe déjà."
   },
   "calculations": {
     "title": "Champs calculés",
@@ -409,6 +428,9 @@
     "label_required": "Le libellé est obligatoire",
     "expression_required": "L'expression est obligatoire",
     "error_ScriptError": "Erreur de script",
+    "error_OutOfDate": "La conception de l'enquête a changé. Vérifiez ce calcul et cliquez sur Enregistrer.",
+    "design_warning": "Les calculs doivent être revalidés à chaque modification de la conception de l'enquête.",
+    "first_save_title": "Bon à savoir",
     "state_error": "Erreur",
     "state_invalid": "Invalide",
     "state_not_computed": "Non calculé",
@@ -538,6 +560,7 @@
     "status": "Statut",
     "active": "Actif",
     "invitation_sent": "Invitation Envoyée",
+    "resend_invitation": "Renvoyer l'Invitation",
     "learn_about_roles": "En savoir plus sur les rôles utilisateur",
     "roles_info": "<strong>Super Admin</strong> — Accès complet à toutes les fonctionnalités, y compris la gestion des utilisateurs, la création de sondages et les paramètres système.<br/><br/><strong>Admin de Sondages</strong> — Peut créer et gérer des sondages, accéder à la conception, aux paramètres, aux réponses et aux analyses.<br/><br/><strong>Analyste</strong> — Peut consulter les réponses et analyses des sondages, et prévisualiser les sondages.<br/><br/><strong>Enquêteur</strong> — Peut collecter les réponses de sondages via l'application mobile, et prévisualiser les sondages."
   },
@@ -556,7 +579,10 @@
     "broken_quotas_title": "Certains quotas ne seront pas appliqués",
     "broken_quotas": "Ces quotas font référence à des questions ou options qui n'existent plus, ils ne compteront ni n'excluront aucun répondant : {{quotas}}. Corrigez leurs conditions dans Quotas, ou publiez quand même.",
     "publish_anyway": "Publier quand même",
-    "download_qr_code": "Télécharger le code QR"
+    "download_qr_code": "Télécharger le code QR",
+    "discard_changes": "Annuler les modifications non publiées",
+    "discard_title": "Annuler les modifications non publiées ?",
+    "discard_description": "Le design revient à la dernière version publiée. Le design actuel et tout l'historique des versions seront définitivement supprimés."
   },
   "email": {
     "check": "Vérifiez votre E-mail",
@@ -741,7 +767,7 @@
     "stat_avg_completion": "Complétion moy.",
     "stat_answered": "Répondu",
     "stat_incomplete": "Incomplet",
-    "stat_preview": "Aperçu",
+    "stat_preview": "Réponses de test",
     "error_loading": "Erreur de chargement des analyses",
     "error_loading_data": "Échec du chargement des données d'analyse",
     "no_data": "Aucune donnée d'analyse disponible",
@@ -783,6 +809,16 @@
     "question_type_text_display": "Affichage de Texte",
     "question_type_image_display": "Affichage d'Image",
     "question_type_video_display": "Affichage de Vidéo"
+  },
+  "version_history": {
+    "description": "Points de restauration de vos modifications non publiées, enregistrés automatiquement pendant l'édition. L'historique est effacé à chaque publication.",
+    "current": "Version actuelle",
+    "empty": "Aucun point de restauration pour l'instant.",
+    "restore": "Restaurer",
+    "preview_title": "Aperçu : {{title}}",
+    "restore_title": "Restaurer cette version ?",
+    "restore_description": "Le design revient à son état du {{date}}. Le design actuel et tous les points de restauration postérieurs à celui-ci seront définitivement supprimés.",
+    "restore_acknowledge": "Je comprends que cette action est irréversible"
   },
   "status_info": {
     "draft": "Le sondage n'a pas encore été publié. Disponible uniquement en aperçu.",

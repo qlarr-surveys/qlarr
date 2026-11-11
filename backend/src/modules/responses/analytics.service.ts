@@ -205,11 +205,20 @@ export class AnalyticsService {
 
 // --- shared context building (reused by CrosstabService) ---
 
+/** A parameterized SQL fragment appended to a WHERE clause (each part starts with " AND"). */
+export interface SqlFilter {
+  clause: string;
+  params: unknown[];
+}
+
 /**
  * Load the processed design + (optionally) the completed responses for a survey
  * into the shape both AnalyticsService and CrosstabService consume. Pass
  * `loadResponses = false` to skip the response query when only the design
  * metadata (labels, schema, component index, types) is needed.
+ *
+ * `responseFilter` is called with the design metadata (no responses yet) and the
+ * first free `$n` placeholder index; its fragment narrows the response query.
  */
 export async function buildAnalyticsContext(
   design: DesignService,
@@ -218,6 +227,7 @@ export async function buildAnalyticsContext(
   surveyId: string,
   maxResponses: number,
   loadResponses = true,
+  responseFilter?: (meta: AnalyticsContext, firstParam: number) => SqlFilter,
 ): Promise<AnalyticsContext> {
   const processed = await design.getProcessedSurvey(surveyId, false);
   const survey = processed.output.survey;
@@ -240,21 +250,7 @@ export async function buildAnalyticsContext(
     engine,
   );
 
-  let responses: Array<Record<string, unknown>> = [];
-  if (loadResponses) {
-    const rows: Array<{ values: string }> = await db.manager.query(
-      `SELECT CAST("values" AS TEXT) AS values FROM responses
-       WHERE survey_id = $1 AND submit_date IS NOT NULL AND preview = false
-         AND ${NOT_DISQUALIFIED}
-       ORDER BY survey_response_index ASC LIMIT $2`,
-      [surveyId, maxResponses],
-    );
-    responses = rows.map((r) => JSON.parse(r.values) as Record<string, unknown>);
-  }
-
-  resolveFormatInstructionLabels(labels, responses, lang);
-
-  return {
+  const ctx: AnalyticsContext = {
     labels,
     schemaMap,
     componentIndexList: processed.output.componentIndexList,
@@ -262,8 +258,23 @@ export async function buildAnalyticsContext(
     answerTypes,
     resources,
     surveyId,
-    responses,
+    responses: [],
   };
+
+  if (loadResponses) {
+    const filter = responseFilter?.(ctx, 3) ?? { clause: '', params: [] };
+    const rows: Array<{ values: string }> = await db.manager.query(
+      `SELECT CAST("values" AS TEXT) AS values FROM responses
+       WHERE survey_id = $1 AND submit_date IS NOT NULL AND preview = false
+         AND ${NOT_DISQUALIFIED}${filter.clause}
+       ORDER BY survey_response_index ASC LIMIT $2`,
+      [surveyId, maxResponses, ...filter.params],
+    );
+    ctx.responses = rows.map((r) => JSON.parse(r.values) as Record<string, unknown>);
+  }
+
+  resolveFormatInstructionLabels(labels, ctx.responses, lang);
+  return ctx;
 }
 
 // --- format instruction resolution ---

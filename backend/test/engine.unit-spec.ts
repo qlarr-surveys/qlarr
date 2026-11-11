@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { EngineService } from '../src/engine/engine.service';
+import * as sandbox from '../src/engine/script-sandbox';
 
 /**
  * Exercises the survey-engine binding end to end against the published
@@ -255,6 +256,29 @@ describe('EngineService (survey-engine binding)', () => {
         r1: { 'Q880htp.value': 2 },
       });
       expect(out).toEqual({ r1: { results: { double: 4 }, errors: {} } });
+    });
+
+    it('reports a failed sandbox run against that response only', async () => {
+      const validated = await engine.validateCalculations(processedSurvey, [
+        calc('double', 'Q880htp.value * 2'),
+      ]);
+      const realSandbox = sandbox.withSandbox;
+      jest.spyOn(sandbox, 'withSandbox').mockImplementationOnce((script, use) =>
+        realSandbox(script, (run) => {
+          let failed = false;
+          return use((entryPoint, input) => {
+            if (failed) return run(entryPoint, input);
+            failed = true;
+            throw new Error('boom');
+          });
+        }),
+      );
+      const out = await engine.calculate(processedSurvey, validated, {
+        r1: { 'Q880htp.value': 2 },
+        r2: { 'Q880htp.value': 3 },
+      });
+      expect(out.r1.errors.double.name).toBe('EngineFailure');
+      expect(out.r2).toEqual({ results: { double: 6 }, errors: {} });
     });
   });
 });

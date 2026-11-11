@@ -102,11 +102,13 @@ export interface NavigateParams {
 }
 
 /** A calculation validation error (≈ engine `CalculationError`), discriminated
- *  by `name`. `start`/`end` are offsets into the expression. */
+ *  by `name`. `start`/`end` are offsets into the expression. `OutOfDate` is ours,
+ *  not the engine's: the design changed since the calculation was validated. */
 export type CalcError =
   | { name: 'ScriptError'; message: string; start: number; end: number }
   | { name: 'InvalidCode' }
-  | { name: 'DuplicateCode' };
+  | { name: 'DuplicateCode' }
+  | { name: 'OutOfDate' };
 
 /** One calculated field. `errors` is set by validation; empty means valid. */
 export interface Calculation {

@@ -1,6 +1,6 @@
 import { SetData } from "~/networking/design";
 import { designStateReceived, setSaving, setUpdating } from "./designState";
-import { onError } from "../edit/editState";
+import { onError, setLastSave } from "../edit/editState";
 import { onApiError } from "~/utils/errorsProcessor";
 import { designChanges } from "@qlarr/design-core";
 
@@ -107,6 +107,7 @@ const setState = (store, state) => {
   store.dispatch(setUpdating(false));
   store.dispatch(designStateReceived(state));
   store.dispatch(setSaving(false));
+  store.dispatch(setLastSave("saved"));
 
   // Clear rollback state on successful save
   rollbackState = null;
@@ -131,6 +132,8 @@ const setError = (store, error) => {
     );
     rollbackState = null;
   }
+
+  store.dispatch(setLastSave("error"));
 
   onApiError({
     error: error,
