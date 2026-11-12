@@ -130,7 +130,7 @@ export class ResponseRepository {
   /** id/values for responses in the index range (bulk file download). */
   findFilesInIndexRange(
     surveyId: string,
-    complete: boolean | undefined,
+    statuses: ExportStatus[],
     from: number,
     to: number,
   ): Promise<ResponseFileRow[]> {
@@ -138,8 +138,8 @@ export class ResponseRepository {
     return this.db.manager.query(
       `SELECT id, survey_response_index AS index, "values" AS values
        FROM responses
-       WHERE survey_id = $1 AND preview = false
-         AND survey_response_index BETWEEN $2 AND $3 ${completeClause(complete)}
+       WHERE survey_id = $1 AND preview = false ${exportClause(statuses)}
+         AND survey_response_index BETWEEN $2 AND $3
        ORDER BY survey_response_index ASC`,
       [surveyId, lower, upper],
     );
@@ -291,7 +291,6 @@ export class ResponseRepository {
   }
 }
 
-/** Non-preview completeness fragment shared by the index-range queries. */
 /** SQL: the response is disqualified. `t` is the table alias prefix, e.g. `r.`. */
 function disqualified(t = ''): string {
   return `COALESCE(${t}"values" ->> 'Survey.disqualified', 'false') = 'true'`;
@@ -313,11 +312,6 @@ function statusCondition(status: ExportStatus, t = ''): string {
 function exportClause(statuses: ExportStatus[]): string {
   if (statuses.length === 0) return 'AND FALSE';
   return `AND (${statuses.map((s) => statusCondition(s)).join(' OR ')})`;
-}
-
-function completeClause(complete: boolean | undefined): string {
-  if (complete === undefined) return '';
-  return complete ? 'AND submit_date IS NOT NULL' : 'AND submit_date IS NULL';
 }
 
 /** WHERE clause + params for the summary filter (surveyor wins over status). */

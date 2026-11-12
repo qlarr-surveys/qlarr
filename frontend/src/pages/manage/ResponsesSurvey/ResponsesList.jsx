@@ -41,7 +41,10 @@ import ConfirmActionModal from "~/components/common/ConfirmActionModal";
 import { RHFSelect } from "~/components/hook-form";
 import LoadingDots from "~/components/common/LoadingDots";
 import { useService } from "~/hooks/use-service";
-import ResponsesDownload from "~/components/manage/ResponsesDownload";
+import ResponsesDownload, {
+  downloadResponseFilesZip,
+} from "~/components/manage/ResponsesDownload";
+import { PROCESSED_ERRORS } from "~/utils/errorsProcessor";
 import ResponsesExport, {
   exportResponsesFile,
 } from "~/components/manage/ResponsesExport";
@@ -126,8 +129,9 @@ function ResponsesList({ refreshKey }) {
 
   const [exportDlgOpen, setExportDlgOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
-  const [noResponsesToExport, setNoResponsesToExport] = useState(false);
+  const [notice, setNotice] = useState({ open: false });
   const [downloadDlgOpen, setDownloadDlgOpen] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const firstFetchThisVisitRef = useRef(true);
 
   const processApirror = () => setFetching(false);
@@ -508,11 +512,49 @@ function ResponsesList({ refreshKey }) {
     );
   };
 
+  const closeNotice = () => setNotice((n) => ({ ...n, open: false }));
+  const notifyNoResponses = () =>
+    setNotice({
+      open: true,
+      severity: "warning",
+      message: t("responses.no_responses_found"),
+    });
+  const notifyNoFiles = () =>
+    setNotice({
+      open: true,
+      severity: "warning",
+      message: t("responses.no_files_found"),
+    });
+  const notifyFilesSizeLimit = () =>
+    setNotice({
+      open: true,
+      severity: "error",
+      message: t("processed_errors.size_limit_exceeded"),
+    });
+
+  const quickDownloadFiles = async () => {
+    setDownloading(true);
+    try {
+      const downloaded = await downloadResponseFilesZip(
+        surveyService,
+        surveyId
+      );
+      if (!downloaded) notifyNoFiles();
+    } catch (e) {
+      if (e?.name === PROCESSED_ERRORS.SIZE_LIMIT_EXCEEDED.name) {
+        notifyFilesSizeLimit();
+        setDownloadDlgOpen(true);
+      }
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const quickExport = async () => {
     setExporting(true);
     try {
       const exported = await exportResponsesFile(surveyService, surveyId);
-      if (!exported) setNoResponsesToExport(true);
+      if (!exported) notifyNoResponses();
     } catch (e) {
       // already surfaced by the service's global error handler
     } finally {
@@ -525,7 +567,7 @@ function ResponsesList({ refreshKey }) {
       <ResponsesExport
         open={exportDlgOpen}
         onClose={() => setExportDlgOpen(false)}
-        onNoResponses={() => setNoResponsesToExport(true)}
+        onNoResponses={notifyNoResponses}
         currentFrom={
           allResponse?.responses?.length > 0
             ? allResponse.responses[0].index
@@ -542,6 +584,8 @@ function ResponsesList({ refreshKey }) {
       <ResponsesDownload
         open={downloadDlgOpen}
         onClose={() => setDownloadDlgOpen(false)}
+        onNoFiles={notifyNoFiles}
+        onSizeLimit={notifyFilesSizeLimit}
         currentFrom={
           allResponse?.responses?.length > 0
             ? allResponse.responses[0].index
@@ -618,12 +662,13 @@ function ResponsesList({ refreshKey }) {
                   </FormControl>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Box display="flex" flexDirection="column" gap={1}>
-                    <ButtonGroup
-                      size="small"
-                      variant="contained"
-                      sx={{ alignSelf: "flex-end" }}
-                    >
+                  <Box
+                    display="flex"
+                    flexWrap="wrap"
+                    justifyContent="flex-end"
+                    gap={1}
+                  >
+                    <ButtonGroup size="small" variant="contained">
                       <Button disabled={exporting} onClick={quickExport}>
                         {t("responses.export")}
                       </Button>
@@ -638,13 +683,22 @@ function ResponsesList({ refreshKey }) {
                     </ButtonGroup>
 
                     {canExportFiles && (
-                      <Button
-                        size="small"
-                        variant="contained"
-                        onClick={() => setDownloadDlgOpen(true)}
-                      >
-                        {t("responses.download")}
-                      </Button>
+                      <ButtonGroup size="small" variant="contained">
+                        <Button
+                          disabled={downloading}
+                          onClick={quickDownloadFiles}
+                        >
+                          {t("responses.download_files")}
+                        </Button>
+                        <Button
+                          aria-label={t("responses.download_options")}
+                          title={t("responses.download_options")}
+                          onClick={() => setDownloadDlgOpen(true)}
+                          sx={{ "&&": { minWidth: 0, px: 1 } }}
+                        >
+                          <MoreHorizIcon fontSize="small" />
+                        </Button>
+                      </ButtonGroup>
                     )}
                   </Box>
                 </Grid>
@@ -1077,17 +1131,17 @@ function ResponsesList({ refreshKey }) {
       </Box>
 
       <Snackbar
-        open={noResponsesToExport}
+        open={notice.open}
         autoHideDuration={4000}
-        onClose={() => setNoResponsesToExport(false)}
+        onClose={closeNotice}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert
-          onClose={() => setNoResponsesToExport(false)}
-          severity="warning"
+          onClose={closeNotice}
+          severity={notice.severity}
           sx={{ width: "100%" }}
         >
-          {t("responses.no_responses_found")}
+          {notice.message}
         </Alert>
       </Snackbar>
     </>

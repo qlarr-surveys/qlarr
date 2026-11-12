@@ -45,6 +45,7 @@ import PrioritySetup from "../orderPriority/PrioritySetup";
 import ScqDefaultValue from "../ScqDefaultValue";
 import DisabledToggle from "../Disabled";
 import MoveGroup from "../MoveGroup";
+import MoveQuestion from "../MoveQuestion";
 import EntityCodeEditor from "../EntityCodeEditor";
 import CustomCSS from "../CustomCss";
 import ConvertQuestionType from "../ConvertQuestionType";
@@ -527,6 +528,8 @@ const SetupComponent = React.memo(({ code, rule, t, isQuickOptions }) => {
       );
     case "move_group":
       return <MoveGroup key={code + rule} code={code} t={t} />;
+    case "move_question":
+      return <MoveQuestion key={code + rule} code={code} t={t} />;
     case "disabled":
       return <DisabledToggle t={t} key={code + rule} code={code} />;
     case "skip_logic":
@@ -610,6 +613,7 @@ const SetupSection = React.memo(({ highlighted, rules, code, t, theme }) => {
     const flat = rules?.flatMap((r) => r.rules || []) || [];
     return [
       "move_group",
+      "move_question",
       "disabled",
       "showDescription",
       "validation_required",
