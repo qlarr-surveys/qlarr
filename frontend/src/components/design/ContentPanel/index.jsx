@@ -251,22 +251,11 @@ function ContentPanel({ designMode, navigatorRef }, ref) {
               align: "start",
             });
           }
-        } else if (
-          lastAddedComponent.type === "question" &&
-          lastAddedComponent.code
-        ) {
+        } else if (lastAddedComponent.type === "question") {
           scrollToElement(
             lastAddedComponent.code,
             lastAddedComponent.groupCode
           );
-        } else if (lastAddedComponent.type === "question") {
-          // Calculate the exact index for the newly added question
-          const groupBaseIndex = lastAddedComponent.groupIndex * 2; // Groups and their drop areas
-          virtuosoRef.current.scrollToIndex({
-            index: groupBaseIndex + 2, // Drop area + question offset
-            behavior: "smooth",
-            align: "end",
-          });
         }
       };
 

@@ -291,7 +291,6 @@ export class ResponseRepository {
   }
 }
 
-/** Non-preview completeness fragment shared by the index-range queries. */
 /** SQL: the response is disqualified. `t` is the table alias prefix, e.g. `r.`. */
 function disqualified(t = ''): string {
   return `COALESCE(${t}"values" ->> 'Survey.disqualified', 'false') = 'true'`;

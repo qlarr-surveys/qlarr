@@ -88,8 +88,6 @@ describe("onDrag with reveal", () => {
       type: "question",
       code: "Q835lqi",
       groupCode: "G1",
-      groupIndex: 0,
-      questionIndex: 0,
     });
   });
 
@@ -104,9 +102,8 @@ describe("onDrag with reveal", () => {
     });
     expect(childCodes(state, "G948ohe")).toEqual(["Q298jbb", "Q976owq"]);
     expect(state.lastAddedComponent).toMatchObject({
+      code: "Q298jbb",
       groupCode: "G948ohe",
-      groupIndex: 1,
-      questionIndex: 0,
     });
 
     onDrag(state, {
@@ -118,9 +115,8 @@ describe("onDrag with reveal", () => {
     });
     expect(childCodes(state, "G1")).toEqual(["Q867ezm", "Q835lqi", "Q976owq"]);
     expect(state.lastAddedComponent).toMatchObject({
+      code: "Q976owq",
       groupCode: "G1",
-      groupIndex: 0,
-      questionIndex: 2,
     });
   });
 

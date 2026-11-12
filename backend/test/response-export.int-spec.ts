@@ -74,7 +74,7 @@ describe('Response export (CSV / XLSX)', () => {
     expect(res.headers['content-disposition']).toContain('responses-export.csv');
     const lines = res.text.trim().split('\r\n');
     expect(lines[0]).toBe(
-      'index,id,start_date (UTC),submit_date (UTC),Lang,disqualified',
+      'index,id,start_date,submit_date,Lang,disqualified',
     );
     expect(lines).toHaveLength(3); // header + 2 responses
     expect(lines[1]).toContain('false');
@@ -94,7 +94,7 @@ describe('Response export (CSV / XLSX)', () => {
       .get(`${base}/csv/0/999999?timezone=${encodeURIComponent('Africa/Cairo')}`)
       .set('Authorization', SUPER)
       .expect(200);
-    expect(res.text).toContain('start_date (Africa/Cairo),submit_date (Africa/Cairo)');
+    expect(res.text).toContain('index,id,start_date,submit_date,');
     expect(res.text).toContain('2024-01-01 02:00:00,2024-02-01 02:00:00');
     expect(res.text).not.toContain('2024-01-01 00:00:00');
   });

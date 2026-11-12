@@ -238,6 +238,7 @@ function RunSurvey({
       })
       .catch((err) => {
         console.error(err);
+        setPendingScrollTarget(null);
         handleError(err);
       });
   };

@@ -3,8 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { IconButton, MenuItem, Select, Typography } from "@mui/material";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
-import { isDisplay } from "~/components/Questions/utils";
+import { isDisplay, questionIconByType } from "~/components/Questions/utils";
 import { onDrag } from "~/state/design/designState";
 import {
   groupTypeOf,
@@ -25,13 +26,12 @@ const selectPages = (state) => {
     label: labelOf(group.code),
     questions: (design[group.code]?.children || []).map((question) => ({
       code: question.code,
+      type: design[question.code]?.type,
       displayCode: design.index?.[question.code] || question.code,
       label: labelOf(question.code),
     })),
   }));
 };
-
-const TOP = "top";
 
 export default function MoveQuestion({ code, t }) {
   const dispatch = useDispatch();
@@ -57,18 +57,21 @@ export default function MoveQuestion({ code, t }) {
   const previousPage = neighbourPage(-1);
   const nextPage = neighbourPage(1);
 
-  const reorder = (toPosition) =>
+  // Moving across pages too: reorder_questions inserts at toIndex - 1 of the
+  // destination once the question is out of its source page.
+  const moveTo = (destination, toPosition) =>
     dispatch(
       onDrag({
         type: "reorder_questions",
         source: page.code,
-        destination: page.code,
+        destination,
         id: code,
         fromIndex: position,
         toIndex: toPosition + 1,
         reveal: true,
       })
     );
+  const reorder = (toPosition) => moveTo(page.code, toPosition);
 
   const reparent = (destination) =>
     dispatch(
@@ -98,27 +101,98 @@ export default function MoveQuestion({ code, t }) {
     else if (nextPage) reparent(nextPage.code);
   };
 
-  const onPageChange = (e) => {
-    if (e.target.value !== page.code) reparent(e.target.value);
+  // One option per landing spot: a page means its top, a question means
+  // right after it. The moved question itself is left out.
+  const pageNames = pageLabels(pages, t);
+  const options = pages.flatMap((target, i) => {
+    const disabled = !accepts(target);
+    const questions = target.questions.filter(
+      (question) => question.code !== code
+    );
+    return [
+      {
+        value: target.code,
+        page: target.code,
+        position: 0,
+        isPage: true,
+        disabled,
+        displayCode: pageNames[i],
+        label: target.label,
+      },
+      ...questions.map((question, j) => ({
+        ...question,
+        value: question.code,
+        page: target.code,
+        position: j + 1,
+        disabled,
+      })),
+    ];
+  });
+  const current = isFirst ? page.code : others[position - 1].code;
+
+  const onChange = (e) => {
+    const option = options.find((o) => o.value === e.target.value);
+    if (option && option.value !== current) {
+      moveTo(option.page, option.position);
+    }
   };
 
-  const onPositionChange = (e) => {
-    const value = e.target.value;
-    reorder(
-      value === TOP
-        ? 0
-        : others.findIndex((question) => question.code === value) + 1
+  const renderOption = (option) => (
+    <span className={styles.option}>
+      <Typography component="span" variant="body2" color="text.secondary">
+        {t(
+          option.isPage
+            ? "move_question_before_prefix"
+            : "move_question_after_prefix"
+        )}
+      </Typography>
+      <span className={styles.optionIcon}>
+        {option.isPage ? (
+          <FormatListBulletedIcon fontSize="small" />
+        ) : (
+          questionIconByType(option.type)
+        )}
+      </span>
+      <Typography component="span" variant="body2" className={styles.optionCode}>
+        {option.displayCode}
+      </Typography>
+      <Typography
+        component="span"
+        variant="body2"
+        color="text.secondary"
+        noWrap
+        className={styles.optionLabel}
+      >
+        {option.label}
+      </Typography>
+    </span>
+  );
+
+  const renderValue = (value) => {
+    const option = options.find((o) => o.value === value);
+    if (!option) return null;
+    const text = option.isPage
+      ? `${option.displayCode} · ${t("move_question_top")}`
+      : t("move_question_after", {
+          question: option.label
+            ? `${option.displayCode}. ${option.label}`
+            : option.displayCode,
+        });
+    return (
+      <span className={styles.option}>
+        <span className={styles.optionIcon}>
+          {option.isPage ? (
+            <FormatListBulletedIcon fontSize="small" />
+          ) : (
+            questionIconByType(option.type)
+          )}
+        </span>
+        <Typography component="span" variant="body2" noWrap className={styles.optionLabel}>
+          {text}
+        </Typography>
+      </span>
     );
   };
-
-  const pageNames = pageLabels(pages, t);
-  const pageLabel = (target, i) =>
-    target.label ? `${pageNames[i]} · ${target.label}` : pageNames[i];
-
-  const questionLabel = (question) =>
-    question.label
-      ? `${question.displayCode}. ${question.label}`
-      : question.displayCode;
 
   return (
     <div className={styles.moveQuestion}>
@@ -153,44 +227,25 @@ export default function MoveQuestion({ code, t }) {
       </div>
 
       <Typography fontWeight={700} variant="body2" sx={{ mb: 0.5 }}>
-        {t("move_question_page")}
-      </Typography>
-      <Select
-        size="small"
-        fullWidth
-        value={page.code}
-        onChange={onPageChange}
-        inputProps={{ "aria-label": t("move_question_page") }}
-        MenuProps={{ PaperProps: { sx: { maxWidth: 360 } } }}
-      >
-        {pages.map((target, i) => (
-          <MenuItem
-            key={target.code}
-            value={target.code}
-            disabled={!accepts(target)}
-          >
-            <span className={styles.optionLabel}>{pageLabel(target, i)}</span>
-          </MenuItem>
-        ))}
-      </Select>
-
-      <Typography fontWeight={700} variant="body2" sx={{ mb: 0.5 }}>
         {t("move_question_position")}
       </Typography>
       <Select
         size="small"
         fullWidth
-        value={isFirst ? TOP : others[position - 1].code}
-        onChange={onPositionChange}
+        value={current}
+        onChange={onChange}
+        renderValue={renderValue}
         inputProps={{ "aria-label": t("move_question_position") }}
-        MenuProps={{ PaperProps: { sx: { maxWidth: 360 } } }}
+        MenuProps={{ PaperProps: { sx: { maxWidth: 420 } } }}
       >
-        <MenuItem value={TOP}>{t("move_question_top")}</MenuItem>
-        {others.map((question) => (
-          <MenuItem key={question.code} value={question.code}>
-            <span className={styles.optionLabel}>
-              {t("move_question_after", { question: questionLabel(question) })}
-            </span>
+        {options.map((option) => (
+          <MenuItem
+            key={option.value}
+            value={option.value}
+            disabled={option.disabled}
+            sx={option.isPage ? undefined : { paddingInlineStart: 4 }}
+          >
+            {renderOption(option)}
           </MenuItem>
         ))}
       </Select>

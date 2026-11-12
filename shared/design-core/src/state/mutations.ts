@@ -1587,12 +1587,6 @@ const revealMovedQuestion = (state, { id, destination }) => {
     type: "question",
     code: id,
     groupCode: destination,
-    groupIndex: state.Survey.children.findIndex(
-      (group) => group.code === destination,
-    ),
-    questionIndex: state[destination].children.findIndex(
-      (question) => question.code === id,
-    ),
   };
 };
 
@@ -1650,13 +1644,10 @@ const newQuestion = (state, payload) => {
     questionObject.question,
   );
 
-  const groupIndex = survey.children.findIndex(
-    (group) => group.code === payload.destination,
-  );
   state.lastAddedComponent = {
     type: "question",
-    groupIndex: groupIndex,
-    questionIndex: destinationQuestionIndex,
+    code: newCode,
+    groupCode: payload.destination,
   };
   cleanupRandomRules(destinationGroup);
   state.focus = newCode;

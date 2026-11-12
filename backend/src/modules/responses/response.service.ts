@@ -36,11 +36,11 @@ import {
   SizeLimitExceededException,
 } from "./response.exceptions";
 
-const additionalColNames = (timeZone: string) => [
+const ADDITIONAL_COL_NAMES = [
   "index",
   "id",
-  `start_date (${timeZone})`,
-  `submit_date (${timeZone})`,
+  "start_date",
+  "submit_date",
   "Lang",
   "disqualified",
 ];
@@ -168,7 +168,7 @@ export class ResponseService {
     const calculated = await this.calculationsFor(surveyId);
     const inZone = wallClockInZone(options.timeZone);
     const finalCols = [
-      ...additionalColNames(options.timeZone),
+      ...ADDITIONAL_COL_NAMES,
       ...colNames,
       ...calculated.columns.map((c) => c.label),
     ];
