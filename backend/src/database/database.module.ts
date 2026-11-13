@@ -33,7 +33,6 @@ import { MIGRATIONS } from './migrations';
           // Postgres); verification is relaxed so a CA outside the container's
           // trust store still connects — the connection is still encrypted.
           ssl: db.ssl ? { rejectUnauthorized: false } : false,
-          extra: { max: db.poolSize },
           synchronize: false,
           autoLoadEntities: true,
           entities: [],
@@ -42,6 +41,7 @@ import { MIGRATIONS } from './migrations';
           // pg pool options: a stuck query, lock wait or abandoned transaction
           // fails instead of holding its request and connection forever.
           extra: {
+            max: db.poolSize,
             connectionTimeoutMillis: 10_000,
             statement_timeout: 60_000,
             lock_timeout: 10_000,
