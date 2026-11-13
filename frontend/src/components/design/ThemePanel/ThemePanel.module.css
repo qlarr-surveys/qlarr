@@ -316,12 +316,13 @@
   gap: 7px;
 }
 
-/* The swatch is a preview, not a button — the picker is right under it. The
-   colour is laid over a chequerboard so a translucent one reads as one. */
+/* The swatch shows the colour and opens the picker over the panel. The colour
+   is laid over a chequerboard so a translucent one reads as one. */
 .preview {
   flex: none;
   width: 34px;
   height: 30px;
+  padding: 0;
   border: 1px solid #cfd5e8;
   border-radius: 6px;
   background-color: #fff;
@@ -333,6 +334,12 @@
   background-size:
     auto,
     8px 8px;
+  cursor: pointer;
+}
+
+.preview:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
 }
 
 .hexInput {
@@ -376,10 +383,141 @@
 
 /* ====== Picker ====== */
 
+/* The popup is fixed and portalled to the body: the panel it belongs to
+   scrolls, and an absolutely positioned popup would be cut off by that scroll
+   box. 1200 clears the panel's sticky footer and the survey canvas beside it,
+   and stays under the app header at 1300. */
+.pickerPopover {
+  position: fixed;
+  z-index: 1200;
+  width: 236px;
+  padding: 10px;
+  border: 1px solid #dfe2ee;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(20, 24, 52, 0.18);
+}
+
 .pickerStack {
   display: grid;
   gap: 8px;
-  margin-top: 9px;
+}
+
+/* The sampler and the current colour sit beside the two bars, the way every
+   colour picker arranges them. */
+.pickerControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bars {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.eyedropper {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  background: #fff;
+  color: #4c5474;
+  cursor: pointer;
+}
+
+.eyedropper:hover {
+  border-color: #b9c1de;
+  color: #1b2150;
+}
+
+.eyedropper:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
+}
+
+.previewDot {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border: 1px solid #cfd5e8;
+  border-radius: 50%;
+  background-color: #fff;
+  background-image: linear-gradient(
+      var(--swatch-color, #fff),
+      var(--swatch-color, #fff)
+    ),
+    conic-gradient(#e4e8f6 0 25%, #fff 0 50%, #e4e8f6 0 75%, #fff 0);
+  background-size:
+    auto,
+    8px 8px;
+}
+
+/* ====== Channels ====== */
+
+.channels {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr) 20px;
+  align-items: start;
+  gap: 6px;
+  /* Numbers read left to right whatever the interface language does. */
+  direction: ltr;
+}
+
+.channel {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+}
+
+.channelBox {
+  width: 100%;
+  min-width: 0;
+  height: 26px;
+  padding: 0 4px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  font: 500 12px/1 Rubik, sans-serif;
+  color: #1b2150;
+  text-align: center;
+}
+
+.channelBox:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: -1px;
+}
+
+.channelName {
+  font: 500 10px/1 Rubik, sans-serif;
+  color: #666e91;
+}
+
+.channelToggle {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  color: #666e91;
+  cursor: pointer;
+}
+
+.channelToggle:hover {
+  color: #1b2150;
+}
+
+.channelToggle:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
 }
 
 /* react-color's shade area fills this box absolutely, so the box owns the
