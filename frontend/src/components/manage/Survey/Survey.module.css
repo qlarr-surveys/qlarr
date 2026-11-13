@@ -360,8 +360,10 @@
 }
 
 /* The redesign's title ⓘ is 2px larger than the one beside the description and
-   rides 2px higher, to sit against a 22px line rather than a 20px one. */
-.titleContainer .rowInfo > button {
+   rides 2px higher, to sit against a 22px line rather than a 20px one.
+   A descendant selector, not a child one: CustomTooltip wraps its button in a
+   flex container of its own, so `.rowInfo > button` matches nothing. */
+.titleContainer .rowInfo button {
   width: 26px;
   height: 26px;
   margin-top: -2px;
