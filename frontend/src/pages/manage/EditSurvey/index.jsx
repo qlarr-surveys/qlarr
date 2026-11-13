@@ -143,9 +143,12 @@ function EditSurvey({ onPublish }) {
               aria-controls={`panel-${section.id}-content`}
               id={`panel-${section.id}-header`}
             >
-              <Typography fontWeight="600" color="#1a2052" variant="h5">
-                {section.title}
-              </Typography>
+              <Box display="flex" alignItems="center" gap=".5rem">
+                {section.tooltip && <CustomTooltip body={section.tooltip} />}
+                <Typography fontWeight="600" color="#1a2052" variant="h5">
+                  {section.title}
+                </Typography>
+              </Box>
             </AccordionSummary>
             <AccordionDetails
               id={`panel-${section.id}-content`}
