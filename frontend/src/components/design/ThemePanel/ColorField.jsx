@@ -207,14 +207,33 @@ const PickerBody = ({ t, hsl, hsv, rgb, onChange, suppressCloseRef }) => {
 
 const SurveyColorPicker = CustomPicker(PickerBody);
 
+/** The nearest ancestor that scrolls, or null when nothing between here and
+ * the document does. */
+function scrollBoxOf(node) {
+  for (let element = node?.parentElement; element; element = element.parentElement) {
+    const { overflowY } = window.getComputedStyle(element);
+    if (overflowY === "auto" || overflowY === "scroll") {
+      return element;
+    }
+  }
+  return null;
+}
+
 /**
  * The picker, floated under the swatch that opened it.
  *
  * It is portalled to the body and positioned fixed because the panel it
  * belongs to scrolls: an absolutely positioned popup would be cut off by that
  * scroll box, which is the one thing a popup must never be. For the same
- * reason it is re-placed on scroll and resize, and flips above the swatch when
- * the window has no room below it.
+ * reason it is re-placed on scroll and resize, flips above the swatch when the
+ * window has no room below it, and closes once the swatch itself has been
+ * scrolled out of the panel — a picker with nothing left to point at is just
+ * something floating over the survey.
+ *
+ * Being portalled puts it last in the document, so it takes the focus when it
+ * opens and keeps it until it closes. Otherwise the bars would sit behind the
+ * whole page in the tab order, and the transparency bar is the only control
+ * that sets opacity at all.
  */
 function PickerPopover({ anchorRef, label, suppressCloseRef, onClose, children }) {
   const popoverRef = React.useRef(null);
@@ -228,13 +247,27 @@ function PickerPopover({ anchorRef, label, suppressCloseRef, onClose, children }
       return;
     }
     const rect = anchor.getBoundingClientRect();
+    // The swatch can be scrolled out of the panel while the popup is open, and
+    // the window never scrolls here, so the panel's own box is what decides
+    // whether the swatch is still on screen.
+    const box = scrollBoxOf(anchor)?.getBoundingClientRect();
+    const hidden =
+      rect.bottom <= 0 ||
+      rect.top >= window.innerHeight ||
+      (box && (rect.bottom <= box.top || rect.top >= box.bottom));
+    if (hidden) {
+      onClose(false);
+      return;
+    }
     const width = popover.offsetWidth;
     const height = popover.offsetHeight;
     const below = rect.bottom + GAP;
-    const top =
-      below + height > window.innerHeight - EDGE
-        ? Math.max(EDGE, rect.top - GAP - height)
-        : below;
+    const wanted =
+      below + height > window.innerHeight - EDGE ? rect.top - GAP - height : below;
+    const top = Math.min(
+      Math.max(EDGE, wanted),
+      Math.max(EDGE, window.innerHeight - height - EDGE)
+    );
     // The popup opens from the swatch's leading edge, which is its right edge
     // in Arabic — the theme's own direction is pinned, so this reads the
     // session's instead.
@@ -244,9 +277,19 @@ function PickerPopover({ anchorRef, label, suppressCloseRef, onClose, children }
       Math.max(EDGE, window.innerWidth - width - EDGE)
     );
     setPosition({ top, left });
-  }, [anchorRef, rtl]);
+  }, [anchorRef, onClose, rtl]);
 
   React.useLayoutEffect(place, [place]);
+
+  // Once it has somewhere to be, the popup takes the focus: it is measured
+  // while `visibility: hidden`, and a hidden element cannot be focused.
+  const taken = React.useRef(false);
+  React.useLayoutEffect(() => {
+    if (position && !taken.current) {
+      taken.current = true;
+      popoverRef.current?.focus({ preventScroll: true });
+    }
+  }, [position]);
 
   React.useEffect(() => {
     // `mousedown`, not `click`: a drag that starts on the shade area and ends
@@ -259,31 +302,64 @@ function PickerPopover({ anchorRef, label, suppressCloseRef, onClose, children }
         onClose(false);
       }
     };
-    const onKeyDown = (event) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        onClose(true);
-      }
-    };
 
     document.addEventListener("mousedown", onMouseDown);
-    document.addEventListener("keydown", onKeyDown);
     // Capture, so the panel's own scroll box is heard as well as the window.
     window.addEventListener("scroll", place, true);
     window.addEventListener("resize", place);
     return () => {
       document.removeEventListener("mousedown", onMouseDown);
-      document.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("scroll", place, true);
       window.removeEventListener("resize", place);
     };
   }, [anchorRef, onClose, place, suppressCloseRef]);
 
+  // Tab stays in the popup while it is open; Escape is the way out, and it
+  // hands the caller back to the swatch. Both are read here rather than from
+  // the document, so a keystroke meant for something else elsewhere on the
+  // page is left alone.
+  const onKeyDown = (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+      onClose(true);
+      return;
+    }
+    if (event.key !== "Tab") {
+      return;
+    }
+    const stops = popoverRef.current?.querySelectorAll(
+      'button, input, [tabindex]:not([tabindex="-1"])'
+    );
+    if (!stops?.length) {
+      return;
+    }
+    const first = stops[0];
+    const last = stops[stops.length - 1];
+    const onEdge = event.shiftKey
+      ? event.target === first || event.target === popoverRef.current
+      : event.target === last;
+    if (onEdge) {
+      event.preventDefault();
+      (event.shiftKey ? last : first).focus();
+    }
+  };
+
   return createPortal(
     <div
       ref={popoverRef}
       role="dialog"
+      aria-modal="true"
       aria-label={label}
+      tabIndex={-1}
+      onKeyDown={onKeyDown}
+      // Pressing anywhere that is not a control — the shade area, the padding
+      // — would otherwise drop focus to the body and take Escape with it.
+      onMouseDown={(event) => {
+        if (!event.target.closest("input, button")) {
+          event.preventDefault();
+        }
+      }}
       style={{
         top: position ? `${position.top}px` : 0,
         left: position ? `${position.left}px` : 0,
@@ -318,6 +394,7 @@ function ColorField({ t, name, label, value, presets, onChange }) {
   const [pickerOpen, setPickerOpen] = React.useState(false);
   const [draft, setDraft] = React.useState("");
   const [invalid, setInvalid] = React.useState(false);
+  const chipRef = React.useRef(null);
   const swatchRef = React.useRef(null);
   // Raised while the screen sampler is up, so the click that samples a pixel
   // is not mistaken for a click away from the popup.
@@ -376,8 +453,11 @@ function ColorField({ t, name, label, value, presets, onChange }) {
     // bar's to say, and leaving it be means Apply never undoes a drag.
     onChange(fromRgb({ ...parseColor(normalized), a: alpha }));
     // Applying a typed hex finishes the edit — the colour is on the survey and
-    // the swatch row shows it, so the editor has nothing left to say.
+    // the swatch row shows it, so the editor has nothing left to say. Focus was
+    // in the editor that is about to go, so it is handed back to the chip that
+    // opened it rather than left to fall to the top of the document.
     closeEditor();
+    chipRef.current?.focus();
   };
 
   // A dragged picker carries the hex box with it, so the two never disagree.
@@ -427,6 +507,7 @@ function ColorField({ t, name, label, value, presets, onChange }) {
         })}
 
         <button
+          ref={chipRef}
           type="button"
           role="radio"
           aria-checked={isCustom}
@@ -462,7 +543,7 @@ function ColorField({ t, name, label, value, presets, onChange }) {
               type="button"
               aria-haspopup="dialog"
               aria-expanded={pickerOpen}
-              aria-label={t("theme_open_color_picker")}
+              aria-label={`${t("theme_open_color_picker")} — ${label}`}
               title={t("theme_open_color_picker")}
               onClick={() => setPickerOpen((wasOpen) => !wasOpen)}
               style={{ "--swatch-color": value }}
