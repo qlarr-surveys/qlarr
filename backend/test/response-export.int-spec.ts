@@ -73,10 +73,38 @@ describe('Response export (CSV / XLSX)', () => {
     expect(res.headers['content-type']).toContain('text/csv');
     expect(res.headers['content-disposition']).toContain('responses-export.csv');
     const lines = res.text.trim().split('\r\n');
-    expect(lines[0]).toBe('index,id,start_date,submit_date,Lang,disqualified');
+    expect(lines[0]).toBe(
+      'index,id,start_date,submit_date,Lang,disqualified',
+    );
     expect(lines).toHaveLength(3); // header + 2 responses
     expect(lines[1]).toContain('false');
     expect(lines[2]).toContain('true');
+  });
+
+  it('exports start/submit dates in UTC by default', async () => {
+    const res = await request(server())
+      .get(`${base}/csv/0/999999`)
+      .set('Authorization', SUPER)
+      .expect(200);
+    expect(res.text).toContain('2024-01-01 00:00:00,2024-02-01 00:00:00');
+  });
+
+  it('exports start/submit dates in the requested time zone', async () => {
+    const res = await request(server())
+      .get(`${base}/csv/0/999999?timezone=${encodeURIComponent('Africa/Cairo')}`)
+      .set('Authorization', SUPER)
+      .expect(200);
+    expect(res.text).toContain('index,id,start_date,submit_date,');
+    expect(res.text).toContain('2024-01-01 02:00:00,2024-02-01 02:00:00');
+    expect(res.text).not.toContain('2024-01-01 00:00:00');
+  });
+
+  it('falls back to UTC for an unknown time zone', async () => {
+    const res = await request(server())
+      .get(`${base}/csv/0/999999?timezone=Mars%2FOlympus`)
+      .set('Authorization', SUPER)
+      .expect(200);
+    expect(res.text).toContain('2024-01-01 00:00:00,2024-02-01 00:00:00');
   });
 
   it('exports XLSX (a zip container)', async () => {

@@ -130,8 +130,7 @@ function QuestionDesign({
 
     if (
       lastAddedComponent?.type === "question" &&
-      lastAddedComponent.groupIndex === parentIndex &&
-      lastAddedComponent.questionIndex === index &&
+      lastAddedComponent.code === code &&
       element
     ) {
       // Delay the addition of the highlight class to ensure the DOM is ready
@@ -152,7 +151,7 @@ function QuestionDesign({
 
       return () => clearTimeout(timeoutId); // Cleanup timeout on unmount or re-render
     }
-  }, [lastAddedComponent, parentIndex, index]);
+  }, [lastAddedComponent, code]);
   const outlineColor = theme.palette.primary.main;
 
   const stateClass = isInSetup

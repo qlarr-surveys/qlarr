@@ -163,6 +163,19 @@ describe('Response file ops + bulk download', () => {
         .set('Authorization', SUPER)
         .expect(204));
 
+    it('filters the zip by response status', async () => {
+      await request(server())
+        .get(`/survey/${SURVEY}/response/files/download/0/999999?status=complete`)
+        .set('Authorization', SUPER)
+        .buffer(true)
+        .parse(binaryParser)
+        .expect(200);
+      await request(server())
+        .get(`/survey/${SURVEY}/response/files/download/0/999999?status=incomplete,disqualified`)
+        .set('Authorization', SUPER)
+        .expect(204);
+    });
+
     it('rejects an export over the 200MB cap with 413', () =>
       request(server())
         .get(`/survey/${SURVEY_BIG}/response/files/download/0/999999`)

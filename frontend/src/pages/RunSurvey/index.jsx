@@ -55,7 +55,10 @@ function RunSurvey({
   const [currentMode, setCurrentMode] = React.useState(mode);
   const [currentNavigationMode, setCurrentNavigationMode] =
     React.useState(navigationMode);
-  const [pendingScrollTarget, setPendingScrollTarget] = React.useState(null);
+  const pendingScrollTargetRef = useRef(null);
+  const setPendingScrollTarget = (code) => {
+    pendingScrollTargetRef.current = code;
+  };
   const containerRef = useRef(null);
 
   const store = useStore()
@@ -235,12 +238,14 @@ function RunSurvey({
       })
       .catch((err) => {
         console.error(err);
+        setPendingScrollTarget(null);
         handleError(err);
       });
   };
 
   useEffect(() => {
     if (navigation || !containerRef.current) return;
+    const pendingScrollTarget = pendingScrollTargetRef.current;
     if (!pendingScrollTarget) {
       containerRef.current.scrollTo({ top: 0 });
       return;
@@ -280,7 +285,7 @@ function RunSurvey({
     return () => {
       cancelled = true;
     };
-  }, [navigation, pendingScrollTarget]);
+  }, [navigation]);
 
   useEffect(() => {
     document.body.style.overflow = "visible";

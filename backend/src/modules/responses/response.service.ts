@@ -3,6 +3,7 @@ import { replaceFormatInstructions } from "@qlarr/design-core";
 import { extname } from "node:path";
 import { PassThrough, Readable } from "node:stream";
 import { ZipFile } from "yazl";
+import { wallClockInZone } from "../../common/datetime";
 import { stripTags } from "../../common/strip-tags";
 import { EngineService } from "../../engine/engine.service";
 import { ComponentIndex, ResponseField } from "../../engine/engine.types";
@@ -164,6 +165,7 @@ export class ResponseService {
     };
 
     const calculated = await this.calculationsFor(surveyId);
+    const inZone = wallClockInZone(options.timeZone);
     const finalCols = [
       ...ADDITIONAL_COL_NAMES,
       ...colNames,
@@ -172,8 +174,8 @@ export class ResponseService {
     const rows = responses.map((r) => [
       r.index,
       r.id,
-      r.startDate,
-      r.submitDate,
+      r.startDate && inZone(r.startDate),
+      r.submitDate && inZone(r.submitDate),
       r.lang,
       r.values["Survey.disqualified"] ?? false,
       ...fields.map((f, i) => cellFor(r.values, f, keys[i], questionCodes[i])),
@@ -285,20 +287,20 @@ export class ResponseService {
   }
 
   /**
-   * Collect every file attached to responses in the index range [from,to]
-   * (optionally filtered by completeness), enforce the 200MB cap, and stream
+   * Collect every file attached to responses in the index range [from,to],
+   * enforce the 200MB cap, and stream
    * them as a ZIP. Returns null when there's nothing to export (→ 204). Per-file
    * download errors are logged and skipped.
    */
   async bulkDownloadResponses(
     surveyId: string,
-    complete: boolean | undefined,
+    statuses: ExportStatus[],
     from: number,
     to: number,
   ): Promise<Readable | null> {
     const rows = await this.responses.findFilesInIndexRange(
       surveyId,
-      complete,
+      statuses,
       from,
       to,
     );

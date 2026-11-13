@@ -142,6 +142,14 @@ function McqAnswerOther(props) {
           .MuiTypography-root {
             width: 100%;
           }
+          .MuiFormControl-root {
+            width: 50%;
+          }
+          @media (max-width: 767px) {
+            .MuiFormControl-root {
+              width: 100%;
+            }
+          }
         `}
         data-code={props.Answer.code}
         control={
@@ -156,6 +164,7 @@ function McqAnswerOther(props) {
         label={
           <TextField
             variant="outlined"
+            size="small"
             required={
               state.textRelevance && nestedTextChild.validation?.required
             }

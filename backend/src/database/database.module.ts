@@ -39,6 +39,14 @@ import { MIGRATIONS } from './migrations';
           entities: [],
           migrations: MIGRATIONS,
           migrationsRun: true,
+          // pg pool options: a stuck query, lock wait or abandoned transaction
+          // fails instead of holding its request and connection forever.
+          extra: {
+            connectionTimeoutMillis: 10_000,
+            statement_timeout: 60_000,
+            lock_timeout: 10_000,
+            idle_in_transaction_session_timeout: 60_000,
+          },
         };
       },
     }),
