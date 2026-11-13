@@ -417,6 +417,15 @@
     "plan_name": "Nom du plan",
     "plan_name_taken": "Un plan portant ce nom existe déjà."
   },
+  "jobs": {
+    "failures_title": "Réponses en échec",
+    "failures_error_loading": "Impossible de charger les échecs",
+    "failure_response": "Réponse",
+    "failure_error": "Erreur",
+    "view_failures": "Voir les échecs",
+    "status_failures": "{{count}} réponses ont échoué.",
+    "status_completed_with_failures": "{{done}} {{count}} réponses ont échoué."
+  },
   "calculations": {
     "title": "Champs calculés",
     "label": "Libellé",
@@ -450,11 +459,7 @@
     "cancel_compute": "Annuler",
     "compute_success": "Calcul terminé.",
     "status_too_many_failures": "Le calcul s'est arrêté : trop de réponses ont échoué. Les résultats obtenus sont conservés.",
-    "status_completed_with_failures": "Calculé. {{count}} réponses ont échoué.",
-    "status_failures": "{{count}} réponses ont échoué.",
-    "view_failures": "Voir les échecs",
-    "failures_title": "Réponses en échec",
-    "failures_error_loading": "Impossible de charger les échecs",
+    "failures_done": "Calculé.",
     "sample_response": "Réponse",
     "sample_empty": "Aucune réponse complète à tester pour l'instant.",
     "unsaved_title": "Modifications non enregistrées",

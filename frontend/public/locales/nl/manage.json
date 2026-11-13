@@ -417,6 +417,15 @@
     "plan_name": "Plannaam",
     "plan_name_taken": "Er bestaat al een plan met deze naam."
   },
+  "jobs": {
+    "failures_title": "Mislukte antwoorden",
+    "failures_error_loading": "Mislukkingen konden niet worden geladen",
+    "failure_response": "Antwoord",
+    "failure_error": "Fout",
+    "view_failures": "Mislukkingen bekijken",
+    "status_failures": "{{count}} antwoorden zijn mislukt.",
+    "status_completed_with_failures": "{{done}} {{count}} antwoorden zijn mislukt."
+  },
   "calculations": {
     "title": "Berekende velden",
     "label": "Label",
@@ -450,11 +459,7 @@
     "cancel_compute": "Annuleren",
     "compute_success": "Berekening voltooid.",
     "status_too_many_failures": "De berekening is gestopt: te veel antwoorden zijn mislukt. De resultaten tot nu toe blijven bewaard.",
-    "status_completed_with_failures": "Berekend. {{count}} antwoorden zijn mislukt.",
-    "status_failures": "{{count}} antwoorden zijn mislukt.",
-    "view_failures": "Mislukkingen bekijken",
-    "failures_title": "Mislukte antwoorden",
-    "failures_error_loading": "Mislukkingen konden niet worden geladen",
+    "failures_done": "Berekend.",
     "sample_response": "Antwoord",
     "sample_empty": "Nog geen voltooide antwoorden om op te testen.",
     "unsaved_title": "Niet-opgeslagen wijzigingen",

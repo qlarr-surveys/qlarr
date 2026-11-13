@@ -417,6 +417,15 @@
     "plan_name": "Nombre del plan",
     "plan_name_taken": "Ya existe un plan con este nombre."
   },
+  "jobs": {
+    "failures_title": "Respuestas fallidas",
+    "failures_error_loading": "No se pudieron cargar los fallos",
+    "failure_response": "Respuesta",
+    "failure_error": "Error",
+    "view_failures": "Ver fallos",
+    "status_failures": "{{count}} respuestas fallaron.",
+    "status_completed_with_failures": "{{done}} {{count}} respuestas fallaron."
+  },
   "calculations": {
     "title": "Campos calculados",
     "label": "Etiqueta",
@@ -450,11 +459,7 @@
     "cancel_compute": "Cancelar",
     "compute_success": "Cálculo completado.",
     "status_too_many_failures": "El cálculo se detuvo: demasiadas respuestas fallaron. Los resultados obtenidos se conservan.",
-    "status_completed_with_failures": "Calculado. {{count}} respuestas fallaron.",
-    "status_failures": "{{count}} respuestas fallaron.",
-    "view_failures": "Ver fallos",
-    "failures_title": "Respuestas fallidas",
-    "failures_error_loading": "No se pudieron cargar los fallos",
+    "failures_done": "Calculado.",
     "sample_response": "Respuesta",
     "sample_empty": "Aún no hay respuestas completadas para probar.",
     "unsaved_title": "Cambios sin guardar",

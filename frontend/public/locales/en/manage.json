@@ -417,6 +417,15 @@
     "plan_name": "Plan name",
     "plan_name_taken": "A plan with this name already exists."
   },
+  "jobs": {
+    "failures_title": "Failed responses",
+    "failures_error_loading": "Failed to load failures",
+    "failure_response": "Response",
+    "failure_error": "Error",
+    "view_failures": "View failures",
+    "status_failures": "{{count}} responses failed.",
+    "status_completed_with_failures": "{{done}} {{count}} responses failed."
+  },
   "calculations": {
     "title": "Calculated fields",
     "label": "Label",
@@ -450,11 +459,7 @@
     "cancel_compute": "Cancel",
     "compute_success": "Computation finished.",
     "status_too_many_failures": "Computation stopped: too many responses failed. Results so far are kept.",
-    "status_completed_with_failures": "Computed. {{count}} responses failed.",
-    "status_failures": "{{count}} responses failed.",
-    "view_failures": "View failures",
-    "failures_title": "Failed responses",
-    "failures_error_loading": "Failed to load failures",
+    "failures_done": "Computed.",
     "sample_response": "Response",
     "sample_empty": "No completed responses to test on yet.",
     "unsaved_title": "Unsaved changes",

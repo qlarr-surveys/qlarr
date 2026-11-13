@@ -421,6 +421,15 @@
     "plan_name": "اسم الخطة",
     "plan_name_taken": "توجد خطة بهذا الاسم بالفعل."
   },
+  "jobs": {
+    "failures_title": "الردود الفاشلة",
+    "failures_error_loading": "فشل تحميل الإخفاقات",
+    "failure_response": "الرد",
+    "failure_error": "خطأ",
+    "view_failures": "عرض الإخفاقات",
+    "status_failures": "فشل {{count}} من الردود.",
+    "status_completed_with_failures": "{{done}} فشل {{count}} من الردود."
+  },
   "calculations": {
     "title": "الحقول المحسوبة",
     "label": "التسمية",
@@ -454,11 +463,7 @@
     "cancel_compute": "إلغاء",
     "compute_success": "اكتمل الحساب.",
     "status_too_many_failures": "توقف الحساب: فشل عدد كبير جدًا من الردود. النتائج حتى الآن محفوظة.",
-    "status_completed_with_failures": "اكتمل الحساب. فشل {{count}} من الردود.",
-    "status_failures": "فشل {{count}} من الردود.",
-    "view_failures": "عرض الإخفاقات",
-    "failures_title": "الردود الفاشلة",
-    "failures_error_loading": "فشل تحميل الإخفاقات",
+    "failures_done": "اكتمل الحساب.",
     "sample_response": "الرد",
     "sample_empty": "لا توجد ردود مكتملة للاختبار بعد.",
     "unsaved_title": "تغييرات غير محفوظة",

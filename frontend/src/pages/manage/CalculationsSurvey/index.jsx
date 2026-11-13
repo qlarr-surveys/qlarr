@@ -31,10 +31,10 @@ import FormProvider, { RHFTextField } from "~/components/hook-form";
 import ConfirmActionModal from "~/components/common/ConfirmActionModal";
 import LoadingDots from "~/components/common/LoadingDots";
 import CalculationValue from "~/components/manage/CalculationValue";
+import { FailuresBanner, FailuresDialog } from "~/components/manage/JobFailures";
 import { PROCESSED_ERRORS } from "~/utils/errorsProcessor";
 import { hasComputeAtStake, isActive } from "~/utils/computeJobs";
 import ExpressionHelp from "./ExpressionHelp";
-import FailuresDialog from "./FailuresDialog";
 
 const CALC_COMPUTE = "calc.compute";
 const MAX_CALCULATIONS = 10;
@@ -326,11 +326,11 @@ function CalculationsSurvey({ onDirtyChange }) {
         {state.failedCount > 0 && (
           <FailuresBanner
             state={state}
+            doneLabel={t("calculations.failures_done", "Computed.")}
             onRetry={onRetry}
             retrying={busy === "retry"}
             retryDisabled={actionsDisabled || active}
             onView={() => setFailuresOpen(true)}
-            t={t}
           />
         )}
         {failuresOpen && (
@@ -339,7 +339,6 @@ function CalculationsSurvey({ onDirtyChange }) {
             surveyId={surveyId}
             kind={CALC_COMPUTE}
             subjectKey=""
-            t={t}
           />
         )}
 
@@ -548,46 +547,6 @@ function StatusBanner({ state, onCancel, cancelling, t }) {
         </Alert>
       ) : null;
   }
-}
-
-/**
- * The responses Compute failed on, with Retry and View failures. Shown
- * whenever there are any, whatever the last run's status; Retry waits while a
- * job is queued or running.
- */
-function FailuresBanner({ state, onRetry, retrying, retryDisabled, onView, t }) {
-  const count = state.failedCount;
-  return (
-    <Alert
-      severity="warning"
-      action={
-        <Stack direction="row" spacing={1}>
-          <Button color="inherit" size="small" onClick={onView}>
-            {t("calculations.view_failures", "View failures")}
-          </Button>
-          <LoadingButton
-            color="inherit"
-            size="small"
-            onClick={onRetry}
-            loading={retrying}
-            disabled={retryDisabled}
-          >
-            {t("action_btn.retry", "Retry")}
-          </LoadingButton>
-        </Stack>
-      }
-    >
-      {state.status === "completed_with_failures"
-        ? t(
-            "calculations.status_completed_with_failures",
-            "Computed. {{count}} responses failed.",
-            { count }
-          )
-        : t("calculations.status_failures", "{{count}} responses failed.", {
-            count,
-          })}
-    </Alert>
-  );
 }
 
 /** One calculation: label, expression, remove, and its stored errors. */

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Alert,
   Button,
@@ -14,6 +15,7 @@ import {
   TablePagination,
   TableRow,
 } from "@mui/material";
+import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import { useService } from "~/hooks/use-service";
 import LoadingDots from "~/components/common/LoadingDots";
 
@@ -23,7 +25,8 @@ const PER_PAGE = 10;
  * A page at a time of a job subject's failed responses: id and error. Mounted
  * only while open, so it starts on the first page each time.
  */
-function FailuresDialog({ onClose, surveyId, kind, subjectKey, t }) {
+function FailuresDialog({ onClose, surveyId, kind, subjectKey }) {
+  const { t } = useTranslation(NAMESPACES.MANAGE);
   const surveyService = useService("survey");
   const [page, setPage] = useState(1);
   const [data, setData] = useState(null);
@@ -45,12 +48,12 @@ function FailuresDialog({ onClose, surveyId, kind, subjectKey, t }) {
   return (
     <Dialog open onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>
-        {t("calculations.failures_title", "Failed responses")}
+        {t("jobs.failures_title", "Failed responses")}
       </DialogTitle>
       <DialogContent>
         {error ? (
           <Alert severity="error">
-            {t("calculations.failures_error_loading", "Failed to load failures")}
+            {t("jobs.failures_error_loading", "Failed to load failures")}
           </Alert>
         ) : !data ? (
           <LoadingDots />
@@ -60,10 +63,8 @@ function FailuresDialog({ onClose, surveyId, kind, subjectKey, t }) {
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell>
-                      {t("calculations.sample_response", "Response")}
-                    </TableCell>
-                    <TableCell>{t("calculations.state_error", "Error")}</TableCell>
+                    <TableCell>{t("jobs.failure_response", "Response")}</TableCell>
+                    <TableCell>{t("jobs.failure_error", "Error")}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>

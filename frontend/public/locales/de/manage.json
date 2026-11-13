@@ -453,6 +453,15 @@
     "plan_name": "Planname",
     "plan_name_taken": "Ein Plan mit diesem Namen existiert bereits."
   },
+  "jobs": {
+    "failures_title": "Fehlgeschlagene Antworten",
+    "failures_error_loading": "Fehler konnten nicht geladen werden",
+    "failure_response": "Antwort",
+    "failure_error": "Fehler",
+    "view_failures": "Fehler anzeigen",
+    "status_failures": "{{count}} Antworten sind fehlgeschlagen.",
+    "status_completed_with_failures": "{{done}} {{count}} Antworten sind fehlgeschlagen."
+  },
   "calculations": {
     "title": "Berechnete Felder",
     "label": "Bezeichnung",
@@ -486,11 +495,7 @@
     "cancel_compute": "Abbrechen",
     "compute_success": "Berechnung abgeschlossen.",
     "status_too_many_failures": "Die Berechnung wurde angehalten: Zu viele Antworten sind fehlgeschlagen. Bisherige Ergebnisse bleiben erhalten.",
-    "status_completed_with_failures": "Berechnet. {{count}} Antworten sind fehlgeschlagen.",
-    "status_failures": "{{count}} Antworten sind fehlgeschlagen.",
-    "view_failures": "Fehler anzeigen",
-    "failures_title": "Fehlgeschlagene Antworten",
-    "failures_error_loading": "Fehler konnten nicht geladen werden",
+    "failures_done": "Berechnet.",
     "sample_response": "Antwort",
     "sample_empty": "Noch keine abgeschlossenen Antworten zum Testen.",
     "unsaved_title": "Ungespeicherte Änderungen",
