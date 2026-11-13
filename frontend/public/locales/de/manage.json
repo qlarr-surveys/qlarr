@@ -602,6 +602,7 @@
   "timezone_info": "Wir verwenden Ihre lokale Zeitzone, um die Ablaufzeit der Umfrage zu berechnen.",
   "timezone_tooltip": "Die Umfrage läuft um 00:00 Uhr am ausgewählten Enddatum in Ihrer lokalen Zeitzone ab",
   "tooltips": {
+    "background_audio": "Mit dieser Option können Sie Ihrer Umfrage Hintergrundaudio hinzufügen.",
     "group_quotas": "Quoten begrenzen, wie viele abgeschlossene Antworten eine Gruppe abgeben kann, z. B. 50 männliche und 50 weibliche Teilnehmende.\n\n● Jede Quote hat eine Bedingung aus Ihren Fragen und ein Limit\n● Teilnehmende werden bei jedem Schritt vorwärts geprüft\n● Ist eine Quote, der sie entsprechen, voll, springt die Umfrage zum Ende und die Antwort wird als disqualifiziert markiert\n● Füllt sich eine Quote, während jemand antwortet, wird er beim nächsten Schritt zum Ende geleitet",
     "create_new_survey": "Erstellen Sie eine neue Umfrage von Grund auf mit einer leeren Vorlage",
     "create_survey_with_ai": "Erstellen Sie automatisch eine neue Umfrage mit KI-Unterstützung",

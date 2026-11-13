@@ -605,6 +605,7 @@
     "email_changed": "Seu e-mail foi atualizado com sucesso!"
   },
   "tooltips": {
+    "background_audio": "Esta opção permite que você adicione áudio de fundo à sua pesquisa.",
     "group_quotas": "As cotas limitam quantas respostas completas um grupo pode dar, ex.: 50 homens e 50 mulheres.\n\n● Cada cota tem uma condição baseada nas suas perguntas e um limite\n● Os respondentes são verificados sempre que avançam\n● Se a cota que corresponde estiver cheia, a pesquisa pula para o final e a resposta é marcada como desqualificada\n● Se uma cota encher enquanto alguém responde, ele vai para o final no próximo avanço",
     "quotas": "Habilitar cotas e definir limites para o número de respostas. Este limite se aplica tanto a respostas de pesquisas online quanto offline, dependendo da frequência com que as respostas offline são sincronizadas.",
     "export": "Exportar os dados da pesquisa",

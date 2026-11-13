@@ -605,6 +605,7 @@
     "email_changed": "¡Tu correo electrónico ha sido actualizado exitosamente!"
   },
   "tooltips": {
+    "background_audio": "Esta opción te permite añadir audio de fondo a tu encuesta.",
     "group_quotas": "Las cuotas limitan cuántas respuestas completas puede dar un grupo, p. ej. 50 hombres y 50 mujeres.\n\n● Cada cuota tiene una condición basada en tus preguntas y un límite\n● Los encuestados se comprueban cada vez que avanzan\n● Si la cuota que cumplen está llena, la encuesta salta al final y la respuesta se marca como descalificada\n● Si una cuota se llena mientras alguien responde, pasa al final en su siguiente avance",
     "quotas": "Habilitar cuotas y establecer límites para el número de respuestas. Este límite se aplica tanto a respuestas de encuestas en línea como sin conexión, dependiendo de la frecuencia con la que se sincronicen las respuestas sin conexión.",
     "export": "Exportar los datos de la encuesta",
