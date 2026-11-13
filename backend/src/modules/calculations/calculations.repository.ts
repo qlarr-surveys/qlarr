@@ -110,15 +110,16 @@ export class CalculationsRepository {
 
   /**
    * A design change: mark every calculation `OutOfDate` until the next Save
-   * validates it. `revision` stays: the authored set is unchanged.
+   * validates it. `revision` stays: the authored set is unchanged. False when
+   * there was nothing to mark: no set, or one already marked.
    */
-  async markOutOfDate(manager: EntityManager, surveyId: string): Promise<void> {
+  async markOutOfDate(manager: EntityManager, surveyId: string): Promise<boolean> {
     const rows = await manager.query<{ calculations: Calculation[] }[]>(
       `SELECT calculations FROM survey_calculations WHERE survey_id = $1 FOR UPDATE`,
       [surveyId],
     );
     const set = rows[0]?.calculations ?? [];
-    if (set.every(isOutOfDate)) return;
+    if (set.every(isOutOfDate)) return false;
     const marked = set.map((c) =>
       isOutOfDate(c)
         ? c
@@ -129,6 +130,7 @@ export class CalculationsRepository {
        WHERE survey_id = $1`,
       [surveyId, JSON.stringify(marked)],
     );
+    return true;
   }
 
   /**
@@ -183,6 +185,20 @@ export class CalculationsRepository {
       ),
     );
     return written.map((r) => r.id);
+  }
+
+  /**
+   * Whether `results_epoch` is still `epoch`, reading the row `FOR SHARE` so a
+   * clear in flight is waited for.
+   */
+  async isEpochCurrent(manager: EntityManager, surveyId: string, epoch: number): Promise<boolean> {
+    const rows: unknown[] = await manager.query(
+      `SELECT 1 FROM survey_calculations
+       WHERE survey_id = $1 AND results_epoch = $2
+       FOR SHARE`,
+      [surveyId, epoch],
+    );
+    return rows.length > 0;
   }
 
   async surveyExists(surveyId: string): Promise<boolean> {

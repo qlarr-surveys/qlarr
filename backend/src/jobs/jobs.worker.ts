@@ -82,8 +82,8 @@ export class JobsWorker implements OnApplicationBootstrap, OnModuleDestroy {
    * Prepare, list the responses (a normal run's pending ones, or a retry's
    * failed ones), trim to `maxResponses`, then run the chunks until done or
    * aborted. Each chunk's failures and progress are written in one
-   * transaction, fenced so none land once the job was cancelled, which also
-   * stops the run (pg-boss settles nothing on a job no longer active). Past
+   * transaction, fenced so none land once the job was cancelled or its input
+   * changed (`isCurrent`), which also stops the run (pg-boss settles nothing on a job no longer active). Past
    * `maxFailures` the job fails; its results and failures so far stay.
    * A throw is stored marked with its code (`job_error` unless said), so
    * `JobsService` tells it apart from a failure pg-boss records itself
@@ -106,6 +106,8 @@ export class JobsWorker implements OnApplicationBootstrap, OnModuleDestroy {
         const failed = await handler.runChunk(job, chunk, ctx, signal);
         const active = await this.context.run(job, (m) =>
           m.transaction(async (tx) => {
+            // The input first: a change locks it before the job's row.
+            if (handler.isCurrent && !(await handler.isCurrent(tx, job, ctx))) return false;
             if (!(await this.rows.lockIfActive(tx, job.kind, job.id))) return false;
             await this.failures.record(tx, job, failed);
             await this.rows.addDone(tx, job.id, chunk.length);
@@ -113,7 +115,7 @@ export class JobsWorker implements OnApplicationBootstrap, OnModuleDestroy {
             return true;
           }),
         );
-        // Cancelled before its signal fired: no more chunks.
+        // Cancelled before its signal fired, or its input changed: no more chunks.
         if (!active) return;
         failedTotal += failed.length;
         if (failedTotal > handler.maxFailures) {

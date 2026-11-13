@@ -232,11 +232,17 @@ function CalculationsSurvey({ onDirtyChange }) {
       setFirstSave(values);
       return;
     }
+    // Disabled while the jobs are checked, so a double-click can't save twice.
+    setBusy("save");
     surveyService
       .getJobs(surveyId)
       .then((jobs) => hasComputeAtStake(jobs))
       .catch(() => true)
-      .then((atStake) => (atStake ? setInvalidatingSave(values) : save(values)));
+      .then((atStake) => {
+        if (!atStake) return save(values);
+        setBusy(null);
+        setInvalidatingSave(values);
+      });
   });
 
   const onConfirmInvalidatingSave = () => {

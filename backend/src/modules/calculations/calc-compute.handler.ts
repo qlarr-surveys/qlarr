@@ -124,13 +124,20 @@ export class CalcComputeHandler implements JobHandler<ComputeContext>, OnModuleI
     return failures;
   }
 
+  isCurrent(tx: EntityManager, job: Job, ctx: ComputeContext): Promise<boolean> {
+    return this.calculations.isEpochCurrent(tx, job.surveyId, ctx.epoch);
+  }
+
   hasResults(surveyId: string): Promise<boolean> {
     return this.calculations.hasComputations(surveyId);
   }
 
-  /** The set goes out of date, and its results go. */
+  /**
+   * The set goes out of date, and its results go. A set already out of date
+   * had them cleared then, and a Compute since runs no calculation.
+   */
   async onDesignChange(tx: EntityManager, surveyId: string): Promise<void> {
-    await this.calculations.markOutOfDate(tx, surveyId);
+    if (!(await this.calculations.markOutOfDate(tx, surveyId))) return;
     await this.invalidate(tx, surveyId);
   }
 

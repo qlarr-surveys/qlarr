@@ -69,8 +69,8 @@ export class SurveyResponseEntity {
   values: Record<string, unknown> | null;
 
   // Calculated-field results from the last Compute (code → value).
-  // Shown only while the survey's calculations status is `completed`. Written
-  // only by CalculationsRepository, so a normal save never overwrites them.
+  // Cleared when the set or the design changes, so any stored are current.
+  // Written only by CalculationsRepository, so a normal save never overwrites them.
   @Column({ type: 'jsonb', nullable: true, update: false })
   computations: Record<string, unknown> | null;
 

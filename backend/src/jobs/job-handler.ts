@@ -71,6 +71,13 @@ export interface JobHandler<Ctx = unknown> {
     ctx: Ctx,
     signal: AbortSignal,
   ): Promise<ResponseFailure[]>;
+  /**
+   * Whether the input `ctx` was read from is still current, checked in the
+   * chunk's failure write `tx` before the job's row is locked, so failures
+   * worked out from changed input are dropped. A change the job's cancel missed
+   * (it was queued as the change ran) still stops it.
+   */
+  isCurrent?(tx: EntityManager, job: Job, ctx: Ctx): Promise<boolean>;
   /** Whether any results exist for the subject. */
   hasResults(surveyId: string, subjectKey: string): Promise<boolean>;
   /** A design change: invalidate whatever it affects, in the change's `tx`. */
