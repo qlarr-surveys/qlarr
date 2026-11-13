@@ -11,6 +11,8 @@ const HEX_SHORT = /^#([0-9a-f])([0-9a-f])([0-9a-f])$/i;
 const HEX_LONG = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i;
 const RGB = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)$/i;
 
+export const HEX_INPUT = /^#?[0-9a-f]{6}$/i;
+
 /** `{ r, g, b, a }` with channels 0-255 and alpha 0-1, or null if unparseable. */
 export function parseColor(value) {
   if (typeof value !== "string") {

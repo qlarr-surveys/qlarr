@@ -310,25 +310,167 @@
   background: #fff;
 }
 
-/* react-color draws the picker with inline styles; these are the few places
-   the panel has to reach in — its card chrome, and the hex/RGBA boxes under
-   the sliders, which otherwise come in on the browser's default font. */
-.customEditor input {
-  font: 500 11.5px/1 Rubik, sans-serif !important;
-  color: #1b2150 !important;
-  border-radius: 5px !important;
-  box-shadow: inset 0 0 0 1px #cfd5e8 !important;
+.customRow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
 }
 
-.customEditor input:focus-visible {
+/* The swatch is a preview, not a button — the picker is right under it. The
+   colour is laid over a chequerboard so a translucent one reads as one. */
+.preview {
+  flex: none;
+  width: 34px;
+  height: 30px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  background-color: #fff;
+  background-image: linear-gradient(
+      var(--swatch-color, #fff),
+      var(--swatch-color, #fff)
+    ),
+    conic-gradient(#e4e8f6 0 25%, #fff 0 50%, #e4e8f6 0 75%, #fff 0);
+  background-size:
+    auto,
+    8px 8px;
+}
+
+.hexInput {
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  font: 500 12.5px/1 Rubik, sans-serif;
+  color: #1b2150;
+  direction: ltr;
+  text-transform: uppercase;
+}
+
+.hexInput:focus-visible {
   outline: 2px solid #3a46d8;
-  outline-offset: 0;
+  outline-offset: -1px;
 }
 
-.customEditor label {
-  font: 400 10.5px/1 Rubik, sans-serif !important;
-  color: #4c5474 !important;
-  text-transform: uppercase !important;
+.hexInvalid {
+  border-color: #b3261e;
+}
+
+.apply {
+  flex: none;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid #1b2150;
+  border-radius: 6px;
+  background: #1b2150;
+  font: 600 12.5px/1 Rubik, sans-serif;
+  color: #fff;
+  cursor: pointer;
+}
+
+.apply:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
+}
+
+/* ====== Picker ====== */
+
+.pickerStack {
+  display: grid;
+  gap: 8px;
+  margin-top: 9px;
+}
+
+/* react-color's shade area fills this box absolutely, so the box owns the
+   height and the rounding. */
+.saturation {
+  position: relative;
+  height: 104px;
+  border: 1px solid #cfd5e8;
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.satPointer {
+  display: block;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(16, 22, 60, 0.45);
+}
+
+.bar {
+  width: 100%;
+  height: 14px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #cfd5e8;
+  border-radius: 7px;
+  /* Left to right is what both gradients mean, in every language. */
+  direction: ltr;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.hueBar {
+  background-image: linear-gradient(
+    to right,
+    #f00 0%,
+    #ff0 17%,
+    #0f0 33%,
+    #0ff 50%,
+    #00f 67%,
+    #f0f 83%,
+    #f00 100%
+  );
+}
+
+.alphaBar {
+  background-color: #fff;
+  background-image: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0),
+      var(--alpha-color, #1b2150)
+    ),
+    conic-gradient(#e4e8f6 0 25%, #fff 0 50%, #e4e8f6 0 75%, #fff 0);
+  background-size:
+    auto,
+    8px 8px;
+}
+
+.bar::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 0 0 1px rgba(16, 22, 60, 0.45);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.bar::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 0 0 1px rgba(16, 22, 60, 0.45);
+  cursor: pointer;
+}
+
+.bar::-moz-range-track {
+  background: transparent;
+}
+
+.bar:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
 }
 
 .help {
