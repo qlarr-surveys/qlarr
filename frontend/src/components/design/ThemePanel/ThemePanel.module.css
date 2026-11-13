@@ -310,60 +310,25 @@
   background: #fff;
 }
 
-.customRow {
-  display: flex;
-  align-items: center;
-  gap: 7px;
+/* react-color draws the picker with inline styles; these are the few places
+   the panel has to reach in — its card chrome, and the hex/RGBA boxes under
+   the sliders, which otherwise come in on the browser's default font. */
+.customEditor input {
+  font: 500 11.5px/1 Rubik, sans-serif !important;
+  color: #1b2150 !important;
+  border-radius: 5px !important;
+  box-shadow: inset 0 0 0 1px #cfd5e8 !important;
 }
 
-.picker {
-  flex: none;
-  width: 34px;
-  height: 30px;
-  padding: 2px;
-  border: 1px solid #cfd5e8;
-  border-radius: 6px;
-  background: #fff;
-  cursor: pointer;
-}
-
-.hexInput {
-  flex: 1;
-  min-width: 0;
-  height: 30px;
-  padding: 0 8px;
-  border: 1px solid #cfd5e8;
-  border-radius: 6px;
-  font: 500 12.5px/1 Rubik, sans-serif;
-  color: #1b2150;
-  direction: ltr;
-  text-transform: uppercase;
-}
-
-.hexInput:focus-visible {
+.customEditor input:focus-visible {
   outline: 2px solid #3a46d8;
-  outline-offset: -1px;
+  outline-offset: 0;
 }
 
-.hexInvalid {
-  border-color: #b3261e;
-}
-
-.apply {
-  flex: none;
-  height: 30px;
-  padding: 0 12px;
-  border: 1px solid #1b2150;
-  border-radius: 6px;
-  background: #1b2150;
-  font: 600 12.5px/1 Rubik, sans-serif;
-  color: #fff;
-  cursor: pointer;
-}
-
-.apply:focus-visible {
-  outline: 2px solid #3a46d8;
-  outline-offset: 2px;
+.customEditor label {
+  font: 400 10.5px/1 Rubik, sans-serif !important;
+  color: #4c5474 !important;
+  text-transform: uppercase !important;
 }
 
 .help {
