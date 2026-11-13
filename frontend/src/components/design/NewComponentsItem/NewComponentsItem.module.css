@@ -1,8 +1,11 @@
+/* The end gutter is 6px short of the start one because the ⓘ's round target is
+   24px around a 14px glyph: 10 + 5 lands the glyph on the same 15px inset the
+   16px start gutter mirrors, so the row stays symmetric under the heading. */
 .row {
   display: flex;
   align-items: center;
   height: 32px;
-  padding-inline: 16px 13px;
+  padding-inline: 16px 10px;
 }
 
 /* The negative inline start pulls the hover/focus box out to sit flush with the
