@@ -4,9 +4,11 @@ import {
   assertWallClock,
   assertWallClockRequired,
   formatWallClockUtc,
+  isTimeZone,
   isWallClock,
   nowUtcString,
   timestampTextTransformer,
+  wallClockInZone,
   wallClockToInstant,
 } from './datetime';
 
@@ -93,6 +95,40 @@ describe('timestampTextTransformer (UTC wall clock)', () => {
     it('is consistent with nowUtcString to the whole second', () => {
       const s = nowUtcString();
       expect(wallClockToInstant(s)).toBe(Date.parse(`${s.replace(' ', 'T')}Z`));
+    });
+  });
+
+  describe('isTimeZone', () => {
+    it('accepts IANA zone names and UTC', () => {
+      expect(isTimeZone('UTC')).toBe(true);
+      expect(isTimeZone('Africa/Cairo')).toBe(true);
+      expect(isTimeZone('America/New_York')).toBe(true);
+    });
+
+    it('rejects unknown names', () => {
+      expect(isTimeZone('Mars/Olympus')).toBe(false);
+      expect(isTimeZone('')).toBe(false);
+    });
+  });
+
+  describe('wallClockInZone', () => {
+    it('returns the UTC wall clock unchanged for UTC', () => {
+      expect(wallClockInZone('UTC')('2024-01-15 10:30:00')).toBe('2024-01-15 10:30:00');
+    });
+
+    it('shifts a UTC wall clock into the zone, across midnight', () => {
+      expect(wallClockInZone('Asia/Tokyo')('2024-01-15 20:30:00')).toBe('2024-01-16 05:30:00');
+      expect(wallClockInZone('America/New_York')('2024-01-15 03:00:00')).toBe('2024-01-14 22:00:00');
+    });
+
+    it('follows daylight saving time', () => {
+      const toNewYork = wallClockInZone('America/New_York');
+      expect(toNewYork('2024-01-15 12:00:00')).toBe('2024-01-15 07:00:00');
+      expect(toNewYork('2024-07-15 12:00:00')).toBe('2024-07-15 08:00:00');
+    });
+
+    it('formats midnight as 00, not 24', () => {
+      expect(wallClockInZone('Asia/Tokyo')('2024-01-15 15:00:00')).toBe('2024-01-16 00:00:00');
     });
   });
 

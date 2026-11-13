@@ -6,9 +6,8 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import { onDrag } from "~/state/design/designState";
+import { groupTypeOf } from "~/utils/design/utils";
 import styles from "./MoveGroup.module.css";
-
-const typeOf = (g) => (g?.type || g?.groupType || "").toLowerCase();
 
 export default function MoveGroup({ code, t }) {
   const dispatch = useDispatch();
@@ -21,16 +20,16 @@ export default function MoveGroup({ code, t }) {
           const empty = { ok: false };
           if (!Array.isArray(children) || !code?.startsWith("G")) return empty;
           const index = children.findIndex((g) => g.code === code);
-          if (index === -1 || typeOf(children[index]) !== "group") return empty;
+          if (index === -1 || groupTypeOf(children[index]) !== "group") return empty;
           let prevIndex = -1;
           for (let i = index - 1; i >= 0; i--)
-            if (typeOf(children[i]) === "group") {
+            if (groupTypeOf(children[i]) === "group") {
               prevIndex = i;
               break;
             }
           let nextIndex = -1;
           for (let i = index + 1; i < children.length; i++)
-            if (typeOf(children[i]) === "group") {
+            if (groupTypeOf(children[i]) === "group") {
               nextIndex = i;
               break;
             }

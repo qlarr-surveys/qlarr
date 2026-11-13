@@ -4,29 +4,49 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
-  Box,
   Button,
-  FormControl,
-  FormLabel,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  Snackbar,
-  Alert,
   CircularProgress,
 } from "@mui/material";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { saveAs } from "file-saver";
 import FormProvider from "~/components/hook-form";
 import { useParams } from "react-router-dom";
 import { useService } from "~/hooks/use-service";
+import { PROCESSED_ERRORS } from "~/utils/errorsProcessor";
+import {
+  ALL_STATUSES,
+  RangeFields,
+  StatusesField,
+  rangeAndStatusesSchema,
+  responseIndexBounds,
+} from "~/components/manage/ResponsesFilterFields";
+
+const DEFAULT_VALUES = {
+  range: "all",
+  statuses: ALL_STATUSES,
+};
+
+export async function downloadResponseFilesZip(
+  surveyService,
+  surveyId,
+  { range, from, to, statuses } = DEFAULT_VALUES
+) {
+  const { blob, fileName } = await surveyService.downloadResponseFiles(
+    surveyId,
+    { ...responseIndexBounds({ range, from, to }), statuses }
+  );
+  if (!blob || blob.size === 0) return false;
+  saveAs(new File([blob], fileName, { type: "application/zip" }));
+  return true;
+}
 
 export default function ResponsesDownload({
   open,
   onClose,
+  onNoFiles,
+  onSizeLimit,
   t,
   currentFrom = 1,
   currentTo = 1,
@@ -35,44 +55,11 @@ export default function ResponsesDownload({
   const surveyService = useService("survey");
 
   const [loading, setLoading] = useState(false);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "info",
-  });
-
-  const handleSnackbarClose = () =>
-    setSnackbar((prev) => ({ ...prev, open: false }));
-
-  const min = 1;
-
-  const VerifySchema = yup.object().shape({
-    from: yup
-      .number()
-      .typeError(t("responses.enter_a_number"))
-      .required(t("responses.enter_a_number"))
-      .min(min, t("responses.min", { min })),
-    to: yup
-      .number()
-      .typeError(t("responses.enter_a_number"))
-      .required(t("responses.enter_a_number"))
-      .min(min, t("responses.min", { min }))
-      .test("gte-from", t("responses.range_invalid"), function (value) {
-        const { from } = this.parent;
-        if (typeof from !== "number" || typeof value !== "number") return false;
-        return value >= from;
-      }),
-    filter: yup.string().oneOf(["all", "complete", "incomplete"]).required(),
-  });
 
   const methods = useForm({
     mode: "onChange",
-    resolver: yupResolver(VerifySchema),
-    defaultValues: {
-      from: currentFrom,
-      to: currentTo,
-      filter: "all",
-    },
+    resolver: yupResolver(yup.object().shape(rangeAndStatusesSchema(t))),
+    defaultValues: { ...DEFAULT_VALUES, from: currentFrom, to: currentTo },
   });
 
   const {
@@ -81,165 +68,62 @@ export default function ResponsesDownload({
     reset,
     formState: { errors },
   } = methods;
+  const statuses = useWatch({ control, name: "statuses" });
 
   useEffect(() => {
-      if (open) {
-        reset({
-          from: currentFrom,
-          to: currentTo,
-          filter: "all",
-        });
-      }
-    }, [open, currentFrom, currentTo, reset]);
-
-  const onSubmit = handleSubmit((data) => {
-    if (!surveyId) {
-      return;
+    if (open) {
+      reset({ ...DEFAULT_VALUES, from: currentFrom, to: currentTo });
     }
+  }, [open, currentFrom, currentTo, reset]);
 
-    const from = Number(data.from);
-    const to = Number(data.to);
-    const complete =
-      data.filter === "all" ? null : data.filter === "complete" ? true : false;
-
+  const onSubmit = handleSubmit(async (data) => {
     setLoading(true);
-    surveyService
-      .downloadResponseFiles(surveyId, from, to, complete)
-      .then(({ blob, fileName }) => {
-        if (!blob || blob.size === 0) {
-          setSnackbar({
-            open: true,
-            message: t("responses.no_files_found"),
-            severity: "warning",
-          });
-          return;
-        }
-        const file = new File([blob], fileName, { type: "application/zip" });
-        saveAs(file);
-        onClose?.();
-      })
-      .catch((error) => {
-        console.log(error)
-        if (error?.name === "size_limit_exceeded") {
-          setSnackbar({
-            open: true,
-            message: t("processed_errors.size_limit_exceeded"),
-            severity: "error",
-          });
-        }
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    try {
+      const downloaded = await downloadResponseFilesZip(
+        surveyService,
+        surveyId,
+        data
+      );
+      if (!downloaded) {
+        onNoFiles?.();
+        return;
+      }
+      onClose?.();
+    } catch (error) {
+      if (error?.name === PROCESSED_ERRORS.SIZE_LIMIT_EXCEEDED.name) {
+        onSizeLimit?.();
+      }
+    } finally {
+      setLoading(false);
+    }
   });
 
   return (
-    <>
-      <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-        <DialogTitle>{t("responses.download")}</DialogTitle>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle>{t("responses.download")}</DialogTitle>
 
-        <FormProvider methods={methods} onSubmit={onSubmit}>
-          <DialogContent sx={{ display: "grid", gap: 2 }}>
-            <Box display="flex" gap={2}>
-              <Controller
-                name="from"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label={t("responses.from")}
-                    type="number"
-                    inputProps={{ min }}
-                    error={!!errors.from}
-                    helperText={errors.from?.message || ""}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      field.onChange(v === "" ? "" : Number(v));
-                    }}
-                  />
-                )}
-              />
+      <FormProvider methods={methods} onSubmit={onSubmit}>
+        <DialogContent sx={{ display: "grid", gap: 2 }}>
+          <RangeFields control={control} errors={errors} t={t} />
+          <StatusesField control={control} t={t} />
+        </DialogContent>
 
-              <Controller
-                name="to"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label={t("responses.to")}
-                    type="number"
-                    inputProps={{ min }}
-                    error={!!errors.to}
-                    helperText={errors.to?.message || ""}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      field.onChange(v === "" ? "" : Number(v));
-                    }}
-                  />
-                )}
-              />
-            </Box>
-
-            <FormControl>
-              <FormLabel>{t("responses.responses_type")}</FormLabel>
-              <Controller
-                name="filter"
-                control={control}
-                render={({ field }) => (
-                  <RadioGroup row {...field}>
-                    <FormControlLabel
-                      value="all"
-                      control={<Radio />}
-                      label={t("responses.filter_completed_show_all")}
-                    />
-                    <FormControlLabel
-                      value="complete"
-                      control={<Radio />}
-                      label={t("responses.complete_responses")}
-                    />
-                    <FormControlLabel
-                      value="incomplete"
-                      control={<Radio />}
-                      label={t("responses.incomplete_responses")}
-                    />
-                  </RadioGroup>
-                )}
-              />
-            </FormControl>
-          </DialogContent>
-
-          <DialogActions>
-            <Button onClick={onClose} disabled={loading}>
-              {t("action_btn.cancel")}
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={loading}
-              endIcon={
-                loading ? <CircularProgress size={20} color="inherit" /> : null
-              }
-            >
-              {t("action_btn.download")}
-            </Button>
-          </DialogActions>
-        </FormProvider>
-      </Dialog>
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          onClose={handleSnackbarClose}
-          severity={snackbar.severity}
-          sx={{ width: "100%" }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </>
+        <DialogActions>
+          <Button onClick={onClose} disabled={loading}>
+            {t("action_btn.cancel")}
+          </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={loading || !statuses?.length}
+            endIcon={
+              loading ? <CircularProgress size={20} color="inherit" /> : null
+            }
+          >
+            {t("action_btn.download")}
+          </Button>
+        </DialogActions>
+      </FormProvider>
+    </Dialog>
   );
 }
