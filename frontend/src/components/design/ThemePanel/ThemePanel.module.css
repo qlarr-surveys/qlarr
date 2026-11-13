@@ -385,8 +385,9 @@
 
 /* The popup is fixed and portalled to the body: the panel it belongs to
    scrolls, and an absolutely positioned popup would be cut off by that scroll
-   box. 1200 clears the panel's sticky footer and the survey canvas beside it,
-   and stays under the app header at 1300. */
+   box. 1200 clears everything on the editor page — the panel's sticky footer,
+   the survey canvas beside it, the survey header at 1 — while staying under
+   MUI's modals and tooltips, which start at 1300. */
 .pickerPopover {
   position: fixed;
   z-index: 1200;
@@ -396,6 +397,12 @@
   border-radius: 10px;
   background: #fff;
   box-shadow: 0 12px 28px rgba(20, 24, 52, 0.18);
+}
+
+/* The popup takes focus when it opens so the keyboard can reach its controls;
+   it is the controls that show where focus is, not the box around them. */
+.pickerPopover:focus {
+  outline: none;
 }
 
 .pickerStack {
