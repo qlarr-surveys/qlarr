@@ -605,7 +605,7 @@
     "email_changed": "Votre e-mail a été mis à jour avec succès !"
   },
   "tooltips": {
-    "background_audio": "Cette option vous permet d'ajouter un fond sonore à votre sondage.",
+    "background_audio": "Enregistre l'audio en arrière-plan pendant qu'un participant répond au sondage dans l'application mobile.",
     "group_quotas": "Les quotas limitent le nombre de réponses complètes qu'un groupe peut donner, par ex. 50 hommes et 50 femmes.\n\n● Chaque quota a une condition basée sur vos questions et une limite\n● Les répondants sont vérifiés à chaque passage à l'étape suivante\n● Si le quota auquel ils correspondent est plein, l'enquête passe à la fin et la réponse est marquée comme disqualifiée\n● Si un quota se remplit pendant qu'une personne répond, elle est envoyée à la fin au passage suivant",
     "quotas": "Activer les quotas et définir des limites pour le nombre de réponses. Cette limite s'applique aux réponses de sondages en ligne et hors ligne, selon la fréquence de synchronisation des réponses hors ligne.",
     "export": "Exporter les données du sondage",
