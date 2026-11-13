@@ -1,50 +1,60 @@
 import React from "react";
 import { Check, Pencil } from "lucide-react";
+import { ChromePicker } from "react-color";
 import styles from "./ThemePanel.module.css";
-import { HEX_INPUT, isLight, sameColor, toHex, toPickerValue } from "./colors";
+import {
+  alphaOf,
+  fromRgb,
+  hexOf,
+  isLight,
+  parseColor,
+  sameColor,
+} from "./colors";
+
+// The picker is drawn inside a 300px panel, so it gives up its own card and
+// takes the width it is given; the rest keeps it on the panel's typography.
+const PICKER_STYLES = {
+  default: {
+    picker: {
+      width: "100%",
+      boxShadow: "none",
+      borderRadius: 0,
+      background: "transparent",
+      fontFamily: "Rubik, sans-serif",
+    },
+    body: { padding: "10px 0 0" },
+  },
+};
 
 /**
  * A colour setting: a row of named presets, and a custom editor behind the
- * last chip for anything else. The editor applies the picker immediately — the
- * survey next to it is the preview — while the typed hex waits for Apply or
- * Enter, so a half-typed value never repaints the survey.
+ * last chip for anything else.
+ *
+ * The custom editor is a full picker — saturation, hue and opacity, with hex
+ * and RGBA boxes under them — rather than `<input type="color">`, which hands
+ * the job to the operating system and has no alpha channel at all. Opacity is
+ * part of a colour here: a translucent survey background is written as
+ * `rgba(...)`, the way the theme has always stored one.
+ *
+ * Every move applies immediately — the survey next to the panel is the
+ * preview — and the picker's own hex box only commits a value once it parses,
+ * so a half-typed hex never repaints the survey.
  */
 function ColorField({ t, name, label, value, presets, onChange }) {
   const [open, setOpen] = React.useState(false);
-  const [draft, setDraft] = React.useState("");
-  const [invalid, setInvalid] = React.useState(false);
 
-  const hex = toHex(value);
+  const hex = hexOf(value);
+  const alpha = alphaOf(value);
+  const opacity = Math.round(alpha * 100);
   const current = (hex || value || "").toUpperCase();
+  // The readout carries the opacity only once it has something to say: a fully
+  // opaque colour is just its hex, the way every preset reads.
+  const display = alpha < 1 ? `${current} · ${opacity}%` : current;
   const isCustom = !presets.some((preset) => sameColor(preset.value, value));
-  // Keyed by the theme field, not the label: a translated label can be all
-  // non-latin characters, and every field would collapse to the same id.
-  const hexId = `theme-hex-${name}`;
-  const helpId = `${hexId}-help`;
 
-  const toggle = () => {
-    setOpen((wasOpen) => {
-      if (!wasOpen) {
-        setDraft(current);
-        setInvalid(false);
-      }
-      return !wasOpen;
-    });
-  };
-
-  const apply = () => {
-    const candidate = draft.trim();
-    if (!HEX_INPUT.test(candidate)) {
-      setInvalid(true);
-      return;
-    }
-    setInvalid(false);
-    const normalized = candidate.startsWith("#") ? candidate : `#${candidate}`;
-    onChange(normalized.toLowerCase());
-    // Applying a typed hex finishes the edit — the colour is on the survey and
-    // the swatch row shows it, so the editor has nothing left to say.
-    setOpen(false);
-  };
+  // The picker holds alpha, which a hex string cannot carry, so it is fed the
+  // parsed channels instead of the theme's notation.
+  const pickerColor = parseColor(value) || { r: 0, g: 0, b: 0, a: 1 };
 
   const pick = (preset) => {
     setOpen(false);
@@ -55,7 +65,7 @@ function ColorField({ t, name, label, value, presets, onChange }) {
     <div className={styles.field}>
       <div className={styles.fieldHead}>
         <span className={styles.fieldLabel}>{label}</span>
-        <span className={styles.fieldValue}>{current}</span>
+        <span className={styles.fieldValue}>{display}</span>
       </div>
 
       <div role="radiogroup" aria-label={label} className={styles.swatches}>
@@ -90,7 +100,7 @@ function ColorField({ t, name, label, value, presets, onChange }) {
           role="radio"
           aria-checked={isCustom}
           aria-expanded={open}
-          onClick={toggle}
+          onClick={() => setOpen((wasOpen) => !wasOpen)}
           className={`${styles.customChip} ${isCustom ? styles.customChipOn : ""}`}
         >
           <Pencil size={12} strokeWidth={1.75} aria-hidden="true" />
@@ -104,52 +114,24 @@ function ColorField({ t, name, label, value, presets, onChange }) {
       </div>
 
       {open && (
-        <div className={styles.customEditor}>
-          <div className={styles.customRow}>
-            <input
-              type="color"
-              aria-label={t("theme_custom_color")}
-              value={toPickerValue(draft, value)}
-              onChange={(event) => {
-                setDraft(event.target.value.toUpperCase());
-                setInvalid(false);
-                onChange(event.target.value.toLowerCase());
-              }}
-              className={styles.picker}
-            />
-            <input
-              id={hexId}
-              type="text"
-              value={draft}
-              spellCheck={false}
-              aria-label={label}
-              aria-invalid={invalid}
-              aria-describedby={helpId}
-              onChange={(event) => {
-                setDraft(event.target.value);
-                setInvalid(false);
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  apply();
-                } else if (event.key === "Escape") {
-                  event.preventDefault();
-                  setOpen(false);
-                }
-              }}
-              className={`${styles.hexInput} ${invalid ? styles.hexInvalid : ""}`}
-            />
-            <button type="button" onClick={apply} className={styles.apply}>
-              {t("theme_apply")}
-            </button>
-          </div>
-          <p
-            id={helpId}
-            role={invalid ? "alert" : "status"}
-            className={`${styles.help} ${invalid ? styles.helpError : ""}`}
-          >
-            {invalid ? t("theme_custom_hex_invalid") : t("theme_custom_hex_hint")}
+        <div
+          role="group"
+          aria-label={`${label} — ${t("theme_custom_color")}`}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              event.preventDefault();
+              setOpen(false);
+            }
+          }}
+          className={styles.customEditor}
+        >
+          <ChromePicker
+            color={pickerColor}
+            styles={PICKER_STYLES}
+            onChange={({ rgb }) => onChange(fromRgb(rgb))}
+          />
+          <p id={`theme-hex-${name}-help`} className={styles.help}>
+            {t("theme_custom_hex_hint")}
           </p>
         </div>
       )}

@@ -11,8 +11,6 @@ const HEX_SHORT = /^#([0-9a-f])([0-9a-f])([0-9a-f])$/i;
 const HEX_LONG = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i;
 const RGB = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)$/i;
 
-export const HEX_INPUT = /^#?[0-9a-f]{6}$/i;
-
 /** `{ r, g, b, a }` with channels 0-255 and alpha 0-1, or null if unparseable. */
 export function parseColor(value) {
   if (typeof value !== "string") {
@@ -67,15 +65,43 @@ export function toHex(value) {
   return `#${channelHex(parsed.r)}${channelHex(parsed.g)}${channelHex(parsed.b)}`;
 }
 
+/**
+ * Lowercase `#rrggbb` for the colour's channels, ignoring how opaque it is, or
+ * null when it cannot be parsed. This is the hue a translucent colour is built
+ * from — what the picker and the hex box edit, with opacity set beside them.
+ */
+export function hexOf(value) {
+  const parsed = parseColor(value);
+  if (!parsed) {
+    return null;
+  }
+  return `#${channelHex(parsed.r)}${channelHex(parsed.g)}${channelHex(parsed.b)}`;
+}
+
+/** How opaque a colour is, 0-1; anything unparseable reads as fully opaque. */
+export function alphaOf(value) {
+  const parsed = parseColor(value);
+  return parsed ? parsed.a : 1;
+}
+
 /** True when two colour notations describe the same opaque colour. */
 export function sameColor(a, b) {
   const left = toHex(a);
   return left !== null && left === toHex(b);
 }
 
-/** The value `<input type="color">` can show — it only accepts `#rrggbb`. */
-export function toPickerValue(value, fallback) {
-  return toHex(value) || toHex(fallback) || "#000000";
+/**
+ * What a picked `{ r, g, b, a }` is written as: hex while the colour is fully
+ * opaque, so an untouched colour still round-trips as the hex everything else
+ * writes, and `rgba(...)` once it is not — the notation the theme has always
+ * used for a translucent colour.
+ */
+export function fromRgb({ r, g, b, a }) {
+  if (a === undefined || a >= 1) {
+    return `#${channelHex(r)}${channelHex(g)}${channelHex(b)}`;
+  }
+  const rounded = Math.round(Math.max(0, a) * 100) / 100;
+  return `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${rounded})`;
 }
 
 const relativeLuminance = ({ r, g, b }) => {
