@@ -70,14 +70,21 @@ export const LOGO_SIZE_DIMENSIONS = {
   large: 360,
 };
 
+const NOT_MOVABLE_TYPES = ["group", "welcome", "end", "options", "other_text", "text_item"];
+
 export const setupOptions = (type) => {
   const result = baseSetupOptions(type);
   if (!result) return result;
-  return result.map((section) =>
-    section.key === "logic"
-      ? { ...section, rules: [...(section.rules || []), "repetition"] }
-      : section,
-  );
+  const movable = !NOT_MOVABLE_TYPES.includes(type);
+  return result.map((section) => {
+    if (section.key === "logic") {
+      return { ...section, rules: [...(section.rules || []), "repetition"] };
+    }
+    if (section.key === "general" && movable) {
+      return { ...section, rules: ["move_question", ...(section.rules || [])] };
+    }
+    return section;
+  });
 };
 
 const baseSetupOptions = (type) => {

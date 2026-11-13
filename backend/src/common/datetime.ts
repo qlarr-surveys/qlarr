@@ -50,6 +50,45 @@ export function wallClockToInstant(wallClock: string): number {
   return Date.parse(`${wallClock.replace(' ', 'T')}Z`);
 }
 
+/** True iff `timeZone` is an IANA zone name (e.g. "Africa/Cairo") or "UTC". */
+export function isTimeZone(timeZone: string): boolean {
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * A converter from a stored UTC wall clock to the same instant's wall clock in
+ * `timeZone` (DST-aware), both "yyyy-MM-dd HH:mm:ss". Build it once per zone
+ * and reuse it across rows; for UTC it returns the value unchanged.
+ */
+export function wallClockInZone(
+  timeZone: string,
+): (wallClock: string) => string {
+  if (timeZone === 'UTC') return (wallClock) => wallClock;
+  const format = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    hourCycle: 'h23',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+  return (wallClock) => {
+    const p = Object.fromEntries(
+      format
+        .formatToParts(wallClockToInstant(wallClock))
+        .map(({ type, value }) => [type, value]),
+    );
+    return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}:${p.second}`;
+  };
+}
+
 const WALL_CLOCK_RE = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
 
 /**

@@ -141,12 +141,20 @@ function ScqChoiceOther(props) {
           .MuiTypography-root {
             width: 100%;
           }
+          .MuiFormControl-root {
+            width: 50%;
+          }
+          @media (max-width: 767px) {
+            .MuiFormControl-root {
+              width: 100%;
+            }
+          }
         `}
         control={<Radio inputProps={{ "aria-label": props.Choice.content?.label }} />}
         label={
           <TextField
             variant="outlined"
-            fullWidth
+            size="small"
             required={
               state.textChild?.relevance && nestedTextChild.validation?.required
             }
