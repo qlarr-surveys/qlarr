@@ -6,8 +6,11 @@ import {
   onAdditionalLangAdded,
   onAdditionalLangRemoved,
   onBaseLangChanged,
+  setDesignModeToLang,
+  setup,
 } from "../state/mutations";
 import { LANGUAGE_DEF } from "../constants/language";
+import { DESIGN_SURVEY_MODE } from "../constants/designMode";
 import sample from "./fixtures/sample-survey.json";
 
 const load = (state = {}, survey = {}) =>
@@ -78,6 +81,15 @@ describe("survey languages", () => {
     expect(state.langInfo.lang).toBe("ar");
   });
 
+  it("returns the editor to the primary language when the language being edited is removed", () => {
+    changeLang(state, "ar");
+    onAdditionalLangRemoved(state, LANGUAGE_DEF.ar);
+
+    expect(state.langInfo.lang).toBe("en");
+    expect(state.langInfo.onMainLang).toBe(true);
+    expect(state.Survey.additionalLang).toEqual([]);
+  });
+
   it("shows a survey saved with a language twice only once", () => {
     const loaded = load(
       {},
@@ -105,5 +117,42 @@ describe("survey languages", () => {
 
     expect(codes(state)).toEqual(["en", "ar", "de"]);
     expect(state.langInfo.lang).toBe("ar");
+  });
+
+  it("returns the editor to the primary language when a reload drops the language being edited", () => {
+    changeLang(state, "ar");
+    load(state, { additionalLang: [LANGUAGE_DEF.de] });
+
+    expect(state.langInfo.lang).toBe("en");
+    expect(state.langInfo.onMainLang).toBe(true);
+  });
+
+  it("follows a primary language changed elsewhere", () => {
+    load(state, {
+      defaultLang: LANGUAGE_DEF.ar,
+      additionalLang: [LANGUAGE_DEF.en],
+    });
+
+    expect(state.langInfo.mainLang).toBe("ar");
+    expect(state.langInfo.lang).toBe("en");
+    expect(state.langInfo.onMainLang).toBe(false);
+  });
+});
+
+describe("the translation workspace", () => {
+  it("opens with nothing selected, on the primary language", () => {
+    const state = load();
+    onAdditionalLangAdded(state, LANGUAGE_DEF.ar);
+    changeLang(state, "ar");
+    setup(state, { code: "Q1", rules: ["title"] });
+
+    setDesignModeToLang(state);
+
+    // The panel is chosen by the mode, so the workspace no longer seeds a
+    // `language` setup rule of its own.
+    expect(state.designMode).toBe(DESIGN_SURVEY_MODE.LANGUAGES);
+    expect(state.setup).toBeUndefined();
+    expect(state.langInfo.lang).toBe("en");
+    expect(state.langInfo.onMainLang).toBe(true);
   });
 });
