@@ -674,6 +674,5 @@
   "lang_import_done_one": "{{count}} veld bijgewerkt.",
   "lang_import_done_other": "{{count}} velden bijgewerkt.",
   "lang_edit_translation": "Vertaling bewerken",
-  "lang_edit_translation_hint": "Schakel tussen talen om de vertaalde inhoud in te vullen of te beoordelen.",
-  "lang_edit_translation_empty": "Schakel hierboven een extra taal in om te beginnen met vertalen."
+  "lang_edit_translation_hint": "Schakel tussen talen om de vertaalde inhoud in te vullen of te beoordelen."
 }

@@ -140,8 +140,14 @@ export function buildDesignState(state, payload) {
     };
   } else {
     // Which languages exist is the survey's to say, not the editor's: only
-    // which one is being edited survives a reload of the design.
+    // which one is being edited survives a reload of the design, and only
+    // while the survey still has it.
     state.langInfo.languagesList = languagesList;
+    state.langInfo.mainLang = defaultLang.code;
+    if (!languagesList.some((language) => language.code === state.langInfo.lang)) {
+      state.langInfo.lang = defaultLang.code;
+    }
+    state.langInfo.onMainLang = state.langInfo.lang === defaultLang.code;
   }
 
   toBeRemoved.forEach((key) => {

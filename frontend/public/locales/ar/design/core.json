@@ -678,6 +678,5 @@
   "lang_import_done_many": "تم تحديث {{count}} حقلًا.",
   "lang_import_done_other": "تم تحديث {{count}} حقل.",
   "lang_edit_translation": "تحرير الترجمة",
-  "lang_edit_translation_hint": "التبديل بين اللغات لملء المحتوى المترجم أو مراجعته.",
-  "lang_edit_translation_empty": "فعِّل لغة إضافية أعلاه لبدء الترجمة."
+  "lang_edit_translation_hint": "التبديل بين اللغات لملء المحتوى المترجم أو مراجعته."
 }

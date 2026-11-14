@@ -118,6 +118,25 @@ describe("survey languages", () => {
     expect(codes(state)).toEqual(["en", "ar", "de"]);
     expect(state.langInfo.lang).toBe("ar");
   });
+
+  it("returns the editor to the primary language when a reload drops the language being edited", () => {
+    changeLang(state, "ar");
+    load(state, { additionalLang: [LANGUAGE_DEF.de] });
+
+    expect(state.langInfo.lang).toBe("en");
+    expect(state.langInfo.onMainLang).toBe(true);
+  });
+
+  it("follows a primary language changed elsewhere", () => {
+    load(state, {
+      defaultLang: LANGUAGE_DEF.ar,
+      additionalLang: [LANGUAGE_DEF.en],
+    });
+
+    expect(state.langInfo.mainLang).toBe("ar");
+    expect(state.langInfo.lang).toBe("en");
+    expect(state.langInfo.onMainLang).toBe(false);
+  });
 });
 
 describe("the translation workspace", () => {

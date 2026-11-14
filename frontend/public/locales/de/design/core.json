@@ -674,6 +674,5 @@
   "lang_import_done_one": "{{count}} Feld aktualisiert.",
   "lang_import_done_other": "{{count}} Felder aktualisiert.",
   "lang_edit_translation": "Übersetzung bearbeiten",
-  "lang_edit_translation_hint": "Wechseln Sie zwischen Sprachen, um die übersetzten Inhalte auszufüllen oder zu überprüfen.",
-  "lang_edit_translation_empty": "Aktivieren Sie oben eine weitere Sprache, um mit dem Übersetzen zu beginnen."
+  "lang_edit_translation_hint": "Wechseln Sie zwischen Sprachen, um die übersetzten Inhalte auszufüllen oder zu überprüfen."
 }

@@ -674,6 +674,5 @@
   "lang_import_done_one": "{{count}} campo atualizado.",
   "lang_import_done_other": "{{count}} campos atualizados.",
   "lang_edit_translation": "Editar tradução",
-  "lang_edit_translation_hint": "Alterne entre idiomas para preencher ou revisar o conteúdo traduzido.",
-  "lang_edit_translation_empty": "Ative um idioma adicional acima para começar a traduzir."
+  "lang_edit_translation_hint": "Alterne entre idiomas para preencher ou revisar o conteúdo traduzido."
 }

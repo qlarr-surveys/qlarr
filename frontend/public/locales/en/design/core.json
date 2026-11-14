@@ -674,6 +674,5 @@
   "lang_import_done_one": "Updated {{count}} field.",
   "lang_import_done_other": "Updated {{count}} fields.",
   "lang_edit_translation": "Edit translation",
-  "lang_edit_translation_hint": "Switch between languages to fill in or review the translated content.",
-  "lang_edit_translation_empty": "Enable an additional language above to start translating."
+  "lang_edit_translation_hint": "Switch between languages to fill in or review the translated content."
 }
