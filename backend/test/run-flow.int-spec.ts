@@ -37,7 +37,6 @@ const HIDDEN_DESIGN_JSON = (() => {
   hide(group, 'false');
   const question = group.questions.find((q: { code: string }) => q.code === HIDDEN_QUESTION);
   hide(question, 'Q303fhu.value === "show"');
-  // Its label pipes in another answer, which the preview should ask for.
   // Labels piping in other answers, which the preview should ask for: an
   // earlier question's, and (on a later question) one row of an array.
   const pipe = (q: { content: any; instructionList: object[] }, code: string) => {
