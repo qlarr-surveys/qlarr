@@ -5,6 +5,7 @@ import { DbConfig } from '../config/db.config';
 import { JobContext } from './job-context';
 import { JobFailuresRepository } from './job-failures.repository';
 import { JobRegistry } from './job-registry';
+import { JobSteps } from './job-steps';
 import { BOSS_POOL_SIZE, BOSS_SCHEMA, PG_BOSS } from './jobs.constants';
 import { JobsController } from './jobs.controller';
 import { JobsRepository } from './jobs.repository';
@@ -41,6 +42,7 @@ import { JobsWorker } from './jobs.worker';
     JobContext,
     JobFailuresRepository,
     JobRegistry,
+    JobSteps,
     JobsRepository,
     JobsService,
     JobsWorker,

@@ -8,10 +8,9 @@ import {
 import { ConfigType } from '@nestjs/config';
 import type { PgBoss } from 'pg-boss';
 import jobsConfig from '../config/jobs.config';
-import { JobContext } from './job-context';
-import { JobFailuresRepository } from './job-failures.repository';
 import { Job, JobErrorCode, JobHandler } from './job-handler';
 import { JobRegistry } from './job-registry';
+import { JobSteps } from './job-steps';
 import {
   HEARTBEAT_SECONDS,
   JOB_ERROR_MARKER,
@@ -39,9 +38,8 @@ export class JobsWorker implements OnApplicationBootstrap, OnModuleDestroy {
     @Inject(PG_BOSS) private readonly boss: PgBoss,
     @Inject(jobsConfig.KEY) private readonly config: ConfigType<typeof jobsConfig>,
     private readonly registry: JobRegistry,
-    private readonly context: JobContext,
     private readonly rows: JobsRepository,
-    private readonly failures: JobFailuresRepository,
+    private readonly steps: JobSteps,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -79,44 +77,22 @@ export class JobsWorker implements OnApplicationBootstrap, OnModuleDestroy {
   }
 
   /**
-   * Prepare, list the responses (a normal run's pending ones, or a retry's
-   * failed ones), trim to `maxResponses`, then run the chunks until done or
-   * aborted. Each chunk's failures and progress are written in one
-   * transaction, fenced so none land once the job was cancelled or its input
-   * changed (`isCurrent`), which also stops the run (pg-boss settles nothing on a job no longer active). Past
-   * `maxFailures` the job fails; its results and failures so far stay.
-   * A throw is stored marked with its code (`job_error` unless said), so
-   * `JobsService` tells it apart from a failure pg-boss records itself
-   * without reading pg-boss's messages.
+   * The job's steps (`JobSteps`), its chunks one at a time until done or
+   * aborted. A chunk caught by the fence stops the run (pg-boss settles
+   * nothing on a job no longer active). Past `maxFailures` the job fails; its
+   * results and failures so far stay. A throw is stored marked with its code
+   * (`job_error` unless said), so `JobsService` tells it apart from a failure
+   * pg-boss records itself without reading pg-boss's messages.
    */
   private async run(handler: JobHandler, job: Job, signal: AbortSignal): Promise<void> {
     try {
-      const ctx = await handler.prepare(job);
-      const listed = await this.context.run(job, (m) =>
-        job.retry
-          ? this.failures.responseIds(m, job, handler.maxResponses)
-          : handler.pending(job, handler.maxResponses, m),
-      );
-      const ids = listed.slice(0, handler.maxResponses);
-      await this.context.run(job, (m) => this.rows.setTotal(m, job.id, ids.length));
+      const { ctx, chunks } = await this.steps.plan(handler, job);
       let failedTotal = 0;
-      for (let i = 0; i < ids.length; i += handler.chunkSize) {
+      for (const chunk of chunks) {
         signal.throwIfAborted();
-        const chunk = ids.slice(i, i + handler.chunkSize);
         const failed = await handler.runChunk(job, chunk, ctx, signal);
-        const active = await this.context.run(job, (m) =>
-          m.transaction(async (tx) => {
-            // The input first: a change locks it before the job's row.
-            if (handler.isCurrent && !(await handler.isCurrent(tx, job, ctx))) return false;
-            if (!(await this.rows.lockIfActive(tx, job.kind, job.id))) return false;
-            await this.failures.record(tx, job, failed);
-            await this.rows.addDone(tx, job.id, chunk.length);
-            await this.rows.addFailed(tx, job.id, failed.length);
-            return true;
-          }),
-        );
         // Cancelled before its signal fired, or its input changed: no more chunks.
-        if (!active) return;
+        if (!(await this.steps.commit(handler, job, ctx, chunk, failed))) return;
         failedTotal += failed.length;
         if (failedTotal > handler.maxFailures) {
           throw new JobFailedError('Too many responses failed', 'too_many_failures');
