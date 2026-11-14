@@ -29,10 +29,16 @@ function BackgroundField({
   const [progress, setProgress] = React.useState(null);
   const [error, setError] = React.useState("");
 
-  // An upload lands asynchronously; the panel follows it into image mode.
+  // The image can arrive or leave from outside this field (an upload landing,
+  // a theme reset), so the panel follows it either way.
   React.useEffect(() => {
-    if (hasImage) setMode("image");
+    setMode(hasImage ? "image" : "color");
   }, [hasImage]);
+
+  // An upload resolves after other edits may have landed; calling the latest
+  // handler keeps it from writing back the theme as it was when it started.
+  const onImageChangeRef = React.useRef(onImageChange);
+  onImageChangeRef.current = onImageChange;
 
   const chooseMode = (next) => {
     if (next === mode) return;
@@ -53,7 +59,7 @@ function BackgroundField({
     setProgress(0);
     uploadResource(file, { onProgress: setProgress })
       .then((response) => {
-        if (response) onImageChange(response.name);
+        if (response) onImageChangeRef.current(response.name);
       })
       .finally(() => setProgress(null));
   };
@@ -83,6 +89,9 @@ function BackgroundField({
               type="button"
               role="radio"
               aria-checked={mode === option}
+              // Leaving image mode mid-upload would only be undone when the
+              // upload lands, so the type is fixed until it does.
+              disabled={uploading}
               onClick={() => chooseMode(option)}
               className={`${styles.chip} ${mode === option ? styles.chipOn : ""}`}
             >
