@@ -4,8 +4,14 @@ import styles from "./ThemePanel.module.css";
 
 /**
  * A setting with a handful of recommended values as chips, and the long tail
- * behind a select. The select shows the current value when it holds one, so a
- * value outside the chips never looks unset.
+ * behind a select. Whatever the current value is, one of the two shows it as
+ * selected, so a value outside the chips never looks unset.
+ *
+ * That includes a value neither list carries. The panel before this one
+ * offered every text size from 10 to 32 in steps of two, so a survey can hold
+ * an answer size of 24 or a title size of 12 that the lists here never name.
+ * Such a value gets a row of its own in the select rather than leaving it on
+ * its placeholder as if nothing were set.
  */
 function ChoiceField({
   label,
@@ -17,7 +23,18 @@ function ChoiceField({
   onChange,
   unit,
 }) {
-  const inMore = moreOptions.some((option) => option === value);
+  // Compared as text: a value can arrive as "24" from a survey written
+  // elsewhere, and it is still the 24 chip.
+  const same = (a, b) => String(a) === String(b);
+  const inChips = options.some((option) => same(option, value));
+  const offList =
+    value !== undefined &&
+    value !== null &&
+    value !== "" &&
+    !inChips &&
+    !moreOptions.some((option) => same(option, value));
+  const selectOptions = offList ? withValue(moreOptions, value) : moreOptions;
+  const inMore = !inChips && selectOptions.some((option) => same(option, value));
 
   return (
     <div className={styles.field}>
@@ -32,9 +49,9 @@ function ChoiceField({
               key={option}
               type="button"
               role="radio"
-              aria-checked={option === value}
+              aria-checked={same(option, value)}
               onClick={() => onChange(option)}
-              className={`${styles.chip} ${option === value ? styles.chipOn : ""}`}
+              className={`${styles.chip} ${same(option, value) ? styles.chipOn : ""}`}
             >
               <span className={styles.chipLabel} data-label={option}>
                 {option}
@@ -55,7 +72,7 @@ function ChoiceField({
             className={styles.more}
           >
             <option value="">{moreLabel}</option>
-            {moreOptions.map((option) => (
+            {selectOptions.map((option) => (
               <option key={option} value={String(option)}>
                 {unit ? `${option} ${unit}` : option}
               </option>
@@ -71,6 +88,15 @@ function ChoiceField({
       </div>
     </div>
   );
+}
+
+// The list with a value it does not carry slotted in: in order among numbers,
+// so a size sits where a size would, and at the end of anything else.
+function withValue(list, value) {
+  const all = [...list, value];
+  return all.every((item) => typeof item === "number")
+    ? all.sort((a, b) => a - b)
+    : all;
 }
 
 // A select hands back strings; sizes have to go into the theme as numbers, so
