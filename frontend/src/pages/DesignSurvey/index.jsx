@@ -14,7 +14,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { isTouchDevice } from "~/utils/isTouchDevice";
 import { TouchBackend } from "react-dnd-touch-backend";
-import { surveyBackgroundLayers } from "~/utils/surveyBackground";
+import { buildResourceUrl } from "~/networking/common";
 import LoadingDots from "~/components/common/LoadingDots";
 import ElementSearch from "~/components/design/ElementSearch";
 import {
@@ -122,17 +122,15 @@ function DesignSurvey() {
   const surveyTheme = useMemo(
     () =>
       createTheme({
-        ...defualtTheme(theme, Boolean(backgroundImage)),
+        ...defualtTheme(theme),
         direction: rtlLanguage.includes(lang) ? "rtl" : "ltr",
       }),
-    [backgroundImage, lang, theme]
+    [lang, theme]
   );
 
-  const backgroundLayers = surveyBackgroundLayers(backgroundImage, theme);
-
-  const backgroundStyle = backgroundLayers
+  const backgroundStyle = backgroundImage
     ? {
-        backgroundImage: backgroundLayers,
+        backgroundImage: `url(${buildResourceUrl(backgroundImage)})`,
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center",

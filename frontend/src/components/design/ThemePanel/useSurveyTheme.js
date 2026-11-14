@@ -3,11 +3,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { defaultSurveyTheme } from "@qlarr/design-core/constants/surveyTheme";
 import { changeAttribute, changeResources } from "~/state/design/designState";
 import {
-  NO_BACKDROP,
-  isLegacyBackdrop,
-  surveyBackdrop,
-  surveyBgColor,
-} from "~/constants/theme";
+  shownBackdrop,
+  withBackdrop,
+  withImageAdded,
+  withImageRemoved,
+} from "./background";
 
 const TEXT_STYLES = ["group", "question", "text"];
 
@@ -49,18 +49,13 @@ export default function useSurveyTheme() {
       questionSize: base.textStyles.question.size,
       answerSize: base.textStyles.text.size,
       accent: base.primaryColor,
-      // Older surveys parked this at fully transparent while an image covered
-      // them; the panel shows the colour such a survey will fall back to, not
-      // a swatch with nothing in it.
-      surveyBg: surveyBgColor(base.bgColor),
+      surveyBg: base.bgColor,
       areaBg: base.paperColor,
       textColor: base.textStyles.group.color,
       backgroundImage: backgroundImage || null,
-      // What the survey visibly has over its image — for one saved before the
-      // setting, that is its background colour. Read from the stored theme
-      // rather than `base`, whose defaults would invent a colour the renderer
-      // never paints.
-      backdropColor: surveyBackdrop(theme, Boolean(backgroundImage)),
+      // Read from the stored theme rather than `base`, so a theme missing its
+      // colour shows the same default the renderer falls back to.
+      backdropColor: backgroundImage ? shownBackdrop(theme) : null,
     }),
     [base, backgroundImage, theme]
   );
@@ -113,33 +108,24 @@ export default function useSurveyTheme() {
     [base, write]
   );
 
-  // The background colour is left exactly as it was. Which of the two gets
-  // painted is the renderer's decision, so an image no longer has to overwrite
-  // a colour to hide it — and dropping the image brings back the colour that
-  // was chosen, rather than whichever one the theme happens to default to.
-  //
-  // That holds for a survey on the backdrop setting. One from before it paints
-  // its colour over any image it is given, so a first image would land under
-  // the default grey and never be seen: giving one moves the survey onto the
-  // setting, with no backdrop — the same clean image the old panel produced.
-  // Replacing an image leaves the survey on whichever footing it was already.
+  // An image arriving or leaving swaps what `bgColor` holds — see ./background.
+  // Replacing one changes nothing in the theme: the wash is already in place.
   const setBackgroundImage = useCallback(
     (name) => {
       dispatch(
         changeResources({ code: "Survey", key: "backgroundImage", value: name })
       );
-      if (name && !backgroundImage && isLegacyBackdrop(theme)) {
-        write({ ...base, backdropColor: NO_BACKDROP });
+      if (name && !backgroundImage) {
+        write(withImageAdded(base));
+      } else if (!name && backgroundImage) {
+        write(withImageRemoved(base));
       }
     },
-    [backgroundImage, base, dispatch, theme, write]
+    [backgroundImage, base, dispatch, write]
   );
 
-  // No backdrop is written out as "none" rather than left out: a theme with no
-  // `backdropColor` is a survey from before the setting, rendered the old way,
-  // and setting the backdrop either way is what moves a survey off that.
   const setBackdropColor = useCallback(
-    (color) => write({ ...base, backdropColor: color || NO_BACKDROP }),
+    (color) => write(withBackdrop(base, color)),
     [base, write]
   );
 
