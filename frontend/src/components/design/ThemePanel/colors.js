@@ -113,6 +113,17 @@ export function fromRgb({ r, g, b, a }) {
   return `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${rounded})`;
 }
 
+/**
+ * The luminance at which a dark tick starts to out-contrast a white one.
+ *
+ * Solving `1.05 / (L + 0.05) = (L + 0.05) / 0.05` puts the crossover here, not
+ * at the midpoint it looks like it should be at: a swatch has to be really
+ * quite light before white marks on it beat dark ones. Half-opaque washes land
+ * squarely in the stretch between the two, which is where guessing at 0.5 used
+ * to put a white tick on a grey swatch at barely 2:1.
+ */
+const TICK_CROSSOVER = 0.179;
+
 const relativeLuminance = ({ r, g, b }) => {
   const [lr, lg, lb] = [r, g, b].map((channel) => {
     const c = channel / 255;
@@ -157,6 +168,6 @@ export function isLight(value) {
       r: overPanel(parsed.r),
       g: overPanel(parsed.g),
       b: overPanel(parsed.b),
-    }) > 0.5
+    }) > TICK_CROSSOVER
   );
 }
