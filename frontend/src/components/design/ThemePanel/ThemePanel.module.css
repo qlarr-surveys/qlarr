@@ -1,0 +1,790 @@
+/* ====== Panel ====== */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  /* Fills the aside so the reset footer sits at the bottom of a short panel
+     and sticks to it once the sections grow past the viewport. */
+  min-height: 100%;
+  font-family: Rubik, sans-serif;
+  color: #1b2150;
+}
+
+.head {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid #eceefb;
+}
+
+.headTitle {
+  margin: 0;
+  font: 700 11px/14px Rubik, sans-serif;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #666e91;
+}
+
+.headHint {
+  margin: 8px 0 0;
+  font: 400 12px/17px Rubik, sans-serif;
+  color: #4c5474;
+}
+
+.sections {
+  flex: 1;
+  padding: 8px 10px 16px;
+}
+
+.footer {
+  position: sticky;
+  bottom: 0;
+  padding: 10px 12px;
+  border-top: 1px solid #e7e9f5;
+  background: #fff;
+}
+
+/* ====== Section ====== */
+
+.section {
+  border: 1px solid transparent;
+  border-radius: 7px;
+}
+
+.sectionOpen {
+  border-color: #cfd5e8;
+  background: #fbfbfe;
+}
+
+.sectionHeading {
+  margin: 0;
+}
+
+.sectionButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  text-align: start;
+  cursor: pointer;
+}
+
+.sectionButton:hover {
+  background: #f4f6fc;
+}
+
+.sectionButton:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: -2px;
+}
+
+.chevron {
+  flex: none;
+  color: #4c5474;
+  transition: transform 120ms ease;
+}
+
+.chevronOpen {
+  transform: rotate(90deg);
+}
+
+/* The arrow points along the reading direction, so it has to turn around in
+   Arabic — and still end up pointing down when the section is open. */
+[dir="rtl"] .chevron {
+  transform: rotate(180deg);
+}
+
+[dir="rtl"] .chevronOpen {
+  transform: rotate(90deg);
+}
+
+.sectionTitle {
+  flex: 1;
+  min-width: 0;
+  font: 500 13.5px/18px Rubik, sans-serif;
+  color: #1b2150;
+}
+
+.sectionOpen .sectionTitle {
+  font-weight: 600;
+}
+
+.sectionMeta {
+  flex: none;
+  font: 400 12px/16px Rubik, sans-serif;
+  color: #666e91;
+}
+
+.sectionBody {
+  padding: 2px 10px 12px;
+}
+
+/* ====== Field ====== */
+
+.field {
+  padding-top: 12px;
+}
+
+.fieldHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+
+.fieldLabel {
+  font: 600 10px/14px Rubik, sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #666e91;
+}
+
+.fieldValue {
+  font: 400 11px/14px Rubik, sans-serif;
+  color: #4c5474;
+  /* Hex values read left to right whatever the interface language does. */
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* ====== Chips ====== */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chipGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  background: #fff;
+  font: 400 12.5px/1 Rubik, sans-serif;
+  color: #3c447a;
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: #b9bff0;
+}
+
+.chip:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.chipOn {
+  border-color: #3a46d8;
+  background: #eceefb;
+  font-weight: 600;
+  color: #2b34a8;
+}
+
+/* Bold marks the chip in use, and bold text is wider: left alone the chips
+   resize and the row rewraps every time the selection moves. Each label is
+   sized by an invisible bold copy of itself, so it takes the same room either
+   way. */
+.chipLabel {
+  display: grid;
+  justify-items: center;
+}
+
+.chipLabel::after {
+  content: attr(data-label);
+  height: 0;
+  overflow: hidden;
+  font-weight: 600;
+  visibility: hidden;
+}
+
+.more {
+  height: 28px;
+  max-width: 100%;
+  padding: 0 8px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  background: #fff;
+  font: 400 12.5px/1 Rubik, sans-serif;
+  color: #3c447a;
+  cursor: pointer;
+}
+
+.more:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.moreOn {
+  border-color: #0e1338;
+  background: #eceefb;
+  font-weight: 600;
+  color: #2b34a8;
+}
+
+/* ====== Colours ====== */
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #dfe2ee;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.swatch:hover {
+  border-color: #b9bff0;
+}
+
+.swatch:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
+}
+
+.swatchOn {
+  border-color: #1b2150;
+  box-shadow: 0 0 0 1px #1b2150;
+}
+
+.customChip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 9px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  background: #fff;
+  font: 500 12px/1 Rubik, sans-serif;
+  color: #3c447a;
+  cursor: pointer;
+}
+
+.customChip:hover {
+  border-color: #b9bff0;
+}
+
+.customChip:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.customChipOn {
+  border-color: #3a46d8;
+  background: #eceefb;
+  font-weight: 600;
+  color: #2b34a8;
+}
+
+.customEditor {
+  margin-top: 8px;
+  padding: 9px 10px;
+  border: 1px solid #dfe2ee;
+  border-radius: 7px;
+  background: #fff;
+}
+
+.customRow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+/* The swatch shows the colour and opens the picker over the panel. The colour
+   is laid over a chequerboard so a translucent one reads as one. */
+.preview {
+  flex: none;
+  width: 34px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  background-color: #fff;
+  background-image: linear-gradient(
+      var(--swatch-color, #fff),
+      var(--swatch-color, #fff)
+    ),
+    conic-gradient(#e4e8f6 0 25%, #fff 0 50%, #e4e8f6 0 75%, #fff 0);
+  background-size:
+    auto,
+    8px 8px;
+  cursor: pointer;
+}
+
+.preview:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
+}
+
+.hexInput {
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  font: 500 12.5px/1 Rubik, sans-serif;
+  color: #1b2150;
+  direction: ltr;
+  text-transform: uppercase;
+}
+
+.hexInput:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: -1px;
+}
+
+.hexInvalid {
+  border-color: #b3261e;
+}
+
+.apply {
+  flex: none;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid #1b2150;
+  border-radius: 6px;
+  background: #1b2150;
+  font: 600 12.5px/1 Rubik, sans-serif;
+  color: #fff;
+  cursor: pointer;
+}
+
+.apply:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
+}
+
+/* ====== Picker ====== */
+
+/* The popup is fixed and portalled to the body: the panel it belongs to
+   scrolls, and an absolutely positioned popup would be cut off by that scroll
+   box. 1200 clears everything on the editor page — the panel's sticky footer,
+   the survey canvas beside it, the survey header at 1 — while staying under
+   MUI's modals and tooltips, which start at 1300. */
+.pickerPopover {
+  position: fixed;
+  z-index: 1200;
+  width: 236px;
+  padding: 10px;
+  border: 1px solid #dfe2ee;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(20, 24, 52, 0.18);
+}
+
+/* The popup takes focus when it opens so the keyboard can reach its controls;
+   it is the controls that show where focus is, not the box around them. */
+.pickerPopover:focus {
+  outline: none;
+}
+
+.pickerStack {
+  display: grid;
+  gap: 8px;
+}
+
+/* The sampler and the current colour sit beside the two bars, the way every
+   colour picker arranges them. */
+.pickerControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bars {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.eyedropper {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  background: #fff;
+  color: #4c5474;
+  cursor: pointer;
+}
+
+.eyedropper:hover {
+  border-color: #b9c1de;
+  color: #1b2150;
+}
+
+.eyedropper:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
+}
+
+.previewDot {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border: 1px solid #cfd5e8;
+  border-radius: 50%;
+  background-color: #fff;
+  background-image: linear-gradient(
+      var(--swatch-color, #fff),
+      var(--swatch-color, #fff)
+    ),
+    conic-gradient(#e4e8f6 0 25%, #fff 0 50%, #e4e8f6 0 75%, #fff 0);
+  background-size:
+    auto,
+    8px 8px;
+}
+
+/* ====== Channels ====== */
+
+.channels {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr) 20px;
+  align-items: start;
+  gap: 6px;
+  /* Numbers read left to right whatever the interface language does. */
+  direction: ltr;
+}
+
+.channel {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+}
+
+.channelBox {
+  width: 100%;
+  min-width: 0;
+  height: 26px;
+  padding: 0 4px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  font: 500 12px/1 Rubik, sans-serif;
+  color: #1b2150;
+  text-align: center;
+}
+
+.channelBox:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: -1px;
+}
+
+.channelName {
+  font: 500 10px/1 Rubik, sans-serif;
+  color: #666e91;
+}
+
+.channelToggle {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  color: #666e91;
+  cursor: pointer;
+}
+
+.channelToggle:hover {
+  color: #1b2150;
+}
+
+.channelToggle:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+/* react-color's shade area fills this box absolutely, so the box owns the
+   height and the rounding. */
+.saturation {
+  position: relative;
+  height: 104px;
+  border: 1px solid #cfd5e8;
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.satPointer {
+  display: block;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(16, 22, 60, 0.45);
+}
+
+.bar {
+  width: 100%;
+  height: 14px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #cfd5e8;
+  border-radius: 7px;
+  /* Left to right is what both gradients mean, in every language. */
+  direction: ltr;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.hueBar {
+  background-image: linear-gradient(
+    to right,
+    #f00 0%,
+    #ff0 17%,
+    #0f0 33%,
+    #0ff 50%,
+    #00f 67%,
+    #f0f 83%,
+    #f00 100%
+  );
+}
+
+.alphaBar {
+  background-color: #fff;
+  background-image: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0),
+      var(--alpha-color, #1b2150)
+    ),
+    conic-gradient(#e4e8f6 0 25%, #fff 0 50%, #e4e8f6 0 75%, #fff 0);
+  background-size:
+    auto,
+    8px 8px;
+}
+
+.bar::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 0 0 1px rgba(16, 22, 60, 0.45);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.bar::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 0 0 1px rgba(16, 22, 60, 0.45);
+  cursor: pointer;
+}
+
+.bar::-moz-range-track {
+  background: transparent;
+}
+
+.bar:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
+}
+
+.help {
+  margin: 7px 0 0;
+  font: 400 11.5px/16px Rubik, sans-serif;
+  color: #4c5474;
+}
+
+.helpError {
+  color: #8a231c;
+}
+
+/* ====== Notes ====== */
+
+.note {
+  margin: 12px 0 0;
+  padding: 8px 10px;
+  border: 1px solid #c6ccf5;
+  border-radius: 7px;
+  background: #f5f6ff;
+  font: 400 11.5px/16px Rubik, sans-serif;
+  color: #2b34a8;
+}
+
+.noteGood {
+  border-color: #cfe0d5;
+  background: #f2f8f4;
+  color: #215c3e;
+}
+
+.noteBad {
+  border-color: #efcfcc;
+  background: #fdf4f3;
+  color: #8a231c;
+}
+
+/* ====== Background image ====== */
+
+.dropZone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 12px;
+  border: 1px dashed #b9bff0;
+  border-radius: 8px;
+  background: #fbfbff;
+  color: #3a46d8;
+  text-align: center;
+  cursor: pointer;
+}
+
+.dropZone:focus-within {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
+}
+
+.dropZoneOver {
+  border-color: #3a46d8;
+  background: #f5f6ff;
+}
+
+.dropTitle {
+  font: 600 12.5px/17px Rubik, sans-serif;
+  color: #2b34a8;
+}
+
+.dropHint {
+  font: 400 11px/15px Rubik, sans-serif;
+  color: #4c5474;
+}
+
+.progressTrack {
+  width: 100%;
+  max-width: 180px;
+  height: 4px;
+  border-radius: 2px;
+  background: #e6e9f6;
+  overflow: hidden;
+}
+
+.progressBar {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: #3a46d8;
+  transition: width 120ms linear;
+}
+
+.imageCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border: 1px solid #d8dcef;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.imageThumb {
+  flex: none;
+  width: 56px;
+  height: 42px;
+  border-radius: 5px;
+  object-fit: cover;
+  background: #eceefb;
+}
+
+.imageActions {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.imageReplace,
+.imageRemove {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 9px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  background: #fff;
+  font: 500 12px/1 Rubik, sans-serif;
+  color: #3c447a;
+  cursor: pointer;
+}
+
+.imageReplace:hover,
+.imageRemove:hover {
+  border-color: #b9bff0;
+}
+
+.imageReplace:focus-within,
+.imageRemove:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.imageRemove {
+  color: #8a231c;
+}
+
+/* ====== Reset ====== */
+
+.resetButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  height: 34px;
+  border: 1px solid #cfd5e8;
+  border-radius: 7px;
+  background: #fff;
+  font: 500 13px/1 Rubik, sans-serif;
+  color: #1b2150;
+  cursor: pointer;
+}
+
+.resetButton:hover {
+  border-color: #b9bff0;
+  background: #f7f8fd;
+}
+
+.resetButton:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
+}
