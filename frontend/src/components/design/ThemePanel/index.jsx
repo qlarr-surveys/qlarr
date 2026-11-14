@@ -19,7 +19,6 @@ import {
   MORE_QUESTION_SIZES,
   MORE_TITLE_SIZES,
   QUESTION_SIZES,
-  SURVEY_BACKGROUNDS,
   TEXT_COLORS,
   TITLE_SIZES,
 } from "./constants";
@@ -27,7 +26,7 @@ import {
 const px = (size) => `${size}px`;
 
 // The Colors group summarises itself with how many colours it holds.
-const COLOR_COUNT = "4";
+const COLOR_COUNT = "3";
 
 /**
  * The Theme workspace's left panel: typography, colours and the survey
@@ -122,14 +121,6 @@ function ThemePanel({ t }) {
             value={values.accent}
             presets={ACCENT_COLORS}
             onChange={(value) => setColor("primaryColor", value)}
-          />
-          <ColorField
-            t={t}
-            name="surveyBg"
-            label={t("theme_survey_background")}
-            value={values.surveyBg}
-            presets={SURVEY_BACKGROUNDS}
-            onChange={(value) => setColor("bgColor", value)}
           />
           <ColorField
             t={t}
