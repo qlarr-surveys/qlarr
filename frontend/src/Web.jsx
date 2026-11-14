@@ -349,13 +349,15 @@ const PreviewSurveyWrapper = ({ resume = false }) => {
   const mode = searchParams.get("mode") || "online";
   const responseId = getparam(useParams(), "responseId");
   const navigationMode = searchParams.get("navigation_mode");
+  const questionId = searchParams.get("question");
   return (
     <RunSurvey
       preview={true}
       responseId={responseId}
-      resume={resume}
+      resume={resume && !questionId}
       mode={mode}
       navigationMode={navigationMode}
+      questionId={questionId}
     />
   );
 };
