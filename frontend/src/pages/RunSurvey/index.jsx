@@ -314,8 +314,8 @@ function RunSurvey({
 
   const cacheRtlMemo = useMemo(() => cacheRtl(i18n.language), [i18n.language]);
   const backgroundLayers = useMemo(
-    () => surveyBackgroundLayers(backgroundImage, surveyTheme?.backdropColor),
-    [backgroundImage, surveyTheme?.backdropColor]
+    () => surveyBackgroundLayers(backgroundImage, surveyTheme),
+    [backgroundImage, surveyTheme]
   );
 
   const navigate = useNavigate();

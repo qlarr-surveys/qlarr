@@ -128,10 +128,7 @@ function DesignSurvey() {
     [backgroundImage, lang, theme]
   );
 
-  const backgroundLayers = surveyBackgroundLayers(
-    backgroundImage,
-    theme?.backdropColor
-  );
+  const backgroundLayers = surveyBackgroundLayers(backgroundImage, theme);
 
   const backgroundStyle = backgroundLayers
     ? {

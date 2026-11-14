@@ -12,11 +12,18 @@ export const FONT_FAMILY = "Rubik";
 
 /**
  * What Backdrop Color starts at once it is switched on: black, barely there.
- *
- * It is deliberately absent from `defaultSurveyTheme` — no backdrop is the
- * default, and a survey only carries the key once someone asks for one.
  */
 export const BACKDROP_COLOR = "rgba(0, 0, 0, 0.2)";
+
+/**
+ * How `backdropColor` says there is no backdrop.
+ *
+ * It has to be said, not left out: a theme with no `backdropColor` at all is a
+ * survey saved before the setting existed, which is rendered the way it always
+ * was. That is also why the key stays out of `defaultSurveyTheme` — stamping
+ * it onto every survey would erase the one thing that tells the two apart.
+ */
+export const NO_BACKDROP = "none";
 
 export const defaultSurveyTheme = {
   textStyles: {
