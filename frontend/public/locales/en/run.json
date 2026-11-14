@@ -26,6 +26,12 @@
         "question_not_found": "This question isn't saved yet. Wait a moment and try again."
     },
     "preview":"You're in preview mode",
+    "preview_inputs": {
+      "title": "Depends on",
+      "hint": "Answer these to see the question the way a respondent would.",
+      "hidden": "With these answers, respondents wouldn't see this question.",
+      "none": "Not answered"
+    },
     "upload": "Upload",
     "uploading": "Uploading",
     "validation_between": "Must be between {{lower_limit}} and {{upper_limit}}",

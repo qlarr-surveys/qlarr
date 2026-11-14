@@ -35,10 +35,22 @@ const HIDDEN_DESIGN_JSON = (() => {
     });
   const group = design.groups[0];
   hide(group, 'false');
-  hide(
-    group.questions.find((q: { code: string }) => q.code === HIDDEN_QUESTION),
-    'Q303fhu.value === "show"',
-  );
+  const question = group.questions.find((q: { code: string }) => q.code === HIDDEN_QUESTION);
+  hide(question, 'Q303fhu.value === "show"');
+  // Its label pipes in another answer, which the preview should ask for.
+  // Labels piping in other answers, which the preview should ask for: an
+  // earlier question's, and (on a later question) one row of an array.
+  const pipe = (q: { content: any; instructionList: object[] }, code: string) => {
+    q.content.en.label = `<p>{{${code}.value}}</p>`;
+    q.instructionList.push({
+      code: 'format_label_en_1',
+      contentPath: ['content', 'en', 'label'],
+      lang: 'en',
+      text: `${code}.value`,
+    });
+  };
+  pipe(question, 'Q829iqb');
+  pipe(group.questions.find((q: { code: string }) => q.code === 'Q293sqi'), 'Q510begA1');
   return JSON.stringify(runValidate(JSON.stringify(design)));
 })();
 
@@ -272,6 +284,30 @@ describe('Survey run — start + navigate', () => {
       expect(shown).toEqual([['G1', [HIDDEN_QUESTION]]]);
       expect(res.body.state.qlarrVariables.G1.relevance).toBe(true);
       expect(res.body.state.qlarrVariables[HIDDEN_QUESTION].relevance).toBe(true);
+    });
+
+    it('lists the answers the question depends on, except relevance-only ones', async () => {
+      const res = await startAt(HIDDEN_QUESTION).expect(200);
+      // Q829iqb feeds the label; Q303fhu only decides relevance, which is forced.
+      expect(res.body.previewInputs).toEqual([
+        { code: 'Q829iqb', kind: 'text', label: 'Q829iqb' },
+      ]);
+    });
+
+    it('asks for a single array row by its own value', async () => {
+      const res = await startAt('Q293sqi').expect(200);
+      expect(res.body.previewInputs).toEqual([
+        {
+          code: 'Q510begA1',
+          kind: 'single',
+          label: 'Q510beg · A1',
+          options: [
+            { code: 'Ac1', label: 'Ac1' },
+            { code: 'Ac2', label: 'Ac2' },
+            { code: 'Ac3', label: 'Ac3' },
+          ],
+        },
+      ]);
     });
 
     it('leaves the relevance logic alone outside the target question', async () => {

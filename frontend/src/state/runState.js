@@ -35,6 +35,7 @@ export const runState = createSlice({
         lang: response.lang,
         responseId: response.responseId,
         screenedOutQuota: response.screenedOutQuota,
+        previewInputs: response.previewInputs ?? [],
       };
       state.saveTimings = response.saveTimings
       state.values = response.state.qlarrVariables;
@@ -85,6 +86,13 @@ export const {
 } = runState.actions;
 
 export default runState.reducer;
+
+// The question shown by a single-question preview. It stays on screen whatever
+// its relevance says, so the designer can see it under any answers.
+export const previewTarget = (state) =>
+  state.runState.singleQuestion
+    ? state.runState.data?.navigationIndex?.questionId
+    : null;
 
 function setValueInState(state, payload) {
   let componentCode = payload.componentCode;

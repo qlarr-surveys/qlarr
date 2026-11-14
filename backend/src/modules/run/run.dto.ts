@@ -3,6 +3,7 @@ import {
   NavigationIndexJson,
 } from '../../engine/engine.types';
 import { SurveyNavigationData } from '../surveys/survey-navigation-data';
+import { PreviewInput } from './preview-inputs';
 
 /** A survey language (≈ engine `SurveyLang`). */
 export interface SurveyLang {
@@ -48,4 +49,6 @@ export interface RunSurveyDto {
   additionalLang: SurveyLang[];
   saveTimings: boolean;
   screenedOutQuota: string | null;
+  /** Single-question preview only: earlier answers the question depends on. */
+  previewInputs?: PreviewInput[];
 }

@@ -26,6 +26,12 @@
         "question_not_found": "Esta pergunta ainda não foi salva. Aguarde um momento e tente novamente."
     },
     "preview":"Você está no modo de pré-visualização",
+    "preview_inputs": {
+      "title": "Depende de",
+      "hint": "Responda a estas para ver a pergunta como um respondente a veria.",
+      "hidden": "Com estas respostas, os respondentes não veriam esta pergunta.",
+      "none": "Sem resposta"
+    },
     "upload": "Enviar",
     "uploading": "Enviando",
     "validation_between": "Deve estar entre {{lower_limit}} e {{upper_limit}}",

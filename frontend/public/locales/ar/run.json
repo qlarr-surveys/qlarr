@@ -27,6 +27,12 @@
   },
   "upload": "تحميل",
   "preview": "أنت في وضع المعاينة",
+  "preview_inputs": {
+    "title": "يعتمد على",
+    "hint": "أجب عن هذه لترى السؤال كما يراه المستجيب.",
+    "hidden": "بهذه الإجابات، لن يرى المستجيبون هذا السؤال.",
+    "none": "بدون إجابة"
+  },
   "uploading": "جاري التحميل",
   "validation_between": "يجب أن يكون بين {{lower_limit}} و {{upper_limit}}",
   "validation_contains": "يجب أن يحتوي على  \"{{contains}}\"",

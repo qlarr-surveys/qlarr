@@ -26,6 +26,12 @@
         "question_not_found": "Deze vraag is nog niet opgeslagen. Wacht even en probeer het opnieuw."
     },
     "preview":"Je bent in voorvertoning modus",
+    "preview_inputs": {
+      "title": "Hangt af van",
+      "hint": "Beantwoord deze om de vraag te zien zoals een respondent hem ziet.",
+      "hidden": "Met deze antwoorden zouden respondenten deze vraag niet zien.",
+      "none": "Niet beantwoord"
+    },
     "upload": "Uploaden",
     "uploading": "Uploaden",
     "validation_between": "Moet tussen {{lower_limit}} en {{upper_limit}} zijn",

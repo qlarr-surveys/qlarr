@@ -8,6 +8,7 @@ import { DesignService } from '../design/design.service';
 import { SurveyEntity } from '../surveys/survey.entity';
 import { SurveyIsNotActiveException } from '../surveys/survey.exceptions';
 import { NavigationResult, NavigationService } from './navigation.service';
+import { previewInputs } from './preview-inputs';
 import { NavigateRequest, RunSurveyDto, StartAtRequest, StartRequest } from './run.dto';
 import { ResponseNotFoundException } from '../responses/response.exceptions';
 import { ResponseRepository } from '../responses/response.repository';
@@ -115,7 +116,10 @@ export class RunService {
       preview: true,
       surveyMode,
     });
-    return toRunDto(null, result, processed.survey);
+    return {
+      ...toRunDto(null, result, processed.survey),
+      previewInputs: previewInputs(processed.output, req.questionId, result.lang.code),
+    };
   }
 
   async navigate(

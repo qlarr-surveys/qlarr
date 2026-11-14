@@ -5,6 +5,7 @@ import { useTheme } from "@mui/material";
 import { FORM_ID } from "~/constants/run";
 import Group, { QuotaMessage } from "~/components/Group";
 import Navigation from "~/components/run/Navigation";
+import PreviewInputs from "~/components/run/PreviewInputs";
 import styles from "./Survey.module.css";
 import { shallowEqual, useSelector } from "react-redux";
 import { TouchBackend } from "react-dnd-touch-backend";
@@ -98,6 +99,7 @@ function Survey() {
             />
           </div>
         )}
+        {singleQuestion && <PreviewInputs />}
         <div className={styles.surveyGroups}>
           {survey && survey.groups
             ? survey.groups
