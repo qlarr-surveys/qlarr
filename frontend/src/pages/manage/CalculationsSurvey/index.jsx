@@ -33,7 +33,7 @@ import LoadingDots from "~/components/common/LoadingDots";
 import CalculationValue from "~/components/manage/CalculationValue";
 import { FailuresBanner, FailuresDialog } from "~/components/manage/JobFailures";
 import { PROCESSED_ERRORS } from "~/utils/errorsProcessor";
-import { hasComputeAtStake, isActive } from "~/utils/computeJobs";
+import { hasJobAtStake, isActive } from "~/utils/computeJobs";
 import ExpressionHelp from "./ExpressionHelp";
 
 const CALC_COMPUTE = "calc.compute";
@@ -236,7 +236,7 @@ function CalculationsSurvey({ onDirtyChange }) {
     setBusy("save");
     surveyService
       .getJobs(surveyId)
-      .then((jobs) => hasComputeAtStake(jobs))
+      .then((jobs) => hasJobAtStake(jobs, CALC_COMPUTE))
       .catch(() => true)
       .then((atStake) => {
         if (!atStake) return save(values);

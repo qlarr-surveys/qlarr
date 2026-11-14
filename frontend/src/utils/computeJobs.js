@@ -2,11 +2,14 @@
 export const isActive = (status) => status === "waiting" || status === "running";
 
 /**
- * Whether `GET survey/:id/jobs` reports a Compute in progress or computed
- * results: what a calculations Save or a design edit would lose.
+ * Whether `GET survey/:id/jobs` reports a job of `kind` (on `subjectKey`,
+ * when given) in progress or with results: what a save that invalidates it
+ * would lose.
  */
-export const hasComputeAtStake = (jobs) =>
+export const hasJobAtStake = (jobs, kind, subjectKey) =>
   jobs.some(
     (job) =>
-      job.kind === "calc.compute" && (isActive(job.status) || job.hasResults)
+      job.kind === kind &&
+      (subjectKey === undefined || job.subjectKey === subjectKey) &&
+      (isActive(job.status) || job.hasResults)
   );
