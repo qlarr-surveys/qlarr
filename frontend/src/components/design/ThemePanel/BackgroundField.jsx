@@ -2,17 +2,25 @@ import React from "react";
 import { Trash2, Upload } from "lucide-react";
 import { buildResourceUrl } from "~/networking/common";
 import { useResourceUpload } from "~/hooks/useResourceUpload";
+import BackdropField from "./BackdropField";
 import ColorField from "./ColorField";
 import styles from "./ThemePanel.module.css";
 import { SURVEY_BACKGROUNDS } from "./constants";
 
 /**
- * The survey background: a colour or an image, never both. An image is painted
- * over the colour, so offering the two side by side would let someone set a
- * colour that nothing shows — the type switch makes the exchange explicit, and
- * dropping the image puts the colour back.
+ * The survey background: a colour or an image, never both. Only one of the two
+ * is ever painted, so offering them side by side would let someone set a
+ * colour that nothing shows — the type switch makes the exchange explicit. The
+ * colour itself is kept either way, so dropping the image puts back the colour
+ * that was chosen, and an image can carry a backdrop wash instead.
  */
-function BackgroundField({ t, values, onColorChange, onImageChange }) {
+function BackgroundField({
+  t,
+  values,
+  onColorChange,
+  onImageChange,
+  onBackdropChange,
+}) {
   const uploadResource = useResourceUpload();
   const hasImage = Boolean(values.backgroundImage);
 
@@ -193,6 +201,14 @@ function BackgroundField({ t, values, onColorChange, onImageChange }) {
             </p>
           )}
         </div>
+      )}
+
+      {mode === "image" && hasImage && (
+        <BackdropField
+          t={t}
+          value={values.backdropColor}
+          onChange={onBackdropChange}
+        />
       )}
 
       <p className={styles.note}>{t("theme_background_note")}</p>

@@ -21,7 +21,7 @@ import Survey from "~/components/run/Survey";
 import { PROCESSED_ERRORS } from "~/utils/errorsProcessor";
 import ErrorLayout from "~/components/common/ErrorLayout";
 import { useService } from "~/hooks/use-service";
-import { buildResourceUrl } from "~/networking/common";
+import { surveyBackgroundLayers } from "~/utils/surveyBackground";
 import Image from "~/components/image/image";
 import CompactLayout from "~/layouts/compact";
 import { isEquivalent } from "~/utils/design/utils";
@@ -306,16 +306,16 @@ function RunSurvey({
   const theme = useMemo(
     () =>
       createTheme({
-        ...defualtTheme(surveyTheme),
+        ...defualtTheme(surveyTheme, Boolean(backgroundImage)),
         direction: rtlLanguage.includes(i18n.language) ? "rtl" : "ltr",
       }),
-    [i18n.language, surveyTheme]
+    [backgroundImage, i18n.language, surveyTheme]
   );
 
   const cacheRtlMemo = useMemo(() => cacheRtl(i18n.language), [i18n.language]);
-  const backgroundImageUrl = useMemo(
-    () => `url(${buildResourceUrl(backgroundImage)})`,
-    [backgroundImage]
+  const backgroundLayers = useMemo(
+    () => surveyBackgroundLayers(backgroundImage, surveyTheme?.backdropColor),
+    [backgroundImage, surveyTheme?.backdropColor]
   );
 
   const navigate = useNavigate();
@@ -349,7 +349,7 @@ function RunSurvey({
                   aria-hidden
                   className={styles.fixedBg}
                   css={css`
-                    background-image: ${backgroundImageUrl};
+                    background-image: ${backgroundLayers};
                   `}
                 />
               )}

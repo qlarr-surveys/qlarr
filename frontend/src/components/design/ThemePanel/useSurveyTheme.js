@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { defaultSurveyTheme } from "@qlarr/design-core/constants/surveyTheme";
 import { changeAttribute, changeResources } from "~/state/design/designState";
-import { TRANSPARENT } from "./constants";
+import { surveyBgColor } from "~/constants/theme";
 
 const TEXT_STYLES = ["group", "question", "text"];
 
@@ -44,10 +44,14 @@ export default function useSurveyTheme() {
       questionSize: base.textStyles.question.size,
       answerSize: base.textStyles.text.size,
       accent: base.primaryColor,
-      surveyBg: base.bgColor,
+      // Older surveys parked this at fully transparent while an image covered
+      // them; the panel shows the colour such a survey will fall back to, not
+      // a swatch with nothing in it.
+      surveyBg: surveyBgColor(base.bgColor),
       areaBg: base.paperColor,
       textColor: base.textStyles.group.color,
       backgroundImage: backgroundImage || null,
+      backdropColor: base.backdropColor || null,
     }),
     [base, backgroundImage]
   );
@@ -100,20 +104,33 @@ export default function useSurveyTheme() {
     [base, write]
   );
 
+  // The background colour is left exactly as it was. Which of the two gets
+  // painted is the renderer's decision, so an image no longer has to overwrite
+  // a colour to hide it — and dropping the image brings back the colour that
+  // was chosen, rather than whichever one the theme happens to default to.
   const setBackgroundImage = useCallback(
     (name) => {
       dispatch(
         changeResources({ code: "Survey", key: "backgroundImage", value: name })
       );
-      // An image is painted behind the survey background colour, so the colour
-      // has to step aside while one is set — and come back when it is dropped.
-      if (name) {
-        write({ ...base, bgColor: TRANSPARENT });
-      } else if (base.bgColor === TRANSPARENT) {
-        write({ ...base, bgColor: defaultSurveyTheme.bgColor });
-      }
     },
-    [base, dispatch, write]
+    [dispatch]
+  );
+
+  // No backdrop is the absence of the key rather than a null parked under it,
+  // so a survey that never wanted one reads exactly as it did before there was
+  // anything to want.
+  const setBackdropColor = useCallback(
+    (color) => {
+      const next = { ...base };
+      if (color) {
+        next.backdropColor = color;
+      } else {
+        delete next.backdropColor;
+      }
+      write(next);
+    },
+    [base, write]
   );
 
   const reset = useCallback(() => {
@@ -130,6 +147,7 @@ export default function useSurveyTheme() {
     setTextColor,
     setColor,
     setBackgroundImage,
+    setBackdropColor,
     reset,
   };
 }

@@ -2,14 +2,28 @@ import { colorToThemeMode } from "~/components/Questions/utils";
 export {
   BG_COLOR, TEXT_COLOR, PRIMARY_COLOR, SECONDARY_COLOR, ERR_COLOR,
   PAPER_COLOR, GROUP_FONT_SIZE, QUESTION_FONT_SIZE, TEXT_FONT_SIZE, FONT_FAMILY,
-  defaultSurveyTheme,
+  BACKDROP_COLOR, defaultSurveyTheme,
 } from "@qlarr/design-core/constants/surveyTheme";
 import {
   BG_COLOR, TEXT_COLOR, PRIMARY_COLOR, SECONDARY_COLOR, ERR_COLOR,
   PAPER_COLOR, GROUP_FONT_SIZE, QUESTION_FONT_SIZE, TEXT_FONT_SIZE, FONT_FAMILY,
 } from "@qlarr/design-core/constants/surveyTheme";
 
-export const defualtTheme = (theme) => {
+/**
+ * The notation a survey used to be left in while a background image covered it.
+ *
+ * Nothing could ask whether an image was set at the time, so the colour itself
+ * was parked at fully transparent to get it out of the way. The renderer asks
+ * that question directly now, which leaves the old value meaning only "there
+ * was an image here once" — so it reads back as a real colour rather than as a
+ * survey with no background at all.
+ */
+const TRANSPARENT_BG = "rgba(0, 0, 0, 0)";
+
+export const surveyBgColor = (bgColor) =>
+  !bgColor || bgColor === TRANSPARENT_BG ? BG_COLOR : bgColor;
+
+export const defualtTheme = (theme, hasBackgroundImage = false) => {
   return {
     textStyles: {
       group: {
@@ -45,7 +59,12 @@ export const defualtTheme = (theme) => {
         main: ERR_COLOR,
       },
       background: {
-        default: theme?.bgColor || BG_COLOR,
+        // An image paints the survey canvas, so the colour steps aside rather
+        // than covering it — and is only stepped over, never overwritten, so
+        // dropping the image brings the same colour back.
+        default: hasBackgroundImage
+          ? "transparent"
+          : surveyBgColor(theme?.bgColor),
         paper: theme?.paperColor || PAPER_COLOR,
       },
       text: {

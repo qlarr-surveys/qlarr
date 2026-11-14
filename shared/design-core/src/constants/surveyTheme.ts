@@ -10,6 +10,14 @@ export const QUESTION_FONT_SIZE = 18;
 export const TEXT_FONT_SIZE = 14;
 export const FONT_FAMILY = "Rubik";
 
+/**
+ * What Backdrop Color starts at once it is switched on: black, barely there.
+ *
+ * It is deliberately absent from `defaultSurveyTheme` — no backdrop is the
+ * default, and a survey only carries the key once someone asks for one.
+ */
+export const BACKDROP_COLOR = "rgba(0, 0, 0, 0.2)";
+
 export const defaultSurveyTheme = {
   textStyles: {
     group: {

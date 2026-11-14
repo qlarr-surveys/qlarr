@@ -46,6 +46,7 @@ function ThemePanel({ t }) {
     setTextColor,
     setColor,
     setBackgroundImage,
+    setBackdropColor,
     reset,
   } = useSurveyTheme();
 
@@ -165,6 +166,7 @@ function ThemePanel({ t }) {
             values={values}
             onColorChange={(value) => setColor("bgColor", value)}
             onImageChange={setBackgroundImage}
+            onBackdropChange={setBackdropColor}
           />
         </ThemeSection>
       </div>

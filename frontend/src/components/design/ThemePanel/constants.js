@@ -1,4 +1,5 @@
 import {
+  BACKDROP_COLOR,
   BG_COLOR,
   FONT_FAMILY,
   GROUP_FONT_SIZE,
@@ -66,7 +67,13 @@ export const TEXT_COLORS = [
   { value: "#33384f", labelKey: "theme_color_slate" },
 ];
 
-// A background image hides the survey background colour rather than replacing
-// it, so picking one parks the colour at fully transparent — and dropping the
-// image has to put a real colour back.
-export const TRANSPARENT = "rgba(0, 0, 0, 0)";
+// The backdrop exists to make text readable over a photograph, so these are
+// washes rather than colours: every one is mostly see-through, and the list
+// leads with the default the way the others do. Anything else — including a
+// heavier wash of the same shade — is a drag of the picker's opacity bar away.
+export const BACKDROP_COLORS = [
+  { value: BACKDROP_COLOR, labelKey: "theme_color_black" },
+  { value: "rgba(0, 0, 0, 0.45)", labelKey: "theme_color_deep_black" },
+  { value: "rgba(9, 17, 51, 0.35)", labelKey: "theme_color_navy" },
+  { value: "rgba(255, 255, 255, 0.3)", labelKey: "theme_color_white" },
+];
