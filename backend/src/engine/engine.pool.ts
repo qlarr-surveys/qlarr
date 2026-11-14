@@ -10,10 +10,16 @@ export interface EnginePoolOptions {
   workersEnabled: boolean;
   /** Max worker threads. */
   poolSize: number;
-  /** Hard per-call budget; on expiry the worker is terminated and the call rejects. */
+  /** Hard per-call budget; on expiry the worker is terminated and the call
+   *  rejects. 0 for none (the jobs pool: a job's time limit or cancel aborts
+   *  its signal instead). */
   timeoutMs: number;
   /** Per-worker V8 old-space cap (MB); a heap-bomb design crashes its worker, not the server. */
   maxOldGenerationSizeMb: number;
+  /** Run the workers at the lowest OS priority (the jobs pool), so they only get
+   *  CPU that live work leaves idle. Linux only: elsewhere `nice` would lower the
+   *  whole process, not just the worker thread. */
+  lowPriority?: boolean;
 }
 
 /**
@@ -40,6 +46,7 @@ export class EnginePool implements OnModuleDestroy {
         // run the compiled output).
         filename: path.resolve(__dirname, 'engine.worker.js'),
         maxThreads: options.poolSize,
+        niceIncrement: options.lowPriority && process.platform === 'linux' ? 19 : 0,
         resourceLimits: {
           maxOldGenerationSizeMb: options.maxOldGenerationSizeMb,
         },
@@ -57,9 +64,14 @@ export class EnginePool implements OnModuleDestroy {
     });
   }
 
-  async run<T>(op: EngineOp, payload: unknown): Promise<T> {
+  /**
+   * Run one op. `signal` aborts it from outside (a job's time limit or cancel): the worker
+   * running it is terminated, as on a timeout, and the call rejects.
+   */
+  async run<T>(op: EngineOp, payload: unknown, signal?: AbortSignal): Promise<T> {
     const task = { op, payload } as EngineTask;
     if (!this.piscina) {
+      signal?.throwIfAborted();
       try {
         return (await dispatch(task)) as T;
       } catch (err) {
@@ -70,10 +82,15 @@ export class EnginePool implements OnModuleDestroy {
     // which is the only way to interrupt a synchronous infinite loop in the
     // author's compiled JS. Piscina then replaces the terminated worker.
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), this.options.timeoutMs);
+    const timer =
+      this.options.timeoutMs > 0
+        ? setTimeout(() => controller.abort(), this.options.timeoutMs)
+        : undefined;
+    const signals = signal ? [controller.signal, signal] : [controller.signal];
     try {
-      return (await this.piscina.run(task, { signal: controller.signal })) as T;
+      return (await this.piscina.run(task, { signal: AbortSignal.any(signals) })) as T;
     } catch (err) {
+      if (signal?.aborted) throw signal.reason;
       if (controller.signal.aborted) {
         this.logger.error(
           `Engine op '${op}' exceeded ${this.options.timeoutMs}ms — worker terminated`,

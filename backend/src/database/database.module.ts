@@ -41,6 +41,7 @@ import { MIGRATIONS } from './migrations';
           // pg pool options: a stuck query, lock wait or abandoned transaction
           // fails instead of holding its request and connection forever.
           extra: {
+            max: db.poolSize,
             connectionTimeoutMillis: 10_000,
             statement_timeout: 60_000,
             lock_timeout: 10_000,

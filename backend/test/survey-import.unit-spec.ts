@@ -54,6 +54,8 @@ describe('SurveysService.importSurvey — rollback on partial failure', () => {
       {} as any, // calculations (the zip has none)
       {} as any, // engine
       {} as any, // design
+      {} as any, // jobs
+      {} as any, // db
       files as any,
     );
     /* eslint-enable @typescript-eslint/no-explicit-any */
