@@ -9,8 +9,12 @@ export function tabs(theme) {
         indicator: {
           backgroundColor: theme.palette.text.primary,
         },
+        // Height as well as width: a scroll button is a flex child of the tab
+        // row, so without one it stretches to the row's height and the 50%
+        // radius draws an ellipse rather than the round target intended.
         scrollButtons: {
           width: 48,
+          height: 48,
           borderRadius: '50%',
         },
       },
