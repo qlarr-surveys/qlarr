@@ -115,17 +115,16 @@ function DesignSurvey() {
 
   const cacheRtlMemo = useMemo(() => cacheRtl(lang), [lang]);
 
-  const backgroundImage = useSelector(
-    (state) => state.designState["Survey"]?.resources?.backgroundImage
+  const surveyTheme = React.useCallback(
+    createTheme({
+      ...defualtTheme(theme),
+      direction: rtlLanguage.includes(lang) ? "rtl" : "ltr",
+    }),
+    [theme]
   );
 
-  const surveyTheme = useMemo(
-    () =>
-      createTheme({
-        ...defualtTheme(theme),
-        direction: rtlLanguage.includes(lang) ? "rtl" : "ltr",
-      }),
-    [lang, theme]
+  const backgroundImage = useSelector(
+    (state) => state.designState["Survey"]?.resources?.backgroundImage
   );
 
   const backgroundStyle = backgroundImage
