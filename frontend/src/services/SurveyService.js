@@ -223,6 +223,39 @@ class SurveyService extends BaseService {
     );
     return response.data;
   }
+
+  async getJobs(surveyId) {
+    const response = await this.handleRequest(() =>
+      authenticatedApi.get(`/survey/${surveyId}/jobs`)
+    );
+    return response.data;
+  }
+
+  async cancelJob(surveyId, jobId) {
+    const response = await this.handleRequest(() =>
+      authenticatedApi.post(`/survey/${surveyId}/jobs/${jobId}/cancel`)
+    );
+    return response.data;
+  }
+
+  async retryJob(surveyId, kind, subjectKey) {
+    const response = await this.handleRequest(() =>
+      authenticatedApi.post(`/survey/${surveyId}/jobs/retry`, {
+        kind,
+        subjectKey,
+      })
+    );
+    return response.data;
+  }
+
+  async jobFailures(surveyId, kind, subjectKey, page, perPage) {
+    const response = await this.handleRequest(() =>
+      authenticatedApi.get(`/survey/${surveyId}/jobs/failures`, {
+        params: { kind, subjectKey, page, perPage },
+      })
+    );
+    return response.data;
+  }
 }
 
 export default SurveyService;

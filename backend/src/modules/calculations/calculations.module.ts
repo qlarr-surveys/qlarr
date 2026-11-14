@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DesignModule } from '../design/design.module';
+import { CalcComputeHandler } from './calc-compute.handler';
 import { CalculationsController } from './calculations.controller';
 import { CalculationsRepository } from './calculations.repository';
 import { CalculationsService } from './calculations.service';
@@ -9,7 +10,7 @@ import { SurveyCalculationsEntity } from './survey-calculations.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([SurveyCalculationsEntity]), DesignModule],
   controllers: [CalculationsController],
-  providers: [CalculationsRepository, CalculationsService],
+  providers: [CalculationsRepository, CalculationsService, CalcComputeHandler],
   // The repository is shared with SurveysModule (clone/import/export) and
   // ResponsesModule (response review and exports).
   exports: [CalculationsRepository],

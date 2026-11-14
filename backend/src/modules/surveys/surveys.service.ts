@@ -1,9 +1,11 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { nowUtcString } from '../../common/datetime';
+import { DbContext } from '../../database/db-context';
 import { EngineService } from '../../engine/engine.service';
 import { Calculation } from '../../engine/engine.types';
 import { FILE_HELPER, FileHelper } from '../../integrations/filesystem/file-helper';
+import { JobsService } from '../../jobs/jobs.service';
 import { SurveyFolder } from '../../integrations/filesystem/survey-folder';
 import {
   MAX_CALCULATIONS,
@@ -57,6 +59,8 @@ export class SurveysService {
     private readonly calculations: CalculationsRepository,
     private readonly engine: EngineService,
     private readonly design: DesignService,
+    private readonly jobs: JobsService,
+    private readonly db: DbContext,
     @Inject(FILE_HELPER) private readonly files: FileHelper,
   ) {}
 
@@ -406,8 +410,11 @@ export class SurveysService {
     // broken, user-visible survey is worse than an invisible leak, so we prefer
     // the leak.
     // Responses, versions and calculations FK-reference the survey, so deleteCascade clears
-    // them before the survey row (all within its own transaction).
-    await this.surveys.deleteCascade(id);
+    // them before the survey row. Its jobs go in the same transaction.
+    await this.db.manager.transaction(async (tx) => {
+      await this.jobs.deleteForSurvey(tx, id);
+      await this.surveys.deleteCascade(id, tx);
+    });
     await this.files.deleteSurveyFiles(id);
   }
 

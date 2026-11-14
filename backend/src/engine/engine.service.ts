@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { com } from '@qlarr/survey-engine';
 import {
   CalculateOutput,
@@ -12,6 +12,7 @@ import {
 } from './engine.types';
 import { ChangeCodeResult } from './engine-runtime';
 import { EnginePool } from './engine.pool';
+import { ENGINE_JOB_POOL } from './engine.constants';
 import {
   DuplicateToCodeException,
   FromCodeNotAvailableException,
@@ -46,10 +47,16 @@ const MASKED_SUFFIX = '.masked_value';
 @Injectable()
 export class EngineService {
   private readonly pool: EnginePool;
+  /** Jobs' own pool, so respondents never queue behind a Compute. */
+  private readonly jobPool: EnginePool;
 
-  constructor(pool?: EnginePool) {
+  constructor(
+    pool?: EnginePool,
+    @Optional() @Inject(ENGINE_JOB_POOL) jobPool?: EnginePool,
+  ) {
     // No pool in a bare `new EngineService()` (unit tests) → run in-process.
     this.pool = pool ?? EnginePool.disabled();
+    this.jobPool = jobPool ?? EnginePool.disabled();
   }
 
   /** Validate a complete survey design → schema, script, impact map, etc. */
@@ -128,17 +135,24 @@ export class EngineService {
    * Evaluate a validated calculation set over responses keyed by ID
    * (`{ responseId: values }`). The engine trusts `errors` and doesn't
    * re-validate, so pass the set exactly as `validateCalculations` returned it.
+   * A job passes `pool: 'job'` (no timeout) and its `signal`.
    */
   calculate(
     processedSurvey: string,
     calculations: Calculation[],
     responses: Record<string, Record<string, unknown>>,
+    options: { pool?: 'job'; signal?: AbortSignal } = {},
   ): Promise<CalculateOutput> {
-    return this.pool.run('calculate', {
-      processedSurvey,
-      calculations: JSON.stringify(calculations),
-      responses: JSON.stringify(responses),
-    });
+    const pool = options.pool === 'job' ? this.jobPool : this.pool;
+    return pool.run(
+      'calculate',
+      {
+        processedSurvey,
+        calculations: JSON.stringify(calculations),
+        responses: JSON.stringify(responses),
+      },
+      options.signal,
+    );
   }
 
   /** A blank starter design for a new survey (≈ `ValidationUseCaseWrapper.new`). */

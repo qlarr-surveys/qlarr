@@ -8,7 +8,7 @@ import {
 } from './calculations.dto';
 import { CalculationsService } from './calculations.service';
 
-/** The Calculated fields tab: state, Test, Save and Compute. */
+/** The Calculated fields tab: state, Test, Save and Compute (cancel is the jobs endpoint). */
 @Controller('survey')
 export class CalculationsController {
   constructor(private readonly calculations: CalculationsService) {}

@@ -17,10 +17,9 @@ const DESIGN_JSON = JSON.stringify(
 
 /**
  * Calculated-fields storage against a real Postgres: the migration, the
- * optimistic-locking save (which resets the status to idle), the Compute run
- * state (start, identity, 2-minute expiry), the guarded result writes into
- * `responses.computations`, and the survey lifecycle (clone, export → import,
- * delete).
+ * optimistic-locking save, the result writes into `responses.computations`
+ * (fenced by `results_epoch`) and clearing them, and the survey
+ * lifecycle (clone, export → import, delete).
  */
 describe('Calculations storage', () => {
   let ctx: TestApp;
@@ -69,13 +68,12 @@ describe('Calculations storage', () => {
     errors: [],
   });
 
-  /** Move the row's run start back by `seconds`, to simulate elapsed time. */
-  const ageRun = (surveyId: string, seconds: number) =>
+  /** An active Compute job row in pg-boss. */
+  const addJob = (surveyId: string) =>
     root.query(
-      `UPDATE survey_calculations
-       SET started_at = started_at - make_interval(secs => $2)
-       WHERE survey_id = $1`,
-      [surveyId, seconds],
+      `INSERT INTO pgboss.job (name, state, data)
+       VALUES ('calc.compute', 'active', $1)`,
+      [JSON.stringify({ surveyId, subjectKey: '' })],
     );
 
   const addResponse = (id: string, surveyId: string) =>
@@ -104,8 +102,6 @@ describe('Calculations storage', () => {
 
       expect(await repo.find(id)).toMatchObject({
         revision: 2,
-        status: 'idle',
-        startedAt: null,
         calculations: [calc('b', '2')],
       });
     });
@@ -120,121 +116,6 @@ describe('Calculations storage', () => {
       }
       expect((await repo.find(id))?.calculations).toEqual([calc('a', '1')]);
     });
-
-    it('is refused with 409 while a run is going, and leaves the run running', async () => {
-      const id = await surveyWithSet('Save while running');
-      await repo.startRun(id, 4, 1);
-
-      await expect(repo.saveSet(id, [calc('x', '1')], 1)).rejects.toMatchObject({
-        status: 409,
-        response: { error: 'CalculationRunInProgressException' },
-      });
-      expect(await repo.find(id)).toMatchObject({
-        revision: 1,
-        status: 'running',
-        calculations: [calc('a', '1')],
-      });
-    });
-
-    it('is allowed once the run is past 2 minutes', async () => {
-      const id = await surveyWithSet('Save after expiry');
-      await repo.startRun(id, 4, 1);
-      await ageRun(id, 121);
-
-      expect(await repo.saveSet(id, [calc('x', '1')], 1)).toBe(2);
-    });
-  });
-
-  describe('Compute run state', () => {
-    it('startRun starts one run at a time', async () => {
-      const id = await surveyWithSet('Start');
-
-      const startedAt = await repo.startRun(id, 4, 1);
-      expect(startedAt).toEqual(expect.any(String));
-      expect(await repo.find(id)).toMatchObject({
-        status: 'running',
-        progressDone: 0,
-        progressTotal: 4,
-      });
-      await expect(repo.startRun(id, 4, 1)).rejects.toMatchObject({
-        status: 409,
-        response: { error: 'CalculationRunInProgressException' },
-      });
-    });
-
-    it('startRun is refused with 409 when the set was saved since it was read', async () => {
-      const id = await surveyWithSet('Start stale');
-      await repo.saveSet(id, [calc('b', '2')], 1);
-
-      await expect(repo.startRun(id, 4, 1)).rejects.toMatchObject({
-        status: 409,
-        response: { error: 'CalculationsRevisionConflictException' },
-      });
-      expect((await repo.find(id))?.status).toBe('idle');
-      expect(await repo.startRun(id, 4, 2)).toEqual(expect.any(String));
-    });
-
-    it('startRun is refused with 409 for a survey without a row', async () => {
-      await expect(
-        repo.startRun(await createSurvey('No row'), 1, 0),
-      ).rejects.toMatchObject({ status: 409 });
-    });
-
-    it('updateRun only updates the current run', async () => {
-      const id = await surveyWithSet('Update');
-      const startedAt = await repo.startRun(id, 4, 1);
-
-      expect(await repo.updateRun(id, startedAt, { progressDone: 2 })).toBe(true);
-      expect(await repo.find(id)).toMatchObject({ status: 'running', progressDone: 2 });
-
-      expect(await repo.updateRun(id, startedAt, { status: 'completed' })).toBe(true);
-      // Finished: the run is no longer current, so further writes are refused.
-      expect(await repo.updateRun(id, startedAt, { progressDone: 3 })).toBe(false);
-      expect(await repo.find(id)).toMatchObject({ status: 'completed', progressDone: 2 });
-    });
-
-    it('a run past 2 minutes is expired on read and can be replaced', async () => {
-      const id = await surveyWithSet('Expire');
-      const first = await repo.startRun(id, 4, 1);
-
-      // Within the limit: nothing changes.
-      await ageRun(id, 60);
-      await repo.expireStaleRun(id);
-      expect((await repo.find(id))?.status).toBe('running');
-
-      // Past the limit: failed, and the old run's writes are refused.
-      await ageRun(id, 61);
-      await repo.expireStaleRun(id);
-      expect((await repo.find(id))?.status).toBe('failed');
-      const aged = (
-        await root.query(
-          `SELECT started_at::text AS s FROM survey_calculations WHERE survey_id = $1`,
-          [id],
-        )
-      )[0].s as string;
-      expect(await repo.updateRun(id, aged, { progressDone: 1 })).toBe(false);
-
-      const second = await repo.startRun(id, 4, 1);
-      expect(second).not.toBeNull();
-      expect(second).not.toBe(first);
-    });
-
-    it('startRun replaces a running row past 2 minutes, even before it is expired', async () => {
-      const id = await surveyWithSet('Replace');
-      await repo.startRun(id, 4, 1);
-      await ageRun(id, 121);
-
-      expect(await repo.startRun(id, 4, 1)).not.toBeNull();
-    });
-
-    it('resetRunningOnBoot turns running into failed', async () => {
-      const id = await surveyWithSet('Boot');
-      await repo.startRun(id, 3, 1);
-
-      await repo.resetRunningOnBoot();
-
-      expect((await repo.find(id))?.status).toBe('failed');
-    });
   });
 
   describe('writeComputations', () => {
@@ -244,55 +125,76 @@ describe('Calculations storage', () => {
       '30000000-0000-0000-0000-000000000003',
     ];
 
-    it('writes for the current run, replacing earlier results', async () => {
+    it('writes while the epoch is current, replacing earlier results', async () => {
       const id = await surveyWithSet('Write');
       await addResponse(r1, id);
       await addResponse(r2, id);
-      const startedAt = await repo.startRun(id, 2, 1);
 
       expect(
-        await repo.writeComputations(
-          id,
-          [
-            { id: r1, computations: { a: 1 } },
-            { id: r2, computations: { a: '#ERROR' } },
-          ],
-          startedAt,
-        ),
-      ).toBe(2);
+        await repo.writeComputations(root.manager, 0, id, [
+          { id: r1, computations: { a: 1 } },
+          { id: r2, computations: { a: 2 } },
+        ]),
+      ).toEqual(expect.arrayContaining([r1, r2]));
       expect(await computationsOf(r1)).toEqual({ a: 1 });
-      expect(await computationsOf(r2)).toEqual({ a: '#ERROR' });
+      expect(await computationsOf(r2)).toEqual({ a: 2 });
 
-      await repo.writeComputations(id, [{ id: r1, computations: { a: 5 } }], startedAt);
+      await repo.writeComputations(root.manager, 0, id, [{ id: r1, computations: { a: 5 } }]);
       expect(await computationsOf(r1)).toEqual({ a: 5 });
     });
 
-    it('writes nothing for a run that is no longer current', async () => {
-      const id = await surveyWithSet('Stale run');
+    it('writes nothing once the results were cleared since', async () => {
+      const id = await surveyWithSet('Stale epoch');
       await addResponse(r3, id);
-      const old = await repo.startRun(id, 1, 1);
-      await ageRun(id, 121);
-      await repo.startRun(id, 1, 1);
 
-      // `old` was taken before ageRun, so it matches neither run.
+      await repo.clearComputations(root.manager, id);
+      expect((await repo.find(id))?.resultsEpoch).toBe(1);
       expect(
-        await repo.writeComputations(id, [{ id: r3, computations: { a: 1 } }], old),
-      ).toBe(0);
+        await repo.writeComputations(root.manager, 0, id, [{ id: r3, computations: { a: 1 } }]),
+      ).toEqual([]);
       expect(await computationsOf(r3)).toBeNull();
     });
 
-    it('a save sets the status back to idle and leaves results in place', async () => {
-      const id = await surveyWithSet('Save hides');
-      const r4 = '30000000-0000-0000-0000-000000000004';
+    it('a clear committed while a results write waits leaves the write with nothing', async () => {
+      const id = await surveyWithSet('Guarded');
+      const r7 = '30000000-0000-0000-0000-000000000007';
+      await addResponse(r7, id);
+
+      const runner = root.createQueryRunner();
+      await runner.connect();
+      await runner.startTransaction();
+      await repo.clearComputations(runner.manager, id);
+      const write = repo.writeComputations(root.manager, 0, id, [
+        { id: r7, computations: { a: 1 } },
+      ]);
+      await new Promise((r) => setTimeout(r, 100));
+      await runner.commitTransaction();
+      await runner.release();
+
+      expect(await write).toEqual([]);
+      expect(await computationsOf(r7)).toBeNull();
+    });
+
+    it('clearComputations deletes the survey\'s results only', async () => {
+      const id = await surveyWithSet('Clear');
+      const other = await surveyWithSet('Clear other');
+      const [r4, r6] = [
+        '30000000-0000-0000-0000-000000000004',
+        '30000000-0000-0000-0000-000000000006',
+      ];
       await addResponse(r4, id);
-      const startedAt = await repo.startRun(id, 1, 1);
-      await repo.writeComputations(id, [{ id: r4, computations: { a: 1 } }], startedAt);
-      await repo.updateRun(id, startedAt, { progressDone: 1, status: 'completed' });
+      await addResponse(r6, other);
+      await repo.writeComputations(root.manager, 0, id, [
+        { id: r4, computations: { a: 1 } },
+      ]);
+      await repo.writeComputations(root.manager, 0, other, [
+        { id: r6, computations: { a: 1 } },
+      ]);
 
-      await repo.saveSet(id, [calc('a', '2')], 1);
+      await repo.clearComputations(root.manager, id);
 
-      expect((await repo.find(id))?.status).toBe('idle');
-      expect(await computationsOf(r4)).toEqual({ a: 1 });
+      expect(await computationsOf(r4)).toBeNull();
+      expect(await computationsOf(r6)).toEqual({ a: 1 });
     });
 
     it("never writes another survey's responses", async () => {
@@ -300,11 +202,12 @@ describe('Calculations storage', () => {
       const other = await surveyWithSet('Other survey');
       const r5 = '30000000-0000-0000-0000-000000000005';
       await addResponse(r5, other);
-      const startedAt = await repo.startRun(id, 1, 1);
 
       expect(
-        await repo.writeComputations(id, [{ id: r5, computations: { a: 1 } }], startedAt),
-      ).toBe(0);
+        await repo.writeComputations(root.manager, 0, id, [
+          { id: r5, computations: { a: 1 } },
+        ]),
+      ).toEqual([]);
       expect(await computationsOf(r5)).toBeNull();
     });
   });
@@ -324,10 +227,10 @@ describe('Calculations storage', () => {
       return imported.body.id as string;
     };
 
-    it('clone copies the set at revision 0 and idle', async () => {
+    it('clone copies the set at revision 0, without its jobs', async () => {
       const id = await surveyWithSet('Clone source');
       await repo.saveSet(id, [calc('a', '1')], 1);
-      await repo.startRun(id, 2, 2);
+      await addJob(id);
 
       const cloned = await request(server())
         .post(`/survey/${id}/clone`)
@@ -336,10 +239,11 @@ describe('Calculations storage', () => {
 
       expect(await repo.find(cloned.body.id)).toMatchObject({
         revision: 0,
-        status: 'idle',
-        startedAt: null,
         calculations: [calc('a', '1')],
       });
+      expect(
+        await root.query(`SELECT 1 FROM pgboss.job WHERE data->>'surveyId' = $1`, [cloned.body.id]),
+      ).toEqual([]);
       // A first save on the clone (sent at revision 0) goes through.
       expect(await repo.saveSet(cloned.body.id, [calc('b', '2')], 0)).toBe(1);
     });
@@ -359,7 +263,7 @@ describe('Calculations storage', () => {
       );
 
       const row = await repo.find(await exportThenImport(id));
-      expect(row).toMatchObject({ revision: 0, status: 'idle' });
+      expect(row).toMatchObject({ revision: 0 });
       // The made-up error is gone (re-validated); the invalid ones keep fresh errors.
       expect(row?.calculations.map((c) => [c.code, c.errors?.map((e) => e.name)])).toEqual([
         ['double', []],
