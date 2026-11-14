@@ -1,7 +1,9 @@
 import React from "react";
 import { Download, Upload } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { downloadCsv } from "~/analytics/crosstabs/csv";
+import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import { useService } from "~/hooks/use-service";
 import { designStateReceived, setSaving } from "~/state/design/designState";
 import { getErrorMessage } from "~/utils/design/codeUtils";
@@ -17,6 +19,10 @@ import styles from "./TranslationPanel.module.css";
  * default.
  */
 function TranslationsCsv({ t }) {
+  // The import's own errors — "not UTF-8", "not a translations CSV" — are
+  // processed errors, and those are worded in the manage namespace; through
+  // the panel's design namespace they all fell back to "Unexpected Error".
+  const { t: tErrors } = useTranslation(NAMESPACES.MANAGE);
   const dispatch = useDispatch();
   const designService = useService("design");
   const fileInput = React.useRef(null);
@@ -27,7 +33,7 @@ function TranslationsCsv({ t }) {
   // handleRequest already surfaced the errors the app handles globally.
   const onError = (error) =>
     setResult(
-      error?.handleGlobally ? null : { error: getErrorMessage(error, t) }
+      error?.handleGlobally ? null : { error: getErrorMessage(error, tErrors) }
     );
 
   const onExport = () => {
