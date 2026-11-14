@@ -9,7 +9,7 @@ import {
   deleteQuestion,
   convertQuestion,
   cloneQuestion,
-  refreshDsl,
+  recompileLogic,
 } from "../state/mutations";
 import { quotaMessageKey } from "../constants/design";
 import { brokenQuotaCodes, isQuotaInstruction } from "../state/addInstructions";
@@ -102,7 +102,7 @@ describe("quotas", () => {
       isActive: false,
       returnType: "boolean",
     });
-    refreshDsl(state);
+    recompileLogic(state);
     expect(quotaInstructions(state).map((instruction) => instruction.code)).toEqual([
       `quota_${code}`,
     ]);
@@ -199,13 +199,13 @@ describe("quotas", () => {
     expect(quotaInstructions(state)).toEqual([]);
   });
 
-  it("restores quota instructions on refreshDsl", () => {
+  it("restores quota instructions on recompileLogic", () => {
     const [code] = addQuotas(1);
     updateQuota(state, { code, changes: { condition } });
     const compiled = quotaInstructions(state)[0].text;
     quotaInstructions(state)[0].text = "stale";
 
-    refreshDsl(state);
+    recompileLogic(state);
 
     expect(quotaInstructions(state)[0].text).toBe(compiled);
   });
