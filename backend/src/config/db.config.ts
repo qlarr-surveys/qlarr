@@ -9,6 +9,8 @@ export interface DbConfig {
   /** Connect over TLS. Required by RDS (`rds.force_ssl`); off for a plain
    *  local Postgres that has no server certificate. */
   ssl: boolean;
+  /** Max connections in the pool. */
+  poolSize: number;
 }
 
 /**
@@ -25,5 +27,6 @@ export default registerAs(
     password: process.env.DB_PASSWORD!,
     database: process.env.DB_NAME!,
     ssl: process.env.DB_SSL === 'true',
+    poolSize: parseInt(process.env.DB_POOL_SIZE ?? '10', 10),
   }),
 );

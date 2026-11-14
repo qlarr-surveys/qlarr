@@ -36,6 +36,7 @@ export const envValidationSchema = Joi.object({
   PORT: Joi.number().port().default(8080),
   DB_PORT: Joi.number().port().default(5432),
   DB_SSL: bool.default(false),
+  DB_POOL_SIZE: Joi.number().integer().positive().default(10),
   JWT_ACTIVE_EXPIRATION_MS: Joi.number().positive().default(3_600_000), // 1h
   JWT_REFRESH_EXPIRATION_MS: Joi.number().positive().default(31_536_000_000), // 1y hard cap
   JWT_REFRESH_IDLE_MS: Joi.number().positive().default(7_776_000_000), // 90d idle timeout
@@ -59,8 +60,13 @@ export const envValidationSchema = Joi.object({
   // --- engine worker pool (engine.config already defaults these) ---
   ENGINE_WORKERS: bool.optional(),
   ENGINE_POOL_SIZE: Joi.number().integer().positive().optional(),
+  ENGINE_JOB_POOL_SIZE: Joi.number().integer().positive().optional(),
   ENGINE_TIMEOUT_MS: Joi.number().integer().positive().optional(),
   ENGINE_MAX_OLD_GEN_MB: Joi.number().integer().positive().optional(),
+
+  // --- long-running jobs ---
+  JOBS_WORKER: bool.default(true),
+  JOB_SLOTS: Joi.number().integer().positive().default(2),
 });
 
 /**

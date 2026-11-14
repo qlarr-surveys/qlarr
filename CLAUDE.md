@@ -60,7 +60,7 @@ src/
 ## Development
 - Run frontend commands from `frontend/`, or from the repo root via the proxied scripts (`npm start`, `npm run build`, …)
 - **Package manager**: npm
-- **Node version**: 20+ (the backend requires it; the root `concurrently` needs 18+)
+- **Node version**: 22.12+ (the backend requires it, for pg-boss; the root `concurrently` needs 18+)
 - Copy `.env.example` to `.env` and set `VITE_BE_URL` to point to the backend API
 
 ### Commands

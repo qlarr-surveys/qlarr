@@ -14,7 +14,7 @@
 # image with no build-essential is sufficient.
 
 # ---- Builder: install all deps and compile TS -> dist/ ----
-FROM node:20-bookworm-slim AS builder
+FROM node:22-bookworm-slim AS builder
 WORKDIR /app
 
 # Shared local package first: the backend's `prebuild` (tsup) compiles its dist/.
@@ -30,7 +30,7 @@ COPY backend/ ./
 RUN npm run build
 
 # ---- Runner: prod deps only + compiled output ----
-FROM node:20-bookworm-slim AS runner
+FROM node:22-bookworm-slim AS runner
 ENV NODE_ENV=production
 # The backend treats `timestamp without time zone` columns as UTC wall clocks;
 # pin the process zone so pg builds/reads Dates in UTC and no DST gap can drift a
