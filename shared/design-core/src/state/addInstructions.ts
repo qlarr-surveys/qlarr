@@ -1417,10 +1417,10 @@ const jsonToJs = (json, nested, getComponentType, getQuestionType) => {
       ) {
         return wrapIfNested(
           nested,
-          `Object.keys(${qCode1}.value).length == 0 || !QlarrScripts.safeAccess(${qCode1}.value,"size") || !QlarrScripts.safeAccess(${qCode1}.value,"stored_filename")`,
+          `Object.keys(${qCode1}.relevant_value).length == 0 || !QlarrScripts.safeAccess(${qCode1}.relevant_value,"size") || !QlarrScripts.safeAccess(${qCode1}.relevant_value,"stored_filename")`,
         );
       } else {
-        return `QlarrScripts.isVoid(${capture(qCode1)}.value)`;
+        return `QlarrScripts.isVoid(${capture(qCode1)}.relevant_value)`;
       }
     case "is_not_empty":
       const qCode = capture(value);
@@ -1431,10 +1431,10 @@ const jsonToJs = (json, nested, getComponentType, getQuestionType) => {
       ) {
         return wrapIfNested(
           nested,
-          `Object.keys(${qCode}.value).length > 0 && QlarrScripts.safeAccess(${qCode}.value,"size") && QlarrScripts.safeAccess(${qCode}.value,"stored_filename")`,
+          `Object.keys(${qCode}.relevant_value).length > 0 && QlarrScripts.safeAccess(${qCode}.relevant_value,"size") && QlarrScripts.safeAccess(${qCode}.relevant_value,"stored_filename")`,
         );
       } else {
-        return `QlarrScripts.isNotVoid(${capture(value)}.value)`;
+        return `QlarrScripts.isNotVoid(${capture(value)}.relevant_value)`;
       }
     case "==":
     case "!=":
@@ -1448,8 +1448,8 @@ const jsonToJs = (json, nested, getComponentType, getQuestionType) => {
       let isDateType =
         type == "date" || type == "date_time" || type == "time";
       let leftOperand = isDateType
-        ? `QlarrScripts.sqlDateTimeToDate(${capture(value[0])}.value)`
-        : `${capture(value[0])}.value`;
+        ? `QlarrScripts.sqlDateTimeToDate(${capture(value[0])}.relevant_value)`
+        : `${capture(value[0])}.relevant_value`;
       if (["==", "!=", "<", "<=", ">", ">="].includes(key)) {
         // Date/time operands are Date objects. `==` / `!=` between two
         // objects compare references (always false / true), so compare their
@@ -1486,24 +1486,24 @@ const jsonToJs = (json, nested, getComponentType, getQuestionType) => {
     case "startsWith":
       return wrapIfNested(
         nested,
-        `${capture(value[0])}.value?.startsWith(${capture(value[1])})`,
+        `${capture(value[0])}.relevant_value?.startsWith(${capture(value[1])})`,
       );
     case "endsWith":
       return wrapIfNested(
         nested,
-        `${capture(value[0])}.value?.endsWith(${capture(value[1])})`,
+        `${capture(value[0])}.relevant_value?.endsWith(${capture(value[1])})`,
       );
     case "contains":
       return wrapIfNested(
         nested,
-        `${capture(value[0])}.value?.indexOf(${capture(value[1])}) > -1`,
+        `${capture(value[0])}.relevant_value?.indexOf(${capture(value[1])}) > -1`,
       );
     case "not_contains":
       return wrapIfNested(
         nested,
-        `!${capture(value[0])}.value || ${capture(
+        `!${capture(value[0])}.relevant_value || ${capture(
           value[0],
-        )}.value?.indexOf(${capture(value[1])}) == -1`,
+        )}.relevant_value?.indexOf(${capture(value[1])}) == -1`,
       );
     case "in":
       const code = capture(value[0]);
@@ -1512,18 +1512,18 @@ const jsonToJs = (json, nested, getComponentType, getQuestionType) => {
           (el) => '"' + el + '"',
         )}].indexOf(Survey.lang) !== -1`;
       } else if (getComponentType(code) == "nps") {
-        return `[${value[1].map((el) => +el)}].indexOf(${code}.value) !== -1`;
+        return `[${value[1].map((el) => +el)}].indexOf(${code}.relevant_value) !== -1`;
       } else if (
         ["mcq", "image_mcq", "icon_mcq"].indexOf(getComponentType(code)) > -1 ||
         getQuestionType(code) == "mcq_array"
       ) {
         return `[${value[1].map(
           (el) => "'" + el + "'",
-        )}].filter((el) => ${code}.value?.indexOf(el) > -1).length > 0`;
+        )}].filter((el) => ${code}.relevant_value?.indexOf(el) > -1).length > 0`;
       } else {
         return `[${value[1].map(
           (el) => '"' + el + '"',
-        )}].indexOf(${code}.value) !== -1`;
+        )}].indexOf(${code}.relevant_value) !== -1`;
       }
     case "not_in":
       const code1 = capture(value[0]);
@@ -1532,18 +1532,18 @@ const jsonToJs = (json, nested, getComponentType, getQuestionType) => {
           (el) => '"' + el + '"',
         )}].indexOf(Survey.lang) == -1`;
       } else if (getComponentType(code1) == "nps") {
-        return `[${value[1].map((el) => +el)}].indexOf(${code1}.value) == -1`;
+        return `[${value[1].map((el) => +el)}].indexOf(${code1}.relevant_value) == -1`;
       } else if (
         ["mcq", "image_mcq", "icon_mcq"].indexOf(getComponentType(code1)) > -1 ||
         getQuestionType(code1) == "mcq_array"
       ) {
         return `[${value[1].map(
           (el) => "'" + el + "'",
-        )}].filter((el) => ${code1}.value?.indexOf(el) > -1).length == 0`;
+        )}].filter((el) => ${code1}.relevant_value?.indexOf(el) > -1).length == 0`;
       } else {
         return `[${value[1].map(
           (el) => '"' + el + '"',
-        )}].indexOf(${code1}.value) == -1`;
+        )}].indexOf(${code1}.relevant_value) == -1`;
       }
 
     default:
