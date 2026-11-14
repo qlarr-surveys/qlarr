@@ -236,6 +236,16 @@ export class DesignService {
     const versionToSave = latest.published ? latest.version + 1 : latest.version;
     const subVersionToSave = latest.published ? 1 : latest.subVersion + 1;
 
+    // File first: storage calls stay out of the transaction so a slow write
+    // can't hold its row locks. If the DB write then fails, the draft file is
+    // one sub-version ahead of its row; the next save overwrites it.
+    await this.files.uploadText(
+      survey.id,
+      SurveyFolder.Design,
+      JSON.stringify(output),
+      String(versionToSave),
+    );
+
     // Version row + survey stamp + calculations reset as one transaction.
     survey.lastModified = nowUtcString();
     const entity = await this.db.manager.transaction(async (tx) => {
@@ -256,14 +266,6 @@ export class DesignService {
       );
       await tx.getRepository(SurveyEntity).save(survey);
       await resetCalculationsOnDesignChange(tx, survey.id);
-      // S3 can't join the transaction, and this may overwrite the draft's file
-      // in place, so it goes last: a failed DB write leaves the file untouched.
-      await this.files.uploadText(
-        survey.id,
-        SurveyFolder.Design,
-        JSON.stringify(output),
-        String(versionToSave),
-      );
       return e;
     });
 
