@@ -138,8 +138,25 @@ export function contrastRatio(foreground, background) {
   return Math.round(((light + 0.05) / (dark + 0.05)) * 10) / 10;
 }
 
-/** True when a swatch needs a dark tick to stay visible on it. */
+/**
+ * True when a swatch needs a dark tick to stay visible on it.
+ *
+ * A translucent colour is judged as it will actually be drawn rather than as
+ * the colour it is mixed from: composited over the light panel behind it, a
+ * barely-there wash of black is a pale grey swatch, and a white tick on it
+ * would be the one thing nobody could see.
+ */
 export function isLight(value) {
   const parsed = parseColor(value);
-  return parsed ? relativeLuminance(parsed) > 0.5 : false;
+  if (!parsed) {
+    return false;
+  }
+  const overPanel = (channel) => channel * parsed.a + 255 * (1 - parsed.a);
+  return (
+    relativeLuminance({
+      r: overPanel(parsed.r),
+      g: overPanel(parsed.g),
+      b: overPanel(parsed.b),
+    }) > 0.5
+  );
 }
