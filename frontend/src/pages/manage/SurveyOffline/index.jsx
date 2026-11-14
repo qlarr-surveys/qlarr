@@ -29,11 +29,7 @@ function SurveyOffline() {
     <Box className={styles.mainContainer}>
       <Box className={styles.boxContainer}>
         <div style={{ display: "flex", gap: ".5rem" }}>
-          <CustomTooltip
-            title="Background Audio"
-            body="This option allows you to add background audio to your survey."
-            url="https://example.com/background-audio"
-          />
+          <CustomTooltip body={t("tooltips.background_audio")} />
 
           <Typography color="#1a2052" fontWeight="500">
             {t("edit_survey.background_audio")}
