@@ -8,10 +8,13 @@ import { DesignService } from '../design/design.service';
 import { SurveyEntity } from '../surveys/survey.entity';
 import { SurveyIsNotActiveException } from '../surveys/survey.exceptions';
 import { NavigationResult, NavigationService } from './navigation.service';
-import { NavigateRequest, RunSurveyDto, StartRequest } from './run.dto';
+import { NavigateRequest, RunSurveyDto, StartAtRequest, StartRequest } from './run.dto';
 import { ResponseNotFoundException } from '../responses/response.exceptions';
 import { ResponseRepository } from '../responses/response.repository';
-import { SurveyDesignWithErrorException } from './run.exceptions';
+import {
+  QuestionNotFoundException,
+  SurveyDesignWithErrorException,
+} from './run.exceptions';
 import { stringIndex, validateClientTimeSkew } from './run.helpers';
 
 type SurveyMode = 'ONLINE' | 'OFFLINE';
@@ -81,6 +84,38 @@ export class RunService {
     });
 
     return toRunDto(entity.id, result, processed.survey);
+  }
+
+  /**
+   * Preview a single question of the working version: the engine starts the
+   * survey directly on it, forced relevant, and reduced to just that question.
+   * Nothing is saved — there is no response to navigate from here.
+   */
+  async startAt(
+    surveyId: string,
+    req: StartAtRequest,
+    surveyMode: SurveyMode,
+  ): Promise<RunSurveyDto> {
+    validateClientTimeSkew(req.clientUTCTime);
+    const processed = await this.design.getProcessedSurvey(surveyId, false);
+    if (!hasQuestion(processed.output.survey, req.questionId)) {
+      throw new QuestionNotFoundException();
+    }
+    const result = await this.navigation.navigate({
+      surveyId,
+      response: null,
+      processedSurvey: processed,
+      navigationDirection: {
+        name: 'START_AT',
+        navigationIndex: { name: 'question', questionId: req.questionId },
+      },
+      navigationMode: 'QUESTION_BY_QUESTION',
+      navigationLang: req.lang,
+      values: {},
+      preview: true,
+      surveyMode,
+    });
+    return toRunDto(null, result, processed.survey);
   }
 
   async navigate(
@@ -174,8 +209,13 @@ function navigationEvent(
   return { name: 'Navigation', from, to, direction, time };
 }
 
+function hasQuestion(survey: Record<string, unknown>, code: string): boolean {
+  const groups = (survey.groups ?? []) as { questions?: { code: string }[] }[];
+  return groups.some((g) => g.questions?.some((q) => q.code === code));
+}
+
 function toRunDto(
-  responseId: string,
+  responseId: string | null,
   result: NavigationResult,
   survey: SurveyEntity,
 ): RunSurveyDto {

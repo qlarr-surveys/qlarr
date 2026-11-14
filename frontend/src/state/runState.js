@@ -23,6 +23,7 @@ export const runState = createSlice({
       let keys = Object.keys(state);
       keys.forEach((key) => delete state[key]);
       state.preview = action.payload.preview;
+      state.singleQuestion = !!action.payload.singleQuestion;
       let response = action.payload.response;
       qlarrDependents = response.state.qlarrDependents;
       state.navigation = undefined;

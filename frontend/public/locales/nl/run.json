@@ -22,7 +22,8 @@
         "survey_scheduled": "Deze enquête is gepland om in de toekomst te starten",
         "client_time_skew": "De klok van uw apparaat loopt niet gelijk. Corrigeer uw datum- en tijdinstellingen en laad de pagina opnieuw.",
         "survey_not_published": "Deze enquête is nog niet gepubliceerd",
-        "survey_not_found": "Deze enquête is niet beschikbaar"
+        "survey_not_found": "Deze enquête is niet beschikbaar",
+        "question_not_found": "Deze vraag is nog niet opgeslagen. Wacht even en probeer het opnieuw."
     },
     "preview":"Je bent in voorvertoning modus",
     "upload": "Uploaden",

@@ -26,6 +26,18 @@ class RunService extends BaseService {
     }
   }
 
+  // Single-question preview: no response is created, so there's nothing to navigate after it.
+  async startAt(questionId, lang, mode = "online") {
+    const surveyId = sessionStorage.getItem("surveyId");
+    const response = await this.handleRequest(() =>
+      authenticatedApi.post(
+        `/survey/${surveyId}/preview/start-at?mode=${mode}`,
+        { questionId, lang, clientUTCTime: localDateToServerDateTime(new Date()) }
+      )
+    );
+    return response.data;
+  }
+
   async navigate(payload, preview = false, mode = "online") {
     console.log(payload)
     const surveyId = sessionStorage.getItem("surveyId");

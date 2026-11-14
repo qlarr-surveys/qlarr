@@ -5,13 +5,18 @@ import { DataSource } from 'typeorm';
 import { EngineService } from '../src/engine/engine.service';
 import { runValidate } from '../src/engine/engine-runtime';
 import { FILE_HELPER } from '../src/integrations/filesystem/file-helper';
-import { startTestApp, TestApp } from './harness';
+import { bearer, startTestApp, TestApp } from './harness';
 
 const SURVEY = '10000000-0000-0000-0000-000000000001';
 const SURVEY_UNPUBLISHED = '10000000-0000-0000-0000-000000000002';
 // A survey with real typed questions (from the design fixture), used to exercise
 // respondent-value schema validation.
 const SURVEY_TYPED = '10000000-0000-0000-0000-000000000003';
+// The typed design with its group and one question hidden by relevance logic.
+const SURVEY_HIDDEN = '10000000-0000-0000-0000-000000000004';
+const HIDDEN_QUESTION = 'Q880htp';
+
+const SUPER = bearer({ authorities: ['super_admin'] });
 
 const engine = new EngineService();
 const DESIGN_JSON = JSON.stringify(runValidate(engine.newSurvey('Runnable')));
@@ -19,12 +24,35 @@ const TYPED_DESIGN_JSON = JSON.stringify(
   runValidate(readFileSync(`${__dirname}/fixtures/survey-design.json`, 'utf8')),
 );
 
+const HIDDEN_DESIGN_JSON = (() => {
+  const design = JSON.parse(readFileSync(`${__dirname}/fixtures/survey-design.json`, 'utf8'));
+  const hide = (component: { instructionList: object[] }, text: string) =>
+    component.instructionList.push({
+      code: 'conditional_relevance',
+      text,
+      returnType: 'boolean',
+      isActive: true,
+    });
+  const group = design.groups[0];
+  hide(group, 'false');
+  hide(
+    group.questions.find((q: { code: string }) => q.code === HIDDEN_QUESTION),
+    'Q303fhu.value === "show"',
+  );
+  return JSON.stringify(runValidate(JSON.stringify(design)));
+})();
+
+const designs: Record<string, string> = {
+  [SURVEY_TYPED]: TYPED_DESIGN_JSON,
+  [SURVEY_HIDDEN]: HIDDEN_DESIGN_JSON,
+};
+
 const files = {
-  // Serve the typed design for SURVEY_TYPED; the empty runnable one otherwise.
+  // Serve each survey's design; the empty runnable one by default.
   getText: jest
     .fn()
     .mockImplementation((surveyId: string) =>
-      Promise.resolve(surveyId === SURVEY_TYPED ? TYPED_DESIGN_JSON : DESIGN_JSON),
+      Promise.resolve(designs[surveyId] ?? DESIGN_JSON),
     ),
   deleteUnusedResponseFiles: jest.fn().mockResolvedValue(undefined),
 };
@@ -62,6 +90,7 @@ describe('Survey run — start + navigate', () => {
     await addSurvey(SURVEY, 'ACTIVE', true);
     await addSurvey(SURVEY_UNPUBLISHED, 'ACTIVE', false);
     await addSurvey(SURVEY_TYPED, 'ACTIVE', true);
+    await addSurvey(SURVEY_HIDDEN, 'DRAFT', false);
   }, 180_000);
 
   afterAll(async () => {
@@ -210,5 +239,72 @@ describe('Survey run — start + navigate', () => {
       })
       .expect(400);
     expect(res.body.error).toBe('WrongValueType');
+  });
+
+  describe('single-question preview (start-at)', () => {
+    const startAt = (questionId: string, auth = true) => {
+      const req = request(server()).post(`/survey/${SURVEY_HIDDEN}/preview/start-at`);
+      return (auth ? req.set('Authorization', SUPER) : req).send({ questionId });
+    };
+    const responseCount = async () =>
+      Number(
+        (
+          await root.query(`SELECT count(*) AS n FROM responses WHERE survey_id = $1`, [
+            SURVEY_HIDDEN,
+          ])
+        )[0].n,
+      );
+
+    it('serves a hidden question in a hidden group, alone and forced relevant', async () => {
+      const res = await startAt(HIDDEN_QUESTION).expect(200);
+
+      expect(res.body.responseId).toBeNull();
+      expect(res.body.navigationIndex).toMatchObject({
+        name: 'question',
+        questionId: HIDDEN_QUESTION,
+      });
+      // The whole survey comes back; only the target is in the current navigation.
+      type Component = { code: string; inCurrentNavigation: boolean };
+      const groups = res.body.survey.groups as (Component & { questions?: Component[] })[];
+      const shown = groups
+        .filter((g) => g.inCurrentNavigation)
+        .map((g) => [g.code, (g.questions ?? []).filter((q) => q.inCurrentNavigation).map((q) => q.code)]);
+      expect(shown).toEqual([['G1', [HIDDEN_QUESTION]]]);
+      expect(res.body.state.qlarrVariables.G1.relevance).toBe(true);
+      expect(res.body.state.qlarrVariables[HIDDEN_QUESTION].relevance).toBe(true);
+    });
+
+    it('leaves the relevance logic alone outside the target question', async () => {
+      const res = await startAt('Q303fhu').expect(200);
+      expect(res.body.state.qlarrVariables[HIDDEN_QUESTION].relevance).toBe(false);
+    });
+
+    it('saves no response', async () => {
+      const before = await responseCount();
+      await startAt(HIDDEN_QUESTION).expect(200);
+      expect(await responseCount()).toBe(before);
+    });
+
+    it('404 QuestionNotFound for an unknown question', async () => {
+      const res = await startAt('Qnope').expect(404);
+      expect(res.body.error).toBe('QuestionNotFound');
+    });
+
+    it('401 when unauthenticated', () => startAt(HIDDEN_QUESTION, false).expect(401));
+
+    it('400 StartAtNotAllowed through the respondent navigate route', async () => {
+      const start = await request(server()).post(`/survey/${SURVEY}/run/start`).send({}).expect(200);
+      const res = await request(server())
+        .post(`/survey/${SURVEY}/run/navigate`)
+        .send({
+          responseId: start.body.responseId,
+          navigationDirection: {
+            name: 'START_AT',
+            navigationIndex: { name: 'question', questionId: 'Q1' },
+          },
+        })
+        .expect(400);
+      expect(res.body.error).toBe('StartAtNotAllowed');
+    });
   });
 });

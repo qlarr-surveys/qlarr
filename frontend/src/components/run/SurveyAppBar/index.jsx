@@ -44,6 +44,9 @@ function SurveyAppBar({ toggleDrawer, preview }) {
     return state.runState.values.Survey.mode;
   });
 
+  // A single-question preview has no response: nothing to jump around or save.
+  const singleQuestion = useSelector((state) => state.runState.singleQuestion);
+
   const theme = useTheme();
 
   const [saveOpen, setSaveOpen] = useState(false);
@@ -93,20 +96,25 @@ function SurveyAppBar({ toggleDrawer, preview }) {
   return (
     <>
       <Toolbar className={styles.toolbar}>
-        <IconButton
-          color="primary"
-          size="large"
-          edge="start"
-          aria-label="menu"
-          sx={{
-            backgroundColor: theme.palette.background.paper,
-          }}
-          onClick={toggleDrawer(true)}
-        >
-          <MenuIcon />
-        </IconButton>
-        <Box display="flex" gap={2}>
-          {!isAndroid && canSave && !(preview && mode == "offline") && (
+        {!singleQuestion && (
+          <IconButton
+            color="primary"
+            size="large"
+            edge="start"
+            aria-label="menu"
+            sx={{
+              backgroundColor: theme.palette.background.paper,
+            }}
+            onClick={toggleDrawer(true)}
+          >
+            <MenuIcon />
+          </IconButton>
+        )}
+        <Box display="flex" gap={2} sx={{ marginInlineStart: "auto" }}>
+          {!isAndroid &&
+            canSave &&
+            !singleQuestion &&
+            !(preview && mode == "offline") && (
             <Button
               variant="contained"
               size="small"

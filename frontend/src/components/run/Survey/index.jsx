@@ -51,6 +51,8 @@ function Survey() {
     return typeof val === "number" ? val : LOGO_SPACING_DEFAULT;
   });
 
+  const singleQuestion = useSelector((state) => state.runState.singleQuestion);
+
   const quotaCode = useSelector(
     (state) => state.runState.data?.screenedOutQuota,
   );
@@ -113,7 +115,7 @@ function Survey() {
                   ),
                 )
             : ""}
-          <Navigation navigationIndex={navigationIndex} />
+          {!singleQuestion && <Navigation navigationIndex={navigationIndex} />}
         </div>
       </form>
     </DndProvider>

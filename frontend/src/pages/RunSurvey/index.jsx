@@ -43,6 +43,7 @@ function RunSurvey({
   resume = false,
   responseId,
   navigationMode,
+  questionId,
 }) {
   const runService = useService("run");
   const location = useLocation();
@@ -152,6 +153,7 @@ function RunSurvey({
         PROCESSED_ERRORS.CLIENT_TIME_SKEW,
         PROCESSED_ERRORS.SURVEY_NOT_PUBLISHED,
         PROCESSED_ERRORS.SURVEY_NOT_FOUND,
+        PROCESSED_ERRORS.QUESTION_NOT_FOUND,
       ].indexOf(procesed) > -1
     ) {
       setInlineError(procesed);
@@ -161,8 +163,13 @@ function RunSurvey({
     dispatch(setFetching(false));
   };
 
-  const startNav = () => {
-    startNavigation(runService, lang, preview, mode, navigationMode)
+  const startNav = (
+    request = () =>
+      questionId
+        ? runService.startAt(questionId, lang, mode)
+        : startNavigation(runService, lang, preview, mode, navigationMode),
+  ) => {
+    request()
       .then(async (response) => {
         // Change language and load namespace before rendering
         // This ensures translations are loaded for the correct language only
@@ -175,7 +182,15 @@ function RunSurvey({
         }
 
         setRender(true);
-        dispatch(stateReceived({ response, preview }));
+        dispatch(
+          stateReceived({ response, preview, singleQuestion: !!questionId }),
+        );
+        if (questionId) {
+          // Nothing was saved, so there's no response to report or resume.
+          sessionStorage.removeItem("responseId");
+          dispatch(setFetching(false));
+          return;
+        }
         if (preview) {
           window.parent.postMessage(
             {
@@ -206,6 +221,18 @@ function RunSurvey({
     dispatch(setFetching(true));
     if (payload.mode) {
       setCurrentMode(payload.mode);
+    }
+    if (questionId) {
+      // A single-question preview has no response to navigate: language and
+      // mode changes start it over.
+      startNav(() =>
+        runService.startAt(
+          questionId,
+          payload.lang ?? store.getState().runState.data?.lang?.code,
+          payload.mode ?? currentMode,
+        ),
+      );
+      return;
     }
     if (payload.navigationMode) {
       setCurrentNavigationMode(payload.navigationMode);
@@ -370,7 +397,9 @@ function RunSurvey({
                 <SurveyMemo
                   key="Survey"
                 />
-                {preview && <PreviewFooter ended={SURVEY_ENDED} />}
+                {preview && !questionId && (
+                  <PreviewFooter ended={SURVEY_ENDED} />
+                )}
                 <SurveyDrawer
                   expanded={expanded}
                   toggleDrawer={toggleDrawer}

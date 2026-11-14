@@ -5,6 +5,7 @@ import {
   ArrowDownWideNarrow,
   Copy,
   CornerDownRight,
+  Eye,
   EyeOff,
   GitBranch,
   ShieldCheck,
@@ -23,6 +24,8 @@ import { ICON_STROKE } from "~/components/Questions/utils";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import { useIsReleased } from "~/hooks/useIsReleased";
 import { useReleaseAcknowledgement } from "~/hooks/useReleaseAcknowledgement";
+import { useParams } from "react-router-dom";
+import { routes } from "~/routes";
 
 function ActionToolbar({ code, isGroup, parentCode, showActions }) {
   const dispatch = useDispatch();
@@ -32,6 +35,7 @@ function ActionToolbar({ code, isGroup, parentCode, showActions }) {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const released = useIsReleased();
   const ack = useReleaseAcknowledgement(released);
+  const { surveyId } = useParams();
 
   const onDelete = useCallback(() => {
     dispatch(resetSetup());
@@ -232,6 +236,24 @@ function ActionToolbar({ code, isGroup, parentCode, showActions }) {
             onClick={() => expandSkipLogic()}
           >
             <CornerDownRight size={20} strokeWidth={ICON_STROKE} />
+          </IconButton>
+        </CustomTooltip>
+      )}
+      {!isGroup && showActions && (
+        <CustomTooltip title={t("preview_question")} showIcon={false}>
+          <IconButton
+            className={styles.statusIcon}
+            onClick={(e) => {
+              e.stopPropagation();
+              window.open(
+                routes.preview.replace(":surveyId", surveyId) +
+                  "?question=" +
+                  encodeURIComponent(code),
+                "_blank",
+              );
+            }}
+          >
+            <Eye size={20} strokeWidth={ICON_STROKE} />
           </IconButton>
         </CustomTooltip>
       )}

@@ -13,7 +13,7 @@ import { Request } from 'express';
 import { assertEventTimes, assertWallClock } from '../../common/datetime';
 import { Public } from '../../auth/public.decorator';
 import { getClientIp } from '../../common/http';
-import { NavigateRequest, RunSurveyDto, StartRequest } from './run.dto';
+import { NavigateRequest, RunSurveyDto, StartAtRequest, StartRequest } from './run.dto';
 import { RunService } from './run.service';
 
 const toSurveyMode = (mode?: string): 'ONLINE' | 'OFFLINE' =>
@@ -50,6 +50,17 @@ export class RunController {
   ): Promise<RunSurveyDto> {
     assertWallClock(body.clientUTCTime, 'clientUTCTime');
     return this.run.start(surveyId, body, true, toSurveyMode(mode), getClientIp(req));
+  }
+
+  @Post(':surveyId/preview/start-at')
+  @HttpCode(200)
+  startAtPreview(
+    @Param('surveyId') surveyId: string,
+    @Query('mode') mode: string | undefined,
+    @Body() body: StartAtRequest,
+  ): Promise<RunSurveyDto> {
+    assertWallClock(body.clientUTCTime, 'clientUTCTime');
+    return this.run.startAt(surveyId, body, toSurveyMode(mode));
   }
 
   @Public()

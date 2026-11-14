@@ -18,6 +18,13 @@ export interface StartRequest {
   clientUTCTime?: string;
 }
 
+/** Preview one question on its own, without creating a response. */
+export interface StartAtRequest {
+  lang?: string;
+  questionId: string;
+  clientUTCTime?: string;
+}
+
 /** ≈ NavigateRequest — advance an existing response. */
 export interface NavigateRequest {
   responseId: string;
@@ -35,7 +42,8 @@ export interface RunSurveyDto {
   state: Record<string, unknown>;
   navigationData: SurveyNavigationData;
   navigationIndex: NavigationIndexJson;
-  responseId: string;
+  /** `null` for a single-question preview, which saves nothing. */
+  responseId: string | null;
   lang: SurveyLang;
   additionalLang: SurveyLang[];
   saveTimings: boolean;

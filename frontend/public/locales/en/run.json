@@ -22,7 +22,8 @@
         "survey_scheduled": "This survey is scheduled to start in the future",
         "client_time_skew": "Your device clock is out of sync. Please correct your date and time settings, then reload the page.",
         "survey_not_published": "This survey hasn't been published yet",
-        "survey_not_found": "This survey is not available"
+        "survey_not_found": "This survey is not available",
+        "question_not_found": "This question isn't saved yet. Wait a moment and try again."
     },
     "preview":"You're in preview mode",
     "upload": "Upload",

@@ -22,7 +22,8 @@
         "survey_scheduled": "Ce sondage est programmé pour commencer dans le futur",
         "client_time_skew": "L'horloge de votre appareil n'est pas synchronisée. Veuillez corriger vos paramètres de date et d'heure, puis recharger la page.",
         "survey_not_published": "Ce sondage n'a pas encore été publié",
-        "survey_not_found": "Ce sondage n'est pas disponible"
+        "survey_not_found": "Ce sondage n'est pas disponible",
+        "question_not_found": "Cette question n'est pas encore enregistrée. Patientez un instant et réessayez."
     },
     "preview":"Vous êtes en mode aperçu",
     "upload": "Télécharger",
