@@ -160,14 +160,8 @@
     "return_to_signin": "Volver a iniciar sesión"
   },
   "label": {
-    "additional_languages": "Idiomas Adicionales",
-    "additional_languages_description": "Elija en qué idiomas los encuestados pueden realizar la encuesta.",
     "analyst": "Analista",
-    "base_language": "Idioma Base",
-    "base_language_description": "El idioma principal en el que está escrita su encuesta.",
     "code": "Código",
-    "edit_translation": "Editar traducción",
-    "edit_translation_description": "Cambie entre idiomas para completar o revisar el contenido traducido.",
     "confirm_new_password": "Confirmar Nueva Contraseña",
     "current_password": "Contraseña Actual",
     "email": "Correo Electrónico",
@@ -620,18 +614,6 @@
     "survey_title": "Título interno usado por tu equipo para identificar la encuesta. Este título no se muestra a los encuestados.",
     "survey_description": "Descripción interna usada por tu equipo para proporcionar contexto sobre la encuesta. Esta descripción no se muestra a los encuestados.",
     "more_info": "Más información"
-  },
-  "translations": {
-    "title": "Traducciones",
-    "translate_to": "Traducir Encuesta A:",
-    "language": "Idioma",
-    "design_language": "Idioma del Diseño",
-    "export_csv": "Exportar CSV",
-    "import_csv": "Importar CSV",
-    "import_csv_override_main": "Sobrescribir el texto del Idioma Base",
-    "import_csv_no_changes": "No hay cambios para importar.",
-    "import_csv_done_one": "Se actualizó {{count}} campo.",
-    "import_csv_done_other": "Se actualizaron {{count}} campos."
   },
   "responses_export": {
     "format_csv": "CSV",

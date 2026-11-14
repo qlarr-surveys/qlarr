@@ -160,14 +160,8 @@
     "return_to_signin": "العودة إلى تسجيل الدخول"
   },
   "label": {
-    "additional_languages": "لغات إضافية",
-    "additional_languages_description": "اختر اللغات التي يمكن للمستجيبين إجراء الاستبيان بها.",
     "analyst": "المحلل",
-    "base_language": "لغة الأساس",
-    "base_language_description": "اللغة الأساسية التي تمت كتابة الاستبيان بها.",
     "code": "كود",
-    "edit_translation": "تحرير الترجمة",
-    "edit_translation_description": "التبديل بين اللغات لملء أو مراجعة المحتوى المترجم.",
     "confirm_new_password": "تأكيد كلمة المرور الجديدة",
     "current_password": "كلمة السر الحالية",
     "email": "البريد الإلكتروني",
@@ -624,22 +618,6 @@
     "survey_description": "وصف داخلي يستخدمه فريقك لتوفير سياق حول الاستطلاع. هذا الوصف لا يظهر للمستجيبين.",
     "create_survey_with_ai": "إنشاء استبيان جديد تلقائيًا باستخدام مساعدة الذكاء الاصطناعي",
     "more_info": "مزيد من المعلومات"
-  },
-  "translations": {
-    "title": "الترجمات",
-    "translate_to": "ترجمة الاستطلاع إلى:",
-    "language": "اللغة",
-    "design_language": "لغة التصميم",
-    "export_csv": "تصدير CSV",
-    "import_csv": "استيراد CSV",
-    "import_csv_override_main": "استبدال نص لغة الأساس",
-    "import_csv_no_changes": "لا توجد تغييرات للاستيراد.",
-    "import_csv_done_zero": "لم يتم تحديث أي حقل.",
-    "import_csv_done_one": "تم تحديث حقل واحد.",
-    "import_csv_done_two": "تم تحديث حقلين.",
-    "import_csv_done_few": "تم تحديث {{count}} حقول.",
-    "import_csv_done_many": "تم تحديث {{count}} حقلًا.",
-    "import_csv_done_other": "تم تحديث {{count}} حقل."
   },
   "responses_export": {
     "format_csv": "CSV",

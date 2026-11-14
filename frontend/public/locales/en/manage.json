@@ -159,14 +159,8 @@
     "return_to_signin": "Return to sign in"
   },
   "label": {
-    "additional_languages": "Additional Languages",
-    "additional_languages_description": "Choose which languages respondents can take the survey in.",
     "analyst": "Analyst",
-    "base_language": "Base Language",
-    "base_language_description": "The primary language your survey is written in.",
     "code": "Code",
-    "edit_translation": "Edit translation",
-    "edit_translation_description": "Switch between languages to fill in or review the translated content.",
     "confirm_new_password": "Confirm New Password",
     "current_password": "Current Password",
     "email": "Email",
@@ -620,18 +614,6 @@
     "survey_title": "Internal title used by your team to identify the survey. This title is not shown to respondents.",
     "survey_description": "Internal description used by your team to provide context about the survey. This description is not shown to respondents.",
     "more_info": "More information"
-  },
-  "translations": {
-    "title": "Translations",
-    "translate_to": "Translate Survey To:",
-    "language": "Language",
-    "design_language": "Design Language",
-    "export_csv": "Export CSV",
-    "import_csv": "Import CSV",
-    "import_csv_override_main": "Overwrite Base Language text",
-    "import_csv_no_changes": "No changes to import.",
-    "import_csv_done_one": "Updated {{count}} field.",
-    "import_csv_done_other": "Updated {{count}} fields."
   },
   "responses_export": {
     "format_csv": "CSV",
