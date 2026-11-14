@@ -2,55 +2,36 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import { useSelector, useDispatch } from "react-redux";
-import { Box, Typography } from "@mui/material";
 import { surveyAttributeChanged } from "~/state/edit/editState";
 import { SURVEY, SURVEY_STATUS } from "~/constants/survey";
-import styles from "./SurveyPrivacy.module.css";
 import { isSurveyAdmin } from "~/constants/roles";
-import { RHFSwitch } from "~/components/hook-form";
+import { ToggleRow } from "~/components/manage/SettingsFields";
 
+/** The Privacy card's rows: what is stored with each response. */
 function SurveyPrivacy() {
   const dispatch = useDispatch();
   const { t } = useTranslation(NAMESPACES.MANAGE);
   const survey = useSelector((state) => state.editState.survey);
-  const isDisabled = !isSurveyAdmin() || survey.status == SURVEY_STATUS.CLOSED;
+  const disabled = !isSurveyAdmin() || survey.status == SURVEY_STATUS.CLOSED;
 
-  const onChangeCheckbox = (e) => {
-    dispatch(
-      surveyAttributeChanged({
-        key: e.target.name,
-        value: e.target.checked,
-      })
-    );
-  };
+  const change = (key) => (value) =>
+    dispatch(surveyAttributeChanged({ key, value }));
 
   return (
-    <Box className={styles.mainContainer}>
-      <Box className={styles.flexContainer}>
-        <Typography color="#1a2052" fontWeight="500">
-          {t("edit_survey.save_ip")}
-        </Typography>
-
-        <RHFSwitch
-          disabled={isDisabled}
-          name={SURVEY.SAVE_IP}
-          checked={survey.saveIp}
-          onChange={onChangeCheckbox}
-        />
-      </Box>
-      <Box className={styles.flexContainer}>
-        <Typography color="#1a2052" fontWeight="500">
-          {t("edit_survey.save_timings")}
-        </Typography>
-
-        <RHFSwitch
-          disabled={isDisabled}
-          name={SURVEY.SAVE_TIMINGS}
-          checked={survey.saveTimings}
-          onChange={onChangeCheckbox}
-        />
-      </Box>
-    </Box>
+    <>
+      <ToggleRow
+        label={t("edit_survey.save_ip")}
+        checked={Boolean(survey.saveIp)}
+        onChange={change(SURVEY.SAVE_IP)}
+        disabled={disabled}
+      />
+      <ToggleRow
+        label={t("edit_survey.save_timings")}
+        checked={Boolean(survey.saveTimings)}
+        onChange={change(SURVEY.SAVE_TIMINGS)}
+        disabled={disabled}
+      />
+    </>
   );
 }
 

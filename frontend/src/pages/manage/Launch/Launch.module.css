@@ -1,17 +1,76 @@
+/* ====== Publish banner ====== */
 
-.actionButton {
+.banner {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.publishContainer {
-  gap: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 20px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 11px 12px;
+  border: 1px solid #f3d98b;
+  border-radius: 8px;
+  background: #fff7e0;
 }
 
+.bannerText {
+  font: 600 13px/1.35 Rubik, sans-serif;
+  color: #8a5a00;
+}
+
+.bannerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.publishWrap {
+  display: inline-flex;
+}
+
+/* ====== Survey URL ====== */
+
+.link {
+  display: block;
+  font: 400 12.5px/1.4 Rubik, sans-serif;
+  color: #3a46d8;
+  text-decoration: underline;
+  word-break: break-all;
+}
+
+.link:focus-visible {
+  border-radius: 2px;
+  outline: 2px solid #0e1338;
+  outline-offset: 1px;
+}
+
+.shareActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 9px;
+}
+
+.qrButton {
+  flex: 1;
+}
+
+/* The one action most visitors come for gets the larger share. */
 .copyButton {
-  gap: 0.5rem;
+  flex: 1.4;
+}
+
+.qrPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid #e3e6f0;
+  border-radius: 8px;
+  background: #fff;
+}
+
+/* react-qr-code draws an inline svg, which would otherwise sit on the text
+   baseline with a gap under it. */
+.qrPanel svg {
+  display: block;
 }

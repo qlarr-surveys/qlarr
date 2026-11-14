@@ -1,58 +1,76 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
-import { Box, Button, Typography, Select, MenuItem, FormControl, Dialog, IconButton, DialogContent, DialogTitle } from "@mui/material";
-import styles from "./Launch.module.css";
-import SurveyIcon from "~/components/common/SurveyIcons/SurveyIcon";
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
-import { newVersionReceived, setSaving } from "~/state/design/designState";
+import React, { useEffect, useId, useMemo, useRef, useState } from "react";
+import { Copy, Download, LayoutGrid, Send } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
+import QRCode from "react-qr-code";
+import { brokenQuotaCodes } from "@qlarr/design-core";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import { useService } from "~/hooks/use-service";
-import CustomTooltip from "~/components/common/Tooltip/Tooltip";
-import { SURVEY_MODE } from "~/constants/survey";
+import { useDesignRestore } from "~/hooks/useDesignRestore";
+import { newVersionReceived, setSaving } from "~/state/design/designState";
 import { surveyAttributeChanged } from "~/state/edit/editState";
-import { SurveyActiveFromTo } from "~/components/manage/SurveyActiveFromTo";
+import { SURVEY_MODE, SURVEY_STATUS } from "~/constants/survey";
 import { isSurveyAdmin } from "~/constants/roles";
-import { SURVEY_STATUS } from "~/constants/survey";
 import { localDateToServerDateTime } from "~/utils/DateUtils";
-import SuccessSnackbar from "~/components/manage/SuccessSnackbar";
 import { sharingUrl } from "~/networking/common";
-import QRCode from "react-qr-code";
-import CloseIcon from "@mui/icons-material/Close";
-import { useTheme } from "@emotion/react";
+import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import ConfirmActionModal from "~/components/common/ConfirmActionModal";
 import DiscardChangesModal from "~/components/manage/DiscardChangesModal";
-import { useDesignRestore } from "~/hooks/useDesignRestore";
-import { brokenQuotaCodes } from "@qlarr/design-core";
+import { SurveyActiveFromTo } from "~/components/manage/SurveyActiveFromTo";
+import {
+  FieldHead,
+  fieldStyles as fields,
+  Select,
+  SettingRow,
+} from "~/components/manage/SettingsFields";
+import styles from "./Launch.module.css";
 
+const SURVEY_MODES = [SURVEY_MODE.WEB, SURVEY_MODE.OFFLINE, SURVEY_MODE.MIXED];
+
+// How long "Link copied" stands in for "Copy Link".
+const COPIED_FOR_MS = 2000;
+// The downloaded QR code is drawn larger than the one on screen, on a white
+// margin, so it still scans once printed.
+const QR_ON_SCREEN = 132;
+const QR_DOWNLOAD = 512;
+const QR_DOWNLOAD_MARGIN = 32;
+
+const toServerDate = (value) => {
+  const date = !value || value instanceof Date ? value : value.toDate();
+  return date ? localDateToServerDateTime(date) : null;
+};
+
+/**
+ * The Launch card's rows: publishing what has changed, where the survey runs,
+ * when it is open, and the link respondents use to reach it.
+ */
 function LaunchPage({ onPublish }) {
   const { t } = useTranslation(NAMESPACES.MANAGE);
   const designService = useService("design");
-  const theme = useTheme();
   const dispatch = useDispatch();
-  const qrRef = useRef();
+  const qrRef = useRef(null);
+  const copiedTimer = useRef(null);
+  const modeId = useId();
+  const qrPanelId = useId();
 
-  const versionDto = useSelector((state) => {
-    return state.designState.versionDto;
-  });
+  const versionDto = useSelector((state) => state.designState.versionDto);
   const published = versionDto?.published;
+  const isDraft = versionDto?.status === "draft";
   const survey = useSelector((state) => state.editState.survey);
-  const [surveyMode, setSurveyMode] = useState("");
-  const [surveyDateError, setSurveyDateError] = useState("");
-  const [isQRDialogOpen, setQRDialogOpen] = useState(false);
-  const [copy, setCopy] = useState(false);
-  const [isDiscardOpen, setDiscardOpen] = useState(false);
-  const { busy, restoring: discarding, canDiscard, discard } = useDesignRestore();
-  const [confirmBrokenQuotas, setConfirmBrokenQuotas] = useState(false);
-
-  const hasFatalErrors = useSelector((state) => {
-    return (
-      state.designState.Survey?.errors &&
-      state.designState.Survey.errors.length > 0
-    );
-  });
-
   const designState = useSelector((state) => state.designState);
+  const hasFatalErrors = useSelector(
+    (state) => state.designState.Survey?.errors?.length > 0
+  );
+
+  const [qrOpen, setQrOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [isDiscardOpen, setDiscardOpen] = useState(false);
+  const [confirmBrokenQuotas, setConfirmBrokenQuotas] = useState(false);
+  const { busy, restoring: discarding, canDiscard, discard } =
+    useDesignRestore();
+
+  useEffect(() => () => clearTimeout(copiedTimer.current), []);
+
   const brokenQuotaLabels = useMemo(() => {
     const broken = brokenQuotaCodes(designState);
     return (designState.Survey?.quotas || [])
@@ -60,12 +78,17 @@ function LaunchPage({ onPublish }) {
       .map((quota) => quota.label || quota.code);
   }, [designState]);
 
-  const params = new URLSearchParams([
-    ["version", versionDto?.version],
-    ["sub_version", versionDto?.subVersion],
-  ]);
+  const isDisabled = !isSurveyAdmin() || survey?.status == SURVEY_STATUS.CLOSED;
+  const url = sharingUrl(survey?.id);
+  // Long enough to recognise, short enough to stay on one line.
+  const shortUrl =
+    url.length > 64 ? `${url.slice(0, 50)}…${url.slice(-10)}` : url;
 
   const publish = () => {
+    const params = new URLSearchParams([
+      ["version", versionDto?.version],
+      ["sub_version", versionDto?.subVersion],
+    ]);
     dispatch(setSaving(true));
     designService
       .publish(params)
@@ -74,287 +97,210 @@ function LaunchPage({ onPublish }) {
         dispatch(newVersionReceived(data));
         onPublish();
       })
-      .catch((error) => {
+      .catch(() => {
         dispatch(setSaving(false));
       });
   };
 
+  const onPublishClick = () => {
+    if (hasFatalErrors) return;
+    if (brokenQuotaLabels.length > 0) {
+      setConfirmBrokenQuotas(true);
+    } else {
+      publish();
+    }
+  };
+
   const discardChanges = () => discard().finally(() => setDiscardOpen(false));
 
-  useEffect(() => {
-    const newSurveyMode = survey?.usage || "";
-    setSurveyMode(newSurveyMode);
-  }, [survey]);
+  const changeSurvey = (key) => (value) =>
+    dispatch(surveyAttributeChanged({ key, value }));
 
-  const isDisabled = !isSurveyAdmin() || survey?.status == SURVEY_STATUS.CLOSED;
-
-  const getUserTimezone = () => {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone;
-  };
-
-  const onSurveyActiveFromChanged = (value) => {
-    setSurveyDateError("");
-    const dateValue = !value || value instanceof Date ? value : value.toDate();
-    dispatch(
-      surveyAttributeChanged({
-        key: "startDate",
-        value: dateValue ? localDateToServerDateTime(dateValue) : null,
-      })
+  const copyLink = () => {
+    navigator.clipboard?.writeText(url).then(
+      () => {
+        setCopied(true);
+        clearTimeout(copiedTimer.current);
+        copiedTimer.current = setTimeout(() => setCopied(false), COPIED_FOR_MS);
+      },
+      () => {}
     );
-  };
-
-  const onSurveyActiveToChanged = (value) => {
-    setSurveyDateError("");
-    const dateValue = !value || value instanceof Date ? value : value.toDate();
-    dispatch(
-      surveyAttributeChanged({
-        key: "endDate",
-        value: dateValue ? localDateToServerDateTime(dateValue) : null,
-      })
-    );
-  };
-
-  const onSurveyModeChanged = (e) => {
-    setSurveyMode(e.target.value);
-    dispatch(
-      surveyAttributeChanged({
-        key: "usage",
-        value: e.target.value,
-      })
-    );
-  };
-
-  const clickCopy = () => {
-    navigator.clipboard.writeText(sharingUrl(survey?.id));
-    setCopy(true);
-  };
-
-  const toggleQRDialog = () => {
-    setQRDialogOpen(!isQRDialogOpen);
   };
 
   const downloadQRCode = () => {
-    const canvas = document.createElement("canvas");
-    const qrCodeSVG = qrRef.current.querySelector("svg");
-    const svgData = new XMLSerializer().serializeToString(qrCodeSVG);
-    const svgBlob = new Blob([svgData], {
-      type: "image/svg+xml;charset=utf-8",
-    });
-    const URL = window.URL || window.webkitURL || window;
-    const blobURL = URL.createObjectURL(svgBlob);
-
+    const svg = qrRef.current?.querySelector("svg");
+    if (!svg) return;
+    const blobUrl = URL.createObjectURL(
+      new Blob([new XMLSerializer().serializeToString(svg)], {
+        type: "image/svg+xml;charset=utf-8",
+      })
+    );
     const image = new Image();
     image.onload = () => {
-      canvas.width = image.width;
-      canvas.height = image.height;
+      const side = QR_DOWNLOAD + QR_DOWNLOAD_MARGIN * 2;
+      const canvas = document.createElement("canvas");
+      canvas.width = side;
+      canvas.height = side;
       const context = canvas.getContext("2d");
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(image, 0, 0);
-      URL.revokeObjectURL(blobURL);
-      const canvasDataURL = canvas.toDataURL("image/png");
-      const a = document.createElement("a");
-      a.href = canvasDataURL;
-      a.download = `${survey?.name}_QRCode.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      context.fillStyle = "#fff";
+      context.fillRect(0, 0, side, side);
+      context.drawImage(
+        image,
+        QR_DOWNLOAD_MARGIN,
+        QR_DOWNLOAD_MARGIN,
+        QR_DOWNLOAD,
+        QR_DOWNLOAD
+      );
+      URL.revokeObjectURL(blobUrl);
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = `${survey?.name}_QRCode.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     };
-    image.src = blobURL;
+    image.src = blobUrl;
   };
 
-  const mailSurveyLink = `mailto:?subject=Survey Link&body=Please complete this survey: ${encodeURIComponent(
-    sharingUrl(survey?.id)
-  )}`;
-
   return (
-    <Box className={styles.box}>
-      {!published && (
-        <Box
-          display="flex"
-          alignItems="center"
-          className={styles.publishContainer}
-          sx={{
-            backgroundColor: theme.palette.warning.lighter,
-            padding: '1rem',
-            borderRadius: '8px',
-            border: `1px solid ${theme.palette.warning.light}`,
-            flexWrap: 'wrap'
-          }}
-        >
-          <Typography
-            variant="subtitle1"
-            sx={{
-              color: theme.palette.warning.dark,
-              flex: canDiscard ? '1 1 180px' : undefined,
-            }}
-          >
-            {versionDto?.status === "draft" 
-              ? t("launch.draft_text")
-              : t("launch.unpublished_text")}
-          </Typography>
-
-          <>
-            <CustomTooltip
-              showIcon={false}
-              title={
-                !hasFatalErrors
-                  ? `${t("launch.publish_tooltip")}`
-                  : `${t("launch.publish_error")}`
-              }
-              placement="top"
-            >
-              <span>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  className={styles.actionButton}
-                  onClick={() => {
-                    if (hasFatalErrors) return;
-                    if (brokenQuotaLabels.length > 0) {
-                      setConfirmBrokenQuotas(true);
-                    } else {
-                      publish();
-                    }
-                  }}
-                  disabled={hasFatalErrors}
-                >
-                  <SurveyIcon
-                    name="launch"
-                    color={!hasFatalErrors ? "#fff" : "#bdbdbd"}
-                  />
-                  {versionDto?.status === "draft" 
-                    ? t("launch.activate")
-                    : t("launch.publish")}
-                </Button>
-              </span>
-            </CustomTooltip>
-            {canDiscard && (
-              <Button
-                variant="outlined"
-                color="primary"
-                disabled={busy || discarding}
-                onClick={() => setDiscardOpen(true)}
-                sx={{ whiteSpace: "nowrap", flexShrink: 0 }}
+    <>
+      {published === false && (
+        <SettingRow>
+          <div role="status" className={styles.banner}>
+            <span className={styles.bannerText}>
+              {isDraft ? t("launch.draft_text") : t("launch.unpublished_text")}
+            </span>
+            <div className={styles.bannerActions}>
+              <CustomTooltip
+                showIcon={false}
+                title={
+                  hasFatalErrors
+                    ? t("launch.publish_error")
+                    : t("launch.publish_tooltip")
+                }
+                placement="top"
               >
-                {t("launch.discard_changes")}
-              </Button>
-            )}
-          </>
-        </Box>
+                {/* A disabled button fires no events, so the tooltip that
+                    says why it is disabled hangs off this wrapper. */}
+                <span className={styles.publishWrap}>
+                  <button
+                    type="button"
+                    disabled={hasFatalErrors}
+                    onClick={onPublishClick}
+                    className={fields.primaryButton}
+                  >
+                    <Send aria-hidden="true" size={14} strokeWidth={2} />
+                    {isDraft ? t("launch.activate") : t("launch.publish")}
+                  </button>
+                </span>
+              </CustomTooltip>
+              {canDiscard && (
+                <button
+                  type="button"
+                  disabled={busy || discarding}
+                  onClick={() => setDiscardOpen(true)}
+                  className={fields.secondaryButton}
+                >
+                  {t("launch.discard_changes")}
+                </button>
+              )}
+            </div>
+          </div>
+        </SettingRow>
       )}
 
-      {/* EditSurveyGeneral inlined */}
-      <Box sx={{ mb: 4, mt: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <CustomTooltip title={t("tooltips.survey_mode")} />
-          <Typography variant="subtitle1" sx={{ ml: 1 }}>
-            {t("label.survey_mode")}
-          </Typography>
-        </Box>
-        <FormControl fullWidth>
-          <Select
-            value={surveyMode}
-            onChange={onSurveyModeChanged}
-            displayEmpty
-            sx={{
-              borderRadius: "12px",
-              "& .MuiOutlinedInput-notchedOutline": {
-                border: "1px solid #d7d7d7",
-              },
-              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                border: "1px solid #181735",
-              },
-              "&:hover .MuiOutlinedInput-notchedOutline": {
-                borderColor: "#181735",
-              },
-              "& .MuiOutlinedInput-input": {
-                padding: ".5rem",
-              },
-              "& .MuiSelect-select": {
-                padding: "12px 14px",
-              },
-            }}
-          >
-            {[
-              { value: SURVEY_MODE.WEB, label: `mode.${SURVEY_MODE.WEB}` },
-              { value: SURVEY_MODE.OFFLINE, label: `mode.${SURVEY_MODE.OFFLINE}` },
-              { value: SURVEY_MODE.MIXED, label: `mode.${SURVEY_MODE.MIXED}` },
-            ].map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {t(option.label)}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <Box sx={{ mt: 4 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <CustomTooltip title={t("tooltips.survey_dates")} />
-            <Typography variant="subtitle1" sx={{ ml: 1 }}>
-              {t("label.survey_dates")}
-            </Typography>
-          </Box>
-          <SurveyActiveFromTo
-            error={surveyDateError}
-            disabled={isDisabled}
-            surveyActiveFrom={survey?.startDate}
-            surveyActiveTo={survey?.endDate}
-            onSurveyActiveFromChanged={onSurveyActiveFromChanged}
-            onSurveyActiveToChanged={onSurveyActiveToChanged}
-          />
-          <Typography
-            variant="caption"
-            color="error"
-            display="flex"
-            alignItems="center"
-            sx={{ mt: 1 }}
-          >
-            {t("timezone_info")}
-          </Typography>
-        </Box>
-      </Box>
+      <SettingRow>
+        <FieldHead
+          label={t("label.survey_mode")}
+          help={t("tooltips.survey_mode")}
+          htmlFor={modeId}
+        />
+        <Select
+          id={modeId}
+          value={survey?.usage || ""}
+          onChange={(event) => changeSurvey("usage")(event.target.value)}
+        >
+          {!survey?.usage && <option value="" disabled hidden />}
+          {SURVEY_MODES.map((mode) => (
+            <option key={mode} value={mode}>
+              {t(`mode.${mode}`)}
+            </option>
+          ))}
+        </Select>
+      </SettingRow>
 
-      {/* SurveySharing inlined */}
-      <Box sx={{ mt: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <CustomTooltip title={t("tooltips.survey_url")} />
-          <Typography variant="subtitle1" sx={{ ml: 1 }}>
-            {t("label.survey_url")}
-          </Typography>
-        </Box>
-        {copy && (
-          <SuccessSnackbar
-            handleClose={() => setCopy(false)}
-            success="copied"
-            left="56"
-          />
-        )}
-        <Box sx={{ mb: 2 }}>
-          <a href={sharingUrl(survey?.id)} style={{ color: theme.palette.primary.main }}>
-            {sharingUrl(survey?.id).slice(0, 50)}...{sharingUrl(survey?.id).slice(-10)}
-          </a>
-        </Box>
-        <Box display="flex" gap={2} sx={{ mb: 2 }}>
-          <Button
-            fullWidth
-            onClick={toggleQRDialog}
-            className={styles.actionButton}
+      <SettingRow>
+        <FieldHead
+          label={t("label.survey_dates")}
+          help={t("tooltips.survey_dates")}
+        />
+        <SurveyActiveFromTo
+          disabled={isDisabled}
+          surveyActiveFrom={survey?.startDate}
+          surveyActiveTo={survey?.endDate}
+          onSurveyActiveFromChanged={(value) =>
+            changeSurvey("startDate")(toServerDate(value))
+          }
+          onSurveyActiveToChanged={(value) =>
+            changeSurvey("endDate")(toServerDate(value))
+          }
+        />
+      </SettingRow>
+
+      <SettingRow>
+        <FieldHead
+          label={t("label.survey_url")}
+          help={t("tooltips.survey_url")}
+        />
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.link}
+        >
+          {shortUrl}
+        </a>
+        <div className={styles.shareActions}>
+          <button
+            type="button"
+            aria-expanded={qrOpen}
+            aria-controls={qrPanelId}
+            onClick={() => setQrOpen((open) => !open)}
+            className={`${fields.secondaryButton} ${styles.qrButton}`}
           >
-            <SurveyIcon name="qrCode" />
+            <LayoutGrid aria-hidden="true" size={14} strokeWidth={2} />
             {t("launch.qr_code")}
-          </Button>
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={styles.copyButton}
-            onClick={clickCopy}
+          </button>
+          <button
+            type="button"
+            onClick={copyLink}
+            className={`${fields.primaryButton} ${styles.copyButton}`}
           >
-            <SurveyIcon name="duplicate" color="#fff" />
-            {t("launch.copy_link")}
-          </Button>
-        </Box>
-      </Box>
+            <Copy aria-hidden="true" size={14} strokeWidth={2} />
+            {copied ? t("launch.link_copied") : t("launch.copy_link")}
+          </button>
+        </div>
+        {/* The button's own label changes too, but a screen reader does not
+            announce that. */}
+        <span role="status" className={fields.visuallyHidden}>
+          {copied ? t("launch.link_copied") : ""}
+        </span>
+        {qrOpen && (
+          <div id={qrPanelId} className={styles.qrPanel}>
+            <div ref={qrRef} role="img" aria-label={t("launch.qr_label")}>
+              <QRCode value={url} size={QR_ON_SCREEN} fgColor="#0e1338" />
+            </div>
+            <button
+              type="button"
+              onClick={downloadQRCode}
+              className={fields.secondaryButton}
+            >
+              <Download aria-hidden="true" size={14} strokeWidth={2} />
+              {t("launch.download_qr_code")}
+            </button>
+          </div>
+        )}
+      </SettingRow>
 
       <DiscardChangesModal
         open={isDiscardOpen}
@@ -362,45 +308,12 @@ function LaunchPage({ onPublish }) {
         onClose={() => setDiscardOpen(false)}
         onConfirm={discardChanges}
       />
-
-      <Dialog
-        open={isQRDialogOpen}
-        onClose={toggleQRDialog}
-        sx={{ "& .MuiDialog-paper": { padding: "2rem", position: "relative" } }}
-      >
-        <DialogTitle sx={{ m: 0, p: 2 }}>
-          <IconButton
-            aria-label="close"
-            onClick={toggleQRDialog}
-            sx={{
-              position: "absolute",
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500],
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent dividers>
-          <div ref={qrRef}>
-            <QRCode value={sharingUrl(survey?.id)} size={256} />
-          </div>
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            onClick={downloadQRCode}
-            sx={{ mt: 2 }}
-          >
-            {t("launch.download_qr_code")}
-          </Button>
-        </DialogContent>
-      </Dialog>
       <ConfirmActionModal
         open={confirmBrokenQuotas}
         title={t("launch.broken_quotas_title")}
-        description={t("launch.broken_quotas", { quotas: brokenQuotaLabels.join(", ") })}
+        description={t("launch.broken_quotas", {
+          quotas: brokenQuotaLabels.join(", "),
+        })}
         cancelLabel={t("action_btn.cancel")}
         confirmLabel={t("launch.publish_anyway")}
         confirmColor="warning"
@@ -410,7 +323,7 @@ function LaunchPage({ onPublish }) {
           publish();
         }}
       />
-    </Box>
+    </>
   );
 }
 
