@@ -168,7 +168,9 @@ export const SurveyActiveFromTo = ({
           inputProps={{
             ...params.inputProps,
             onChange: upperCaseTyping(params.inputProps?.onChange),
-            "aria-invalid": extra.invalid || undefined,
+            // This replaces the aria-invalid MUI sets from the field's own
+            // error (a half-typed date), so it has to carry that one too.
+            "aria-invalid": extra.invalid || params.error || undefined,
             "aria-describedby": extra.describedBy,
           }}
         />
