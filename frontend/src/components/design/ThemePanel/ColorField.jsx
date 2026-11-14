@@ -23,6 +23,9 @@ const EDGE = 8;
 // What `HEX_INPUT` accepts, half-typed: anything still on its way to a hex.
 const PARTIAL_HEX = /^#?[0-9a-f]{0,6}$/i;
 
+/** The ink that reads on a colour, for a mark or a label sitting on top of it. */
+const inkOn = (value) => (isLight(value) ? "#0e1338" : "#ffffff");
+
 const SaturationPointer = () => <span className={styles.satPointer} />;
 
 // The browser's own screen sampler. Chromium has it; Firefox and Safari do
@@ -413,7 +416,17 @@ function ColorField({ t, name, label, value, presets, onChange }) {
   const isCustom = !presets.some((preset) => sameColor(preset.value, value));
   // The picker holds alpha, which a hex string cannot carry, so it is fed the
   // parsed channels rather than the theme's notation.
-  const pickerColor = parseColor(value) || { r: 0, g: 0, b: 0, a: 1 };
+  const parsed = parseColor(value);
+  const pickerColor = parsed || { r: 0, g: 0, b: 0, a: 1 };
+
+  // A colour outside the presets has no swatch of its own in the row, so the
+  // chip becomes one: it wears the colour, and its label takes whichever ink
+  // reads on it. A colour the panel cannot parse is left to the stylesheet,
+  // which has something legible to fall back on.
+  const customStyle =
+    isCustom && parsed
+      ? { background: value, color: inkOn(value) }
+      : undefined;
 
   // Keyed by the theme field, not the label: a translated label can be all
   // non-latin characters, and every field would collapse to the same id.
@@ -511,7 +524,7 @@ function ColorField({ t, name, label, value, presets, onChange }) {
                   size={13}
                   strokeWidth={3}
                   aria-hidden="true"
-                  color={isLight(preset.value) ? "#0e1338" : "#ffffff"}
+                  color={inkOn(preset.value)}
                 />
               )}
             </button>
@@ -525,6 +538,7 @@ function ColorField({ t, name, label, value, presets, onChange }) {
           aria-checked={isCustom}
           aria-expanded={open}
           onClick={toggle}
+          style={customStyle}
           className={`${styles.customChip} ${isCustom ? styles.customChipOn : ""}`}
         >
           <Pencil size={12} strokeWidth={1.75} aria-hidden="true" />
