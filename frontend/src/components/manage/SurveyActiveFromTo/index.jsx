@@ -22,6 +22,22 @@ const settled = (value) => !value || value.isValid();
 const outOfOrder = (from, to) =>
   !!from && !!to && from.isValid() && to.isValid() && to.isBefore(from);
 
+// The mask keeps a typed "a" or "p" as typed, and "02:30 pM" is not a time the
+// strict parser reads, so typing a lowercase meridiem left the field invalid.
+// The mask holds only digits, separators and AM/PM, so capitals are safe.
+const upperCaseTyping = (onChange) => (event) => {
+  const input = event.target;
+  const upper = input.value.toUpperCase();
+  if (upper !== input.value) {
+    // Rewriting the value moves the caret to the end; the mask places the
+    // next character from where it was.
+    const { selectionStart, selectionEnd } = input;
+    input.value = upper;
+    input.setSelectionRange(selectionStart, selectionEnd);
+  }
+  onChange?.(event);
+};
+
 // The design's 36px field, drawn over MUI's outlined input.
 const inputSx = (invalid) => ({
   "& .MuiOutlinedInput-root": {
@@ -151,6 +167,7 @@ export const SurveyActiveFromTo = ({
           sx={inputSx(extra.invalid)}
           inputProps={{
             ...params.inputProps,
+            onChange: upperCaseTyping(params.inputProps?.onChange),
             "aria-invalid": extra.invalid || undefined,
             "aria-describedby": extra.describedBy,
           }}
