@@ -213,16 +213,28 @@
   visibility: hidden;
 }
 
+.moreWrap {
+  position: relative;
+  display: inline-flex;
+  max-width: 100%;
+}
+
+/* The chevron is drawn here rather than left to the browser, which paints its
+   own tight against the border. The end padding is the chevron's room — a
+   logical one, because the panel mirrors in Arabic. */
 .more {
   height: 28px;
   max-width: 100%;
-  padding: 0 8px;
+  padding-block: 0;
+  padding-inline: 8px 24px;
   border: 1px solid #cfd5e8;
   border-radius: 6px;
   background: #fff;
   font: 400 12.5px/1 Rubik, sans-serif;
   color: #3c447a;
   cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .more:focus-visible {
@@ -230,10 +242,23 @@
   outline-offset: 1px;
 }
 
-.moreOn {
+/* Decorative, and the select underneath owns the clicks. */
+.moreChevron {
+  position: absolute;
+  inset-inline-end: 8px;
+  top: calc(50% - 6px);
+  color: #3c447a;
+  pointer-events: none;
+}
+
+.moreOn .more {
   border-color: #0e1338;
   background: #eceefb;
   font-weight: 600;
+  color: #2b34a8;
+}
+
+.moreOn .moreChevron {
   color: #2b34a8;
 }
 

@@ -1,4 +1,5 @@
 import React from "react";
+import { ChevronDown } from "lucide-react";
 import styles from "./ThemePanel.module.css";
 
 /**
@@ -41,24 +42,32 @@ function ChoiceField({
             </button>
           ))}
         </div>
-        <select
-          aria-label={moreLabel}
-          value={inMore ? String(value) : ""}
-          onChange={(event) => {
-            // The placeholder row only labels the select; picking it is not a
-            // choice of its own.
-            if (event.target.value === "") return;
-            onChange(parseOption(event.target.value, value));
-          }}
-          className={`${styles.more} ${inMore ? styles.moreOn : ""}`}
-        >
-          <option value="">{moreLabel}</option>
-          {moreOptions.map((option) => (
-            <option key={option} value={String(option)}>
-              {unit ? `${option} ${unit}` : option}
-            </option>
-          ))}
-        </select>
+        <span className={`${styles.moreWrap} ${inMore ? styles.moreOn : ""}`}>
+          <select
+            aria-label={moreLabel}
+            value={inMore ? String(value) : ""}
+            onChange={(event) => {
+              // The placeholder row only labels the select; picking it is not a
+              // choice of its own.
+              if (event.target.value === "") return;
+              onChange(parseOption(event.target.value, value));
+            }}
+            className={styles.more}
+          >
+            <option value="">{moreLabel}</option>
+            {moreOptions.map((option) => (
+              <option key={option} value={String(option)}>
+                {unit ? `${option} ${unit}` : option}
+              </option>
+            ))}
+          </select>
+          <ChevronDown
+            aria-hidden="true"
+            size={12}
+            strokeWidth={2}
+            className={styles.moreChevron}
+          />
+        </span>
       </div>
     </div>
   );
