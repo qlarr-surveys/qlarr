@@ -28,7 +28,7 @@ interface ComputeContext {
 
 /**
  * The Compute job (one subject per survey, `''`): runs the stored set on the
- * next 10K completed responses without results, in chunks of 200, within 2
+ * next 50K completed responses without results, in chunks of 200, within 2
  * minutes. Always incremental, since any results that exist are valid: the
  * next Compute runs the rest. Only error-free results are written; a response
  * with any error (or no result) is a failure instead, skipped by later Computes

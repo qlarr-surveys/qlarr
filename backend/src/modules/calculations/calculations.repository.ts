@@ -211,7 +211,8 @@ export class CalculationsRepository {
 
   /**
    * Ids of the survey's completed responses (previews included) without
-   * results and not failed, by id, at most `limit`: what Compute runs on.
+   * results and not failed, by response index, at most `limit`: what Compute
+   * runs on.
    */
   async uncomputedResponseIds(
     surveyId: string,
@@ -222,7 +223,7 @@ export class CalculationsRepository {
       `SELECT id FROM responses
        WHERE survey_id = $1 AND submit_date IS NOT NULL AND computations IS NULL
          AND ${NOT_FAILED}
-       ORDER BY id
+       ORDER BY survey_response_index
        LIMIT $2`,
       [surveyId, limit],
     );

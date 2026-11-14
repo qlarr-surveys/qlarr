@@ -11,7 +11,7 @@ export const CALC_COMPUTE = 'calc.compute';
 export const COMPUTE_TIME_LIMIT_SECONDS = 120;
 
 /** At most this many responses per Compute job; the next Compute runs the rest. */
-export const MAX_RESPONSES_PER_JOB = 10_000;
+export const MAX_RESPONSES_PER_JOB = 50_000;
 
 /** A Compute job fails once more than this many of its responses failed. */
 export const MAX_COMPUTE_FAILURES = 50;
