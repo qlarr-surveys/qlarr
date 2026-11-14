@@ -642,7 +642,6 @@
   "theme_background_not_an_image": "Ese archivo no es una imagen. Sube un archivo PNG, JPG, SVG o WebP.",
   "theme_backdrop": "Superposición",
   "theme_backdrop_color": "Color de la superposición",
-  "theme_backdrop_hint": "Un tono sobre la imagen para que el texto siga siendo legible encima.",
   "theme_color_indigo": "Índigo",
   "theme_color_green": "Verde",
   "theme_color_violet": "Violeta",

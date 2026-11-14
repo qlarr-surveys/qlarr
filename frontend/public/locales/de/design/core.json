@@ -642,7 +642,6 @@
   "theme_background_not_an_image": "Diese Datei ist kein Bild. Laden Sie eine PNG-, JPG-, SVG- oder WebP-Datei hoch.",
   "theme_backdrop": "Abdunkelung",
   "theme_backdrop_color": "Farbe der Abdunkelung",
-  "theme_backdrop_hint": "Ein Farbschleier über dem Bild, damit der Text darauf lesbar bleibt.",
   "theme_color_indigo": "Indigo",
   "theme_color_green": "Grün",
   "theme_color_violet": "Violett",

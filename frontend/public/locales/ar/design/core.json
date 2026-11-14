@@ -642,7 +642,6 @@
   "theme_background_not_an_image": "هذا الملف ليس صورة. ارفع ملف PNG أو JPG أو SVG أو WebP.",
   "theme_backdrop": "طبقة تعتيم",
   "theme_backdrop_color": "لون طبقة التعتيم",
-  "theme_backdrop_hint": "لون شفاف فوق الصورة ليبقى النص واضحًا عليها.",
   "theme_color_indigo": "نيلي",
   "theme_color_green": "أخضر",
   "theme_color_violet": "بنفسجي",

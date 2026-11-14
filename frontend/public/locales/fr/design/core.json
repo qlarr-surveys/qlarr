@@ -642,7 +642,6 @@
   "theme_background_not_an_image": "Ce fichier n’est pas une image. Téléchargez un fichier PNG, JPG, SVG ou WebP.",
   "theme_backdrop": "Voile",
   "theme_backdrop_color": "Couleur du voile",
-  "theme_backdrop_hint": "Une teinte posée sur l’image, pour que le texte y reste lisible.",
   "theme_color_indigo": "Indigo",
   "theme_color_green": "Vert",
   "theme_color_violet": "Violet",

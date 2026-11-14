@@ -642,7 +642,6 @@
   "theme_background_not_an_image": "Dat bestand is geen afbeelding. Upload een PNG-, JPG-, SVG- of WebP-bestand.",
   "theme_backdrop": "Overlay",
   "theme_backdrop_color": "Overlaykleur",
-  "theme_backdrop_hint": "Een kleurwaas over de afbeelding, zodat de tekst erop leesbaar blijft.",
   "theme_color_indigo": "Indigo",
   "theme_color_green": "Groen",
   "theme_color_violet": "Violet",

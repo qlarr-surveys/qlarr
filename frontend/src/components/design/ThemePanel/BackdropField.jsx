@@ -12,6 +12,10 @@ import { BACKDROP_COLORS } from "./constants";
  * dim it on the author's behalf, the panel offers the dimming as a setting
  * with none as its default. It only appears once there is an image to wash,
  * because a backdrop over a flat colour would just be a second flat colour.
+ *
+ * The section already carries a note of its own, and the preview beside the
+ * panel answers "what does this do" the moment the chip is pressed, so this
+ * says it with the switch rather than with a second paragraph under it.
  */
 function BackdropField({ t, value, onChange }) {
   const on = Boolean(value);
@@ -75,8 +79,6 @@ function BackdropField({ t, value, onChange }) {
           onChange={onChange}
         />
       )}
-
-      <p className={styles.note}>{t("theme_backdrop_hint")}</p>
     </>
   );
 }
