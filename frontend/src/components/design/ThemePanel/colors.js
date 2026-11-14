@@ -58,15 +58,6 @@ export function parseColor(value) {
 const channelHex = (channel) =>
   Math.max(0, Math.min(255, Math.round(channel))).toString(16).padStart(2, "0");
 
-/** Lowercase `#rrggbb`, or null for a colour that has no opaque hex form. */
-export function toHex(value) {
-  const parsed = parseColor(value);
-  if (!parsed || parsed.a < 1) {
-    return null;
-  }
-  return `#${channelHex(parsed.r)}${channelHex(parsed.g)}${channelHex(parsed.b)}`;
-}
-
 /**
  * Lowercase `#rrggbb` for the colour's channels, ignoring how opaque it is, or
  * null when it cannot be parsed. This is the hue a translucent colour is built
@@ -86,10 +77,26 @@ export function alphaOf(value) {
   return parsed ? parsed.a : 1;
 }
 
-/** True when two colour notations describe the same opaque colour. */
+/**
+ * True when two colour notations describe the same colour, opacity included.
+ *
+ * Opacity counts because a preset can be translucent: a backdrop list is every
+ * shade of "mostly see-through", and comparing those on their channels alone
+ * would leave each one looking unselected however exactly it was matched.
+ * Alpha is compared loosely, since it round-trips through a percentage.
+ */
 export function sameColor(a, b) {
-  const left = toHex(a);
-  return left !== null && left === toHex(b);
+  const left = parseColor(a);
+  const right = parseColor(b);
+  if (!left || !right) {
+    return false;
+  }
+  return (
+    left.r === right.r &&
+    left.g === right.g &&
+    left.b === right.b &&
+    Math.abs(left.a - right.a) < 0.005
+  );
 }
 
 /**
