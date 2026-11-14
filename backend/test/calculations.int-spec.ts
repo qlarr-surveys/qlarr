@@ -7,6 +7,7 @@ import { runValidate } from '../src/engine/engine-runtime';
 import { FILE_HELPER } from '../src/integrations/filesystem/file-helper';
 import { DesignService } from '../src/modules/design/design.service';
 import { CalculationsRepository } from '../src/modules/calculations/calculations.repository';
+import { MAX_RESPONSES_PER_JOB } from '../src/modules/calculations/calculations.constants';
 import { bearer, startTestApp, TestApp } from './harness';
 
 const SUPER = bearer({ authorities: ['super_admin'] });
@@ -367,17 +368,17 @@ describe('Calculations', () => {
       expect(await lastJob(id)).toBe('completed');
     });
 
-    it('a job runs at most 10K responses; the next Compute runs the rest', async () => {
+    it('a job runs at most MAX_RESPONSES_PER_JOB responses; the next Compute runs the rest', async () => {
       const { id } = await createSurvey();
-      // 3 completed responses already, plus 9,998: 10,001 in all.
+      // 3 completed responses already, plus enough to exceed the cap by one.
       await root.query(
         `INSERT INTO responses
            (id, version, survey_id, preview, nav_index, start_date, submit_date,
             lang, events, "values")
          SELECT gen_random_uuid(), 1, $1, false, '', '2024-01-01 00:00:00',
                 '2024-02-01 00:00:00', 'en', '[]'::jsonb, '{"Q880htp.value": 1}'::jsonb
-         FROM generate_series(1, 9998)`,
-        [id],
+         FROM generate_series(1, $2)`,
+        [id, MAX_RESPONSES_PER_JOB - 2],
       );
       await save(id, [DOUBLE], 0).expect(200);
 
