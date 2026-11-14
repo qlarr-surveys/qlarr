@@ -14,7 +14,9 @@ function Group(props) {
     let groupState = state.runState.values[props.group.code];
     return {
       showGroup:
-        typeof groupState?.relevance === "undefined" || groupState.relevance,
+        state.runState.singleQuestion ||
+        typeof groupState?.relevance === "undefined" ||
+        groupState.relevance,
     };
   }, shallowEqual);
 

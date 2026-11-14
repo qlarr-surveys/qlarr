@@ -71,15 +71,25 @@ export const NAV_DIRECTION = {
   RESUME: 'RESUME',
   SAVE: 'SAVE',
   JUMP: 'JUMP',
+  START_AT: 'START_AT',
 } as const;
 export type NavDirectionName = (typeof NAV_DIRECTION)[keyof typeof NAV_DIRECTION];
 
 /**
- * Where to move (≈ engine `NavigationDirection`). `JUMP` carries a target index.
+ * Where to move (≈ engine `NavigationDirection`). `JUMP` carries a target index;
+ * `START_AT` starts a throwaway preview directly on one question.
  */
 export type NavigationDirectionJson =
-  | { name: Exclude<NavDirectionName, typeof NAV_DIRECTION.JUMP> }
-  | { name: typeof NAV_DIRECTION.JUMP; navigationIndex: NavigationIndexJson };
+  | {
+      name: Exclude<
+        NavDirectionName,
+        typeof NAV_DIRECTION.JUMP | typeof NAV_DIRECTION.START_AT
+      >;
+    }
+  | {
+      name: typeof NAV_DIRECTION.JUMP | typeof NAV_DIRECTION.START_AT;
+      navigationIndex: NavigationIndexJson;
+    };
 
 /** Result of a navigation step (≈ backend `NavigationJsonOutput`). */
 export interface NavigationJsonOutput {

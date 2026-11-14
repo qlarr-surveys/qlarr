@@ -19,6 +19,7 @@ import {
   JumpNotAllowedException,
   PreviousNotAllowedException,
   ResumeNotAllowedException,
+  StartAtNotAllowedException,
   SurveyDesignWithErrorException,
   SurveyExpiredException,
   SurveyNotStartedException,
@@ -84,6 +85,8 @@ export class NavigationService {
       timeSinceStartMillis(response?.startDate ?? null) > navData.resumeExpiryMillis
     ) {
       throw new ResumeNotAllowedException();
+    } else if (direction === NAV_DIRECTION.START_AT && (!preview || response)) {
+      throw new StartAtNotAllowedException();
     } else if (!navData.allowJump && direction === NAV_DIRECTION.JUMP) {
       throw new JumpNotAllowedException();
     } else if (!navData.allowPrevious && direction === NAV_DIRECTION.PREV) {

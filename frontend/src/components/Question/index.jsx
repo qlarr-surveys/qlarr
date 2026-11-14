@@ -1,5 +1,6 @@
 import React, { Suspense, forwardRef } from "react";
 import { useSelector } from "react-redux";
+import { previewTarget } from "~/state/runState";
 
 import { Box, css, useTheme } from "@mui/material";
 import styles from "./Question.module.css";
@@ -63,6 +64,7 @@ const Question = forwardRef((props, ref) => {
   const relevance = useSelector((state) => {
     let questionState = state.runState.values[props.component.qualifiedCode];
     return (
+      previewTarget(state) === props.component.qualifiedCode ||
       typeof questionState?.relevance === "undefined" ||
       questionState?.relevance
     );

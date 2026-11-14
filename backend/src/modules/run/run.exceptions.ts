@@ -40,6 +40,19 @@ export class PreviousNotAllowedException extends RunException {
   }
 }
 
+/** `START_AT` is only for a throwaway preview, never on an existing response. */
+export class StartAtNotAllowedException extends RunException {
+  constructor() {
+    super('This Navigation Direction is not allowed', 'StartAtNotAllowed');
+  }
+}
+
+export class QuestionNotFoundException extends RunException {
+  constructor() {
+    super('Question not found', 'QuestionNotFound', HttpStatus.NOT_FOUND);
+  }
+}
+
 export class SurveyNotStartedException extends RunException {
   constructor(startDate: string) {
     super(

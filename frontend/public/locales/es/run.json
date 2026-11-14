@@ -22,9 +22,16 @@
         "survey_scheduled": "Esta encuesta está programada para comenzar en el futuro",
         "client_time_skew": "El reloj de su dispositivo no está sincronizado. Corrija la configuración de fecha y hora y vuelva a cargar la página.",
         "survey_not_published": "Esta encuesta aún no ha sido publicada",
-        "survey_not_found": "Esta encuesta no está disponible"
+        "survey_not_found": "Esta encuesta no está disponible",
+        "question_not_found": "Esta pregunta aún no se ha guardado. Espera un momento e inténtalo de nuevo."
     },
     "preview":"Estás en modo de vista previa",
+    "preview_inputs": {
+      "title": "Depende de",
+      "hint": "Responde estas para ver la pregunta como la vería un encuestado.",
+      "hidden": "Con estas respuestas, los encuestados no verían esta pregunta.",
+      "none": "Sin responder"
+    },
     "upload": "Subir",
     "uploading": "Subiendo",
     "validation_between": "Debe estar entre {{lower_limit}} y {{upper_limit}}",

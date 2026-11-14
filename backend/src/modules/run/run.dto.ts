@@ -3,6 +3,7 @@ import {
   NavigationIndexJson,
 } from '../../engine/engine.types';
 import { SurveyNavigationData } from '../surveys/survey-navigation-data';
+import { PreviewInput } from './preview-inputs';
 
 /** A survey language (≈ engine `SurveyLang`). */
 export interface SurveyLang {
@@ -15,6 +16,13 @@ export interface StartRequest {
   lang?: string;
   navigationMode?: string;
   values?: Record<string, unknown>;
+  clientUTCTime?: string;
+}
+
+/** Preview one question on its own, without creating a response. */
+export interface StartAtRequest {
+  lang?: string;
+  questionId: string;
   clientUTCTime?: string;
 }
 
@@ -35,9 +43,12 @@ export interface RunSurveyDto {
   state: Record<string, unknown>;
   navigationData: SurveyNavigationData;
   navigationIndex: NavigationIndexJson;
-  responseId: string;
+  /** `null` for a single-question preview, which saves nothing. */
+  responseId: string | null;
   lang: SurveyLang;
   additionalLang: SurveyLang[];
   saveTimings: boolean;
   screenedOutQuota: string | null;
+  /** Single-question preview only: earlier answers the question depends on. */
+  previewInputs?: PreviewInput[];
 }

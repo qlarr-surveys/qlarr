@@ -27,6 +27,9 @@ function PreviewSurvey({ responseId = null }) {
     searchParams.get("navigation_mode") || "ALL_IN_ONE"
   );
   const [currentResponseId, setCurrentResponseId] = useState(responseId);
+  // Previewing a single question: it always runs question by question, saves no
+  // response, and has no navigation mode to pick.
+  const questionId = searchParams.get("question");
   const { t } = useTranslation(NAMESPACES.MANAGE);
 
   const surveyId = getparam(useParams(), "surveyId");
@@ -51,7 +54,11 @@ function PreviewSurvey({ responseId = null }) {
             .replace(":responseId", responseId)
         : routes.iframePreviewSurvey.replace(":surveyId", surveyId)) +
           "?mode=" + previewMode +
-          (navigationMode ? "&navigation_mode=" + navigationMode : ""),
+          (questionId
+            ? "&question=" + encodeURIComponent(questionId)
+            : navigationMode
+              ? "&navigation_mode=" + navigationMode
+              : ""),
     []
   );
 
@@ -125,6 +132,18 @@ function PreviewSurvey({ responseId = null }) {
   }, []);
 
   const formatUrl = (previewMode, navigationMode) => {
+    if (questionId) {
+      window.history.replaceState(
+        {},
+        "",
+        routes.preview.replace(":surveyId", surveyId) +
+          "?mode=" +
+          previewMode +
+          "&question=" +
+          encodeURIComponent(questionId),
+      );
+      return;
+    }
     window.history.replaceState(
       {},
       "",
@@ -137,8 +156,11 @@ function PreviewSurvey({ responseId = null }) {
     );
   };
 
+  // The tour points at the navigation-mode select, which this mode hides.
+  const Wrapper = questionId ? React.Fragment : PreviewSurveyTourProvider;
+
   return (
-    <PreviewSurveyTourProvider>
+    <Wrapper>
       <Box
         display="flex"
         position="relative"
@@ -163,29 +185,31 @@ function PreviewSurvey({ responseId = null }) {
           />
         </Tabs>
 
-        <Box data-tour="navigation-mode-select" position="absolute" right="16px" top="0px">
-          <FormControl sx={{ minWidth: 200 }}>
-            <InputLabel id="navigation-mode-select-label">
-              {t("preview_page.navigation_mode")}
-            </InputLabel>
-            <Select
-              labelId="navigation-mode-select-label"
-              id="navigation-mode-select"
-              size="small"
-              value={navigationMode}
-              onChange={handleNavigationModeChange}
-              label={t("preview_page.navigation_mode")}
-            >
-              <MenuItem value="ALL_IN_ONE">{t("preview_page.all_in_one")}</MenuItem>
-              <MenuItem value="GROUP_BY_GROUP">
-                {t("preview_page.group_by_group")}
-              </MenuItem>
-              <MenuItem value="QUESTION_BY_QUESTION">
-                {t("preview_page.question_by_question")}
-              </MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
+        {!questionId && (
+          <Box data-tour="navigation-mode-select" position="absolute" right="16px" top="0px">
+            <FormControl sx={{ minWidth: 200 }}>
+              <InputLabel id="navigation-mode-select-label">
+                {t("preview_page.navigation_mode")}
+              </InputLabel>
+              <Select
+                labelId="navigation-mode-select-label"
+                id="navigation-mode-select"
+                size="small"
+                value={navigationMode}
+                onChange={handleNavigationModeChange}
+                label={t("preview_page.navigation_mode")}
+              >
+                <MenuItem value="ALL_IN_ONE">{t("preview_page.all_in_one")}</MenuItem>
+                <MenuItem value="GROUP_BY_GROUP">
+                  {t("preview_page.group_by_group")}
+                </MenuItem>
+                <MenuItem value="QUESTION_BY_QUESTION">
+                  {t("preview_page.question_by_question")}
+                </MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+        )}
       </Box>
 
       <div
@@ -217,7 +241,7 @@ function PreviewSurvey({ responseId = null }) {
           />
         </div>
       </div>
-    </PreviewSurveyTourProvider>
+    </Wrapper>
   );
 }
 

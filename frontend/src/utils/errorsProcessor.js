@@ -62,6 +62,7 @@ export const PROCESSED_ERRORS = {
   CLIENT_TIME_SKEW: { name: "client_time_skew", handleGlobally: false },
   SURVEY_NOT_PUBLISHED: { name: "survey_not_published", handleGlobally: false },
   SURVEY_NOT_FOUND: { name: "survey_not_found", handleGlobally: true },
+  QUESTION_NOT_FOUND: { name: "question_not_found", handleGlobally: false },
   SURVEY_EXPIRED: { name: "survey_expired", handleGlobally: false },
   INVALID_SURVEY_DATES: { name: "invalid_survey_dates", handleGlobally: false },
   SURVEY_QUOTA: { name: "survey_quota", handleGlobally: false },
@@ -184,6 +185,8 @@ export const processError = (e) => {
         return PROCESSED_ERRORS.SURVEY_NOT_PUBLISHED;
       case "SurveyNotFoundException":
         return PROCESSED_ERRORS.SURVEY_NOT_FOUND;
+      case "QuestionNotFound":
+        return PROCESSED_ERRORS.QUESTION_NOT_FOUND;
       case "SurveyIsClosedException":
         return PROCESSED_ERRORS.SURVEY_CLOSED;
       case "InvalidSurveyDates":
