@@ -619,7 +619,6 @@
   "theme_open_color_picker": "Ouvrir le sélecteur de couleur",
   "theme_pick_from_screen": "Prélever une couleur à l’écran",
   "theme_switch_color_values": "Basculer entre RVB et TSL",
-  "theme_apply": "Appliquer",
   "theme_custom_hex_hint": "Choisissez une couleur et son opacité, ou saisissez une valeur hexadécimale. Le questionnaire se met à jour immédiatement.",
   "theme_custom_hex_invalid": "Cette valeur de couleur n’est pas valide. Saisissez une valeur hexadécimale à 6 chiffres telle que #2D3CB1.",
   "theme_hue": "Couleur",

@@ -619,7 +619,6 @@
   "theme_open_color_picker": "Kleurkiezer openen",
   "theme_pick_from_screen": "Een kleur van het scherm kiezen",
   "theme_switch_color_values": "Wisselen tussen RGB en HSL",
-  "theme_apply": "Toepassen",
   "theme_custom_hex_hint": "Kies een kleur en de dekking, of voer een hexwaarde in. De enquête wordt meteen bijgewerkt.",
   "theme_custom_hex_invalid": "Die kleurwaarde is ongeldig. Voer een hexwaarde van 6 tekens in, zoals #2D3CB1.",
   "theme_hue": "Kleur",

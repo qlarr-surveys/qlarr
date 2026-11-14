@@ -364,23 +364,6 @@
   border-color: #b3261e;
 }
 
-.apply {
-  flex: none;
-  height: 30px;
-  padding: 0 12px;
-  border: 1px solid #1b2150;
-  border-radius: 6px;
-  background: #1b2150;
-  font: 600 12.5px/1 Rubik, sans-serif;
-  color: #fff;
-  cursor: pointer;
-}
-
-.apply:focus-visible {
-  outline: 2px solid #3a46d8;
-  outline-offset: 2px;
-}
-
 /* ====== Picker ====== */
 
 /* The popup is fixed and portalled to the body: the panel it belongs to

@@ -20,6 +20,9 @@ import {
 const GAP = 6;
 const EDGE = 8;
 
+// What `HEX_INPUT` accepts, half-typed: anything still on its way to a hex.
+const PARTIAL_HEX = /^#?[0-9a-f]{0,6}$/i;
+
 const SaturationPointer = () => <span className={styles.satPointer} />;
 
 // The browser's own screen sampler. Chromium has it; Firefox and Safari do
@@ -441,21 +444,30 @@ function ColorField({ t, name, label, value, presets, onChange }) {
     setOpen(true);
   };
 
-  const apply = () => {
-    const candidate = draft.trim();
-    if (!HEX_INPUT.test(candidate)) {
-      setInvalid(true);
+  // A hex arrives one character at a time, and every prefix of a good one is
+  // itself not a colour yet. Typing is read as it goes: the survey takes each
+  // complete hex as it is finished, and the box only objects once what is in
+  // it can no longer become one — so `#2d3c` is quietly on its way somewhere,
+  // while `#2d3cb12` and `#zz` are wrong the moment they are.
+  const type = (text) => {
+    setDraft(text);
+    const candidate = text.trim();
+    if (HEX_INPUT.test(candidate)) {
+      setInvalid(false);
+      const normalized = candidate.startsWith("#") ? candidate : `#${candidate}`;
+      // Typing a hex changes the colour, not how transparent it is — that is
+      // the bar's to say, so a drag of it is never undone from here.
+      onChange(fromRgb({ ...parseColor(normalized), a: alpha }));
       return;
     }
-    setInvalid(false);
-    const normalized = candidate.startsWith("#") ? candidate : `#${candidate}`;
-    // Typing a hex changes the colour, not how transparent it is — that is the
-    // bar's to say, and leaving it be means Apply never undoes a drag.
-    onChange(fromRgb({ ...parseColor(normalized), a: alpha }));
-    // Applying a typed hex finishes the edit — the colour is on the survey and
-    // the swatch row shows it, so the editor has nothing left to say. Focus was
-    // in the editor that is about to go, so it is handed back to the chip that
-    // opened it rather than left to fall to the top of the document.
+    setInvalid(!PARTIAL_HEX.test(candidate));
+  };
+
+  // Nothing is left to confirm, so Enter means "done with this": the colour is
+  // already on the survey and the swatch row shows it. Focus was in the editor
+  // that is about to go, so it is handed back to the chip that opened it
+  // rather than left to fall to the top of the document.
+  const finish = () => {
     closeEditor();
     chipRef.current?.focus();
   };
@@ -557,21 +569,15 @@ function ColorField({ t, name, label, value, presets, onChange }) {
               aria-label={label}
               aria-invalid={invalid}
               aria-describedby={helpId}
-              onChange={(event) => {
-                setDraft(event.target.value);
-                setInvalid(false);
-              }}
+              onChange={(event) => type(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
                   event.preventDefault();
-                  apply();
+                  finish();
                 }
               }}
               className={`${styles.hexInput} ${invalid ? styles.hexInvalid : ""}`}
             />
-            <button type="button" onClick={apply} className={styles.apply}>
-              {t("theme_apply")}
-            </button>
           </div>
 
           <p
