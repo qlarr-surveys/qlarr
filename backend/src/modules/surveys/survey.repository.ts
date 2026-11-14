@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DeepPartial, Repository } from 'typeorm';
+import { DeepPartial, EntityManager, Repository } from 'typeorm';
 import { isUniqueViolation } from '../../common/db-errors';
 import { DbContext } from '../../database/db-context';
 import { SurveyEntity } from './survey.entity';
@@ -49,14 +49,15 @@ export class SurveyRepository {
   /**
    * Delete a survey and its FK-referencing rows (responses, versions,
    * calculations) in one transaction — the children must go before the survey
-   * row.
+   * row. In `tx` when given, else in its own.
    */
-  async deleteCascade(id: string): Promise<void> {
-    await this.db.manager.transaction(async (tx) => {
-      await tx.query('DELETE FROM responses WHERE survey_id = $1', [id]);
-      await tx.query('DELETE FROM versions WHERE survey_id = $1', [id]);
-      await tx.query('DELETE FROM survey_calculations WHERE survey_id = $1', [id]);
-      await tx.query('DELETE FROM surveys WHERE id = $1', [id]);
-    });
+  async deleteCascade(id: string, tx?: EntityManager): Promise<void> {
+    const work = async (m: EntityManager) => {
+      await m.query('DELETE FROM responses WHERE survey_id = $1', [id]);
+      await m.query('DELETE FROM versions WHERE survey_id = $1', [id]);
+      await m.query('DELETE FROM survey_calculations WHERE survey_id = $1', [id]);
+      await m.query('DELETE FROM surveys WHERE id = $1', [id]);
+    };
+    await (tx ? work(tx) : this.db.manager.transaction(work));
   }
 }

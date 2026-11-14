@@ -6,8 +6,8 @@ import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 /**
  * One calculated value, in one of its states:
  * - `value`: the result as text (objects and arrays as JSON);
- * - `error`: a red chip (the calculation failed on this response); `message`,
- *   when given (Test only), is shown as a tooltip;
+ * - `error`: a red chip, the calculation failed on this response (Test only;
+ *   Compute records failures instead), with `message` as a tooltip;
  * - `empty`: a muted dash (no value);
  * - `not_computed`: a grey chip;
  * - `invalid`: a red outlined chip, for a calculation with validation errors

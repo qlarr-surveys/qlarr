@@ -159,7 +159,7 @@ export class ResponseRepository {
     return Number(count);
   }
 
-  /** One page of summary rows (surveyor name joined in), newest-start first. */
+  /** One page of summary rows (surveyor name joined in), by response index. */
   summaryPage(
     surveyId: string,
     status: ResponseStatus,
@@ -179,7 +179,7 @@ export class ResponseRepository {
        FROM responses r
        LEFT JOIN users u ON r.surveyor = u.id
        WHERE ${where.clause}
-       ORDER BY r.start_date ASC
+       ORDER BY r.survey_response_index ASC
        LIMIT $${where.params.length + 1} OFFSET $${where.params.length + 2}`,
       [...where.params, size, offset],
     );

@@ -242,10 +242,6 @@
   padding: 10px;
 }
 
-.collapsible-content p {
-  word-break: break-all;
-}
-
 .collapsible-content.open {
   display: block !important;
 }
@@ -439,10 +435,6 @@
 
 .content-editor .collapsible-content {
   padding-top: 10px;
-}
-
-.content-editor .collapsible-content p {
-  word-break: break-all;
 }
 
 .content-editor .collapsible-content.open {
