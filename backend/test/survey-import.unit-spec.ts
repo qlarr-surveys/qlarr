@@ -21,8 +21,9 @@ describe('SurveysService.importSurvey — rollback on partial failure', () => {
     recordGps: false,
     latestVersion: { valid: true },
   };
+  const SRC = '10000000-0000-0000-0000-000000000001';
   const surveyJson = JSON.stringify({
-    survey: simpleSurvey,
+    survey: { ...simpleSurvey, id: SRC },
     autoCompleteResources: [],
   });
 
@@ -57,6 +58,7 @@ describe('SurveysService.importSurvey — rollback on partial failure', () => {
       {} as any, // jobs
       {} as any, // db
       files as any,
+      { getOrThrow: () => ({ backendUrl: 'https://api.new' }) } as any,
     );
     /* eslint-enable @typescript-eslint/no-explicit-any */
     return { service, surveys, files };
@@ -83,5 +85,27 @@ describe('SurveysService.importSurvey — rollback on partial failure', () => {
 
     expect(dto.id).toBeDefined();
     expect(surveys.deleteCascade).not.toHaveBeenCalled();
+  });
+
+  it("repoints the exported survey's resource URLs at this backend and the new survey", async () => {
+    const design = JSON.stringify({
+      content: `<img src="http://old:8080/survey/${SRC}/resource/a.png">`,
+      other: `https://elsewhere/survey/20000000-0000-0000-0000-000000000002/resource/b.png`,
+    });
+    const { service, files } = makeService({
+      extractImportZip: jest.fn().mockResolvedValue({
+        surveyJson,
+        designFile: Buffer.from(design),
+        resources: [],
+      }),
+    });
+
+    const dto = await service.importSurvey(Buffer.from('zip'));
+
+    const uploaded = (files.uploadImportedSurvey.mock.calls[0][1] as Buffer).toString('utf8');
+    expect(JSON.parse(uploaded)).toEqual({
+      content: `<img src="https://api.new/survey/${dto.id}/resource/a.png">`,
+      other: `https://elsewhere/survey/20000000-0000-0000-0000-000000000002/resource/b.png`,
+    });
   });
 });

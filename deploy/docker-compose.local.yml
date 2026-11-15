@@ -81,6 +81,7 @@ services:
       # --- auth & app (throwaway dev secret; JWT_SECRET must be >=16 chars) ---
       JWT_SECRET: "bG9jYWwtZGV2LXNlY3JldC1jaGFuZ2UtbWUtbmVlZHMtdG8tYmUtbG9uZy1lbm91Z2g="
       FRONTEND_URL: "http://localhost:3000"
+      BACKEND_URL: "http://localhost:8080"
       SEED_ADMIN_PASSWORD: "admin"
       # --- local file storage (absolute path on the mounted volume) ---
       FILE_SYSTEM_ROOT_FOLDER: "/var/qlarr/resources"

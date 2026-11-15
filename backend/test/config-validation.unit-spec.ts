@@ -6,6 +6,7 @@ import {
 // A minimal environment that satisfies every required var.
 const validEnv = {
   FRONTEND_URL: 'http://localhost:3000',
+  BACKEND_URL: 'http://localhost:8080',
   DB_HOST: 'localhost',
   DB_USER: 'qlarr',
   DB_PASSWORD: 'secret',
@@ -32,6 +33,7 @@ describe('env validation schema', () => {
 
   it.each([
     'FRONTEND_URL',
+    'BACKEND_URL',
     'DB_HOST',
     'DB_USER',
     'DB_PASSWORD',
@@ -48,8 +50,8 @@ describe('env validation schema', () => {
   it('reports every problem at once (abortEarly: false)', () => {
     const { error } = validate({ JWT_SECRET: validEnv.JWT_SECRET });
     expect(error).toBeDefined();
-    // All five other required vars are missing → all five surface together.
-    expect(error!.details.length).toBe(5);
+    // All six other required vars are missing → all six surface together.
+    expect(error!.details.length).toBe(6);
   });
 
   it('rejects a non-numeric port', () => {

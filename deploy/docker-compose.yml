@@ -52,6 +52,7 @@ services:
       FILE_SYSTEM_ROOT_FOLDER: "/var/qlarr/resources"
       DB_PASSWORD: "${POSTGRES_PASSWORD}"
       FRONTEND_URL: "https://${CADDY_FRONTEND_HOSTNAME}"
+      BACKEND_URL: "https://${CADDY_API_HOSTNAME}"
 
   postgres-db:
     container_name: 'postgres-db'
