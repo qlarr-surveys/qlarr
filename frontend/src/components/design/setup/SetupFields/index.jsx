@@ -1,5 +1,11 @@
-import React, { createContext, useCallback, useContext, useId } from "react";
-import { ChevronDown } from "lucide-react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useId,
+  useRef,
+} from "react";
+import { Check, ChevronDown, Plus, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
@@ -162,11 +168,14 @@ export function SetupField({ label, help, htmlFor, id, action, children }) {
   );
 }
 
-/** A native select with the design's chevron; compact in the general settings. */
-export function SetupSelect({ className, children, ...props }) {
+/**
+ * A native select with the design's chevron; compact in the general settings.
+ * `inline` sizes it to sit inside a sentence ("Show [2] of 5").
+ */
+export function SetupSelect({ className, inline, children, ...props }) {
   const small = useSetupVariant() === "basic";
   return (
-    <span className={styles.selectWrap}>
+    <span className={cx(styles.selectWrap, inline && styles.selectWrapInline)}>
       <select
         className={cx(styles.select, small && styles.selectSmall, className)}
         {...props}
@@ -221,6 +230,234 @@ export function SetupLangInput({ lang, label, value, onChange, placeholder }) {
         className={styles.langField}
       />
     </label>
+  );
+}
+
+/**
+ * One choice of a few, as a row of buttons: a radio group, so the arrow keys
+ * move the choice and Tab leaves the group. `columns` sets the buttons in that
+ * many equal columns, taller, so long labels wrap instead of squeezing.
+ */
+export function SetupSegmented({
+  label,
+  labelledBy,
+  options,
+  value,
+  onChange,
+  columns,
+  disabled,
+}) {
+  const buttons = useRef([]);
+  const selected = options.findIndex((option) => option.value === value);
+
+  const choose = (index) => {
+    const count = options.length;
+    const next = (index + count) % count;
+    buttons.current[next]?.focus();
+    if (options[next].value !== value) {
+      onChange(options[next].value);
+    }
+  };
+
+  const onKeyDown = (event, index) => {
+    const rtl = getComputedStyle(event.currentTarget).direction === "rtl";
+    const forward = rtl ? "ArrowLeft" : "ArrowRight";
+    const back = rtl ? "ArrowRight" : "ArrowLeft";
+    let next = null;
+    if (event.key === forward || event.key === "ArrowDown") next = index + 1;
+    else if (event.key === back || event.key === "ArrowUp") next = index - 1;
+    else if (event.key === "Home") next = 0;
+    else if (event.key === "End") next = options.length - 1;
+    if (next !== null) {
+      event.preventDefault();
+      choose(next);
+    }
+  };
+
+  return (
+    <div
+      role="radiogroup"
+      aria-label={label}
+      aria-labelledby={labelledBy}
+      className={cx(styles.segmented, columns && styles.segmentedGrid)}
+      style={
+        columns
+          ? { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }
+          : undefined
+      }
+    >
+      {options.map((option, index) => {
+        const on = index === selected;
+        return (
+          <button
+            key={String(option.value)}
+            ref={(element) => {
+              buttons.current[index] = element;
+            }}
+            type="button"
+            role="radio"
+            aria-checked={on}
+            tabIndex={on || (selected === -1 && index === 0) ? 0 : -1}
+            disabled={disabled}
+            onClick={() => !on && onChange(option.value)}
+            onKeyDown={(event) => onKeyDown(event, index)}
+            className={cx(
+              styles.segment,
+              columns && styles.segmentTall,
+              on && styles.segmentOn
+            )}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * A control inside a setting, e.g. Make repeatable's "Max repeats": a small
+ * name over the control, so it reads as part of the setting above it.
+ */
+export function SetupSubField({ label, help, htmlFor, id, children }) {
+  const Tag = htmlFor ? "label" : "span";
+  return (
+    <div className={styles.subField}>
+      <div className={styles.subFieldHead}>
+        <SetupHelp label={label} help={help} />
+        <Tag id={id} htmlFor={htmlFor} className={styles.subFieldLabel}>
+          {label}
+        </Tag>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+/**
+ * A code with a fixed start the author can't change, e.g. a custom rule's
+ * "validation_custom_": the start, then the input for the rest.
+ */
+export function SetupPrefixInput({ prefix, invalid, className, ...props }) {
+  return (
+    <span className={cx(styles.prefixInput, invalid && styles.invalid)}>
+      <span aria-hidden="true" className={styles.prefixText}>
+        {prefix}
+      </span>
+      <input
+        type="text"
+        dir="ltr"
+        spellCheck={false}
+        autoComplete="off"
+        aria-invalid={!!invalid}
+        className={cx(styles.prefixField, className)}
+        {...props}
+      />
+    </span>
+  );
+}
+
+/**
+ * A switch inside a setting, e.g. a skip rule's "Disqualify": its name in
+ * body type, then the switch. `onChange` receives the new state.
+ */
+export function SetupSubToggle({ label, checked, onChange, disabled }) {
+  const labelId = useId();
+  return (
+    <div className={cx(styles.subToggle, disabled && styles.subToggleDisabled)}>
+      <span id={labelId}>{label}</span>
+      <SetupSwitch
+        checked={checked}
+        onChange={onChange}
+        disabled={disabled}
+        aria-labelledby={labelId}
+      />
+    </div>
+  );
+}
+
+/** A list of things to tick, e.g. which options a new order applies to. */
+export function SetupCheckList({ label, children }) {
+  return (
+    <ul aria-label={label} className={styles.checkList}>
+      {children}
+    </ul>
+  );
+}
+
+/** One line of a SetupCheckList: the box, the item's code, its text. */
+export function SetupCheckItem({ code, text, checked, onChange, note }) {
+  return (
+    <li>
+      <label className={styles.checkItem}>
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={(event) => onChange(event.target.checked)}
+          className={styles.checkInput}
+        />
+        <span
+          aria-hidden="true"
+          className={cx(styles.checkBox, checked && styles.checkBoxOn)}
+        >
+          {checked && <Check size={14} strokeWidth={3} />}
+        </span>
+        {code && (
+          <span className={styles.checkCode} title={code}>
+            {code}
+          </span>
+        )}
+        <span dir="auto" className={styles.checkText} title={text}>
+          {text}
+        </span>
+        {note && <span className={styles.checkNote}>{note}</span>}
+      </label>
+    </li>
+  );
+}
+
+/**
+ * A boxed item of a list the author builds up, e.g. a skip rule: a header bar
+ * with its title and actions, then its fields.
+ */
+export function SetupCard({ title, actions, invalid, children, ...rest }) {
+  return (
+    <section className={cx(styles.card, invalid && styles.cardInvalid)} {...rest}>
+      <div className={styles.cardHeader}>
+        <span className={styles.cardTitle}>{title}</span>
+        {actions}
+      </div>
+      <div className={styles.cardBody}>{children}</div>
+    </section>
+  );
+}
+
+/** The trash button that removes a card. */
+export function SetupRemoveButton({ label, onClick }) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      onClick={onClick}
+      className={styles.removeButton}
+    >
+      <Trash2 aria-hidden="true" size={16} strokeWidth={2} />
+    </button>
+  );
+}
+
+/** The full-width button that adds to a list, e.g. "Add skip rule". */
+export function SetupAddButton({ children, className, ...props }) {
+  return (
+    <button
+      type="button"
+      className={cx(styles.addButton, className)}
+      {...props}
+    >
+      <Plus aria-hidden="true" size={16} strokeWidth={2} />
+      <span>{children}</span>
+    </button>
   );
 }
 

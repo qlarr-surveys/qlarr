@@ -1,33 +1,33 @@
-.ruleCard {
-  margin-top: 16px;
-  margin-bottom: 16px;
-  padding: 12px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  background-color: #fafafa;
-}
+/* A skip rule's fields, inside its card (SetupCard). */
 
-.ruleHeader {
+/* "To page end" and "Disqualify": what happens on arrival, set apart from
+   where the rule goes. */
+.endOptions {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.toEnd {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  align-items: center;
-  padding: 4px;
+  flex-direction: column;
+  gap: 4px;
+  margin: 2px -12px -12px;
+  padding: 6px 12px;
+  border-top: 1px solid #eceef6;
+  background: #fafbfd;
 }
 
 .errorDisplay {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px;
-  background-color: #fff3e0;
-  border-radius: 4px;
-  color: #e65100;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff3e0;
+  font: 400 13.5px/19px Rubik, sans-serif;
+  color: #8a4a00;
+}
+
+.errorIcon {
+  flex: none;
+}
+
+.errorText {
+  flex: 1;
+  min-width: 0;
 }

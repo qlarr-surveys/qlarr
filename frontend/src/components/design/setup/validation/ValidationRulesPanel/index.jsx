@@ -1,11 +1,11 @@
 import React from "react";
-import { Box, Typography } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { changeValidationValue } from "~/state/design/designState";
 import PresetRuleCard from "./PresetRuleCard";
 import AddRulePicker from "./AddRulePicker";
 import RuleCard from "../CustomValidationRules/RuleCard";
 import { useCustomValidationRules } from "../CustomValidationRules/useCustomValidationRules";
+import { setupFieldStyles } from "~/components/design/setup/SetupFields";
 
 /**
  * Validation tab body. Shows only the *active* rules as cards (Required pinned
@@ -53,8 +53,7 @@ function ValidationRulesPanel({ code, t, validationRules }) {
     );
 
   return (
-    <Box>
-
+    <div className={setupFieldStyles.stack}>
       {hasRequired && (
         <PresetRuleCard
           code={code}
@@ -97,7 +96,7 @@ function ValidationRulesPanel({ code, t, validationRules }) {
         onAddCustom={onAddRule}
         t={t}
       />
-    </Box>
+    </div>
   );
 }
 

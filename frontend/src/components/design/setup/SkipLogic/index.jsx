@@ -1,18 +1,5 @@
-import { AddOutlined, DeleteOutline, ErrorOutlineOutlined } from "@mui/icons-material";
-import {
-  Autocomplete,
-  Box,
-  Button,
-  Chip,
-  Divider,
-  FormControl,
-  IconButton,
-  MenuItem,
-  Select,
-  Switch,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { ErrorOutlineOutlined } from "@mui/icons-material";
+import { Autocomplete, Chip, TextField } from "@mui/material";
 import { jumpDestinations } from "~/utils/design/access/jumpDestinations";
 import { stripTags } from "~/utils/design/utils";
 import {
@@ -20,12 +7,25 @@ import {
   updateSkipRule,
   removeSkipRule,
 } from "~/state/design/designState";
-import React, { useMemo } from "react";
+import React, { useId, useMemo } from "react";
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
+import {
+  SetupAddButton,
+  SetupCard,
+  SetupLabel,
+  SetupRemoveButton,
+  SetupSelect,
+  SetupSubField,
+  SetupSubToggle,
+  setupFieldStyles,
+  useSetupHelp,
+} from "~/components/design/setup/SetupFields";
 import styles from "./SkipLogic.module.css";
 
 function SkipLogic({ code, t }) {
   const dispatch = useDispatch();
+  const help = useSetupHelp();
+  const idBase = useId();
 
   // === SELECTORS ===
   const skipLogic = useSelector((state) => {
@@ -117,11 +117,17 @@ function SkipLogic({ code, t }) {
 
   // === RENDER ===
   return (
-    <>
-      <Typography fontWeight={700}>{t("skip_logic")}</Typography>
-      <Divider sx={{ my: 1 }} />
+    <div role="group" aria-labelledby={`${idBase}-title`}>
+      <div className={setupFieldStyles.head}>
+        <SetupLabel
+          id={`${idBase}-title`}
+          label={t("skip_logic")}
+          help={help("skip_logic")}
+        />
+      </div>
 
-      {skipLogic.map((rule, ruleIndex) => {
+      <div className={setupFieldStyles.stack}>
+        {skipLogic.map((rule, ruleIndex) => {
           const usedCodes = getUsedAnswerCodes(ruleIndex);
           const availableOptions = children?.filter(
             (child) =>
@@ -154,24 +160,25 @@ function SkipLogic({ code, t }) {
           // Disqualify is only allowed when skipping to END group
           const disqualifyDisabled = rule.skipTo !== endGroupCode;
 
-          return (
-            <Box key={ruleIndex} className={styles.ruleCard}>
-              <Box className={styles.ruleHeader}>
-                <Typography fontWeight={600}>
-                  {t("select_conditions")}
-                </Typography>
-                <IconButton
-                  size="small"
-                  onClick={() => onRemoveRule(ruleIndex)}
-                  color="error"
-                >
-                  <DeleteOutline fontSize="small" />
-                </IconButton>
-              </Box>
+          const titleId = `${idBase}-rule-${ruleIndex}`;
+          const destinationId = `${idBase}-to-${ruleIndex}`;
 
+          return (
+            <SetupCard
+              key={ruleIndex}
+              aria-labelledby={titleId}
+              invalid={!!invalidSkipDestination}
+              title={<span id={titleId}>{t("select_conditions")}</span>}
+              actions={
+                <SetupRemoveButton
+                  label={t("remove_rule")}
+                  onClick={() => onRemoveRule(ruleIndex)}
+                />
+              }
+            >
               <Autocomplete
                 multiple
-                noOptionsText={t('logic_builder.no_options')}
+                noOptionsText={t("logic_builder.no_options")}
                 options={availableOptions || []}
                 value={selectedOptions}
                 onChange={(event, newValue) =>
@@ -199,6 +206,10 @@ function SkipLogic({ code, t }) {
                     {...params}
                     variant="outlined"
                     size="small"
+                    inputProps={{
+                      ...params.inputProps,
+                      "aria-labelledby": titleId,
+                    }}
                     placeholder={
                       selectedOptions.length === 0
                         ? t("select_conditions")
@@ -206,107 +217,70 @@ function SkipLogic({ code, t }) {
                     }
                   />
                 )}
-                sx={{ mb: 2 }}
               />
 
               {invalidSkipDestination ? (
-                <Box className={styles.errorDisplay}>
-                  <ErrorOutlineOutlined style={{ verticalAlign: "middle" }} />{" "}
-                  {t("invalid_skip_destination_err", { code: rule.skipTo })}
-                  <Button
-                    variant="contained"
-                    size="small"
+                <div className={styles.errorDisplay} role="alert">
+                  <ErrorOutlineOutlined className={styles.errorIcon} />
+                  <span className={styles.errorText}>
+                    {t("invalid_skip_destination_err", { code: rule.skipTo })}
+                  </span>
+                  <button
+                    type="button"
                     onClick={() => onDestinationChange(ruleIndex, null)}
+                    className={setupFieldStyles.secondaryButton}
                   >
                     {t("ok")}
-                  </Button>
-                </Box>
+                  </button>
+                </div>
               ) : (
                 <>
-                  <FormControl variant="standard" fullWidth>
-                    <Select
+                  <SetupSubField label={t("skip_to")} htmlFor={destinationId}>
+                    <SetupSelect
+                      id={destinationId}
                       value={rule.skipTo || ""}
-                      displayEmpty
                       onChange={(e) =>
                         onDestinationChange(ruleIndex, e.target.value || null)
                       }
-                      MenuProps={{
-                        PaperProps: {
-                          sx: {
-                            ml: "50px",
-                          },
-                        },
-                      }}
                     >
-                      <MenuItem value="">
-                        <em>{t("skip_to")}</em>
-                      </MenuItem>
+                      <option value="">—</option>
                       {destinations?.map((element) => (
-                        <MenuItem key={element.code} value={element.code}>
+                        <option key={element.code} value={element.code}>
                           {element.label}
-                        </MenuItem>
+                        </option>
                       ))}
-                    </Select>
-                  </FormControl>
+                    </SetupSelect>
+                  </SetupSubField>
 
                   {rule.skipTo && rule.skipTo.startsWith("G") && (
-                    <Box sx={{ mt: 1 }}>
-                      <div className={styles.toEnd}>
-                        <Typography
-                          sx={{
-                            color: toEndDisabled
-                              ? "grey.500"
-                              : "text.primary",
-                          }}
-                          fontWeight={600}
-                        >
-                          {t("to_group_end")}
-                        </Typography>
-                        <Switch
-                          disabled={toEndDisabled}
-                          checked={rule.toEnd || false}
-                          onChange={(event) =>
-                            onToEndChange(ruleIndex, event.target.checked)
-                          }
-                        />
-                      </div>
-                      <div className={styles.toEnd}>
-                        <Typography
-                          sx={{
-                            color: disqualifyDisabled
-                              ? "grey.500"
-                              : "text.primary",
-                          }}
-                          fontWeight={600}
-                        >
-                          {t("disqualify")}
-                        </Typography>
-                        <Switch
-                          disabled={disqualifyDisabled}
-                          checked={rule.disqualify || false}
-                          onChange={(event) =>
-                            onDisqualifyChange(ruleIndex, event.target.checked)
-                          }
-                        />
-                      </div>
-                    </Box>
+                    <div className={styles.endOptions}>
+                      <SetupSubToggle
+                        label={t("to_group_end")}
+                        checked={rule.toEnd || false}
+                        disabled={toEndDisabled}
+                        onChange={(checked) =>
+                          onToEndChange(ruleIndex, checked)
+                        }
+                      />
+                      <SetupSubToggle
+                        label={t("disqualify")}
+                        checked={rule.disqualify || false}
+                        disabled={disqualifyDisabled}
+                        onChange={(checked) =>
+                          onDisqualifyChange(ruleIndex, checked)
+                        }
+                      />
+                    </div>
                   )}
                 </>
               )}
-            </Box>
+            </SetupCard>
           );
         })}
 
-      <Button
-        variant="outlined"
-        startIcon={<AddOutlined />}
-        onClick={onAddRule}
-        sx={{ mt: 2 }}
-        fullWidth
-      >
-        {t("add_skip_rule")}
-      </Button>
-    </>
+        <SetupAddButton onClick={onAddRule}>{t("add_skip_rule")}</SetupAddButton>
+      </div>
+    </div>
   );
 }
 

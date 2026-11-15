@@ -1,47 +1,45 @@
-import React from "react";
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
-import { changeAttribute, changeCustomCss } from "~/state/design/designState";
-import CustomTooltip from "~/components/common/Tooltip/Tooltip";
-import { TextField, Typography } from "@mui/material";
-import { useTranslation } from "react-i18next";
-import { NAMESPACES } from "~/hooks/useNamespaceLoader";
+import React, { useId } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { changeCustomCss } from "~/state/design/designState";
+import {
+  SetupField,
+  setupFieldStyles,
+  useSetupHelp,
+} from "~/components/design/setup/SetupFields";
+
+const PLACEHOLDER = `/* Enter your CSS code here... */
+  background-color: #007bff;
+  color: white;
+`;
 
 function CustomCSS({ code, t }) {
   const dispatch = useDispatch();
-  const { t: tTooltips } = useTranslation(NAMESPACES.DESIGN_TOOLTIPS);
+  const help = useSetupHelp();
+  const id = useId();
 
   const inputValue = useSelector((state) => {
     return state.designState[code].customCss;
   });
 
-  const setCss = (event) => {
-    console.log("value", event.target.value);
-    dispatch(
-      changeCustomCss({ code, value: event.target.value })
-    );
-  };
+  const helpText = [help("custom_css"), help("expression_reference")]
+    .filter(Boolean)
+    .join("\n\n");
 
   return (
-    <>
-      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-        <CustomTooltip body={`${tTooltips("custom_css")}\n\n${tTooltips("expression_reference")}`} />
-        <Typography fontWeight={700}>{t("custom_css")}</Typography>
-      </div>
-      <TextField
-        fullWidth
-        multiline
-        minRows={4}
-        maxRows={25}
-        value={inputValue}
-        onChange={setCss}
-        placeholder={`/* Enter your CSS code here... */
-  background-color: #007bff;
-  color: white;
-`}
-        variant="outlined"
+    <SetupField label={t("custom_css")} help={helpText} htmlFor={id}>
+      <textarea
+        id={id}
+        rows={6}
+        dir="ltr"
+        spellCheck={false}
+        value={inputValue || ""}
+        onChange={(event) =>
+          dispatch(changeCustomCss({ code, value: event.target.value }))
+        }
+        placeholder={PLACEHOLDER}
+        className={`${setupFieldStyles.textarea} ${setupFieldStyles.code}`}
       />
-    </>
+    </SetupField>
   );
 }
 

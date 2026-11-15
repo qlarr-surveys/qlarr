@@ -1,16 +1,18 @@
-import { DeleteOutline } from "@mui/icons-material";
+import React, { useEffect, useId, useState } from "react";
 import {
-  Box,
-  IconButton,
-  InputAdornment,
-  TextField,
-  Typography,
-} from "@mui/material";
-import React, { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { NAMESPACES } from "~/hooks/useNamespaceLoader";
-import CustomTooltip from "~/components/common/Tooltip/Tooltip";
-import styles from "./CustomValidationRules.module.css";
+  SetupCard,
+  SetupHint,
+  SetupLangInput,
+  SetupPrefixInput,
+  SetupRemoveButton,
+  SetupSubField,
+  setupFieldStyles,
+  useSetupHelp,
+} from "~/components/design/setup/SetupFields";
+
+const cx = (...names) => names.filter(Boolean).join(" ");
+
+const ID_PREFIX = "validation_custom_";
 
 function RuleCard({
   rule,
@@ -23,7 +25,8 @@ function RuleCard({
   onRuleIdChange,
   onErrorMessageChange,
 }) {
-  const { t: tTooltips } = useTranslation(NAMESPACES.DESIGN_TOOLTIPS);
+  const help = useSetupHelp();
+  const idBase = useId();
   const [idSuffix, setIdSuffix] = useState(
     rule.code?.replace(/^validation_custom_/, "") || ""
   );
@@ -33,115 +36,89 @@ function RuleCard({
   }, [rule.code]);
 
   const idError = validateRuleIdSuffix(idSuffix, rule.code);
+  const hasRuleErrors = rule.errors.length > 0;
+  const title = `${t("custom_rule")} #${ruleIndex + 1}`;
 
   return (
-    <Box className={styles.ruleCard}>
-      <Box className={styles.ruleHeader}>
-        <Typography fontWeight={600}>
-          {t("custom_rule")} #{ruleIndex + 1}
-        </Typography>
-        <IconButton
-          size="small"
+    <SetupCard
+      aria-label={title}
+      invalid={!!idError || hasRuleErrors}
+      title={title}
+      actions={
+        <SetupRemoveButton
+          label={t("remove_rule")}
           onClick={() => onRemoveRule(rule.code)}
-          color="error"
-        >
-          <DeleteOutline fontSize="small" />
-        </IconButton>
-      </Box>
-
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5 }}>
-          {t("validation_rule_id")}
-        </Typography>
-        <TextField
-          fullWidth
-          variant="outlined"
-          size="small"
+        />
+      }
+    >
+      <SetupSubField label={t("validation_rule_id")} htmlFor={`${idBase}-id`}>
+        <SetupPrefixInput
+          id={`${idBase}-id`}
+          prefix={ID_PREFIX}
           placeholder="custom_rule"
           value={idSuffix}
-          onChange={(e) => setIdSuffix(e.target.value.replace(/[^a-zA-Z0-9_]/g, ""))}
+          invalid={!!idError}
+          aria-describedby={idError ? `${idBase}-id-error` : undefined}
+          onChange={(e) =>
+            setIdSuffix(e.target.value.replace(/[^a-zA-Z0-9_]/g, ""))
+          }
           onBlur={() => !idError && onRuleIdChange(rule.code, idSuffix)}
-          error={!!idError}
-          helperText={idError}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Typography
-                  component="span"
-                  sx={{ color: "text.secondary", fontWeight: 500 }}
-                >
-                  validation_custom_
-                </Typography>
-              </InputAdornment>
-            ),
-          }}
         />
-      </Box>
+        {idError && (
+          <SetupHint id={`${idBase}-id-error`} error>
+            {idError}
+          </SetupHint>
+        )}
+      </SetupSubField>
 
-      <Box sx={{ mb: 2 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 4 }}>
-          <CustomTooltip body={tTooltips("expression_reference")} />
-          <Typography variant="body2" fontWeight={600}>
-            {t("rule_condition")}
-          </Typography>
-        </div>
-        <TextField
-          fullWidth
-          multiline
+      <SetupSubField
+        label={t("rule_condition")}
+        help={help("expression_reference")}
+        htmlFor={`${idBase}-rule`}
+      >
+        <textarea
+          id={`${idBase}-rule`}
           rows={2}
-          variant="outlined"
-          size="small"
+          dir="ltr"
+          spellCheck={false}
           placeholder={t("enter_validation_rule")}
           value={rule.rule || ""}
           onChange={(e) => onRuleChange(rule.code, e.target.value)}
-          error={rule.errors.length > 0}
+          aria-invalid={hasRuleErrors}
+          className={cx(
+            setupFieldStyles.textarea,
+            setupFieldStyles.code,
+            hasRuleErrors && setupFieldStyles.invalid
+          )}
         />
         {rule.errors.map((err, i) => (
-          <Typography
-            key={i}
-            variant="caption"
-            color="error"
-            display="block"
-            sx={{ mt: 0.5 }}
-          >
+          <SetupHint key={i} error>
             {err.message}
-          </Typography>
+          </SetupHint>
         ))}
-      </Box>
+      </SetupSubField>
 
-      <Typography fontWeight={700} sx={{ mt: 2, mb: 1 }}>
-        {t("error_messages")}
-      </Typography>
-
-      <Box className={styles.errorWrapper}>
-        <Box className={styles.errorLabelWrapper}>
-          {languagesList.map((l) => (
-            <Box
-              key={l.code}
-              className={`${styles.errorItem} ${styles.uppercase}`}
-            >
-              {l.code}:
-            </Box>
+      <SetupSubField label={t("error_messages")} id={`${idBase}-messages`}>
+        <div
+          role="group"
+          aria-labelledby={`${idBase}-messages`}
+          className={setupFieldStyles.langList}
+        >
+          {languagesList.map((lang) => (
+            <SetupLangInput
+              key={lang.code}
+              lang={lang}
+              label={t("error_message")}
+              placeholder={t("error_message")}
+              value={rule.errorMessages?.[lang.code] || ""}
+              onChange={(value) =>
+                onErrorMessageChange(rule.code, lang.code, value)
+              }
+            />
           ))}
-        </Box>
-        <Box className={styles.errorItemContainer}>
-          {languagesList.map((l) => (
-            <Box key={l.code} className={styles.errorItem}>
-              <TextField
-                fullWidth
-                size="small"
-                variant="standard"
-                placeholder={t("error_message")}
-                value={rule.errorMessages?.[l.code] || ""}
-                onChange={(e) =>
-                  onErrorMessageChange(rule.code, l.code, e.target.value)
-                }
-              />
-            </Box>
-          ))}
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </SetupSubField>
+    </SetupCard>
   );
 }
 

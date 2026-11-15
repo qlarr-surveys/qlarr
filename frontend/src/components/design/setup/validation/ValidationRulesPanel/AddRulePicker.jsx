@@ -1,6 +1,6 @@
 import React from "react";
-import { Button, Divider, Menu, MenuItem } from "@mui/material";
-import { AddOutlined } from "@mui/icons-material";
+import { Divider, Menu, MenuItem } from "@mui/material";
+import { SetupAddButton } from "~/components/design/setup/SetupFields";
 
 /**
  * "Add rule" button that opens a menu of the validations not yet active for
@@ -25,15 +25,13 @@ function AddRulePicker({
 
   return (
     <>
-      <Button
-        variant="outlined"
-        fullWidth
-        startIcon={<AddOutlined />}
-        sx={{ mt: 2 }}
+      <SetupAddButton
+        aria-haspopup="menu"
+        aria-expanded={open}
         onClick={(event) => setAnchorEl(event.currentTarget)}
       >
         {t("validation_add_rule")}
-      </Button>
+      </SetupAddButton>
       <Menu anchorEl={anchorEl} open={open} onClose={close}>
         {availablePresets.map((rule) => (
           <MenuItem

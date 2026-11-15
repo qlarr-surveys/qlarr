@@ -1,16 +1,5 @@
-import React, { useMemo, useCallback } from "react";
+import React, { useMemo, useCallback, useId } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  Box,
-  FormControlLabel,
-  MenuItem,
-  Select,
-  Switch,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-  Typography,
-} from "@mui/material";
 import {
   accessibleDependencies,
   CARRY_FORWARD_SOURCE_TYPES,
@@ -22,6 +11,16 @@ import {
   updateRepetitionSource,
   disableRepetition,
 } from "~/state/design/designState";
+import {
+  SetupHint,
+  SetupSegmented,
+  SetupSelect,
+  SetupSubField,
+  SetupSubToggle,
+  SetupToggle,
+  setupFieldStyles,
+  useSetupHelp,
+} from "~/components/design/setup/SetupFields";
 
 // Source types selectable per repetition kind.
 const MCQ_SOURCE_TYPES = CARRY_FORWARD_SOURCE_TYPES; // per selected option
@@ -32,6 +31,10 @@ const NUMBER_SOURCE_TYPES = ["number"]; // per entered count
 // (range + relevanceInstruction) — the raw values are never edited here.
 function RepeatSettings({ code, t }) {
   const dispatch = useDispatch();
+  const help = useSetupHelp();
+  const kindId = useId();
+  const sourceId = useId();
+  const maxId = useId();
   const designState = useSelector((s) => s.designState);
   const config = useSelector((s) => s.designState[code]?.repeatSource);
   const repeatInfo = useSelector((s) => s.designState[code]?.repeatInfo);
@@ -70,8 +73,8 @@ function RepeatSettings({ code, t }) {
     [designState, sourceCode],
   );
 
-  const onToggle = (e) => {
-    if (e.target.checked) {
+  const onToggle = (checked) => {
+    if (checked) {
       dispatch(enableRepetition({ code }));
     } else {
       dispatch(disableRepetition({ code }));
@@ -79,7 +82,7 @@ function RepeatSettings({ code, t }) {
   };
 
   // Switching kind invalidates the current source (valid types differ).
-  const onKind = (_e, value) => {
+  const onKind = (value) => {
     if (value && value !== kind) {
       dispatch(updateRepetitionSource({ code, kind: value, sourceCode: "" }));
     }
@@ -95,87 +98,76 @@ function RepeatSettings({ code, t }) {
     }
   };
 
-  const onCarryOther = (e) =>
-    dispatch(updateRepetitionSource({ code, carryOther: e.target.checked }));
+  const onCarryOther = (checked) =>
+    dispatch(updateRepetitionSource({ code, carryOther: checked }));
 
   return (
-    <Box>
-      <FormControlLabel
-        control={<Switch size="small" checked={enabled} onChange={onToggle} />}
-        label={t("repeat_enable")}
-      />
-
+    <SetupToggle
+      label={t("repeat_enable")}
+      help={help("repetition")}
+      checked={enabled}
+      onChange={onToggle}
+    >
       {enabled && (
-        <Box sx={{ mt: 1 }}>
-          <Typography fontWeight={700} variant="body2" sx={{ mb: 0.5 }}>
-            {t("repeat_kind")}
-          </Typography>
-          <ToggleButtonGroup
-            exclusive
-            size="small"
-            value={kind}
-            onChange={onKind}
-            aria-label="repeat-kind"
-          >
-            <ToggleButton value="mcq">{t("repeat_kind_option")}</ToggleButton>
-            <ToggleButton value="number">{t("repeat_kind_count")}</ToggleButton>
-          </ToggleButtonGroup>
+        <div className={setupFieldStyles.stack}>
+          <SetupSubField label={t("repeat_kind")} id={kindId}>
+            <SetupSegmented
+              labelledBy={kindId}
+              options={[
+                { value: "mcq", label: t("repeat_kind_option") },
+                { value: "number", label: t("repeat_kind_count") },
+              ]}
+              value={kind}
+              onChange={onKind}
+            />
+          </SetupSubField>
 
-          <Box sx={{ mt: 1 }}>
-            <Select
-              fullWidth
-              size="small"
-              displayEmpty
-              value={sources.some((s) => s.code === sourceCode) ? sourceCode : ""}
-              onChange={onSource}
-            >
-              <MenuItem value="">
-                <em>{t("repeat_source_placeholder")}</em>
-              </MenuItem>
-              {sources.map((s) => (
-                <MenuItem key={s.code} value={s.code}>
-                  {s.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </Box>
+          <SetupSelect
+            id={sourceId}
+            aria-label={t("repeat_source_placeholder")}
+            value={sources.some((s) => s.code === sourceCode) ? sourceCode : ""}
+            onChange={onSource}
+          >
+            <option value="">{t("repeat_source_placeholder")}</option>
+            {sources.map((s) => (
+              <option key={s.code} value={s.code}>
+                {s.label}
+              </option>
+            ))}
+          </SetupSelect>
 
           {kind === "number" && sourceCode && (
-            <TextField
-              type="number"
-              size="small"
-              sx={{ mt: 1, width: 140 }}
-              label={t("repeat_max")}
-              value={max}
-              onChange={onMax}
-              inputProps={{ min: 1, max: REPEAT_NUMBER_MAX }}
-            />
+            <SetupSubField label={t("repeat_max")} htmlFor={maxId}>
+              <input
+                id={maxId}
+                type="number"
+                min={1}
+                max={REPEAT_NUMBER_MAX}
+                value={max}
+                onChange={onMax}
+                className={`${setupFieldStyles.input} ${setupFieldStyles.inputShort}`}
+              />
+            </SetupSubField>
           )}
 
           {kind === "mcq" && sourceCode && sourceHasOther && (
-            <FormControlLabel
-              sx={{ display: "block", mt: 0.5 }}
-              control={
-                <Switch
-                  size="small"
-                  checked={carryOther}
-                  onChange={onCarryOther}
-                />
-              }
+            <SetupSubToggle
               label={t("repeat_include_other")}
+              checked={carryOther}
+              onChange={onCarryOther}
             />
           )}
 
           {repeatInfo?.range?.length > 0 && (
-            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
+            <SetupHint>
               {kind === "number"
                 ? t("repeat_summary_count", { count: repeatInfo.range.length })
                 : t("repeat_summary_option", { count: repeatInfo.range.length })}
-            </Typography>
+            </SetupHint>
           )}
-        </Box>
+        </div>
       )}
-    </Box>
+    </SetupToggle>
   );
 }
 

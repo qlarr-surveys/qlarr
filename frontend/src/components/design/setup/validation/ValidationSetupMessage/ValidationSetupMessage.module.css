@@ -1,19 +1,21 @@
+/* A rule's error message per survey language: the standard one, or the
+   author's own, with the button that switches between them. */
+.messages {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .heading {
-  margin-top: 6px;
+  font: 500 13.5px Rubik, sans-serif;
+  color: #1b2150;
 }
 
 .messageRow {
-  font-size: 14px;
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.rowLabel {
-  text-transform: uppercase;
-  min-width: 28px;
-  color: rgba(0, 0, 0, 0.6);
-  flex-shrink: 0;
+  min-height: 40px;
 }
 
 .rowContent {
@@ -22,5 +24,6 @@
 }
 
 .standardText {
-  color: rgba(0, 0, 0, 0.6);
+  font: 400 13.5px/19px Rubik, sans-serif;
+  color: #5b6189;
 }

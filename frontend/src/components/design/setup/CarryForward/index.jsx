@@ -1,17 +1,5 @@
-import React, { useMemo, useCallback } from "react";
+import React, { useMemo, useCallback, useId } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  Box,
-  Button,
-  Divider,
-  FormControlLabel,
-  MenuItem,
-  Select,
-  Switch,
-  ToggleButton,
-  ToggleButtonGroup,
-  Typography,
-} from "@mui/material";
 import {
   accessibleDependencies,
   isArrayType,
@@ -23,12 +11,24 @@ import {
   updateCarryForward,
   disableCarryForward,
 } from "~/state/design/designState";
+import {
+  SetupField,
+  SetupSegmented,
+  SetupSelect,
+  SetupSubToggle,
+  setupFieldStyles,
+  useSetupHelp,
+} from "~/components/design/setup/SetupFields";
+
+const cx = (...names) => names.filter(Boolean).join(" ");
 
 // Config editor for one axis of a target ("rows" for choice/ranking/text
 // targets; "rows" and "columns" for arrays). Dispatches the design-core carry
 // forward mutations, which materialize + keep the options in sync.
 function AxisConfig({ code, axis, axisLabel, sources, hasOtherFor, t }) {
   const dispatch = useDispatch();
+  const help = useSetupHelp();
+  const selectId = useId();
   const config = useSelector((s) => s.designState[code]?.carryForward?.[axis]);
   const sourceCode = config?.sourceCode || "";
   const mode = config?.mode || "selected";
@@ -54,83 +54,61 @@ function AxisConfig({ code, axis, axisLabel, sources, hasOtherFor, t }) {
     }
   };
 
-  const onMode = (_e, value) => {
+  const onMode = (value) => {
     if (value) dispatch(updateCarryForward({ targetCode: code, axis, mode: value }));
   };
 
-  const onCarryOther = (e) =>
-    dispatch(
-      updateCarryForward({ targetCode: code, axis, carryOther: e.target.checked }),
-    );
+  const onCarryOther = (checked) =>
+    dispatch(updateCarryForward({ targetCode: code, axis, carryOther: checked }));
 
   return (
-    <Box sx={{ mb: 1 }}>
-      {axisLabel && (
-        <Typography fontWeight={700} variant="body2" sx={{ mb: 0.5 }}>
-          {axisLabel}
-        </Typography>
-      )}
-      <Select
-        fullWidth
-        size="small"
-        displayEmpty
-        value={sourceCode}
-        onChange={onSource}
-      >
-        <MenuItem value="">
-          <em>{t("carry_source_placeholder")}</em>
-        </MenuItem>
-        {sources.map((s) => (
-          <MenuItem key={s.code} value={s.code}>
-            {s.label}
-          </MenuItem>
-        ))}
-      </Select>
+    <SetupField label={axisLabel} help={help("carry_forward")} htmlFor={selectId}>
+      <div className={setupFieldStyles.stack}>
+        <SetupSelect id={selectId} value={sourceCode} onChange={onSource}>
+          <option value="">{t("carry_source_placeholder")}</option>
+          {sources.map((s) => (
+            <option key={s.code} value={s.code}>
+              {s.label}
+            </option>
+          ))}
+        </SetupSelect>
 
-      {config && (
-        <Box sx={{ mt: 1 }}>
-          <ToggleButtonGroup
-            exclusive
-            size="small"
-            value={mode}
-            onChange={onMode}
-            aria-label="carry-forward-mode"
-          >
-            <ToggleButton value="selected">
-              {t("carry_mode_selected")}
-            </ToggleButton>
-            <ToggleButton value="unselected">
-              {t("carry_mode_unselected")}
-            </ToggleButton>
-          </ToggleButtonGroup>
-
-          {mode === "selected" && sourceHasOther && (
-            <FormControlLabel
-              sx={{ display: "block", mt: 0.5 }}
-              control={
-                <Switch
-                  size="small"
-                  checked={carryOther}
-                  onChange={onCarryOther}
-                />
-              }
-              label={t("carry_other")}
+        {config && (
+          <>
+            <SetupSegmented
+              label={axisLabel}
+              options={[
+                { value: "selected", label: t("carry_mode_selected") },
+                { value: "unselected", label: t("carry_mode_unselected") },
+              ]}
+              value={mode}
+              onChange={onMode}
             />
-          )}
 
-          <Button
-            size="small"
-            color="error"
-            sx={{ mt: 0.5 }}
-            onClick={() =>
-              dispatch(disableCarryForward({ targetCode: code, axis }))
-            }
-          >
-            {t("carry_remove")}
-          </Button>
-        </Box>
-      )}
-    </Box>
+            {mode === "selected" && sourceHasOther && (
+              <SetupSubToggle
+                label={t("carry_other")}
+                checked={carryOther}
+                onChange={onCarryOther}
+              />
+            )}
+
+            <button
+              type="button"
+              onClick={() =>
+                dispatch(disableCarryForward({ targetCode: code, axis }))
+              }
+              className={cx(
+                setupFieldStyles.textLink,
+                setupFieldStyles.textLinkDanger
+              )}
+            >
+              {t("carry_remove")}
+            </button>
+          </>
+        )}
+      </div>
+    </SetupField>
   );
 }
 
@@ -168,7 +146,7 @@ function CarryForward({ code, t }) {
   }
 
   return (
-    <div>
+    <div className={cx(setupFieldStyles.stack, setupFieldStyles.stackLoose)}>
       {isArray ? (
         <>
           <AxisConfig
@@ -179,7 +157,6 @@ function CarryForward({ code, t }) {
             hasOtherFor={hasOtherFor}
             t={t}
           />
-          <Divider sx={{ my: 1.5 }} />
           <AxisConfig
             code={code}
             axis="columns"

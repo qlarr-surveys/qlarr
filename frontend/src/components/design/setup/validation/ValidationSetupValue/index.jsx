@@ -1,4 +1,3 @@
-import { TextField } from "@mui/material";
 import styles from "./ValidationSetupValue.module.css";
 import { useDispatch } from "react-redux";
 import { changeValidationValue } from "~/state/design/designState";
@@ -6,6 +5,12 @@ import { useSelector } from "react-redux";
 import FileType from "../../FileType";
 import React, { useState } from "react";
 import { Trans } from 'react-i18next';
+import {
+  SetupHint,
+  setupFieldStyles,
+} from "~/components/design/setup/SetupFields";
+
+const cx = (...names) => names.filter(Boolean).join(" ");
 
 function ValidationSetupValue({ code, validation, rule, t }) {
   const childCount = useSelector((state) => {
@@ -58,9 +63,16 @@ function ValidationSetupValue({ code, validation, rule, t }) {
     rule != "validation_pattern_email" &&
     rule != "validation_file_types";
 
+  // Nothing to set, e.g. Required: no empty row in the rule's body.
+  if (rule != "validation_file_types" && keys.length === 0) {
+    return null;
+  }
+
   return (
     <div className={styles.valueValidationItemsContainer}>
-      {keys && hasSubtitle && <div>{t(rule + "_subtitle")}</div>}
+      {keys && hasSubtitle && (
+        <span className={styles.subtitle}>{t(rule + "_subtitle")}</span>
+      )}
       <div className={styles.valueValidationItems}>
         {rule == "validation_file_types" ? (
           <FileType
@@ -68,21 +80,17 @@ function ValidationSetupValue({ code, validation, rule, t }) {
             onValueChanged={(value) => onValuesUpdate("fileTypes", value)}
           />
         ) : (
-          keys.map((i) => {
-            const isInError =
-              typeof bounds !== "undefined" &&
-              (validation[i] < bounds[0] || validation[i] > bounds[1]);
-            return (
-              <ValidationInput
-                key={i}
-                t={t}
-                initialValue={validation[i]}
-                bounds={bounds}
-                validationType={typeof validation[i]}
-                onValuesUpdate={(value) => onValuesUpdate(i, value)}
-              />
-            );
-          })
+          keys.map((i) => (
+            <ValidationInput
+              key={i}
+              t={t}
+              label={hasSubtitle ? t(rule + "_subtitle") : t(rule + "_title")}
+              initialValue={validation[i]}
+              bounds={bounds}
+              validationType={typeof validation[i]}
+              onValuesUpdate={(value) => onValuesUpdate(i, value)}
+            />
+          ))
         )}
       </div>
     </div>
@@ -91,11 +99,13 @@ function ValidationSetupValue({ code, validation, rule, t }) {
 
 const ValidationInput = ({
   t,
+  label,
   initialValue,
   validationType,
   onValuesUpdate,
   bounds,
 }) => {
+  const hintId = React.useId();
   const [value, setValue] = useState(initialValue);
   const isInError = value != initialValue;
   const onValueChange = (event) => {
@@ -114,12 +124,23 @@ const ValidationInput = ({
     }
   };
   return (
-    <TextField
-      error={isInError}
-      value={value}
-      variant="standard"
-      helperText={
-        isInError ? (
+    <div className={styles.valueField}>
+      <input
+        value={value}
+        type={validationType === "number" ? "number" : "text"}
+        dir="auto"
+        aria-label={label}
+        aria-invalid={isInError}
+        aria-describedby={isInError ? hintId : undefined}
+        onChange={onValueChange}
+        className={cx(
+          setupFieldStyles.input,
+          setupFieldStyles.inputShort,
+          isInError && setupFieldStyles.invalid
+        )}
+      />
+      {isInError && (
+        <SetupHint id={hintId} error>
           <Trans
             t={t}
             values={{
@@ -127,13 +148,9 @@ const ValidationInput = ({
             }}
             i18nKey="value_beyond_bounds_no_label"
           />
-        ) : null
-      }
-      size="small"
-      type={validationType === "number" ? "number" : "text"}
-      onChange={onValueChange}
-      style={{ maxWidth: "150px", marginLeft: "8px" }}
-    />
+        </SetupHint>
+      )}
+    </div>
   );
 };
 

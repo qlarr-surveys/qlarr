@@ -1,20 +1,17 @@
-import React from "react";
-import {
-  Checkbox,
-  MenuItem,
-  Select,
-  ToggleButton,
-  ToggleButtonGroup,
-  Typography,
-} from "@mui/material";
+import React, { useId } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { changeAttribute, updatePriority } from "~/state/design/designState";
-import styles from "./PrioritySetup.module.css";
-import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import { instructionByCode } from "@qlarr/design-core/state/addInstructions";
 import { stripTags } from "~/utils/design/utils";
-import { useTranslation } from "react-i18next";
-import { NAMESPACES } from "~/hooks/useNamespaceLoader";
+import {
+  SetupCheckItem,
+  SetupCheckList,
+  SetupField,
+  SetupSegmented,
+  SetupSelect,
+  setupFieldStyles,
+  useSetupHelp,
+} from "~/components/design/setup/SetupFields";
 import OrderPriorityError from "../OrderPriorityError";
 import errorStyles from "~/components/design/ErrorDisplay/ErrorDisplay.module.css";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
@@ -33,7 +30,9 @@ const RULE_CONFIG = {
 
 export default function PrioritySetup({ t, rule, code }) {
   const dispatch = useDispatch();
-  const { t: tTooltips } = useTranslation(NAMESPACES.DESIGN_TOOLTIPS);
+  const help = useSetupHelp();
+  const headingId = useId();
+  const limitId = useId();
 
   const { title, type } = RULE_CONFIG[rule] || {};
   const isGroups = rule === "prioritise_groups";
@@ -125,95 +124,72 @@ export default function PrioritySetup({ t, rule, code }) {
     commitCodes(next, relevantGroup?.limit);
   };
 
+  const heading = type ? t(title) : t("op_priority_section");
+
   return (
-    <>
-      <div className={styles.label}>
-        <CustomTooltip body={tTooltips(title)} />
-        <Typography fontWeight={700}>
-          {type ? t(title) : t("op_priority_section")}
-        </Typography>
-      </div>
+    <SetupField label={heading} help={help(title)} id={headingId}>
+      <div className={setupFieldStyles.stack}>
+        <SetupSegmented
+          labelledBy={headingId}
+          options={[
+            { value: "NONE", label: t("no_priority") },
+            { value: "PRIORITY", label: t("prioritise") },
+          ]}
+          value={value}
+          onChange={onToggle}
+        />
 
-      <ToggleButtonGroup
-        className={styles.modeGroup}
-        size="small"
-        exclusive
-        value={value}
-        onChange={(_e, next) => {
-          if (next !== null) onToggle(next);
-        }}
-      >
-        <ToggleButton value="NONE">{t("no_priority")}</ToggleButton>
-        <ToggleButton value="PRIORITY">{t("prioritise")}</ToggleButton>
-      </ToggleButtonGroup>
+        {value !== "NONE" && (
+          <div className={setupFieldStyles.panelBox}>
+            <SetupCheckList label={heading}>
+              {children.map((item) => (
+                <SetupCheckItem
+                  key={item.code}
+                  code={item.code}
+                  text={stripTags(item.label)}
+                  checked={item.inGroup}
+                  onChange={(checked) => onCheck(item.code, checked)}
+                />
+              ))}
+            </SetupCheckList>
 
-      {value !== "NONE" && (
-        <>
-          <ul className={styles.list}>
-            {children.map((item) => (
-              <PriorityChildRow
-                key={item.code}
-                item={item}
-                onCheck={(checked) => onCheck(item.code, checked)}
-              />
-            ))}
-          </ul>
-
-          {selectedCount >= 2 ? (
-            <>
-              <div className={styles.limitRow}>
-                <Typography fontWeight={700}>{t("priority_show")}</Typography>
-                <Select
-                  size="small"
+            {selectedCount >= 2 ? (
+              <div className={setupFieldStyles.sentence}>
+                <label htmlFor={limitId}>{t("priority_show")}</label>
+                <SetupSelect
+                  id={limitId}
+                  inline
                   value={effectiveLimit}
-                  onChange={(e) => commitCodes(selectedCodes, Number(e.target.value))}
+                  onChange={(e) =>
+                    commitCodes(selectedCodes, Number(e.target.value))
+                  }
                 >
-                  {Array.from({ length: selectedCount - 1 }, (_, i) => i + 1).map(
-                    (n) => (
-                      <MenuItem key={n} value={n}>
-                        {n}
-                      </MenuItem>
-                    )
-                  )}
-                </Select>
-                <Typography>
-                  {t("priority_of_count", { count: selectedCount })}
-                </Typography>
+                  {Array.from(
+                    { length: selectedCount - 1 },
+                    (_, i) => i + 1
+                  ).map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </SetupSelect>
+                <span>{t("priority_of_count", { count: selectedCount })}</span>
               </div>
-            </>
-          ) : (
-            <div className={errorStyles.errorDisplay}>
-              <div className={errorStyles.errorItem}>
-                <ErrorOutlineIcon style={{ verticalAlign: "middle" }} />
-                <span className={errorStyles.errorMessage}>
-                  {t("priority_min_items")}
-                </span>
+            ) : (
+              <div className={errorStyles.errorDisplay}>
+                <div className={errorStyles.errorItem}>
+                  <ErrorOutlineIcon style={{ verticalAlign: "middle" }} />
+                  <span className={errorStyles.errorMessage}>
+                    {t("priority_min_items")}
+                  </span>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <OrderPriorityError errors={errors} />
-        </>
-      )}
-    </>
-  );
-}
-
-function PriorityChildRow({ item, onCheck }) {
-  const text = stripTags(item.label);
-  return (
-    <li className={styles.listItem} onClick={() => onCheck(!item.inGroup)}>
-      <Checkbox
-        checked={item.inGroup}
-        onClick={(e) => e.stopPropagation()}
-        onChange={(e) => onCheck(e.target.checked)}
-      />
-      <span className={styles.codeChip} title={item.code}>
-        {item.code}
-      </span>
-      <span className={styles.itemLabel} title={text}>
-        {text}
-      </span>
-    </li>
+            <OrderPriorityError errors={errors} />
+          </div>
+        )}
+      </div>
+    </SetupField>
   );
 }

@@ -317,8 +317,10 @@
   top: 0;
 }
 
+/* Sized by their names and sharing what is left, so a longer name such as
+   "Validation" (or "Validierung") is not cut off to keep the tabs equal. */
 .tab {
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 0;
   height: 42px;
   padding: 0 6px;

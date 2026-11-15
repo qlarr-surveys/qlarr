@@ -1,41 +1,52 @@
-import { Box, Switch, TextField, Typography } from "@mui/material";
+import React from "react";
+import {
+  SetupHint,
+  SetupToggle,
+  setupFieldStyles,
+  useSetupHelp,
+} from "~/components/design/setup/SetupFields";
 import { useOrderInstructions } from "./useOrderInstructions";
-import styles from "../shared.module.css";
+
+const cx = (...names) => names.filter(Boolean).join(" ");
 
 function OrderInstructions({ code, t }) {
-  const { isOpen, orderInstruction, errors, onToggle, onTextChange } = useOrderInstructions(code);
+  const help = useSetupHelp();
+  const { isOpen, orderInstruction, errors, onToggle, onTextChange } =
+    useOrderInstructions(code);
+  const label = t("order_instructions_title");
 
   return (
-    <Box>
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <Typography fontWeight={700}>{t("order_instructions_title")}</Typography>
-        <Switch
-          checked={isOpen}
-          onChange={(e) => onToggle(e.target.checked)}
-          inputProps={{ "aria-label": "order instructions" }}
-        />
-      </Box>
+    <SetupToggle
+      label={label}
+      help={help("order_instructions")}
+      checked={!!isOpen}
+      onChange={onToggle}
+    >
       {isOpen && (
-        <Box className={styles.instructionCard}>
-          <TextField
-            fullWidth
-            multiline
+        <>
+          <textarea
             rows={3}
-            variant="outlined"
-            size="small"
+            dir="ltr"
+            spellCheck={false}
+            aria-label={label}
+            aria-invalid={errors.length > 0}
             placeholder={t("order_instruction_placeholder")}
-            value={orderInstruction.text || ""}
+            value={orderInstruction?.text || ""}
             onChange={(e) => onTextChange(e.target.value)}
-            error={errors.length > 0}
+            className={cx(
+              setupFieldStyles.textarea,
+              setupFieldStyles.code,
+              errors.length > 0 && setupFieldStyles.invalid
+            )}
           />
           {errors.map((err, i) => (
-            <Typography key={i} variant="caption" color="error" display="block" sx={{ mt: 0.5 }}>
+            <SetupHint key={i} error>
               {err.message}
-            </Typography>
+            </SetupHint>
           ))}
-        </Box>
+        </>
       )}
-    </Box>
+    </SetupToggle>
   );
 }
 

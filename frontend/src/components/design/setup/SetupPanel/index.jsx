@@ -401,7 +401,12 @@ const SetupBody = React.memo(function SetupBody({ setupInfo, rules, code, t }) {
             tabIndex={0}
             className={cx(
               styles.tabPanel,
-              view.flash === selectedTab.key && styles.panelFlash
+              // The validation rules aren't rows of their own, so a rule the
+              // canvas points at flashes the whole panel instead.
+              (view.flash === selectedTab.key ||
+                (selectedTab.key === "validation" &&
+                  selectedTab.rules.includes(view.flash))) &&
+                styles.panelFlash
             )}
           >
             {selectedTab.key === "validation" ? (

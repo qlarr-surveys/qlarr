@@ -1,17 +1,25 @@
-import { Switch, Button, Divider, Typography, TextField, Box, Link } from "@mui/material";
 import { QlarrLogicBuilderInlineWrapper } from "~/components/design/setup/logic/QlarrLogicBuilder";
 import { changeRelevance, clearRelevanceConfig, updateInstruction } from "~/state/design/designState";
-import React, { useMemo, useCallback, useState } from "react";
+import React, { useMemo, useCallback, useId, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./Relevance.module.css";
 import { Trans, useTranslation } from "react-i18next";
-import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
+import {
+  SetupHint,
+  SetupLabel,
+  SetupToggle,
+  setupFieldStyles,
+  useSetupHelp,
+} from "~/components/design/setup/SetupFields";
+
+const cx = (...names) => names.filter(Boolean).join(" ");
 
 function Relevance({ code, t }) {
   const dispatch = useDispatch();
-  const { t: tTooltips } = useTranslation(NAMESPACES.DESIGN_TOOLTIPS);
+  const help = useSetupHelp();
   const { t: tCore } = useTranslation(NAMESPACES.DESIGN_CORE);
+  const expressionId = useId();
 
   const designState = useSelector((s) => s.designState);
   const state = designState[code];
@@ -95,85 +103,95 @@ function Relevance({ code, t }) {
     }));
   };
 
-  return (
-    <div>
-      <div className={styles.toggleValue}>
-        <div className={styles.label}>
-          <CustomTooltip body={tTooltips("relevance")} />
-          <Typography color={isDisabled && "text.disabled"} fontWeight={700}>
-            {t("relevance")}
-          </Typography>
-        </div>
-        <Switch
-          id="conditional-visibility-switch"
-          disabled={isDisabled || (hasErrors && !isRawMode)}
-          checked={isToggleOn}
-          onChange={(e) => handleToggle(e.target.checked)}
-          inputProps={{ "aria-label": "conditional-visibility-switch" }}
-        />
-      </div>
+  const manualHelp = [
+    help("relevance_manual_expression"),
+    help("expression_reference"),
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 
-      {isToggleOn && (
-        hasErrors && !isRawMode ? (
-          <div className={styles.errorContainer}>
+  return (
+    <SetupToggle
+      label={t("relevance")}
+      help={help("relevance")}
+      checked={isToggleOn}
+      onChange={handleToggle}
+      disabled={isDisabled || (hasErrors && !isRawMode)}
+    >
+      {isToggleOn &&
+        (hasErrors && !isRawMode ? (
+          <div className={styles.errorContainer} role="alert">
             <span className={styles.errorText}>
               <Trans t={t} i18nKey="wrong_logic_err" />
             </span>
-            <Button variant="contained" size="small" onClick={resetToShowAlways}>
+            <button
+              type="button"
+              onClick={resetToShowAlways}
+              className={setupFieldStyles.secondaryButton}
+            >
               {tCore("ok")}
-            </Button>
+            </button>
           </div>
         ) : isRawMode ? (
-          <>
-            <Divider sx={{ my: 1 }} />
-            <Box sx={{ display: "flex", alignItems: "center", gap: "4px", mb: 0.5 }}>
-              <CustomTooltip body={`${tTooltips("relevance_manual_expression")}\n\n${tTooltips("expression_reference")}`} />
-              <Typography variant="body2" fontWeight={600}>{t("manual_expression")}</Typography>
-            </Box>
-            <TextField
-              fullWidth
-              multiline
+          <div className={setupFieldStyles.stack}>
+            <SetupLabel
+              label={t("manual_expression")}
+              help={manualHelp}
+              htmlFor={expressionId}
+              field
+            />
+            <textarea
+              id={expressionId}
               rows={3}
-              variant="outlined"
-              size="small"
+              dir="ltr"
+              spellCheck={false}
               placeholder={t("conditional_relevance_text_placeholder")}
               value={conditionalRelevance?.text || ""}
               onChange={(e) => handleRawTextChange(e.target.value)}
-              error={hasErrors}
+              aria-invalid={hasErrors}
+              className={cx(
+                setupFieldStyles.textarea,
+                setupFieldStyles.code,
+                hasErrors && setupFieldStyles.invalid
+              )}
             />
             {errors.map((err, i) => (
-              <Typography key={i} variant="caption" color="error" display="block" sx={{ mt: 0.5 }}>
+              <SetupHint key={i} error>
                 {err.message}
-              </Typography>
+              </SetupHint>
             ))}
             {showResetWarning ? (
-              <Box sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-                <Typography variant="caption" color="text.secondary" sx={{ flex: 1 }}>
-                  {t("switch_to_visual_warning")}
-                </Typography>
-                <Button size="small" onClick={() => setShowResetWarning(false)}>
-                  {tCore("cancel")}
-                </Button>
-                <Button size="small" variant="contained" onClick={handleConfirmSwitchToVisual}>
-                  {t("confirm_switch")}
-                </Button>
-              </Box>
+              <div className={styles.confirm} role="alertdialog" aria-label={t("switch_to_visual_warning")}>
+                <p className={styles.confirmText}>{t("switch_to_visual_warning")}</p>
+                <div className={styles.confirmActions}>
+                  <button
+                    type="button"
+                    onClick={() => setShowResetWarning(false)}
+                    className={setupFieldStyles.secondaryButton}
+                  >
+                    {tCore("cancel")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmSwitchToVisual}
+                    className={styles.confirmButton}
+                  >
+                    {t("confirm_switch")}
+                  </button>
+                </div>
+              </div>
             ) : (
-              <Box sx={{ mt: 0.5, textAlign: "right" }}>
-                <Link
-                  component="button"
-                  variant="caption"
-                  onClick={handleSwitchToVisual}
-                  sx={{ cursor: "pointer" }}
-                >
-                  {t("use_visual_builder")}
-                </Link>
-              </Box>
+              <button
+                type="button"
+                onClick={handleSwitchToVisual}
+                className={setupFieldStyles.textLink}
+              >
+                {t("use_visual_builder")}
+              </button>
             )}
-          </>
+          </div>
         ) : conditionOn ? (
-          <>
-            <Divider sx={{ my: 1 }} />
+          <div className={setupFieldStyles.stack}>
             <QlarrLogicBuilderInlineWrapper
               code={code}
               jsonLogic={logic}
@@ -184,20 +202,16 @@ function Relevance({ code, t }) {
               langList={langList}
               t={tCore}
             />
-            <Box sx={{ mt: 0.5, textAlign: "right" }}>
-              <Link
-                component="button"
-                variant="caption"
-                onClick={handleSwitchToRaw}
-                sx={{ cursor: "pointer" }}
-              >
-                {t("use_manual_expression")}
-              </Link>
-            </Box>
-          </>
-        ) : null
-      )}
-    </div>
+            <button
+              type="button"
+              onClick={handleSwitchToRaw}
+              className={setupFieldStyles.textLink}
+            >
+              {t("use_manual_expression")}
+            </button>
+          </div>
+        ) : null)}
+    </SetupToggle>
   );
 }
 

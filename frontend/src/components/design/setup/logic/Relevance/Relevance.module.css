@@ -1,42 +1,60 @@
-.relevance {
-  display: inline-block;
-}
+/* "Show when": what its switch opens, under the shared row styles. */
 
 .errorContainer {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 12px;
-  background-color: #fff3e0;
   border-radius: 8px;
-  color: #e65100;
-  margin-top: 8px;
+  background: #fff3e0;
+  font: 400 13.5px/19px Rubik, sans-serif;
+  color: #8a4a00;
 }
 
 .errorText {
   flex: 1;
 }
 
-.label {
+/* Leaving the manual expression for the builder erases it: ask first. */
+.confirm {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #f0c9a0;
+  border-radius: 8px;
+  background: #fff8f0;
 }
 
-
-.toggleValue {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
+.confirmText {
+  margin: 0;
+  font: 400 13.5px/19px Rubik, sans-serif;
+  color: #1b2150;
 }
 
-.inputValue {
-  max-width: 80%;
+.confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
-.label {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
+.confirmButton {
+  height: 36px;
+  min-width: 72px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px;
+  background: #3a46d8;
+  font: 600 14px Rubik, sans-serif;
+  color: #fff;
+  cursor: pointer;
+}
+
+.confirmButton:hover {
+  background: #2f3bc4;
+}
+
+.confirmButton:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
 }
