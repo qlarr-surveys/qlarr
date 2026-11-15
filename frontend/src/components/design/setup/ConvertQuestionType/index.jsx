@@ -1,17 +1,22 @@
-import React from "react";
+import React, { useId } from "react";
 import {
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  MenuItem,
-  Select,
   Typography,
 } from "@mui/material";
+import {
+  SetupField,
+  SetupSelect,
+  useSetupHelp,
+} from "~/components/design/setup/SetupFields";
 import { useConvertQuestionType } from "./useConvertQuestionType";
 
 export default function ConvertQuestionType({ code, t }) {
+  const help = useSetupHelp();
+  const id = useId();
   const {
     type,
     convertibleTypes,
@@ -23,26 +28,27 @@ export default function ConvertQuestionType({ code, t }) {
   } = useConvertQuestionType(code);
 
   return (
-    <div>
-      <Typography fontWeight={700} style={{ marginBottom: "8px" }}>
-        {t("question_type")}
-      </Typography>
-      <Select
-        fullWidth
+    <SetupField
+      label={t("question_type")}
+      help={help("question_type")}
+      htmlFor={id}
+    >
+      <SetupSelect
+        id={id}
         value={type}
         onChange={(e) => handleChange(e.target.value)}
       >
         {convertibleTypes.map((qt) => (
-          <MenuItem key={qt} value={qt}>
+          <option key={qt} value={qt}>
             {t(qt)}
-          </MenuItem>
+          </option>
         ))}
-      </Select>
+      </SetupSelect>
       <Dialog open={!!pendingType} onClose={handleCancel}>
         <DialogTitle>{t("convert_warning_title")}</DialogTitle>
         <DialogContent>
           <Typography gutterBottom>{t("convert_warning_body")}</Typography>
-          <ul style={{ margin: 0, paddingLeft: 20 }}>
+          <ul style={{ margin: 0, paddingInlineStart: 20 }}>
             {lostAttributes.map((attr) => (
               <li key={attr}>
                 <Typography variant="body2">{t(attr)}</Typography>
@@ -57,6 +63,6 @@ export default function ConvertQuestionType({ code, t }) {
           </Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </SetupField>
   );
 }

@@ -1,18 +1,17 @@
-import React from "react";
-import Switch from "@mui/material/Switch";
-import styles from "./ShowHint.module.css";
-import TextField from "@mui/material/TextField";
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
+import React, { useId } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { changeAttribute, changeContent } from "~/state/design/designState";
-import CustomTooltip from "~/components/common/Tooltip/Tooltip";
-import { Typography } from "@mui/material";
-import { useTranslation } from "react-i18next";
-import { NAMESPACES } from "~/hooks/useNamespaceLoader";
+import {
+  SetupLabel,
+  SetupLangInput,
+  SetupToggle,
+  setupFieldStyles,
+  useSetupHelp,
+} from "~/components/design/setup/SetupFields";
 
 function ShowHint({ code, t }) {
   const dispatch = useDispatch();
-  const { t: tTooltips } = useTranslation(NAMESPACES.DESIGN_TOOLTIPS);
+  const help = useSetupHelp();
 
   const showHint = useSelector((state) => {
     return state.designState[code].showHint || false;
@@ -23,24 +22,20 @@ function ShowHint({ code, t }) {
   };
 
   return (
-    <>
-      <div className={styles.showHint}>
-        <div className={styles.label}>
-          <CustomTooltip body={tTooltips("show_question_hint")} />
-          <Typography fontWeight={700}>{t("show_question_hint")}</Typography>
-        </div>
-        <Switch
-          checked={showHint}
-          onChange={(event) => setCheckedHint(event.target.checked)}
-        />
-      </div>
-    </>
+    <SetupToggle
+      label={t("show_question_hint")}
+      help={help("show_question_hint")}
+      checked={showHint}
+      onChange={setCheckedHint}
+    />
   );
 }
 
+/** A translatable text setting: one input per survey language. */
 export function SetupTextInput({ code, objectName, title, t }) {
   const dispatch = useDispatch();
-  const { t: tTooltips } = useTranslation(NAMESPACES.DESIGN_TOOLTIPS);
+  const help = useSetupHelp();
+  const titleId = useId();
   const setContentValue = (lang, value) => {
     dispatch(changeContent({ code, key: objectName, lang, value }));
   };
@@ -53,30 +48,32 @@ export function SetupTextInput({ code, objectName, title, t }) {
     return state.designState[code].content;
   });
 
+  const label = title ? t(title) : "";
+
   return (
-    <>
-      <div className={styles.label}>
-        {objectName !== "hint" && (
-          <CustomTooltip body={tTooltips(title)} />
-        )}
-        {title && <Typography fontWeight={700}>{t(`${title}`)}</Typography>}
+    <div role="group" aria-labelledby={title ? titleId : undefined}>
+      {title && (
+        <div className={setupFieldStyles.head}>
+          <SetupLabel
+            label={label}
+            help={objectName !== "hint" ? help(title) : ""}
+            id={titleId}
+            field
+          />
+        </div>
+      )}
+      <div className={setupFieldStyles.langList}>
+        {languagesList.map((lang) => (
+          <SetupLangInput
+            key={lang.code}
+            lang={lang}
+            label={label}
+            value={content?.[lang.code]?.[objectName] || ""}
+            onChange={(value) => setContentValue(lang.code, value)}
+          />
+        ))}
       </div>
-      {languagesList.map((lang) => {
-        return (
-          <div className={styles.inputValue} key={lang.code}>
-            <TextField
-              label={lang.name}
-              variant="standard"
-              type="text"
-              value={content?.[lang.code]?.[objectName] || ""}
-              onChange={(event) =>
-                setContentValue(lang.code, event.target.value)
-              }
-            />
-          </div>
-        );
-      })}
-    </>
+    </div>
   );
 }
 

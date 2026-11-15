@@ -1,16 +1,14 @@
 import React from "react";
-import Switch from "@mui/material/Switch";
-import styles from "./Disabled.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import { changeRelevance } from "~/state/design/designState";
-import CustomTooltip from "~/components/common/Tooltip/Tooltip";
-import { Typography } from "@mui/material";
-import { useTranslation } from "react-i18next";
-import { NAMESPACES } from "~/hooks/useNamespaceLoader";
+import {
+  SetupToggle,
+  useSetupHelp,
+} from "~/components/design/setup/SetupFields";
 
 export default function DisabledToggle({ code, t }) {
   const dispatch = useDispatch();
-  const { t: tTooltips } = useTranslation(NAMESPACES.DESIGN_TOOLTIPS);
+  const help = useSetupHelp();
   const rule =
     useSelector((s) => s.designState[code]?.relevance?.rule) ?? "show_always";
   const checked = rule === "hide_always";
@@ -28,16 +26,11 @@ export default function DisabledToggle({ code, t }) {
     );
   };
   return (
-    <div className={styles.toggleValue}>
-      <div className={styles.label}>
-        <CustomTooltip body={tTooltips("disabled")} />
-        <Typography fontWeight={700}>{t("disabled")}</Typography>
-      </div>
-      <Switch
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-        inputProps={{ "aria-label": "disabled-switch" }}
-      />
-    </div>
+    <SetupToggle
+      label={t("disabled")}
+      help={help("disabled")}
+      checked={checked}
+      onChange={onChange}
+    />
   );
 }

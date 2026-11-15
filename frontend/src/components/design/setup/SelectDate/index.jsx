@@ -1,39 +1,35 @@
-import { TextField, Typography } from "@mui/material";
+import React, { useId } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { changeAttribute } from "~/state/design/designState";
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
-import styles from "./SelectDate.module.css";
-import CustomTooltip from "~/components/common/Tooltip/Tooltip";
-import { useTranslation } from "react-i18next";
-import { NAMESPACES } from "~/hooks/useNamespaceLoader";
+import {
+  SetupField,
+  setupFieldStyles as styles,
+  useSetupHelp,
+} from "~/components/design/setup/SetupFields";
 
 function SelectDate({ label, rule, code, t }) {
   const dispatch = useDispatch();
-  const { t: tTooltips } = useTranslation(NAMESPACES.DESIGN_TOOLTIPS);
+  const help = useSetupHelp();
+  const id = useId();
 
   const value = useSelector((state) => {
     return state.designState[code][rule] || "";
   });
 
   return (
-    <div className={styles.selectDate}>
-      <div className={styles.label}>
-        <CustomTooltip body={tTooltips(label)} />
-        <Typography fontWeight={700}>{t(label)}</Typography>
-      </div>
-      <TextField
-        className={styles.selectDateField}
-        variant="standard"
-        size="small"
-        value={value}
+    <SetupField label={t(label)} help={help(label)} htmlFor={id}>
+      <input
+        id={id}
         type="date"
+        value={value}
         onChange={(event) => {
           dispatch(
             changeAttribute({ code, key: rule, value: event.target.value })
           );
         }}
+        className={`${styles.input} ${styles.inputShort}`}
       />
-    </div>
+    </SetupField>
   );
 }
 

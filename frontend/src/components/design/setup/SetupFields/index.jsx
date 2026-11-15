@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useId } from "react";
+import React, { createContext, useCallback, useContext, useId } from "react";
 import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
@@ -24,11 +24,21 @@ export { styles as setupFieldStyles };
 
 const cx = (...names) => names.filter(Boolean).join(" ");
 
-const labelClassFor = (variant) => {
-  if (variant === "basic") return styles.basicLabel;
+const labelClassFor = (variant, field) => {
+  if (variant === "basic") return field ? styles.basicFieldLabel : styles.basicLabel;
   if (variant === "logic") return styles.sectionLabel;
   return styles.label;
 };
+
+/**
+ * Looks up a setting's help in the tooltips namespace. A setting without help
+ * gets "" rather than its key, so it draws no ⓘ instead of one that reads
+ * "image_height".
+ */
+export function useSetupHelp() {
+  const { t } = useTranslation(NAMESPACES.DESIGN_TOOLTIPS);
+  return useCallback((key) => t(key, { defaultValue: "" }), [t]);
+}
 
 /** The ⓘ before a setting's name; nothing when the setting has no help. */
 export function SetupHelp({ label, help }) {
@@ -72,18 +82,30 @@ export function SetupSwitch({ checked, onChange, disabled, ...aria }) {
 
 /**
  * A setting's name with its ⓘ, and whatever ends the line: a switch, buttons.
- * With `htmlFor` the name is the label of that control.
+ * With `htmlFor` the name is the label of that control. `field` marks the name
+ * of a control set under it, which the general settings print in small caps.
  */
-export function SetupLabel({ label, help, htmlFor, id, disabled, children }) {
+export function SetupLabel({
+  label,
+  help,
+  htmlFor,
+  id,
+  disabled,
+  field,
+  children,
+}) {
   const variant = useSetupVariant();
   const Tag = htmlFor ? "label" : "span";
   return (
-    <div className={styles.inline}>
+    <div className={cx(styles.inline, field && variant === "basic" && styles.inlineTight)}>
       <SetupHelp label={label} help={help} />
       <Tag
         id={id}
         htmlFor={htmlFor}
-        className={cx(labelClassFor(variant), disabled && styles.labelDisabled)}
+        className={cx(
+          labelClassFor(variant, field),
+          disabled && styles.labelDisabled
+        )}
       >
         {label}
       </Tag>
@@ -127,10 +149,11 @@ export function SetupToggle({
  * `action` ends the name's line, e.g. a button that acts on the whole field.
  */
 export function SetupField({ label, help, htmlFor, id, action, children }) {
+  const variant = useSetupVariant();
   return (
     <div>
-      <div className={styles.head}>
-        <SetupLabel label={label} help={help} htmlFor={htmlFor} id={id}>
+      <div className={variant === "basic" ? styles.headTight : styles.head}>
+        <SetupLabel label={label} help={help} htmlFor={htmlFor} id={id} field>
           {action}
         </SetupLabel>
       </div>
@@ -139,20 +162,65 @@ export function SetupField({ label, help, htmlFor, id, action, children }) {
   );
 }
 
-/** A native select with the design's chevron. */
+/** A native select with the design's chevron; compact in the general settings. */
 export function SetupSelect({ className, children, ...props }) {
+  const small = useSetupVariant() === "basic";
   return (
     <span className={styles.selectWrap}>
-      <select className={cx(styles.select, className)} {...props}>
+      <select
+        className={cx(styles.select, small && styles.selectSmall, className)}
+        {...props}
+      >
         {children}
       </select>
       <ChevronDown
         aria-hidden="true"
-        size={16}
+        size={small ? 14 : 16}
         strokeWidth={2}
-        className={styles.chevron}
+        className={cx(styles.chevron, small && styles.chevronSmall)}
       />
     </span>
+  );
+}
+
+/**
+ * A square outlined button with an icon, e.g. Move up and Move down. The
+ * icon is decoration; `label` is what it says.
+ */
+export function SetupIconButton({ label, icon: Icon, className, ...props }) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      className={cx(styles.iconButton, className)}
+      {...props}
+    >
+      <Icon aria-hidden="true" size={16} strokeWidth={2} />
+    </button>
+  );
+}
+
+/**
+ * One language's text of a translatable setting: the language's code, then
+ * the input. `label` names the setting, for the input's accessible name.
+ */
+export function SetupLangInput({ lang, label, value, onChange, placeholder }) {
+  return (
+    <label className={styles.langInput}>
+      <span className={styles.langCode} title={lang.name}>
+        {lang.code.toUpperCase()}
+      </span>
+      <input
+        type="text"
+        dir="auto"
+        value={value}
+        placeholder={placeholder}
+        onChange={(event) => onChange(event.target.value)}
+        aria-label={label ? `${label} (${lang.name})` : lang.name}
+        className={styles.langField}
+      />
+    </label>
   );
 }
 

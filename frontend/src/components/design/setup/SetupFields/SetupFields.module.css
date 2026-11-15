@@ -28,6 +28,21 @@
   color: #2a2f4a;
 }
 
+/* The name of a control set under it, in the general settings: small caps,
+   on a line no taller than the name. */
+.basicFieldLabel {
+  flex: 1;
+  min-width: 0;
+  font: 600 11px/1 Rubik, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5b6189;
+}
+
+.inlineTight {
+  min-height: 0;
+}
+
 /* Inside an advanced tab. */
 .label {
   flex: 1;
@@ -51,6 +66,10 @@
 /* The line above a field's control. */
 .head {
   margin-bottom: 8px;
+}
+
+.headTight {
+  margin-bottom: 5px;
 }
 
 /* What a switch opens up, under its line. */
@@ -150,6 +169,15 @@
   cursor: not-allowed;
 }
 
+/* The general settings' select: the height of their switches' lines. */
+.selectSmall {
+  height: 32px;
+  padding-inline: 10px 32px;
+  border-color: #dfe2ee;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
 /* Decorative, and the select underneath owns the clicks. */
 .chevron {
   position: absolute;
@@ -158,6 +186,10 @@
   transform: translateY(-50%);
   color: #4c5474;
   pointer-events: none;
+}
+
+.chevronSmall {
+  inset-inline-end: 10px;
 }
 
 /* ====== Input ====== */
@@ -189,8 +221,74 @@
   resize: vertical;
 }
 
+/* A number or a date: a value, not a sentence. */
+.inputShort {
+  height: 40px;
+}
+
 .input::placeholder,
 .textarea::placeholder {
+  color: #a3a8c3;
+}
+
+/* ====== Translatable text ====== */
+
+.langList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.langInput {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid #dfe2ef;
+  border-radius: 8px;
+  background: #fff;
+  box-sizing: border-box;
+  cursor: text;
+}
+
+.langInput:hover {
+  border-color: #b9bff0;
+}
+
+.langInput:focus-within {
+  border-color: #3a46d8;
+  box-shadow: 0 0 0 2px #e3e6ff;
+}
+
+.langCode {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 5px;
+  background: #f0f2fa;
+  font: 600 11px Rubik, sans-serif;
+  letter-spacing: 0.04em;
+  color: #3c447a;
+  box-sizing: border-box;
+}
+
+.langField {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: 400 14.5px Rubik, sans-serif;
+  color: #1b2150;
+}
+
+.langField::placeholder {
   color: #a3a8c3;
 }
 
@@ -237,6 +335,45 @@
 }
 
 .secondaryButton:disabled {
+  border-color: #e3e6f0;
+  color: #a3a8c3;
+  cursor: not-allowed;
+}
+
+/* Buttons that end a setting's line, side by side. */
+.actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.iconButton {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #cfd5e8;
+  border-radius: 8px;
+  background: #fff;
+  color: #2b34a8;
+  cursor: pointer;
+}
+
+.iconButton:hover:not(:disabled) {
+  border-color: #b9bff0;
+  background: #eef0fb;
+}
+
+.iconButton:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.iconButton:disabled {
   border-color: #e3e6f0;
   color: #a3a8c3;
   cursor: not-allowed;
