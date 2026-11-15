@@ -158,9 +158,12 @@ function logTimes(state, code) {
 }
 
 function next(state) {
-  // With skipInvalid the engine decides: it moves past an invalid page but
+  // With skipInvalid, the first Next on an invalid page only shows the errors;
+  // the next one lets the engine decide: it moves past an invalid page but
   // won't submit an invalid survey.
-  if (!state.values.Survey.validity && !state.data.navigationData.skipInvalid) {
+  const warned =
+    state.data.navigationData.skipInvalid && state.values.Survey.show_errors;
+  if (!state.values.Survey.validity && !warned) {
     state.values.Survey.show_errors = true;
     state.invalidNextAttempts = (state.invalidNextAttempts ?? 0) + 1;
   } else {
