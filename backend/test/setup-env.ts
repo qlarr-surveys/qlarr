@@ -4,6 +4,7 @@
 // placeholders just satisfy the import-time validation. `??=` so a suite can
 // still override.
 process.env.FRONTEND_URL ??= 'http://localhost:3000';
+process.env.BACKEND_URL ??= 'http://localhost:8080';
 process.env.DB_HOST ??= 'localhost';
 process.env.DB_PORT ??= '5432';
 process.env.DB_USER ??= 'test';

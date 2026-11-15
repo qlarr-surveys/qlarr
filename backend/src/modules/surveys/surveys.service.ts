@@ -1,6 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'node:crypto';
 import { nowUtcString } from '../../common/datetime';
+import { isUuid } from '../../common/validation';
+import { AppConfig } from '../../config/app.config';
 import { DbContext } from '../../database/db-context';
 import { EngineService } from '../../engine/engine.service';
 import { Calculation } from '../../engine/engine.types';
@@ -62,6 +65,7 @@ export class SurveysService {
     private readonly jobs: JobsService,
     private readonly db: DbContext,
     @Inject(FILE_HELPER) private readonly files: FileHelper,
+    private readonly config: ConfigService,
   ) {}
 
   private async findEntity(id: string): Promise<SurveyEntity> {
@@ -197,7 +201,11 @@ export class SurveysService {
     const exported = JSON.parse(imported.surveyJson) as ExportedSimpleSurvey;
     const dto = await this.saveSurveyData(exported.survey);
     try {
-      await this.files.uploadImportedSurvey(dto.id, imported.designFile, imported.resources);
+      await this.files.uploadImportedSurvey(
+        dto.id,
+        this.repointResourceUrls(imported.designFile, exported.survey.id, dto.id),
+        imported.resources,
+      );
       await this.saveAutoComplete(dto.id, exported.autoCompleteResources);
     } catch (err) {
       // Roll back the survey/version rows saveSurveyData already wrote, not just
@@ -213,6 +221,27 @@ export class SurveysService {
       exported.calculations,
     );
     return dto;
+  }
+
+  /**
+   * Rich-text images embed absolute resource URLs
+   * (`<backend>/survey/<id>/resource/<file>`). Point the ones from the exported
+   * survey at this backend and the imported survey, whichever instance the
+   * export came from.
+   */
+  private repointResourceUrls(design: Buffer, sourceId: string, destination: string): Buffer {
+    // The id goes into a RegExp, so only a well-formed one is used.
+    if (!isUuid(sourceId)) return design;
+    const backendUrl = this.config.getOrThrow<AppConfig>('app').backendUrl;
+    return Buffer.from(
+      design
+        .toString('utf8')
+        .replace(
+          new RegExp(`https?://[^"'\\s<>]*?/survey/${sourceId}/resource/`, 'g'),
+          `${backendUrl}/survey/${destination}/resource/`,
+        ),
+      'utf8',
+    );
   }
 
   /**
