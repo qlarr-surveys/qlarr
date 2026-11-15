@@ -1,4 +1,4 @@
-import React, { useId, useRef, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import { useSelector, useDispatch } from "react-redux";
@@ -26,9 +26,8 @@ const isValidLimit = (value) => {
  * As before, turning the switch off saves `quota` -1 and clearing the limit
  * saves 0, both meaning no cap. A limit must be a whole number from 1 to
  * 10,000 — anything else says why as it is typed, where it used to be dropped
- * keystroke by keystroke without a word — and it saves once settled, on Enter
- * or on leaving the field. Saving every keystroke would send the number's
- * prefixes: typing 20000 would save 2000 before the last zero was refused.
+ * keystroke by keystroke without a word — and each valid one saves as it is
+ * typed.
  */
 function SurveyQuota() {
   const dispatch = useDispatch();
@@ -42,6 +41,16 @@ function SurveyQuota() {
   const labelId = useId();
   const inputId = useId();
   const errorId = useId();
+
+  // Follow the saved value, so a failed save that restores the server copy
+  // shows it. 0 (a cleared limit) leaves the switch as it is.
+  const saved = survey?.quota;
+  useEffect(() => {
+    setError("");
+    setLimit(saved > 0 ? String(saved) : "");
+    if (saved > 0) setChecked(true);
+    else if (saved === -1) setChecked(false);
+  }, [saved]);
 
   const disabled = !isSurveyAdmin() || survey?.status == SURVEY_STATUS.CLOSED;
 
@@ -63,14 +72,14 @@ function SurveyQuota() {
   const onLimit = (event) => {
     const value = event.target.value;
     setLimit(value);
-    setError(isValidLimit(value) ? "" : t("edit_survey.quota_range"));
-  };
-
-  const commitLimit = () => {
-    if (!checked || !isValidLimit(limit)) return;
-    const value = limit === "" ? 0 : Number(limit);
-    if (value !== survey?.quota) {
-      save(value);
+    if (!isValidLimit(value)) {
+      setError(t("edit_survey.quota_range"));
+      return;
+    }
+    setError("");
+    const quota = value === "" ? 0 : Number(value);
+    if (quota !== survey?.quota) {
+      save(quota);
     }
   };
 
@@ -106,10 +115,6 @@ function SurveyQuota() {
           placeholder={t("edit_survey.quota_placeholder")}
           value={limit}
           onChange={onLimit}
-          onBlur={commitLimit}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") commitLimit();
-          }}
           disabled={disabled || !checked}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? errorId : undefined}
