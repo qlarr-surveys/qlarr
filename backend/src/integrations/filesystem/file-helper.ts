@@ -80,14 +80,6 @@ export interface FileHelper {
     destinationSurveyId: string,
   ): Promise<void>;
 
-  /** Copy a single design file across surveys, renaming it. */
-  copyDesign(
-    sourceSurveyId: string,
-    destinationSurveyId: string,
-    sourceFileName: string,
-    newFileName: string,
-  ): Promise<void>;
-
   /** Delete every file under a survey (survey deletion). */
   deleteSurveyFiles(surveyId: string): Promise<void>;
 

@@ -310,15 +310,25 @@ export class SurveysService {
     }
   }
 
-  /** Copy the source's latest design into the destination as version 1. */
+  /**
+   * Copy the source's latest design into the destination as version 1,
+   * repointing its resource URLs (`survey/<id>/resource/...`) at the clone's
+   * copies of those files.
+   */
   private async copyDesign(source: string, destination: string): Promise<void> {
     const latest = await this.versions.findLatest(source);
     if (!latest) return;
-    // Copy the design object BEFORE writing the version row: a version row with
+    // Write the design object BEFORE the version row: a version row with
     // no S3 design object shows on the dashboard and 500s on every editor open,
     // whereas a copied object with no row is invisible and harmless. If the copy
     // fails, no row is written and the clone simply doesn't exist.
-    await this.files.copyDesign(source, destination, String(latest.version), '1');
+    const design = await this.files.getText(source, SurveyFolder.Design, String(latest.version));
+    await this.files.uploadText(
+      destination,
+      SurveyFolder.Design,
+      design.replaceAll(`survey/${source}/resource/`, `survey/${destination}/resource/`),
+      '1',
+    );
     await this.versions.save({
       ...latest,
       surveyId: destination,

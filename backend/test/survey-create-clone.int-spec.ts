@@ -2,6 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { FILE_HELPER } from '../src/integrations/filesystem/file-helper';
+import { SurveyFolder } from '../src/integrations/filesystem/survey-folder';
 import { bearer, startTestApp, TestApp } from './harness';
 
 const SRC = '10000000-0000-0000-0000-000000000001';
@@ -13,7 +14,7 @@ const SURVEYOR = token(['surveyor']);
 const files = {
   uploadText: jest.fn().mockResolvedValue(undefined),
   cloneResources: jest.fn().mockResolvedValue(undefined),
-  copyDesign: jest.fn().mockResolvedValue(undefined),
+  getText: jest.fn(),
   deleteSurveyFiles: jest.fn().mockResolvedValue(undefined),
 };
 
@@ -94,6 +95,9 @@ describe('Survey create + clone', () => {
 
   describe('POST /survey/:id/clone', () => {
     it('clones the survey, resources, design and autocomplete', async () => {
+      files.getText.mockResolvedValue(
+        `{"src":"http://be/survey/${SRC}/resource/a.png","other":"${SRC}"}`,
+      );
       const res = await request(server())
         .post(`/survey/${SRC}/clone`)
         .set('Authorization', SUPER)
@@ -102,7 +106,14 @@ describe('Survey create + clone', () => {
       expect(res.body.id).not.toBe(SRC);
 
       expect(files.cloneResources).toHaveBeenCalledWith(SRC, res.body.id);
-      expect(files.copyDesign).toHaveBeenCalledWith(SRC, res.body.id, '1', '1');
+      // The design is copied as version 1 with its resource URLs repointed.
+      expect(files.getText).toHaveBeenCalledWith(SRC, SurveyFolder.Design, '1');
+      expect(files.uploadText).toHaveBeenCalledWith(
+        res.body.id,
+        SurveyFolder.Design,
+        `{"src":"http://be/survey/${res.body.id}/resource/a.png","other":"${SRC}"}`,
+        '1',
+      );
 
       // A version row + copied autocomplete row exist for the clone.
       const [v] = await root.query(
