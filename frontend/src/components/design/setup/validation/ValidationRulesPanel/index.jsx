@@ -7,6 +7,10 @@ import RuleCard from "../CustomValidationRules/RuleCard";
 import { useCustomValidationRules } from "../CustomValidationRules/useCustomValidationRules";
 import { setupFieldStyles } from "~/components/design/setup/SetupFields";
 
+// One shared empty value, so a question without validation doesn't hand
+// useSelector a new object on every call (and re-render on every action).
+const NO_VALIDATION = {};
+
 /**
  * Validation tab body. Shows only the *active* rules as cards (Required pinned
  * first), with an "Add rule" picker that surfaces the remaining inactive
@@ -24,7 +28,7 @@ function ValidationRulesPanel({ code, t, validationRules }) {
   );
 
   const validationState = useSelector(
-    (state) => state.designState[code]?.validation || {}
+    (state) => state.designState[code]?.validation || NO_VALIDATION
   );
 
   const hasRequired = presetCatalog.includes("validation_required");

@@ -22,6 +22,10 @@ import {
 } from "~/components/design/setup/SetupFields";
 import styles from "./SkipLogic.module.css";
 
+// One shared empty list, so a question without skip rules doesn't hand
+// useSelector a new array on every call (and re-render on every action).
+const NO_RULES = [];
+
 function SkipLogic({ code, t }) {
   const dispatch = useDispatch();
   const help = useSetupHelp();
@@ -30,7 +34,7 @@ function SkipLogic({ code, t }) {
   // === SELECTORS ===
   const skipLogic = useSelector((state) => {
     const sl = state.designState[code].skip_logic;
-    return Array.isArray(sl) ? sl : [];
+    return Array.isArray(sl) ? sl : NO_RULES;
   });
 
   const componentIndex = useSelector(
