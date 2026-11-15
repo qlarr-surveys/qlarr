@@ -2,7 +2,7 @@ import React, { useId } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { changeAttribute, updatePriority } from "~/state/design/designState";
 import { instructionByCode } from "@qlarr/design-core/state/addInstructions";
-import { stripTags } from "~/utils/design/utils";
+import { isEquivalent, stripTags } from "~/utils/design/utils";
 import {
   SetupCheckItem,
   SetupCheckList,
@@ -45,6 +45,8 @@ export default function PrioritySetup({ t, rule, code }) {
   const priorities = instruction?.priorities || [];
   const errors = instruction?.errors || [];
 
+  // Rebuilt on every call, so compared by value: by reference the setting
+  // would re-render on every store update.
   const rawChildren = useSelector((state) => {
     const comp = state.designState[code];
     const lang = state.designState.langInfo.lang;
@@ -58,7 +60,7 @@ export default function PrioritySetup({ t, rule, code }) {
         code: el.code,
         label: state.designState[el.qualifiedCode]?.content?.[lang]?.label,
       }));
-  });
+  }, isEquivalent);
 
   // For rows/columns the instruction holds one group per axis, so pick the
   // group relevant to this axis and keep the others (the other axis) intact.

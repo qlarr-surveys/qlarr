@@ -3,7 +3,7 @@ import { shallowEqual, useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { changeAttribute, updateRandom } from "~/state/design/designState";
 import { instructionByCode } from "@qlarr/design-core/state/addInstructions";
-import { stripTags } from "~/utils/design/utils";
+import { isEquivalent, stripTags } from "~/utils/design/utils";
 import {
   SetupCheckItem,
   SetupCheckList,
@@ -107,6 +107,8 @@ export default function OrderSetup({ t, rule, code }) {
 
   const randomGroupCodes = relevantGroup?.codes || [];
 
+  // Rebuilt on every call, so compared by value: by reference the setting
+  // would re-render on every store update.
   const children = useSelector((state) => {
     return (
       state.designState[code]?.children
@@ -120,7 +122,7 @@ export default function OrderSetup({ t, rule, code }) {
           };
         }) || []
     );
-  });
+  }, isEquivalent);
 
   const reorderedCount = children.filter((c) => c.inRandomGroup).length;
   const pinnedCount = children.length - reorderedCount;

@@ -10,6 +10,10 @@ import {
   useSetupHelp,
 } from "~/components/design/setup/SetupFields";
 
+// One shared empty list, so a question without options doesn't hand
+// useSelector a new array on every call (and re-render on every action).
+const NO_ANSWERS = [];
+
 function ScqDefaultValue({ code }) {
   const dispatch = useDispatch();
   const { t } = useTranslation(NAMESPACES.DESIGN_CORE);
@@ -17,7 +21,7 @@ function ScqDefaultValue({ code }) {
   const id = useId();
 
   const answers = useSelector(
-    (state) => state.designState[code]?.children || []
+    (state) => state.designState[code]?.children || NO_ANSWERS
   );
 
   const currentInstruction = useSelector((state) => {
