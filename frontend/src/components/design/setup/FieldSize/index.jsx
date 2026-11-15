@@ -82,7 +82,7 @@ function FieldSize({
               lower_bound: lowerBound,
               upper_bound: upperBound,
               setup_value: stateValue,
-              label,
+              label: t(label),
             }}
             i18nKey="value_beyond_bounds"
           />

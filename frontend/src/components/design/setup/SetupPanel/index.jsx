@@ -742,7 +742,7 @@ const SetupComponent = React.memo(({ code, rule, t, isQuickOptions }) => {
           values={aspectValues}
           labels={aspectLabels}
           key={code + rule}
-          defaultValue="1:1"
+          defaultValue={1}
           label="image_aspect_ratio"
           rule={rule}
           code={code}
@@ -754,7 +754,7 @@ const SetupComponent = React.memo(({ code, rule, t, isQuickOptions }) => {
         <SelectValue
           values={iconSizes}
           key={code + rule}
-          defaultValue="1:1"
+          defaultValue="150"
           label="image_icon_size"
           rule={rule}
           code={code}
@@ -775,7 +775,7 @@ const SetupComponent = React.memo(({ code, rule, t, isQuickOptions }) => {
     case "imageHeight":
       return (
         <FieldSize
-          label={t("image_height")}
+          label="image_height"
           lowerBound={50}
           upperBound={500}
           t={t}
