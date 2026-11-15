@@ -13,6 +13,62 @@
   border-inline-end: 1px solid #dce0ee;
 }
 
+/* ====== Settings bar ====== */
+
+/* Outside the scrolling body, so it stays put above the settings. */
+.bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 16px;
+  border-bottom: 1px solid #dfe2ef;
+  background: #f7f8fc;
+}
+
+.back {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin-inline-start: -6px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #4c5474;
+  cursor: pointer;
+}
+
+.back:hover {
+  background: #eceefb;
+  color: #3a46d8;
+}
+
+.back:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+/* The arrow points back the way the interface reads. */
+.flip {
+  transform: scaleX(-1);
+}
+
+.barTitle {
+  margin: 0;
+  overflow: hidden;
+  font: 700 12px/1 Rubik, sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #3a46d8;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 /* ====== Body ====== */
 
 .body {

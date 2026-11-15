@@ -1,0 +1,255 @@
+/* The rows of the settings panel, drawn to docs/design/editor-phase-3.3.html
+   (its question settings). A row is a line: the ⓘ, the setting's name, and
+   whatever ends the line; a field adds its control under that line. */
+
+/* ====== Line ====== */
+
+.inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  font-family: Rubik, sans-serif;
+}
+
+/* The ⓘ's round target hangs into the panel's padding, so its glyph, not its
+   hover circle, lines up with the edge of the rows below. */
+.help {
+  flex: none;
+  display: flex;
+  margin-inline-start: -4px;
+}
+
+/* Above "Show advanced settings": the quick settings, set small. */
+.basicLabel {
+  flex: 1;
+  min-width: 0;
+  font: 400 14px/20px Rubik, sans-serif;
+  color: #2a2f4a;
+}
+
+/* Inside an advanced tab. */
+.label {
+  flex: 1;
+  min-width: 0;
+  font: 600 15px/20px Rubik, sans-serif;
+  color: #1b2150;
+}
+
+/* The Logic tab's sections. */
+.sectionLabel {
+  flex: 1;
+  min-width: 0;
+  font: 600 16px/22px Rubik, sans-serif;
+  color: #1b2150;
+}
+
+.labelDisabled {
+  color: #8a90ad;
+}
+
+/* The line above a field's control. */
+.head {
+  margin-bottom: 8px;
+}
+
+/* What a switch opens up, under its line. */
+.below {
+  margin-top: 10px;
+}
+
+/* ====== Switch ====== */
+
+.switch {
+  flex: none;
+  display: inline-flex;
+  justify-content: flex-start;
+  width: 38px;
+  height: 22px;
+  padding: 2px;
+  border: 0;
+  border-radius: 11px;
+  background: #cfd3e4;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.switchSmall {
+  width: 34px;
+  height: 20px;
+  border-radius: 10px;
+}
+
+.switchOn {
+  justify-content: flex-end;
+  background: #3a46d8;
+}
+
+.knob {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.switchSmall .knob {
+  width: 16px;
+  height: 16px;
+}
+
+.switch:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
+}
+
+.switch:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ====== Select ====== */
+
+.selectWrap {
+  position: relative;
+  display: block;
+}
+
+/* The end padding is the chevron's room. Logical properties, not left/right,
+   so the chevron moves to the left in a right-to-left interface. */
+.select {
+  display: block;
+  width: 100%;
+  height: 48px;
+  padding-block: 0;
+  padding-inline: 14px 44px;
+  border: 1px solid #dfe2ef;
+  border-radius: 8px;
+  background: #fff;
+  font: 400 15px/1.2 Rubik, sans-serif;
+  color: #1b2150;
+  text-overflow: ellipsis;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.select:hover:not(:disabled) {
+  border-color: #b9bff0;
+}
+
+.select:focus-visible {
+  border-color: #3a46d8;
+  outline: none;
+  box-shadow: 0 0 0 2px #e3e6ff;
+}
+
+.select:disabled {
+  background: #f3f4f8;
+  color: #6b7194;
+  cursor: not-allowed;
+}
+
+/* Decorative, and the select underneath owns the clicks. */
+.chevron {
+  position: absolute;
+  inset-inline-end: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #4c5474;
+  pointer-events: none;
+}
+
+/* ====== Input ====== */
+
+.input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  padding: 0 12px;
+  border: 1.5px solid #cfd5e8;
+  border-radius: 8px;
+  background: #fff;
+  font: 400 15px/1.2 Rubik, sans-serif;
+  color: #1b2150;
+  box-sizing: border-box;
+}
+
+.textarea {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #cfd5e8;
+  border-radius: 8px;
+  background: #fff;
+  font: 400 14.5px/21px Rubik, sans-serif;
+  color: #1b2150;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: #a3a8c3;
+}
+
+.input:focus,
+.textarea:focus {
+  border-color: #3a46d8;
+  outline: none;
+  box-shadow: 0 0 0 2px #e3e6ff;
+}
+
+.invalid,
+.invalid:focus {
+  border-color: #b3261e;
+}
+
+/* ====== Buttons ====== */
+
+/* The outlined button a row puts beside its name, e.g. Up and Down. */
+.secondaryButton {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  min-width: 72px;
+  padding: 0 12px;
+  border: 1px solid #cfd5e8;
+  border-radius: 8px;
+  background: #fff;
+  font: 500 14px Rubik, sans-serif;
+  color: #1b2150;
+  cursor: pointer;
+}
+
+.secondaryButton:hover:not(:disabled) {
+  border-color: #b9bff0;
+  background: #f5f6ff;
+}
+
+.secondaryButton:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.secondaryButton:disabled {
+  border-color: #e3e6f0;
+  color: #a3a8c3;
+  cursor: not-allowed;
+}
+
+/* ====== Small print ====== */
+
+.hint {
+  margin: 6px 2px 0;
+  font: 400 12px/16px Rubik, sans-serif;
+  color: #5b6189;
+}
+
+.hintError {
+  color: #b3261e;
+}

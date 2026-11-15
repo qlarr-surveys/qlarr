@@ -1,10 +1,14 @@
+import React from "react";
+import { useDispatch, useSelector, shallowEqual } from "react-redux";
+import { useTranslation } from "react-i18next";
+import { ChevronDown, Settings2, X } from "lucide-react";
 import FieldSize from "~/components/design/setup/FieldSize";
 import ShowHint, { SetupTextInput } from "~/components/design/setup/ShowHint";
 import ValidationSetupItem from "~/components/design/setup/validation/ValidationSetupItem";
+import { SetupVariant } from "~/components/design/setup/SetupFields";
 import ValidationRulesPanel from "../validation/ValidationRulesPanel";
 import OrderInstructions from "../advanced/OrderInstructions";
 import ConditionalRelevance from "../advanced/ConditionalRelevance";
-import React from "react";
 import ToggleValue from "../ToggleValue";
 import SelectValue from "../SelectValue";
 import SelectDate from "../SelectDate";
@@ -19,25 +23,9 @@ import {
   isGroup,
   isQuestion,
 } from "@qlarr/design-core";
-import styles from "./SetupPanel.module.css";
-import CloseIcon from "@mui/icons-material/Close";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import {
-  Box,
-  Button,
-  Divider,
-  IconButton,
-  Tab,
-  Tabs,
-  Typography,
-} from "@mui/material";
-import { useDispatch } from "react-redux";
-import { resetSetup, clearHighlighted } from "~/state/design/designState";
-import { useSelector } from "react-redux";
-import { createSelector } from "@reduxjs/toolkit";
-import { useTheme } from "@emotion/react";
-import { questionIconByType } from "~/components/Questions/utils";
+import { resetSetup } from "~/state/design/designState";
+import { pageLabels, stripTags } from "~/utils/design/utils";
+import { rtlLanguage } from "~/utils/common";
 import OrderSetup from "../orderPriority/OrderSetup";
 import PrioritySetup from "../orderPriority/PrioritySetup";
 import ScqDefaultValue from "../ScqDefaultValue";
@@ -48,21 +36,35 @@ import EntityCodeEditor from "../EntityCodeEditor";
 import CustomCSS from "../CustomCss";
 import ConvertQuestionType from "../ConvertQuestionType";
 import LogoSetup from "../LogoSetup";
+import AdvancedModeMenu from "./AdvancedModeMenu";
+import { useSetupView } from "./useSetupView";
+import styles from "./SetupPanel.module.css";
 
+const cx = (...names) => names.filter(Boolean).join(" ");
+
+// What a selection shows above "Show advanced settings", in the design's
+// order. Each shows only for a selection whose rules include it.
+const BASIC_RULES = [
+  "validation_required",
+  "showDescription",
+  "hint",
+  "disabled",
+  "move_question",
+  "move_group",
+];
+
+/**
+ * The settings of whatever is selected on the canvas, drawn to
+ * docs/design/editor-phase-3.3.html: a header naming the selection, the
+ * general settings, and the advanced settings behind their button, in tabs.
+ *
+ * Which settings exist is still design-core's `setupOptions`; this decides
+ * only where each one is drawn.
+ */
 function SetupPanel({ t }) {
-  const dispatch = useDispatch();
-
-  const theme = useTheme();
-
-  const selectSetupInfo = (state) => state.designState.setup || {};
-  const selectSetupData = createSelector([selectSetupInfo], (setupInfo) => ({
-    code: setupInfo.code,
-    highlighted: setupInfo.highlighted,
-    rules: setupInfo.rules || [],
-    ...setupInfo,
-  }));
-
-  const { code, highlighted, rules } = useSelector(selectSetupData);
+  const setupInfo = useSelector((state) => state.designState.setup);
+  const code = setupInfo?.code;
+  const rules = setupInfo?.rules;
 
   const showCarryForwardRule = useSelector((state) => {
     if (!code) return false;
@@ -103,64 +105,335 @@ function SetupPanel({ t }) {
     if (!showRepetitionRule) hidden.push("repetition");
     if (selfRepeatable) hidden.push("relevance", "conditional_relevance", "disabled");
     if (insideRepeatable) hidden.push("skip_logic");
-    if (hidden.length === 0) return rules;
+    if (hidden.length === 0) return rules || [];
     return (rules || []).map((group) => ({
       ...group,
       rules: (group.rules || []).filter((r) => !hidden.includes(r)),
     }));
   }, [rules, showCarryForwardRule, showRepetitionRule, selfRepeatable, insideRepeatable]);
 
-  const type = useSelector((state) => {
-    return state.designState[code].type;
-  });
-
-  const order = useSelector((state) => {
-    return state.designState.index[code];
-  });
-
   return (
-    <div
-      className={styles.rightContent}
-      style={{
-        left: theme.direction == "rtl" ? "0px" : "",
-      }}
-    >
-      {code !== "Survey" && (
-        <div className={styles.titleContainer}>
-          <Box display="flex" alignItems="center" gap={1}>
-            <Typography variant="h6" component="h2">
-              {t("setup_for")}
-            </Typography>
-            {questionIconByType(`${type}`, undefined)}
-            <Typography variant="h6" component="h2">
-              {order}
-            </Typography>
-          </Box>
-
-          <IconButton
-            data-preview-allow
-            onClick={() => {
-              dispatch(resetSetup());
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </div>
-      )}
-
-      <Divider />
-      <SetupSection
-        rules={effectiveRules || []}
+    <div className={styles.panel}>
+      {code !== "Survey" && <SetupHeader code={code} t={t} />}
+      <SetupBody
+        setupInfo={setupInfo}
+        rules={effectiveRules}
         code={code}
         t={t}
-        highlighted={highlighted}
-        theme={theme}
       />
     </div>
   );
 }
 
 export default React.memo(SetupPanel);
+
+// A label is TipTap markup; the header wants its text, entities decoded.
+// DOMParser never runs what it parses, so this is safe for any label.
+const plainText = (html) => {
+  if (!html) return "";
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  return (doc.body.textContent || "").replace(/\s+/g, " ").trim();
+};
+
+const selectHeader = (code) => (state) => {
+  const design = state.designState;
+  const component = design[code] || {};
+  const { lang, mainLang } = design.langInfo || {};
+  const labelIn = (language) =>
+    stripTags(component.content?.[language]?.label || "").trim()
+      ? component.content[language].label
+      : "";
+  const groups = design.Survey?.children || [];
+  const groupCode = isGroup(code)
+    ? code
+    : groups.find((group) =>
+        design[group.code]?.children?.some((child) => child.code === code)
+      )?.code;
+  return {
+    type: component.type,
+    displayCode: design.index?.[code] || code,
+    label: labelIn(lang) || labelIn(mainLang),
+    groupCode,
+  };
+};
+
+/** The selection: its code, its type and page, and its text; and ✕. */
+const SetupHeader = React.memo(function SetupHeader({ code, t }) {
+  const dispatch = useDispatch();
+  const { type, displayCode, label: labelHtml, groupCode } = useSelector(
+    selectHeader(code),
+    shallowEqual
+  );
+  const label = React.useMemo(() => plainText(labelHtml), [labelHtml]);
+  const groups = useSelector((state) => state.designState.Survey?.children);
+
+  const question = isQuestion(code);
+  const group = isGroup(code);
+  const pageName = React.useMemo(() => {
+    const list = groups || [];
+    const index = list.findIndex((page) => page.code === groupCode);
+    return index === -1 ? "" : pageLabels(list, t)[index];
+  }, [groups, groupCode, t]);
+
+  const subtitle = question
+    ? [t(`component_${type}_title`), pageName].filter(Boolean).join(" · ")
+    : group
+      ? pageName
+      : "";
+  const untitled = !label && question;
+  const title = label || (question ? t("untitled_question") : "");
+  const closeLabel = question
+    ? t("close_question_settings")
+    : group
+      ? t("close_page_settings")
+      : t("close_settings");
+
+  return (
+    <div className={styles.header}>
+      <div className={styles.headerLine}>
+        <span className={styles.code}>{displayCode}</span>
+        <span className={styles.subtitle} title={subtitle}>
+          {subtitle}
+        </span>
+        <button
+          type="button"
+          className={styles.close}
+          aria-label={closeLabel}
+          title={closeLabel}
+          onClick={() => dispatch(resetSetup())}
+          data-preview-allow
+        >
+          <X size={14} strokeWidth={2} aria-hidden="true" />
+        </button>
+      </div>
+      {title && (
+        <div className={cx(styles.title, untitled && styles.titleEmpty)}>
+          {title}
+        </div>
+      )}
+    </div>
+  );
+});
+
+/** A rule's row, tinted for a moment when something pointed at it. */
+function Row({ rule, flash, children }) {
+  const ref = React.useRef(null);
+  const flashing = flash === rule;
+
+  React.useEffect(() => {
+    if (flashing) {
+      ref.current?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+    }
+  }, [flashing]);
+
+  return (
+    <div ref={ref} className={cx(styles.row, flashing && styles.rowFlash)}>
+      {children}
+    </div>
+  );
+}
+
+/**
+ * The general settings, the advanced button with its "…" menu, and the
+ * advanced tabs. A selection with no general settings (the survey's page
+ * order) opens straight onto its tabs; one whose rules have no tabs at all
+ * (an answer, the logo) is a plain list.
+ */
+const SetupBody = React.memo(function SetupBody({ setupInfo, rules, code, t }) {
+  const { i18n } = useTranslation();
+  const isRtl = rtlLanguage.includes(i18n.language);
+  const ids = React.useId();
+  const advancedButtonRef = React.useRef(null);
+
+  const tabs = React.useMemo(
+    () => (rules || []).filter((tab) => (tab.rules || []).length > 0),
+    [rules]
+  );
+  const hasTitles = tabs.some((tab) => !!tab.title);
+  const flatRules = React.useMemo(
+    () => tabs.flatMap((tab) => tab.rules || []),
+    [tabs]
+  );
+  const basicRules = React.useMemo(
+    () => BASIC_RULES.filter((rule) => flatRules.includes(rule)),
+    [flatRules]
+  );
+
+  const view = useSetupView({ setupInfo, tabs, basicRules });
+
+  if (!hasTitles) {
+    return (
+      <SetupVariant.Provider value="advanced">
+        <div className={styles.flatRows}>
+          {flatRules.map((rule) => (
+            <Row key={rule} rule={rule} flash={view.flash}>
+              <SetupComponent code={code} rule={rule} t={t} />
+            </Row>
+          ))}
+        </div>
+      </SetupVariant.Provider>
+    );
+  }
+
+  const advancedOnly = basicRules.length === 0;
+  const open = advancedOnly || view.open;
+  const selectedTab = tabs.find((tab) => tab.key === view.tab) || tabs[0];
+  const tabId = (key) => `${ids}tab-${key}`;
+  const panelId = `${ids}panel`;
+  const advancedId = `${ids}advanced`;
+
+  const toggleAdvanced = () => {
+    view.setOpen(!view.open);
+    // Back to the top, so the switch happens where the button is rather than
+    // somewhere down a tab that just collapsed.
+    requestAnimationFrame(() => {
+      let scroller = advancedButtonRef.current?.parentElement;
+      while (scroller && getComputedStyle(scroller).overflowY !== "auto") {
+        scroller = scroller.parentElement;
+      }
+      if (scroller) {
+        scroller.scrollTop = 0;
+      }
+    });
+  };
+
+  // Arrow keys move between tabs (mirrored right to left), Home and End jump.
+  const onTabKeyDown = (event) => {
+    const keys = tabs.map((tab) => tab.key);
+    const index = keys.indexOf(selectedTab.key);
+    const step = isRtl ? -1 : 1;
+    let next = -1;
+    if (event.key === "ArrowRight") next = index + step;
+    else if (event.key === "ArrowLeft") next = index - step;
+    else if (event.key === "Home") next = 0;
+    else if (event.key === "End") next = keys.length - 1;
+    else return;
+    event.preventDefault();
+    const key = keys[(next + keys.length) % keys.length];
+    view.setTab(key);
+    document.getElementById(tabId(key))?.focus();
+  };
+
+  return (
+    <>
+      {!open && (
+        <section aria-label={t("general_settings")} className={styles.basics}>
+          <SetupVariant.Provider value="basic">
+            <div className={styles.basicRows}>
+              {basicRules.map((rule) => (
+                <Row key={rule} rule={rule} flash={view.flash}>
+                  <SetupComponent code={code} rule={rule} t={t} isQuickOptions />
+                </Row>
+              ))}
+            </div>
+          </SetupVariant.Provider>
+        </section>
+      )}
+
+      {!advancedOnly && (
+        <div className={styles.advancedBar}>
+          <button
+            ref={advancedButtonRef}
+            type="button"
+            className={cx(styles.advancedButton, open && styles.advancedButtonOpen)}
+            aria-expanded={open}
+            aria-controls={advancedId}
+            onClick={toggleAdvanced}
+            data-preview-allow
+          >
+            <Settings2 size={15} strokeWidth={2} aria-hidden="true" />
+            <span className={styles.advancedLabel}>
+              {open ? t("hide_advanced_settings") : t("show_advanced_settings")}
+            </span>
+            <ChevronDown
+              size={11}
+              strokeWidth={2}
+              aria-hidden="true"
+              className={styles.advancedChevron}
+            />
+          </button>
+          <AdvancedModeMenu
+            alwaysExpand={view.alwaysExpand}
+            onChange={view.setAlwaysExpand}
+            t={t}
+          />
+        </div>
+      )}
+
+      {open && (
+        <div
+          id={advancedId}
+          role="region"
+          aria-label={t("advanced_settings")}
+          className={cx(styles.advanced, advancedOnly && styles.advancedOnly)}
+        >
+          <div
+            role="tablist"
+            aria-label={t("advanced_settings")}
+            className={styles.tabs}
+            onKeyDown={onTabKeyDown}
+          >
+            {tabs.map((tab) => {
+              const selected = tab.key === selectedTab.key;
+              const name = t(tab.title);
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  role="tab"
+                  id={tabId(tab.key)}
+                  aria-selected={selected}
+                  aria-controls={panelId}
+                  tabIndex={selected ? 0 : -1}
+                  title={t("tab_settings", { name })}
+                  className={cx(styles.tab, selected && styles.tabSelected)}
+                  onClick={() => view.setTab(tab.key)}
+                >
+                  {name}
+                </button>
+              );
+            })}
+          </div>
+          <div
+            id={panelId}
+            role="tabpanel"
+            aria-labelledby={tabId(selectedTab.key)}
+            tabIndex={0}
+            className={cx(
+              styles.tabPanel,
+              view.flash === selectedTab.key && styles.panelFlash
+            )}
+          >
+            {selectedTab.key === "validation" ? (
+              <ValidationRulesPanel
+                code={code}
+                t={t}
+                validationRules={selectedTab.rules}
+              />
+            ) : (
+              <SetupVariant.Provider
+                value={selectedTab.key === "logic" ? "logic" : "advanced"}
+              >
+                <div
+                  className={cx(
+                    styles.tabRows,
+                    selectedTab.key === "logic" && styles.logicRows
+                  )}
+                >
+                  {selectedTab.rules.map((rule) => (
+                    <Row key={rule} rule={rule} flash={view.flash}>
+                      <SetupComponent code={code} rule={rule} t={t} />
+                    </Row>
+                  ))}
+                </div>
+              </SetupVariant.Provider>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+});
 
 const SetupComponent = React.memo(({ code, rule, t, isQuickOptions }) => {
   if (rule.startsWith("validation_")) {
@@ -549,216 +822,3 @@ const SetupComponent = React.memo(({ code, rule, t, isQuickOptions }) => {
   }
 });
 
-const SHOW_ADVANCED_KEY = "design_show_advanced";
-
-const SetupSection = React.memo(({ highlighted, rules, code, t, theme }) => {
-  const dispatch = useDispatch();
-  const [highlightedEl, setHighlightedEl] = React.useState(highlighted);
-  const [preferAdvanced, setPreferAdvanced] = React.useState(
-    () => localStorage.getItem(SHOW_ADVANCED_KEY) === "true"
-  );
-  const [revealedAdvanced, setRevealedAdvanced] = React.useState(false);
-  const showAdvanced = preferAdvanced || revealedAdvanced;
-
-  React.useEffect(() => {
-    setRevealedAdvanced(false);
-  }, [code]);
-
-  const handleShowAdvanced = React.useCallback((value) => {
-    localStorage.setItem(SHOW_ADVANCED_KEY, String(value));
-    setPreferAdvanced(value);
-    setRevealedAdvanced(false);
-  }, []);
-
-  const targetTabIndex = React.useMemo(() => {
-    if (!rules?.length) return 0;
-
-    const byKey = rules.findIndex((r) => r.key === highlighted);
-    if (byKey !== -1) return byKey;
-
-    const byChild = rules.findIndex((r) => r.rules?.includes(highlighted));
-    if (byChild !== -1) return byChild;
-
-    return 0;
-  }, [rules, highlighted]);
-
-  const [selectedTab, setSelectedTab] = React.useState(() => targetTabIndex);
-
-  React.useEffect(() => {
-    if (highlighted) {
-      const isBasicMode = !showAdvanced;
-      const visibleInBasic =
-        normalRules.includes(highlighted) ||
-        rules?.some(
-          (tab) => tab.key === highlighted && tab.rules?.some((r) => normalRules.includes(r))
-        );
-      if (!(isBasicMode && visibleInBasic)) {
-        setRevealedAdvanced(true);
-      }
-      setSelectedTab(targetTabIndex);
-    }
-  }, [targetTabIndex]);
-
-  const handleTabChange = (_, newValue) => setSelectedTab(newValue);
-
-  const hasTitles = rules?.some((rule) => !!rule.title);
-
-  const normalRules = React.useMemo(() => {
-    const flat = rules?.flatMap((r) => r.rules || []) || [];
-    return [
-      "move_group",
-      "move_question",
-      "disabled",
-      "showDescription",
-      "validation_required",
-      "hint",
-    ].filter((r) => flat.includes(r));
-  }, [rules]);
-
-  React.useEffect(() => {
-    if (!highlighted) {
-      setHighlightedEl(null);
-      return;
-    }
-
-    const isBasicMode = !showAdvanced;
-    if (isBasicMode) {
-      const tab = rules?.find((t) => t.key === highlighted);
-      const basicRule = tab
-        ? tab.rules?.find((r) => normalRules.includes(r))
-        : highlighted;
-      setHighlightedEl(basicRule ?? highlighted);
-    } else {
-      setHighlightedEl(highlighted);
-    }
-
-    const timer = setTimeout(() => {
-      setHighlightedEl(null);
-      dispatch(clearHighlighted());
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, [highlighted]);
-
-  const rowSx = (el) => ({
-    borderRadius: "5px",
-    backgroundColor:
-      el === highlightedEl ? theme?.palette?.grey[300] : "inherit",
-    transition: "background-color 400ms ease",
-  });
-
-  if (!hasTitles) {
-    return (
-      <Box>
-        {rules?.flatMap((rule) =>
-          rule.rules?.map((el) => (
-            <div className={styles.setupContainer} key={el}>
-              <SetupComponent key={el} code={code} rule={el} t={t} />
-            </div>
-          )),
-        )}
-      </Box>
-    );
-  }
-
-  return (
-    <>
-      {!showAdvanced && (
-        <Box>
-          {normalRules.map((rule) => (
-            <div className={styles.setupContainer} key={rule}>
-              <Box sx={rowSx(rule)}>
-                <SetupComponent code={code} rule={rule} t={t} isQuickOptions />
-              </Box>
-            </div>
-          ))}
-        </Box>
-      )}
-
-      {!showAdvanced && (
-        <Box sx={{ display: "flex", justifyContent: "center", marginTop: "2em" }}>
-          <Button
-            variant="contained"
-            size="medium"
-            endIcon={<ArrowForwardIcon />}
-            data-preview-allow
-            onClick={() => handleShowAdvanced(true)}
-          >
-            {t("show_advanced_settings")}
-          </Button>
-        </Box>
-      )}
-
-      {showAdvanced && (
-        <>
-          <Divider />
-          <Tabs
-            className={styles.tabContainer}
-            value={selectedTab}
-            onChange={handleTabChange}
-            variant="standard"
-            TabIndicatorProps={{ sx: { display: "none" } }}
-            sx={{
-              "& .MuiTabs-flexContainer": {
-                flexWrap: "wrap",
-              },
-            }}
-          >
-            {rules.map((rule) => (
-              <Tab
-                className={styles.tabStyle}
-                sx={{
-                  px: 1.5,
-                  borderBottom: "2px solid transparent",
-                  "&.Mui-selected": {
-                    borderBottom: "2px solid #000",
-                  },
-                }}
-                key={rule.key}
-                label={t(rule.title)}
-              />
-            ))}
-          </Tabs>
-          <Divider />
-          <Box
-            sx={{
-              backgroundColor:
-                rules[selectedTab]?.key === highlighted
-                  ? "#fff"
-                  : "background.paper",
-            }}
-          >
-            {rules[selectedTab]?.key === "validation" ? (
-              <div className={styles.setupContainer}>
-                <ValidationRulesPanel
-                  code={code}
-                  t={t}
-                  validationRules={rules[selectedTab].rules}
-                />
-              </div>
-            ) : (
-              rules[selectedTab]?.rules?.map((el) => (
-                <div className={styles.setupContainer} key={el}>
-                  <Box sx={rowSx(el)}>
-                    <SetupComponent key={el} code={code} rule={el} t={t} />
-                  </Box>
-                </div>
-              ))
-            )}
-          </Box>
-
-          <Box sx={{ display: "flex", justifyContent: "center", marginTop: "2em" }}>
-            <Button
-              variant="contained"
-              size="medium"
-              startIcon={<ArrowBackIcon />}
-              data-preview-allow
-              onClick={() => handleShowAdvanced(false)}
-            >
-              {t("hide_advanced_settings")}
-            </Button>
-          </Box>
-        </>
-      )}
-    </>
-  );
-});
