@@ -14,12 +14,24 @@
 .headerTitle {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 6px;
+  min-height: 30px;
+}
+
+.description {
+  margin: 0;
+  font: 400 12px/17px Rubik, sans-serif;
+  color: #5b6189;
 }
 
 .notice {
-  padding: 8px 12px;
-  border-radius: 8px;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid #f3d98b;
+  border-radius: 7px;
+  background: #fff7e0;
+  font: 400 11.5px/16px Rubik, sans-serif;
+  color: #8a5a00;
 }
 
 .empty {
@@ -28,9 +40,15 @@
   align-items: center;
   gap: 12px;
   padding: 24px 16px;
-  border: 1px dashed #C4CDD5;
+  border: 1px dashed #cfd5e8;
   border-radius: 8px;
   text-align: center;
+}
+
+.emptyText {
+  margin: 0;
+  font: 400 12.5px/1.4 Rubik, sans-serif;
+  color: #5b6189;
 }
 
 .list {
@@ -40,7 +58,7 @@
 }
 
 .card {
-  border: 1px solid #DFE3E8;
+  border: 1px solid #e3e6f0;
   border-radius: 8px;
   background: #fff;
   transition: border-color 0.15s, box-shadow 0.15s;
@@ -48,7 +66,7 @@
 
 .card:hover,
 .cardExpanded {
-  border-color: #C4CDD5;
+  border-color: #cfd5e8;
 }
 
 .cardExpanded {

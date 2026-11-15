@@ -158,7 +158,9 @@ function logTimes(state, code) {
 }
 
 function next(state) {
-  if (!state.values.Survey.validity) {
+  // With skipInvalid the engine decides: it moves past an invalid page but
+  // won't submit an invalid survey.
+  if (!state.values.Survey.validity && !state.data.navigationData.skipInvalid) {
     state.values.Survey.show_errors = true;
     state.invalidNextAttempts = (state.invalidNextAttempts ?? 0) + 1;
   } else {

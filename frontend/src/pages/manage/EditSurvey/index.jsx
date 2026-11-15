@@ -1,165 +1,133 @@
-import React from "react";
-import Box from "@mui/material/Box";
-import Accordion from "@mui/material/Accordion";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import Typography from "@mui/material/Typography";
-import Divider from "@mui/material/Divider";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import styles from "./EditSurvey.module.css";
+import React, { useRef } from "react";
+import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import SurveyQuota from "~/components/manage/SurveyQuota";
 import GroupQuotas from "~/components/manage/GroupQuotas";
-import LaunchPage from "../Launch/launch";
 import ExportSurvey from "~/components/manage/ExportSurvey";
-import { useSelector } from "react-redux";
-import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import NavigationSettings from "~/components/manage/NavigationSettings";
-import SurveyOffline from '../SurveyOffline';
-import SurveyPrivacy from '../SurveyPrivacy';
 import { isSurveyAdmin } from "~/constants/roles";
 import { SURVEY_STATUS } from "~/constants/survey";
+import LaunchPage from "../Launch/launch";
+import SurveyOffline from "../SurveyOffline";
+import SurveyPrivacy from "../SurveyPrivacy";
+import SettingsNav from "./SettingsNav";
+import SettingsSection from "./SettingsSection";
+import useSectionSpy from "./useSectionSpy";
+import styles from "./EditSurvey.module.css";
 
+const SECTION_IDS = [
+  "launch",
+  "offline",
+  "privacy",
+  "navigation",
+  "quotas",
+  "export",
+];
+
+/**
+ * The Settings workspace, built to docs/design/editor-phase-3.3.html (where it
+ * is called Configure): every survey-level setting on one scrolling canvas, a
+ * card per section, with a nav on the left to jump between them.
+ *
+ * Settings save as they change, through the survey's debounced saver
+ * (`editSaveDebounce`), so there is no save or done button.
+ */
 function EditSurvey({ onPublish }) {
   const { t } = useTranslation(NAMESPACES.MANAGE);
   const survey = useSelector((state) => state.editState.survey);
+  const published = useSelector(
+    (state) => state.designState.versionDto?.published
+  );
   const designReady = useSelector(
     (state) =>
       !!state.designState.designStateReceived && !!state.designState.Survey
   );
+  const groupQuotaCount = useSelector(
+    (state) => state.designState.Survey?.quotas?.length || 0
+  );
 
-  const combinedSections = [
+  const canvasRef = useRef(null);
+  const { active, jumpTo, onScroll } = useSectionSpy(canvasRef, SECTION_IDS);
+
+  if (!survey) {
+    return null;
+  }
+
+  const quotasOff = !(survey.quota > 0) && groupQuotaCount === 0;
+
+  const sections = [
+    {
+      id: "launch",
+      title: t("edit_survey.launch"),
+      hint: t("edit_survey.launch_hint"),
+      // Something is waiting to be published: the same signal as the dot on
+      // the Settings tab.
+      badge: published === false ? "action" : null,
+      content: <LaunchPage onPublish={onPublish} />,
+    },
     {
       id: "offline",
       title: t("edit_survey.offline"),
-      component: <SurveyOffline />,
+      hint: t("edit_survey.offline_hint"),
+      content: <SurveyOffline />,
     },
     {
       id: "privacy",
       title: t("edit_survey.privacy"),
-      component: <SurveyPrivacy />,
+      hint: t("edit_survey.privacy_hint"),
+      content: <SurveyPrivacy />,
     },
-  ];
-
-  const sections = [
     {
       id: "navigation",
       title: t("edit_survey.navigation"),
-      component: <NavigationSettings/>,
+      hint: t("edit_survey.navigation_hint"),
+      content: <NavigationSettings />,
     },
     {
       id: "quotas",
       title: t("edit_survey.quotas"),
-      component: (
-        <Box display="flex" flexDirection="column" gap={3}>
+      hint: t("edit_survey.quotas_hint"),
+      badge: quotasOff ? "off" : null,
+      content: (
+        <>
           <SurveyQuota />
-          {designReady && <Divider />}
           {designReady && (
             <GroupQuotas
               disabled={
-                !isSurveyAdmin() || survey?.status == SURVEY_STATUS.CLOSED
+                !isSurveyAdmin() || survey.status == SURVEY_STATUS.CLOSED
               }
             />
           )}
-        </Box>
+        </>
       ),
     },
     {
       id: "export",
       title: t("edit_survey.export"),
-      component: <ExportSurvey />,
-      tooltip: t("tooltips.export")
+      hint: t("edit_survey.export_hint"),
+      content: <ExportSurvey />,
     },
   ];
 
-  return survey && (
-    <Box className={styles.mainContainer}>
-      <Accordion className={styles.accordionContainer} defaultExpanded={true}>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel-launch-content"
-          id="panel-launch-header"
-        >
-          <Typography fontWeight="600" color="#1a2052" variant="h5">
-            {t("edit_survey.launch")}
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails
-          id="panel-launch-content"
-          className={styles.accordionDetails}
-        >
-          <LaunchPage onPublish={onPublish} />
-        </AccordionDetails>
-      </Accordion>
-      <Box
-        display="flex"
-        flexWrap={{ xs: "wrap", sm: "wrap", md: "nowrap" }}
-        alignItems="flex-start"
-        gap={4}
-        width="100%"
-      >
-        {combinedSections.map((section) => {
-          return (
-            <Accordion
-              className={styles.accordionContainer}
-              key={section.id}
-              defaultExpanded={true}
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls={`panel-${section.id}-content`}
-                id={`panel-${section.id}-header`}
-              >
-                <Box display="flex" alignItems="center" gap=".5rem">
-                  {section.tooltip && (
-                    <CustomTooltip body={section.tooltip} />
-                  )}
-                  <Typography fontWeight="600" color="#1a2052" variant="h5">
-                    {section.title}
-                  </Typography>
-                </Box>
-              </AccordionSummary>
-              <AccordionDetails
-                id={`panel-${section.id}-content`}
-                className={styles.accordionDetails}
-              >
-                {section.component}
-              </AccordionDetails>
-            </Accordion>
-          );
-        })}
-      </Box>
-
-      {sections.map((section) => {
-        return (
-          <Accordion
-            className={styles.accordionContainer}
-            key={section.id}
-            defaultExpanded={true}
-          >
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls={`panel-${section.id}-content`}
-              id={`panel-${section.id}-header`}
-            >
-              <Box display="flex" alignItems="center" gap=".5rem">
-                {section.tooltip && <CustomTooltip body={section.tooltip} />}
-                <Typography fontWeight="600" color="#1a2052" variant="h5">
-                  {section.title}
-                </Typography>
-              </Box>
-            </AccordionSummary>
-            <AccordionDetails
-              id={`panel-${section.id}-content`}
-              className={styles.accordionDetails}
-            >
-              {section.component}
-            </AccordionDetails>
-          </Accordion>
-        );
-      })}
-    </Box>
+  return (
+    <div className={styles.workspace}>
+      <SettingsNav
+        t={t}
+        sections={sections}
+        active={active}
+        onPick={jumpTo}
+      />
+      <div ref={canvasRef} onScroll={onScroll} className={styles.canvas}>
+        <div className={styles.column}>
+          {sections.map(({ id, title, hint, content }) => (
+            <SettingsSection key={id} id={id} title={title} hint={hint}>
+              {content}
+            </SettingsSection>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 

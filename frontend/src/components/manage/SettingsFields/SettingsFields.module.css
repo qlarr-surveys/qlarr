@@ -1,0 +1,263 @@
+/* The controls of the Settings workspace's cards, drawn to
+   docs/design/editor-phase-3.3.html (its "Configure" workspace). Every section
+   card is a column of rows; a row holds one setting. */
+
+/* ====== Row ====== */
+
+.row {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f2f9;
+  font-family: Rubik, sans-serif;
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+/* ====== Label ====== */
+
+/* Above a select, a date pair or a link: the label, then the control. */
+.head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+/* A toggle: the label takes the line and the switch sits at its end. */
+.inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+}
+
+.label {
+  min-width: 0;
+  font: 500 13px/1.3 Rubik, sans-serif;
+  color: #0e1338;
+}
+
+.inline .label {
+  flex: 1;
+}
+
+/* The small label over an input, e.g. "From" and "To". */
+.subLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  font: 500 11px/1.3 Rubik, sans-serif;
+  color: #4c5474;
+}
+
+/* A control under a toggle's line, e.g. the limit under "Total responses". */
+.below {
+  margin-top: 6px;
+}
+
+/* ====== Switch ====== */
+
+.switch {
+  flex: none;
+  display: inline-flex;
+  justify-content: flex-start;
+  width: 36px;
+  height: 21px;
+  padding: 2px;
+  border: 0;
+  border-radius: 11px;
+  background: #cfd5e8;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.switchOn {
+  justify-content: flex-end;
+  background: #3a46d8;
+}
+
+.knob {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+}
+
+.switch:focus-visible {
+  outline: 2px solid #0e1338;
+  outline-offset: 2px;
+}
+
+.switch:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ====== Select ====== */
+
+.selectWrap {
+  position: relative;
+  display: block;
+}
+
+/* The end padding is the chevron's room. Logical properties, not left/right,
+   so the chevron moves to the left in a right-to-left interface. */
+.select {
+  display: block;
+  width: 100%;
+  height: 36px;
+  padding-block: 0;
+  padding-inline: 10px 44px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  background: #fff;
+  font: 400 13px/1 Rubik, sans-serif;
+  color: #0e1338;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.select:hover:not(:disabled) {
+  border-color: #9aa1c0;
+}
+
+.select:focus-visible {
+  border-color: #3a46d8;
+  outline: 2px solid #0e1338;
+  outline-offset: 1px;
+}
+
+.select:disabled {
+  background: #f3f4f8;
+  color: #6b7194;
+  cursor: not-allowed;
+}
+
+/* Decorative, and the select underneath owns the clicks. */
+.chevron {
+  position: absolute;
+  inset-inline-end: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #4c5474;
+  pointer-events: none;
+}
+
+/* ====== Input ====== */
+
+.input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  background: #fff;
+  font: 400 13px/1 Rubik, sans-serif;
+  color: #0e1338;
+}
+
+.input:focus-visible {
+  outline: 2px solid #0e1338;
+  outline-offset: 1px;
+}
+
+.input:disabled {
+  background: #f3f4f8;
+  cursor: not-allowed;
+}
+
+.input::placeholder {
+  color: #8a90a8;
+}
+
+.inputInvalid {
+  border-color: #b3261e;
+}
+
+/* ====== Messages ====== */
+
+.note {
+  margin: 6px 0 0;
+  font: 400 11px/15px Rubik, sans-serif;
+  color: #8a5a00;
+}
+
+.error {
+  margin: 6px 0 0;
+  font: 400 11px/15px Rubik, sans-serif;
+  color: #b3261e;
+}
+
+/* ====== Buttons ====== */
+
+.primaryButton,
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  border-radius: 6px;
+  font: 600 12.5px/1 Rubik, sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.primaryButton {
+  padding: 0 14px;
+  border: 0;
+  background: #1b2559;
+  color: #fff;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: #242f6d;
+}
+
+.primaryButton:focus-visible {
+  outline: 2px solid #0e1338;
+  outline-offset: 2px;
+}
+
+.secondaryButton {
+  padding: 0 12px;
+  border: 1px solid #cfd5e8;
+  background: #fff;
+  font-weight: 500;
+  color: #1b2150;
+}
+
+.secondaryButton:hover:not(:disabled) {
+  border-color: #b9bff0;
+  background: #f4f6fc;
+}
+
+.secondaryButton:focus-visible {
+  outline: 2px solid #0e1338;
+  outline-offset: 1px;
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* Read only by a screen reader: a status line that would repeat what the
+   page already shows. */
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

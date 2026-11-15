@@ -15,12 +15,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import {
-  Add,
-  DeleteOutline,
-  ExpandLess,
-  ExpandMore,
-} from "@mui/icons-material";
+import { DeleteOutline, ExpandLess, ExpandMore } from "@mui/icons-material";
+import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import { useService } from "~/hooks/use-service";
@@ -38,6 +34,7 @@ import { QlarrLogicBuilderInlineWrapper } from "~/components/design/setup/logic/
 import { useFieldConfig } from "~/components/design/setup/logic/QlarrLogicBuilder/hooks/useFieldConfig";
 import { jsonLogicToTree } from "~/components/design/setup/logic/QlarrLogicBuilder/utils/jsonLogic";
 import { OPERATORS } from "~/components/design/setup/logic/QlarrLogicBuilder/config/operators";
+import { fieldStyles, SettingRow } from "~/components/manage/SettingsFields";
 import styles from "./GroupQuotas.module.css";
 
 function GroupQuotas({ disabled }) {
@@ -136,86 +133,76 @@ function GroupQuotas({ disabled }) {
     setExpanded(expanded === quota.code ? null : quota.code);
 
   const addButton = !disabled && (
-    <Button
-      variant="outlined"
-      size="small"
-      startIcon={<Add />}
+    <button
+      type="button"
       onClick={() => {
         expandAdded.current = true;
         dispatch(addQuota());
       }}
+      className={fieldStyles.secondaryButton}
     >
+      <Plus aria-hidden="true" size={14} strokeWidth={2} />
       {t("group_quotas.add")}
-    </Button>
+    </button>
   );
 
   return (
-    <Box className={styles.container} ref={containerRef}>
-      <Box className={styles.header}>
-        <Box className={styles.headerTitle}>
-          <CustomTooltip body={t("tooltips.group_quotas")} />
-          <Typography color="#1a2052" fontWeight="600" variant="subtitle1">
-            {t("group_quotas.title")}
-          </Typography>
-        </Box>
-        {quotas.length > 0 && addButton}
-      </Box>
-      <Typography variant="body2" color="text.secondary">
-        {t("group_quotas.description")}
-      </Typography>
-      {published === false && quotas.length > 0 && (
-        <Box
-          className={styles.notice}
-          sx={{
-            backgroundColor: "warning.lighter",
-            border: 1,
-            borderColor: "warning.light",
-          }}
-        >
-          <Typography variant="body2" color="warning.dark">
-            {t("group_quotas.unpublished_note")}
-          </Typography>
-        </Box>
-      )}
-
-      {quotas.length === 0 ? (
-        <Box className={styles.empty}>
-          <Typography variant="body2" color="text.secondary">
-            {t("group_quotas.empty")}
-          </Typography>
-          {addButton}
-        </Box>
-      ) : (
-        <Box className={styles.list}>
-          {quotas.map((quota) => (
-            <QuotaCard
-              key={quota.code}
-              quota={quota}
-              count={statusByCode[quota.code]?.count ?? 0}
-              full={
-                !brokenCodes.has(quota.code) &&
-                (statusByCode[quota.code]?.full ?? false)
-              }
-              broken={brokenCodes.has(quota.code)}
-              expanded={!disabled && expanded === quota.code}
-              onToggle={() => toggle(quota)}
-              disabled={disabled}
-              fields={fields}
-              designState={designState}
-              componentIndex={componentIndex}
-              mainLang={mainLang}
-              langList={langList}
-              hasMessage={isNotEmptyHtml(
-                survey?.content?.[mainLang]?.[quotaMessageKey(quota.code)],
-              )}
-              onEditMessage={() => editMessage(quota.code)}
-              t={t}
-              tDesign={tDesign}
+    <SettingRow>
+      <Box className={styles.container} ref={containerRef}>
+        <Box className={styles.header}>
+          <Box className={styles.headerTitle}>
+            <CustomTooltip
+              body={t("tooltips.group_quotas")}
+              iconLabel={t("edit_survey.about_setting", {
+                name: t("group_quotas.title"),
+              })}
             />
-          ))}
+            <span className={fieldStyles.label}>{t("group_quotas.title")}</span>
+          </Box>
+          {quotas.length > 0 && addButton}
         </Box>
-      )}
-    </Box>
+        <p className={styles.description}>{t("group_quotas.description")}</p>
+        {published === false && quotas.length > 0 && (
+          <p className={styles.notice}>{t("group_quotas.unpublished_note")}</p>
+        )}
+
+        {quotas.length === 0 ? (
+          <Box className={styles.empty}>
+            <p className={styles.emptyText}>{t("group_quotas.empty")}</p>
+            {addButton}
+          </Box>
+        ) : (
+          <Box className={styles.list}>
+            {quotas.map((quota) => (
+              <QuotaCard
+                key={quota.code}
+                quota={quota}
+                count={statusByCode[quota.code]?.count ?? 0}
+                full={
+                  !brokenCodes.has(quota.code) &&
+                  (statusByCode[quota.code]?.full ?? false)
+                }
+                broken={brokenCodes.has(quota.code)}
+                expanded={!disabled && expanded === quota.code}
+                onToggle={() => toggle(quota)}
+                disabled={disabled}
+                fields={fields}
+                designState={designState}
+                componentIndex={componentIndex}
+                mainLang={mainLang}
+                langList={langList}
+                hasMessage={isNotEmptyHtml(
+                  survey?.content?.[mainLang]?.[quotaMessageKey(quota.code)],
+                )}
+                onEditMessage={() => editMessage(quota.code)}
+                t={t}
+                tDesign={tDesign}
+              />
+            ))}
+          </Box>
+        )}
+      </Box>
+    </SettingRow>
   );
 }
 

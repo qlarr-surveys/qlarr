@@ -22,7 +22,7 @@ export function defaultNavigationData(): SurveyNavigationData {
     navigationMode: 'GROUP_BY_GROUP',
     allowPrevious: true,
     resumeExpiryMillis: TEN_YEARS_MILLIS,
-    skipInvalid: true,
+    skipInvalid: false,
     allowIncomplete: true,
     allowJump: true,
   };

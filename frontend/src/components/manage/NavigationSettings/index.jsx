@@ -1,10 +1,6 @@
-import React, { useMemo, useState } from "react";
-import styles from "./NavigationSettings.module.css";
-import { Box, MenuItem, Typography } from "@mui/material";
-import CustomTooltip from "~/components/common/Tooltip/Tooltip";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
-import { RHFSelect, RHFSwitch } from "~/components/hook-form";
 import { isSurveyAdmin } from "~/constants/roles";
 import { useDispatch, useSelector } from "react-redux";
 import { NAVIGATION_MODE, SURVEY_STATUS } from "~/constants/survey";
@@ -12,6 +8,12 @@ import {
   surveyAttributeChanged,
   surveyAttributeChangedImmediate,
 } from "~/state/edit/editState";
+import {
+  FieldHead,
+  Select,
+  SettingRow,
+  ToggleRow,
+} from "~/components/manage/SettingsFields";
 
 const RESUME_EXPIRY_PRESETS = [
   { key: "1h", labelKey: "since_start.1h", fallback: "1 hour", ms: 3600000 },
@@ -49,61 +51,50 @@ const findPresetByMs = (ms) => RESUME_EXPIRY_PRESETS.find((p) => p.ms === ms);
 const findPresetByKey = (key) =>
   RESUME_EXPIRY_PRESETS.find((p) => p.key === key);
 
+const TOGGLES = [
+  {
+    key: "allowPrevious",
+    labelKey: "allow_previous",
+    tooltipKey: "tooltips.allow_previous",
+  },
+  {
+    key: "allowIncomplete",
+    labelKey: "allow_incomplete",
+    tooltipKey: "tooltips.allow_incomplete",
+  },
+  {
+    key: "allowJump",
+    labelKey: "allow_jump",
+    tooltipKey: "tooltips.allow_jump",
+  },
+  {
+    key: "skipInvalid",
+    labelKey: "skip_invalid",
+    tooltipKey: "tooltips.skip_invalid",
+  },
+];
+
+/**
+ * The Navigation card's rows: how respondents move through the survey.
+ *
+ * A change is written as a top-level key of the survey (`allowPrevious`), which
+ * is what the save request takes; the server merges it into
+ * `surveyNavigationData` and answers without the top-level copy. So each value
+ * is read from the top-level key first: right after a change it holds what was
+ * just picked, and once the save comes back, or the server's copy replaces a
+ * failed one, it is gone and the server's value shows.
+ */
 const NavigationSettings = () => {
   const dispatch = useDispatch();
   const survey = useSelector((state) => state.editState.survey);
-
   const { t } = useTranslation(NAMESPACES.DESIGN_CORE);
-  const isDisabled = !isSurveyAdmin() || survey?.status == SURVEY_STATUS.CLOSED;
 
-  const mode =
-    survey?.surveyNavigationData?.navigationMode ??
-    NAVIGATION_MODE.GROUP_BY_GROUP;
+  const disabled = !isSurveyAdmin() || survey?.status == SURVEY_STATUS.CLOSED;
+  const read = (key) => survey?.[key] ?? survey?.surveyNavigationData?.[key];
 
-  const toggleDefs = useMemo(
-    () => [
-      {
-        key: "allowPrevious",
-        labelKey: "allow_previous",
-        tooltipKey: "tooltips.allow_previous",
-      },
-      {
-        key: "allowIncomplete",
-        labelKey: "allow_incomplete",
-        tooltipKey: "tooltips.allow_incomplete",
-      },
-      {
-        key: "allowJump",
-        labelKey: "allow_jump",
-        tooltipKey: "tooltips.allow_jump",
-      },
-      {
-        key: "skipInvalid",
-        labelKey: "skip_invalid",
-        tooltipKey: "tooltips.skip_invalid",
-      },
-    ],
-    []
-  );
-
-  const [toggles, setToggles] = useState({
-    allowPrevious: Boolean(survey?.surveyNavigationData?.allowPrevious),
-    allowIncomplete: Boolean(survey?.surveyNavigationData?.allowIncomplete),
-    allowJump: Boolean(survey?.surveyNavigationData?.allowJump),
-    skipInvalid: Boolean(survey?.surveyNavigationData?.skipInvalid),
-  });
-
-  const [resumePresetKey, setResumePresetKey] = useState(
-    findPresetByMs(survey?.surveyNavigationData?.resumeExpiryMillis)?.key ??
-      "1w"
-  );
-
-  const handleToggleChange = (key) => (e) => {
-    const next = e.target.checked;
-    setToggles((prev) => ({ ...prev, [key]: next }));
-
-    dispatch(surveyAttributeChanged({ key, value: next }));
-  };
+  const mode = read("navigationMode") ?? NAVIGATION_MODE.GROUP_BY_GROUP;
+  const resumePresetKey =
+    findPresetByMs(read("resumeExpiryMillis"))?.key ?? "1w";
 
   const onNavigationModeChanged = (event) => {
     dispatch(
@@ -115,9 +106,7 @@ const NavigationSettings = () => {
   };
 
   const onResumeExpiryChanged = (event) => {
-    const key = event.target.value;
-    setResumePresetKey(key);
-    const preset = findPresetByKey(key);
+    const preset = findPresetByKey(event.target.value);
     if (preset) {
       dispatch(
         surveyAttributeChanged({
@@ -129,54 +118,58 @@ const NavigationSettings = () => {
   };
 
   return (
-    <Box className={styles.mainContainer}>
-      <RHFSelect
-        value={mode}
-        disabled={isDisabled}
-        label={t("navigation_mode")}
-        onChange={onNavigationModeChanged}
-      >
-        <MenuItem value={NAVIGATION_MODE.GROUP_BY_GROUP}>
-          {t("group_by_group")}
-        </MenuItem>
-        <MenuItem value={NAVIGATION_MODE.QUESTION_BY_QUESTION}>
-          {t("question_by_question")}
-        </MenuItem>
-        <MenuItem value={NAVIGATION_MODE.ALL_IN_ONE}>
-          {t("all_in_one")}
-        </MenuItem>
-      </RHFSelect>
+    <>
+      <SettingRow>
+        <FieldHead
+          label={t("navigation_mode")}
+          htmlFor="settings-navigation-mode"
+        />
+        <Select
+          id="settings-navigation-mode"
+          value={mode}
+          disabled={disabled}
+          onChange={onNavigationModeChanged}
+        >
+          <option value={NAVIGATION_MODE.GROUP_BY_GROUP}>
+            {t("group_by_group")}
+          </option>
+          <option value={NAVIGATION_MODE.QUESTION_BY_QUESTION}>
+            {t("question_by_question")}
+          </option>
+          <option value={NAVIGATION_MODE.ALL_IN_ONE}>{t("all_in_one")}</option>
+        </Select>
+      </SettingRow>
 
-      <RHFSelect
-        value={resumePresetKey}
-        disabled={isDisabled}
-        label={t("response_expiry")}
-        onChange={onResumeExpiryChanged}
-      >
-        {RESUME_EXPIRY_PRESETS.map((p) => (
-          <MenuItem key={p.key} value={p.key}>
-            {t(p.labelKey, p.fallback)}
-          </MenuItem>
-        ))}
-      </RHFSelect>
+      <SettingRow>
+        <FieldHead
+          label={t("response_expiry")}
+          htmlFor="settings-response-expiry"
+        />
+        <Select
+          id="settings-response-expiry"
+          value={resumePresetKey}
+          disabled={disabled}
+          onChange={onResumeExpiryChanged}
+        >
+          {RESUME_EXPIRY_PRESETS.map((p) => (
+            <option key={p.key} value={p.key}>
+              {t(p.labelKey, p.fallback)}
+            </option>
+          ))}
+        </Select>
+      </SettingRow>
 
-      {toggleDefs.map(({ key, labelKey, tooltipKey }) => (
-        <Box key={key} className={styles.boxContainer}>
-          <Box display="flex" alignItems="center" gap=".5rem">
-            <CustomTooltip body={t(tooltipKey)} />
-            <Typography color="#1a2052" fontWeight="500">
-              {t(labelKey)}
-            </Typography>
-          </Box>
-
-          <RHFSwitch
-            disabled={isDisabled}
-            checked={Boolean(toggles[key])}
-            onChange={handleToggleChange(key)}
-          />
-        </Box>
+      {TOGGLES.map(({ key, labelKey, tooltipKey }) => (
+        <ToggleRow
+          key={key}
+          label={t(labelKey)}
+          help={t(tooltipKey)}
+          checked={Boolean(read(key))}
+          onChange={(value) => dispatch(surveyAttributeChanged({ key, value }))}
+          disabled={disabled}
+        />
       ))}
-    </Box>
+    </>
   );
 };
 

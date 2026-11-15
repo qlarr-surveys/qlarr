@@ -1,60 +1,190 @@
-.mainContainer {
-  padding: 1rem 3rem;
+/* ====== Workspace ====== */
+
+.workspace {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  font-family: Rubik, sans-serif;
+}
+
+/* ====== Nav ====== */
+
+/* The same column as the editor's left panel in the other workspaces. */
+.aside {
+  flex: none;
+  width: 22rem;
+  min-height: 0;
   height: 100%;
   overflow: auto;
+  scrollbar-width: thin;
+  background: #fff;
+  border-inline-end: 1px solid #dce0ee;
+  color: #1b2150;
+}
+
+.head {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid #eceefb;
+}
+
+.headTitle {
+  margin: 0;
+  font: 700 11px/14px Rubik, sans-serif;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #666e91;
+}
+
+.headHint {
+  margin: 8px 0 0;
+  font: 400 12px/17px Rubik, sans-serif;
+  color: #4c5474;
+}
+
+.nav {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2px;
+  padding: 9px 8px 24px;
 }
-.accordionDetails {
-  margin: auto;
-  max-width: 800px;
+
+.navItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
-}
-.loadingWrapper {
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  padding-top: 100px;
-}
-
-.accordionContainer.accordionContainer {
-  margin: 0px;
-  box-shadow: none;
-  border-radius: 15px;
-  padding: 2rem;
-  width: 100%;
-  background-color: white;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  text-align: start;
+  cursor: pointer;
 }
 
+.navItem:hover {
+  background: #f4f6fc;
+}
 
+.navItem:focus-visible {
+  outline: 2px solid #0e1338;
+  outline-offset: -1px;
+}
 
-@media (max-width: 600px) {
-  .mainContainer {
-    padding: 0.5rem;
+.navItemOn,
+.navItemOn:hover {
+  border-color: #d8dcef;
+  background: #f0f2fa;
+}
+
+/* The accent bar on the reading edge of the current entry. */
+.navItemOn::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 2px;
+  background: #3a46d8;
+}
+
+.navLabel {
+  flex: 1;
+  min-width: 0;
+  font: 500 14.5px/1.3 Rubik, sans-serif;
+  color: #0e1338;
+}
+
+.navItemOn .navLabel {
+  font-weight: 600;
+}
+
+.badgeAction {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 6px;
+  border: 1px solid #eed79a;
+  border-radius: 3px;
+  background: #fdf0cf;
+  font: 600 9.5px/1 Rubik, sans-serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #7a5a10;
+}
+
+.badgeOff {
+  flex: none;
+  font: 600 9.5px/1 Rubik, sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #5b6189;
+}
+
+/* ====== Canvas ====== */
+
+.canvas {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 40px 40px 0;
+  background: #eaecf4;
+}
+
+/* The bottom padding lets the last, short sections scroll up to the top,
+   where the nav can land on them and the highlight can follow. */
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 780px;
+  margin: 0 auto;
+  padding-bottom: 55vh;
+}
+
+.card {
+  scroll-margin-top: 16px;
+  background: #fff;
+  border: 1px solid #dce0ee;
+  border-radius: 12px;
+}
+
+.cardHead {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid #eef0f8;
+}
+
+/* Focused only by the nav's jump, which already shows where it landed. */
+.cardTitle {
+  margin: 0;
+  font: 600 17px/22px Rubik, sans-serif;
+  color: #1b2150;
+  outline: none;
+}
+
+.cardHint {
+  margin: 3px 0 0;
+  font: 400 13px/18px Rubik, sans-serif;
+  color: #5b6189;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+}
+
+/* The console goes down to 768px wide. Below this, a nav beside the cards
+   would squeeze them under ~470px, so the canvas scrolls alone. */
+@media (max-width: 959px) {
+  .aside {
+    display: none;
   }
-  .accordionContainer {
-    padding: 0.25rem;
+
+  .canvas {
+    padding: 24px 24px 0;
   }
-
-}
-@media (min-width: 601px) and (max-width: 1024px) {
-  .mainContainer {
-    padding: 1rem;
-  }
-  .accordionContainer {
-    padding: 0.75rem;
-  }
-
-}
-
-.accordionContainer:first-of-type {
-  border-radius: 15px;
-}
-.accordionContainer::before {
-  display: none;
-}
-
-.launchContainer{
-  background-color: white;
 }
