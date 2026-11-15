@@ -76,7 +76,12 @@ const inputSx = (invalid) => ({
   "& .MuiOutlinedInput-root.Mui-disabled": {
     background: "#f3f4f8",
   },
+  // MUI pulls the calendar button 12px past the field's end (edge="end"),
+  // which put the icon on the border. Kept inside, it sits 10px in, matching
+  // the text's inset on the other side.
   "& .MuiIconButton-root": {
+    margin: 0,
+    padding: "6px",
     color: "#4c5474",
   },
   "& .MuiSvgIcon-root": {
