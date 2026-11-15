@@ -21,7 +21,7 @@ import {
   setDesignModeToDesign,
   setDesignModeToLang,
   setDesignModeToTheme,
-  refreshDsl,
+  recompileLogic,
   showQuotaMessage,
 } from "~/state/design/designState";
 import { DESIGN_SURVEY_MODE } from "@qlarr/design-core/constants/designMode";
@@ -106,10 +106,10 @@ function DesignSurvey() {
   }, [designStateReceived]);
 
   useEffect(() => {
-    if (designStateReceived && searchParams.get("refresh") === "true") {
-      dispatch(refreshDsl());
-      searchParams.delete("refresh");
-      setSearchParams(searchParams);
+    if (designStateReceived && searchParams.get("recompile_logic") === "1") {
+      dispatch(recompileLogic());
+      searchParams.delete("recompile_logic");
+      setSearchParams(searchParams, { replace: true });
     }
   }, [designStateReceived]);
 

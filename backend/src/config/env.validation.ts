@@ -19,6 +19,7 @@ const bool = Joi.boolean().truthy('true').falsy('false');
 export const envValidationSchema = Joi.object({
   // --- required: no safe default ---
   FRONTEND_URL: Joi.string().uri().required(),
+  BACKEND_URL: Joi.string().uri().required(),
   DB_HOST: Joi.string().required(),
   DB_USER: Joi.string().required(),
   DB_PASSWORD: Joi.string().required(),

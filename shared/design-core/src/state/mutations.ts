@@ -140,8 +140,14 @@ export function buildDesignState(state, payload) {
     };
   } else {
     // Which languages exist is the survey's to say, not the editor's: only
-    // which one is being edited survives a reload of the design.
+    // which one is being edited survives a reload of the design, and only
+    // while the survey still has it.
     state.langInfo.languagesList = languagesList;
+    state.langInfo.mainLang = defaultLang.code;
+    if (!languagesList.some((language) => language.code === state.langInfo.lang)) {
+      state.langInfo.lang = defaultLang.code;
+    }
+    state.langInfo.onMainLang = state.langInfo.lang === defaultLang.code;
   }
 
   toBeRemoved.forEach((key) => {
@@ -1364,43 +1370,13 @@ export function setSaving(state, payload) {
   state.isSaving = payload;
 }
 
-export function refreshDsl(state) {
-  const survey = state.Survey;
-  if (!survey?.children) {
-    return;
-  }
-
-  survey.children.forEach((group) => {
-    const groupObj = state[group.code];
-
-    cleanupFormatInstructions(groupObj);
-
-    groupObj.children?.forEach((questionChild) => {
-      const questionCode = questionChild.code;
-      const question = state[questionCode];
-      if (!question) {
-        return;
-      }
-
-      addQuestionValueInstruction(question);
-      cleanupFormatInstructions(question);
-
-      question.children?.forEach((element) => {
-        addAnswerInstructions(
-          state,
-          state[element.qualifiedCode],
-          questionCode,
-          questionCode,
-        );
-        cleanupFormatInstructions(state[element.qualifiedCode]);
-      });
-
-      cleanupValidation(state, questionCode);
-      cleanupDefaultValue(question);
-      refreshEnumForSingleChoice(question, state);
-      refreshListForMultipleChoice(question, state);
-      addMaskedValuesInstructions(questionCode, question, state);
-    });
+// show/hide and quota conditions written before they read `relevant_value`.
+export function recompileLogic(state) {
+  Object.keys(state).forEach((code) => {
+    const relevance = state[code]?.relevance;
+    if (relevance) {
+      addRelevanceInstructions(state, code, relevance);
+    }
   });
   refreshQuotaInstructions(state);
 }
@@ -1513,45 +1489,6 @@ const cleanupPriorityRules = (componentState) => {
       updatePriorityByRule(componentState, rule);
     }
   });
-};
-
-const cleanupFormatInstructions = (componentState) => {
-  const prefixToRemove = `format_`;
-  const toRemove = componentState.instructionList?.filter((instruction) =>
-    instruction.code.startsWith(prefixToRemove),
-  );
-  toRemove?.forEach((instruction) => {
-    changeInstruction(componentState, {
-      code: instruction.code,
-      remove: true,
-    });
-  });
-  if (componentState.customCss) {
-    const referenceInstructions = buildFormatInstruction(
-      componentState.customCss,
-      "custom",
-      "css",
-      ["customCss"],
-    );
-    referenceInstructions?.forEach((instruction) =>
-      changeInstruction(componentState, instruction),
-    );
-  }
-  if (componentState.content) {
-    Object.keys(componentState.content).forEach((lang) => {
-      Object.keys(componentState.content[lang]).forEach((key) => {
-        const referenceInstructions = buildFormatInstruction(
-          componentState.content[lang][key],
-          key,
-          lang,
-          ["content", lang, key],
-        );
-        referenceInstructions?.forEach((instruction) =>
-          changeInstruction(componentState, instruction),
-        );
-      });
-    });
-  }
 };
 
 // Clean up skip_logic rules that point to a deleted destination

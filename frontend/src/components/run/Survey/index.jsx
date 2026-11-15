@@ -5,6 +5,7 @@ import { useTheme } from "@mui/material";
 import { FORM_ID } from "~/constants/run";
 import Group, { QuotaMessage } from "~/components/Group";
 import Navigation from "~/components/run/Navigation";
+import PreviewInputs from "~/components/run/PreviewInputs";
 import styles from "./Survey.module.css";
 import { shallowEqual, useSelector } from "react-redux";
 import { TouchBackend } from "react-dnd-touch-backend";
@@ -51,6 +52,8 @@ function Survey() {
     return typeof val === "number" ? val : LOGO_SPACING_DEFAULT;
   });
 
+  const singleQuestion = useSelector((state) => state.runState.singleQuestion);
+
   const quotaCode = useSelector(
     (state) => state.runState.data?.screenedOutQuota,
   );
@@ -96,6 +99,7 @@ function Survey() {
             />
           </div>
         )}
+        {singleQuestion && <PreviewInputs />}
         <div className={styles.surveyGroups}>
           {survey && survey.groups
             ? survey.groups
@@ -113,7 +117,7 @@ function Survey() {
                   ),
                 )
             : ""}
-          <Navigation navigationIndex={navigationIndex} />
+          {!singleQuestion && <Navigation navigationIndex={navigationIndex} />}
         </div>
       </form>
     </DndProvider>

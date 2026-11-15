@@ -25,7 +25,7 @@ npm run start:dev            # watch mode on PORT (default 8080)
 ```
 
 Copy `.env.example` to `.env` and set at least `DB_*`, `JWT_SECRET` and
-`FRONTEND_URL` first. On first startup, when the users table is empty, an admin
+`FRONTEND_URL` / `BACKEND_URL` first. On first startup, when the users table is empty, an admin
 is seeded:
 
 ```

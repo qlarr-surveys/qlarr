@@ -35,14 +35,14 @@ function TranslationPanel({ t }) {
   const mainLang = useSelector((state) => state.designState.langInfo?.mainLang);
   const lang = useSelector((state) => state.designState.langInfo?.lang);
   const languagesList = useSelector(
-    (state) => state.designState.langInfo?.languagesList
+    (state) => state.designState.langInfo?.languagesList,
   );
 
   const uiLang = i18n.language;
   const surveyLangs = languagesList || [];
   const additional = React.useMemo(
     () => surveyLangs.filter((language) => language.code !== mainLang),
-    [surveyLangs, mainLang]
+    [surveyLangs, mainLang],
   );
   const additionalCodes = additional.map((language) => language.code);
 
@@ -142,41 +142,46 @@ function TranslationPanel({ t }) {
           <TranslationsCsv t={t} />
         </section>
 
-        <div className={styles.divider} />
+        {additional.length > 0 && (
+          <>
+            <div className={styles.divider} />
 
-        <section className={styles.group}>
-          <h3 className={styles.groupTitle}>{t("lang_edit_translation")}</h3>
-          <p className={styles.groupHint}>
-            {t("lang_edit_translation_hint")}
-          </p>
-          {additional.length === 0 ? (
-            <p className={styles.empty}>{t("lang_edit_translation_empty")}</p>
-          ) : (
-            <div
-              role="radiogroup"
-              aria-label={t("lang_edit_translation")}
-              className={styles.chips}
-            >
-              {surveyLangs.map((language) => (
-                <button
-                  key={language.code}
-                  type="button"
-                  role="radio"
-                  aria-checked={language.code === lang}
-                  dir={dirOf(language.code)}
-                  onClick={() => dispatch(changeLang(language.code))}
-                  className={`${styles.chip} ${
-                    language.code === lang ? styles.chipOn : ""
-                  }`}
-                >
-                  <span className={styles.chipLabel} data-label={language.name}>
-                    {language.name}
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
-        </section>
+            <section className={styles.group}>
+              <h3 className={styles.groupTitle}>
+                {t("lang_edit_translation")}
+              </h3>
+              <p className={styles.groupHint}>
+                {t("lang_edit_translation_hint")}
+              </p>
+              <div
+                role="radiogroup"
+                aria-label={t("lang_edit_translation")}
+                className={styles.chips}
+              >
+                {surveyLangs.map((language) => (
+                  <button
+                    key={language.code}
+                    type="button"
+                    role="radio"
+                    aria-checked={language.code === lang}
+                    dir={dirOf(language.code)}
+                    onClick={() => dispatch(changeLang(language.code))}
+                    className={`${styles.chip} ${
+                      language.code === lang ? styles.chipOn : ""
+                    }`}
+                  >
+                    <span
+                      className={styles.chipLabel}
+                      data-label={language.name}
+                    >
+                      {language.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          </>
+        )}
       </div>
     </div>
   );

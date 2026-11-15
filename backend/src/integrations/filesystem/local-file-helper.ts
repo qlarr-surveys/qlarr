@@ -9,7 +9,6 @@ import { randomUUID } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import {
   access,
-  copyFile,
   cp,
   mkdir,
   readFile,
@@ -316,23 +315,6 @@ export class LocalFileHelper implements FileHelper, OnModuleInit {
     }
     const dest = this.folderPath(destinationSurveyId, SurveyFolder.Resources);
     await cp(src, dest, { recursive: true });
-  }
-
-  async copyDesign(
-    sourceSurveyId: string,
-    destinationSurveyId: string,
-    sourceFileName: string,
-    newFileName: string,
-  ): Promise<void> {
-    const from = this.filePath(sourceSurveyId, SurveyFolder.Design, sourceFileName);
-    const to = this.filePath(destinationSurveyId, SurveyFolder.Design, newFileName);
-    await mkdir(dirname(to), { recursive: true });
-    await copyFile(from, to);
-    try {
-      await copyFile(`${from}${METADATA_POSTFIX}`, `${to}${METADATA_POSTFIX}`);
-    } catch {
-      // No sidecar (e.g. a file from an older layout) — nothing to copy.
-    }
   }
 
   async deleteSurveyFiles(surveyId: string): Promise<void> {

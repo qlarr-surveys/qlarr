@@ -111,17 +111,17 @@ describe("convertQuestion — recompiles relevance that reads the question", () 
       },
     });
     expect(relevanceText(state, dependent)).toBe(
-      `["A1"].indexOf(${source}.value) !== -1`,
+      `["A1"].indexOf(${source}.relevant_value) !== -1`,
     );
 
     convertQuestion(state, { questionCode: source, newType: "mcq" });
     expect(relevanceText(state, dependent)).toBe(
-      `['A1'].filter((el) => ${source}.value?.indexOf(el) > -1).length > 0`,
+      `['A1'].filter((el) => ${source}.relevant_value?.indexOf(el) > -1).length > 0`,
     );
 
     convertQuestion(state, { questionCode: source, newType: "scq" });
     expect(relevanceText(state, dependent)).toBe(
-      `["A1"].indexOf(${source}.value) !== -1`,
+      `["A1"].indexOf(${source}.relevant_value) !== -1`,
     );
   });
 
@@ -161,8 +161,8 @@ describe("convertQuestion — recompiles relevance that reads the question", () 
 
     convertQuestion(state, { questionCode: source, newType: "mcq" });
     expect(relevanceText(state, dependent)).toBe(
-      `['A1'].filter((el) => ${source}.value?.indexOf(el) > -1).length > 0 || ` +
-        `["A1"].indexOf(${gone}.value) !== -1`,
+      `['A1'].filter((el) => ${source}.relevant_value?.indexOf(el) > -1).length > 0 || ` +
+        `["A1"].indexOf(${gone}.relevant_value) !== -1`,
     );
   });
 });
@@ -188,7 +188,7 @@ describe("relevance on an mcq_array row", () => {
       value: { rule: "show_if", logic: { [op]: [{ var: row }, ["Ac1"]] } },
     });
     expect(relevanceText(state, dependent)).toBe(
-      `['Ac1'].filter((el) => ${row}.value?.indexOf(el) > -1).length ${comparison}`,
+      `['Ac1'].filter((el) => ${row}.relevant_value?.indexOf(el) > -1).length ${comparison}`,
     );
   });
 });

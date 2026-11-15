@@ -143,7 +143,7 @@ function toNavigationIndex(index: NavigationIndexJson | null | undefined) {
 function toNavigationDirection(direction: NavigationDirectionJson) {
   const ND = exposed.NavigationDirection;
   // The wire names are the engine's own serial constants — uppercase
-  // (START / PREV / NEXT / RESUME / SAVE / JUMP), which is exactly what the
+  // (START / PREV / NEXT / RESUME / SAVE / JUMP / START_AT), which is exactly what the
   // frontend and the engine's `NavigationDirectionSerializer` use. Normalise so
   // a server-generated `Start` (capitalised) resolves too.
   switch (direction.name.toUpperCase()) {
@@ -160,6 +160,12 @@ function toNavigationDirection(direction: NavigationDirectionJson) {
         toNavigationIndex(
           'navigationIndex' in direction ? direction.navigationIndex : undefined,
         )!,
+      );
+    case 'START_AT':
+      return new ND.StartAt(
+        toNavigationIndex(
+          'navigationIndex' in direction ? direction.navigationIndex : undefined,
+        ) as InstanceType<typeof exposed.NavigationIndex.Question>,
       );
     default:
       return ND.Start;

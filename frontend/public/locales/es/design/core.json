@@ -1,5 +1,6 @@
 {
   "duplicate": "Duplicar",
+  "preview_question": "Previsualizar esta pregunta",
   "delete": "Eliminar",
   "add_all": "Agregar \"Todos\"",
   "add_column": "Agregar Columna",
@@ -673,6 +674,5 @@
   "lang_import_done_one": "Se actualizó {{count}} campo.",
   "lang_import_done_other": "Se actualizaron {{count}} campos.",
   "lang_edit_translation": "Editar traducción",
-  "lang_edit_translation_hint": "Cambia entre idiomas para completar o revisar el contenido traducido.",
-  "lang_edit_translation_empty": "Activa un idioma adicional arriba para empezar a traducir."
+  "lang_edit_translation_hint": "Cambia entre idiomas para completar o revisar el contenido traducido."
 }
