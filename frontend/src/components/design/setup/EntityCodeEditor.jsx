@@ -119,7 +119,8 @@ function EntityCodeEditor({ code }) {
           !!error && styles.error
         )}
       >
-        {/* Left to right in any language, so the prefix always leads. */}
+        {/* Codes only take a-z, 0-9 and _, so the code reads left to right
+            in every language, Arabic included, with the prefix first. */}
         <div className={styles.code} dir="ltr">
           {prefix && (
             <span
