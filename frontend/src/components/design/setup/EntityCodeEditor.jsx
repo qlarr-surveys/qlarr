@@ -31,6 +31,7 @@ function EntityCodeEditor({ code }) {
   const help = useSetupHelp();
   const inputId = useId();
   const messageId = useId();
+  const inputRef = React.useRef(null);
 
   const { currentSetup, saving } = useSelector(
     (state) => ({
@@ -99,6 +100,16 @@ function EntityCodeEditor({ code }) {
 
   const canSubmit = !!code && isDirty && !saving && !!suffix;
 
+  // The prefix reads as the code's fixed first letter: pressing it puts the
+  // caret straight after it, at the start of the part that can be edited.
+  const focusAfterPrefix = (event) => {
+    event.preventDefault();
+    const input = inputRef.current;
+    if (!input) return;
+    input.focus();
+    input.setSelectionRange(0, 0);
+  };
+
   return (
     <SetupField label={t("entity_code")} help={help("entity_code")} htmlFor={inputId}>
       <div
@@ -108,24 +119,31 @@ function EntityCodeEditor({ code }) {
           !!error && styles.error
         )}
       >
-        {prefix && (
-          <span className={styles.prefix} aria-hidden="true">
-            {prefix}
-          </span>
-        )}
-        <input
-          id={inputId}
-          type="text"
-          value={suffix}
-          onChange={(e) => handleEntityCodeChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          aria-invalid={!!error}
-          aria-describedby={error ? messageId : undefined}
-          spellCheck={false}
-          autoComplete="off"
-          dir="ltr"
-          className={styles.input}
-        />
+        {/* Left to right in any language, so the prefix always leads. */}
+        <div className={styles.code} dir="ltr">
+          {prefix && (
+            <span
+              className={styles.prefix}
+              aria-hidden="true"
+              onMouseDown={focusAfterPrefix}
+            >
+              {prefix}
+            </span>
+          )}
+          <input
+            ref={inputRef}
+            id={inputId}
+            type="text"
+            value={suffix}
+            onChange={(e) => handleEntityCodeChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            aria-invalid={!!error}
+            aria-describedby={error ? messageId : undefined}
+            spellCheck={false}
+            autoComplete="off"
+            className={styles.input}
+          />
+        </div>
         <button
           type="button"
           onClick={handleEntityCodeSave}

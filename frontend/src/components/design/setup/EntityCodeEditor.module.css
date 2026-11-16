@@ -1,5 +1,6 @@
-/* The element code: its fixed prefix, the editable rest, and the button that
-   applies it, in one box (docs/design/editor-phase-3.3.html). */
+/* The element code and the button that applies it, in one box
+   (docs/design/editor-phase-3.3.html). The code's fixed prefix ("Q", "G")
+   reads as its first letter rather than as a separate chip. */
 
 .box {
   display: flex;
@@ -33,30 +34,37 @@
   border-color: #b3261e;
 }
 
+/* Codes are identifiers: set in monospace. The prefix and the input share
+   the font, so the editable rest follows the prefix like the next letter. */
+.code {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
+  padding-left: 12px;
+  font: 500 16px/22px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.02em;
+}
+
+/* Muted: part of the code, but not editable. */
 .prefix {
   flex: none;
   display: flex;
   align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  padding: 0 12px;
-  box-sizing: border-box;
-  border-inline-end: 1px solid #dfe2ef;
-  background: #f3f4f8;
-  font: 600 16px Rubik, sans-serif;
-  color: #3c447a;
+  color: #6b7194;
+  cursor: text;
+  user-select: none;
 }
 
-/* Codes are identifiers: set in monospace, left to right in any language. */
 .input {
   flex: 1;
   min-width: 0;
-  padding: 0 12px;
+  padding: 0 12px 0 0;
   border: 0;
   outline: none;
   background: transparent;
-  font: 500 16px/22px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  letter-spacing: 0.02em;
+  font: inherit;
+  letter-spacing: inherit;
   color: #1b2150;
 }
 
