@@ -1216,6 +1216,11 @@ export function updateSkipRule(state, payload) {
     rule.toEnd = false;
     rule.disqualify = false;
   }
+  // Skipping to the last group already ends the survey
+  const groups = state.Survey.children || [];
+  if (rule.skipTo && rule.skipTo === groups[groups.length - 1]?.code) {
+    rule.toEnd = false;
+  }
   addSkipInstructions(state, code);
 }
 
