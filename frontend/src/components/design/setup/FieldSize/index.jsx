@@ -1,13 +1,15 @@
-import React, { useState } from "react";
-import TextField from "@mui/material/TextField";
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
+import React, { useId, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Trans } from "react-i18next";
 import { changeAttribute } from "~/state/design/designState";
-import { Trans, useTranslation } from "react-i18next";
-import styles from "./FieldSize.module.css";
-import CustomTooltip from "~/components/common/Tooltip/Tooltip";
-import { NAMESPACES } from "~/hooks/useNamespaceLoader";
-import { Typography } from "@mui/material";
+import {
+  SetupField,
+  SetupHint,
+  setupFieldStyles as styles,
+  useSetupHelp,
+} from "~/components/design/setup/SetupFields";
+
+const cx = (...names) => names.filter(Boolean).join(" ");
 
 function FieldSize({
   label,
@@ -19,7 +21,9 @@ function FieldSize({
   upperBound,
 }) {
   const dispatch = useDispatch();
-  const { t: tTooltips } = useTranslation(NAMESPACES.DESIGN_TOOLTIPS);
+  const help = useSetupHelp();
+  const id = useId();
+  const hintId = useId();
 
   const stateValue = useSelector((state) => {
     return state.designState[code][rule] || defaultValue;
@@ -43,7 +47,7 @@ function FieldSize({
 
   const isError = value != stateValue;
 
-  const lostFocus = (event) => {
+  const lostFocus = () => {
     if (isError) {
       setValue(stateValue);
       dispatch(
@@ -57,40 +61,34 @@ function FieldSize({
   };
 
   return (
-    <>
-      <div className={styles.label}>
-        <CustomTooltip body={tTooltips(label)} />
-        <Typography fontWeight={700}>{t(label)}:</Typography>
-      </div>
-      <TextField
-        label={t(label)}
-        error={isError}
-        variant="outlined"
+    <SetupField label={t(label)} help={help(label)} htmlFor={id}>
+      <input
+        id={id}
         type="number"
-        helperText={
-          isError ? (
-            <Trans
-              t={t}
-              values={{
-                lower_bound: lowerBound,
-                upper_bound: upperBound,
-                setup_value: stateValue,
-                label,
-              }}
-              i18nKey="value_beyond_bounds"
-            />
-          ) : null
-        }
-        size="small"
-        sx={{ maxWidth: "200px" ,
-
-          ml:2,
-         }}
+        min={lowerBound}
+        max={upperBound}
         value={value}
         onBlur={lostFocus}
-        onChange={(event) => onValueChange(event)}
+        onChange={onValueChange}
+        aria-invalid={isError}
+        aria-describedby={isError ? hintId : undefined}
+        className={cx(styles.input, styles.inputShort, isError && styles.invalid)}
       />
-    </>
+      {isError && (
+        <SetupHint id={hintId} error>
+          <Trans
+            t={t}
+            values={{
+              lower_bound: lowerBound,
+              upper_bound: upperBound,
+              setup_value: stateValue,
+              label: t(label),
+            }}
+            i18nKey="value_beyond_bounds"
+          />
+        </SetupHint>
+      )}
+    </SetupField>
   );
 }
 

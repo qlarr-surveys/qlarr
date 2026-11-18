@@ -1,4 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
+import { isEquivalent } from "~/utils/design/utils";
 import {
   addCustomValidationRule,
   updateCustomValidationRuleText,
@@ -10,6 +11,8 @@ import {
 export function useCustomValidationRules(code, t) {
   const dispatch = useDispatch();
 
+  // Rebuilt on every call, so compared by value: by reference the rules
+  // would re-render on every store update.
   const customRules = useSelector((state) => {
     const instructionList = state.designState[code]?.instructionList || [];
     const content = state.designState[code]?.content || {};
@@ -26,7 +29,7 @@ export function useCustomValidationRules(code, t) {
           ])
         ),
       }));
-  });
+  }, isEquivalent);
 
   const languagesList = useSelector((state) => {
     return state.designState.langInfo.languagesList;

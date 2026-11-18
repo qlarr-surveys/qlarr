@@ -1,18 +1,23 @@
-import React from "react";
-import { Checkbox, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import React, { useId } from "react";
 import { shallowEqual, useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { changeAttribute, updateRandom } from "~/state/design/designState";
-import styles from "./OrderSetup.module.css";
-import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import { instructionByCode } from "@qlarr/design-core/state/addInstructions";
-import { stripTags } from "~/utils/design/utils";
-import { useTranslation } from "react-i18next";
-import { NAMESPACES } from "~/hooks/useNamespaceLoader";
+import { isEquivalent, stripTags } from "~/utils/design/utils";
+import {
+  SetupCheckItem,
+  SetupCheckList,
+  SetupField,
+  SetupHint,
+  SetupSegmented,
+  setupFieldStyles,
+  useSetupHelp,
+} from "~/components/design/setup/SetupFields";
 
 export default function OrderSetup({ t, rule, code }) {
   const dispatch = useDispatch();
-  const { t: tTooltips } = useTranslation(NAMESPACES.DESIGN_TOOLTIPS);
+  const help = useSetupHelp();
+  const headingId = useId();
 
   const value = useSelector((state) => {
     return state.designState[code][rule] || "NONE";
@@ -102,6 +107,8 @@ export default function OrderSetup({ t, rule, code }) {
 
   const randomGroupCodes = relevantGroup?.codes || [];
 
+  // Rebuilt on every call, so compared by value: by reference the setting
+  // would re-render on every store update.
   const children = useSelector((state) => {
     return (
       state.designState[code]?.children
@@ -115,7 +122,7 @@ export default function OrderSetup({ t, rule, code }) {
           };
         }) || []
     );
-  });
+  }, isEquivalent);
 
   const reorderedCount = children.filter((c) => c.inRandomGroup).length;
   const pinnedCount = children.length - reorderedCount;
@@ -148,85 +155,47 @@ export default function OrderSetup({ t, rule, code }) {
     dispatch(changeAttribute({ code, key: rule, value: finalValue }));
   };
 
+  const heading = type ? t(title) : t("op_order_section");
+
   return (
-    <>
-      <div className={styles.label}>
-        <CustomTooltip body={tTooltips(title)} />
-        <Typography fontWeight={700}>
-          {type ? t(title) : t("op_order_section")}
-        </Typography>
-      </div>
+    <SetupField label={heading} help={help(title)} id={headingId}>
+      <div className={setupFieldStyles.stack}>
+        <SetupSegmented
+          labelledBy={headingId}
+          options={values.map((val, index) => ({
+            value: val,
+            label: labels[index],
+          }))}
+          value={value}
+          onChange={onChange}
+          columns={values.length > 2 ? values.length : undefined}
+        />
 
-      <ToggleButtonGroup
-        className={styles.modeGroup}
-        size="small"
-        exclusive
-        value={value}
-        onChange={(_e, next) => {
-          if (next !== null) onChange(next);
-        }}
-      >
-        {values.map((val, index) => (
-          <ToggleButton key={val} value={val}>
-            {labels[index]}
-          </ToggleButton>
-        ))}
-      </ToggleButtonGroup>
-
-      {value != "NONE" && value != undefined && (
-        <>
-          <Typography
-            className={styles.summary}
-            variant="body2"
-            color="text.secondary"
-          >
-            {pinnedCount === 0
-              ? t("order_applies_all", { count: children.length })
-              : t("order_pinned_some", {
-                  count: pinnedCount,
-                  total: children.length,
-                })}
-          </Typography>
-          <ul className={styles.list}>
-            {children &&
-              children.map((item, index) => (
-                <RandomisedChildDisplay
-                  key={index}
+        {value != "NONE" && value != undefined && (
+          <>
+            <SetupHint>
+              {pinnedCount === 0
+                ? t("order_applies_all", { count: children.length })
+                : t("order_pinned_some", {
+                    count: pinnedCount,
+                    total: children.length,
+                  })}
+            </SetupHint>
+            <SetupCheckList label={heading}>
+              {children.map((item, index) => (
+                <SetupCheckItem
+                  key={item.code}
                   code={item.code}
-                  handleChange={(checked) => handleCheckboxChange(checked, index)}
+                  text={stripTags(item.label)}
                   checked={item.inRandomGroup}
-                  label={item.label}
+                  onChange={(checked) => handleCheckboxChange(checked, index)}
                 />
               ))}
-          </ul>
-          <Typography
-            className={styles.hint}
-            variant="body2"
-            color="text.secondary"
-          >
-            {t("op_fixed_hint")}
-          </Typography>
-        </>
-      )}
-    </>
-  );
-}
-
-function RandomisedChildDisplay({ code, label, checked, handleChange }) {
-  const text = stripTags(label);
-  return (
-    <li className={styles.listItem} onClick={() => handleChange(!checked)}>
-      <Checkbox
-        checked={checked}
-        onClick={(e) => e.stopPropagation()}
-        onChange={(e) => handleChange(e.target.checked)}
-      />
-      <span className={styles.codeChip} title={code}>
-        {code}
-      </span>
-      <span className={styles.itemLabel} title={text}>
-        {text}
-      </span>
-    </li>
+            </SetupCheckList>
+            <SetupHint>{t("op_fixed_hint")}</SetupHint>
+          </>
+        )}
+      </div>
+    </SetupField>
   );
 }

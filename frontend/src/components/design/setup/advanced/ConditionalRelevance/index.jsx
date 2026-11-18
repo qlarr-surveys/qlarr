@@ -1,56 +1,56 @@
-import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
-import React from "react";
+import React, { useId } from "react";
+import {
+  SetupAddButton,
+  SetupCard,
+  SetupHint,
+  SetupRemoveButton,
+  setupFieldStyles,
+} from "~/components/design/setup/SetupFields";
 import { useConditionalRelevance } from "./useConditionalRelevance";
-import styles from "../shared.module.css";
-import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
+
+const cx = (...names) => names.filter(Boolean).join(" ");
 
 function ConditionalRelevance({ code, t }) {
+  const titleId = useId();
   const { conditionalRelevance, errors, onDelete, onTextChange, onAdd } =
     useConditionalRelevance(code);
 
-  return (
-    <>
-      {!conditionalRelevance ? (
-        <Box sx={{ my: 2 }}>
-          <Button
-            variant="outlined"
-            startIcon={<AddIcon />}
-            onClick={onAdd}
-            size="small"
-          >
-            {t("add_conditional_relevance")}
-          </Button>
-        </Box>
-      ) : (
-        <Box className={styles.instructionCard}>
-          <Box className={styles.instructionHeader}>
-            <Typography fontWeight={600}>conditional relevance</Typography>
-            <IconButton size="small" onClick={onDelete}>
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </Box>
+  if (!conditionalRelevance) {
+    return (
+      <SetupAddButton onClick={onAdd}>
+        {t("add_conditional_relevance")}
+      </SetupAddButton>
+    );
+  }
 
-          <TextField
-            fullWidth
-            multiline
-            rows={3}
-            variant="outlined"
-            size="small"
-            placeholder={t("conditional_relevance_text_placeholder")}
-            value={conditionalRelevance.text || ""}
-            onChange={(e) => onTextChange(e.target.value)}
-            sx={{ mt: 1 }}
-            error={errors.length > 0}
-          />
-          {errors.map((err, i) => (
-            <Typography key={i} variant="caption" color="error" display="block" sx={{ mt: 0.5 }}>
-              {err.message}
-            </Typography>
-          ))}
-        </Box>
-      )}
-    </>
+  return (
+    <SetupCard
+      aria-labelledby={titleId}
+      invalid={errors.length > 0}
+      title={<span id={titleId}>{t("relevance")}</span>}
+      actions={<SetupRemoveButton label={t("delete")} onClick={onDelete} />}
+    >
+      <textarea
+        rows={3}
+        dir="ltr"
+        spellCheck={false}
+        aria-labelledby={titleId}
+        aria-invalid={errors.length > 0}
+        placeholder={t("conditional_relevance_text_placeholder")}
+        value={conditionalRelevance.text || ""}
+        onChange={(e) => onTextChange(e.target.value)}
+        className={cx(
+          setupFieldStyles.textarea,
+          setupFieldStyles.code,
+          errors.length > 0 && setupFieldStyles.invalid
+        )}
+      />
+      {errors.map((err, i) => (
+        <SetupHint key={i} error>
+          {err.message}
+        </SetupHint>
+      ))}
+    </SetupCard>
   );
 }
 

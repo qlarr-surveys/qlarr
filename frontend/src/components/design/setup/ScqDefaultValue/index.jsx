@@ -1,17 +1,27 @@
-import React, { useMemo } from "react";
-import { MenuItem, Typography, FormControl, Select } from "@mui/material";
+import React, { useId, useMemo } from "react";
 import { useSelector, useDispatch, shallowEqual } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import { setDefaultValue } from "~/state/design/designState";
 import { stripTags } from "~/utils/design/utils";
+import {
+  SetupField,
+  SetupSelect,
+  useSetupHelp,
+} from "~/components/design/setup/SetupFields";
+
+// One shared empty list, so a question without options doesn't hand
+// useSelector a new array on every call (and re-render on every action).
+const NO_ANSWERS = [];
 
 function ScqDefaultValue({ code }) {
   const dispatch = useDispatch();
   const { t } = useTranslation(NAMESPACES.DESIGN_CORE);
+  const help = useSetupHelp();
+  const id = useId();
 
   const answers = useSelector(
-    (state) => state.designState[code]?.children || []
+    (state) => state.designState[code]?.children || NO_ANSWERS
   );
 
   const currentInstruction = useSelector((state) => {
@@ -63,33 +73,36 @@ function ScqDefaultValue({ code }) {
     return null;
   }
 
+  // A default whose answer is gone is still the saved value: name it rather
+  // than let the select fall back to showing "No default".
+  const isOrphan =
+    !!currentDefaultValue &&
+    !answers.some((answer) => answer.code === currentDefaultValue);
+
   return (
-    <div style={{ marginBottom: "16px" }}>
-      <Typography fontWeight={700} style={{ marginBottom: "8px" }}>
-        {t("default_value")}
-      </Typography>
-      <Select
-        fullWidth
+    <SetupField
+      label={t("default_value")}
+      help={help("default_value")}
+      htmlFor={id}
+    >
+      <SetupSelect
+        id={id}
         value={currentDefaultValue}
         onChange={handleDefaultValueChange}
-        displayEmpty
-        renderValue={(selected) => {
-          if (!selected) {
-            return t("no_default");
-          }
-          return getAnswerLabel(selected);
-        }}
       >
-        <MenuItem value="">
-          <em>{t("no_default")}</em>
-        </MenuItem>
+        <option value="">{t("no_default")}</option>
         {answers.map((answer) => (
-          <MenuItem key={answer.code} value={answer.code}>
+          <option key={answer.code} value={answer.code}>
             {getAnswerLabel(answer.code)}
-          </MenuItem>
+          </option>
         ))}
-      </Select>
-    </div>
+        {isOrphan && (
+          <option value={currentDefaultValue}>
+            {getAnswerLabel(currentDefaultValue)}
+          </option>
+        )}
+      </SetupSelect>
+    </SetupField>
   );
 }
 

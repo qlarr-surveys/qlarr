@@ -19,6 +19,9 @@ const CustomTooltip = ({
   // ("About the survey description") should; the generic label is the floor,
   // not the target.
   iconLabel,
+  // "md" is the question settings panel's ⓘ: a 26px target around a 16px
+  // glyph drawn at the full stroke, beside labels set larger than elsewhere.
+  size = "sm",
 }) => {
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -116,7 +119,9 @@ const CustomTooltip = ({
               all. It also gives the 24px target the redesign draws. */}
           <button
             type="button"
-            className={styles.iconButton}
+            className={`${styles.iconButton} ${
+              size === "md" ? styles.iconButtonMd : ""
+            }`}
             aria-label={triggerLabel}
             aria-expanded={tooltipOpen}
             onClick={(e) => {
@@ -124,7 +129,11 @@ const CustomTooltip = ({
               setTooltipOpen((prev) => !prev);
             }}
           >
-            <Info size={14} strokeWidth={1.4} />
+            {size === "md" ? (
+              <Info size={16} strokeWidth={2} />
+            ) : (
+              <Info size={14} strokeWidth={1.4} />
+            )}
           </button>
         </Tooltip>
       </div>

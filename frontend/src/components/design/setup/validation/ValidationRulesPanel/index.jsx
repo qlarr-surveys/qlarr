@@ -1,11 +1,15 @@
 import React from "react";
-import { Box, Typography } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { changeValidationValue } from "~/state/design/designState";
 import PresetRuleCard from "./PresetRuleCard";
 import AddRulePicker from "./AddRulePicker";
 import RuleCard from "../CustomValidationRules/RuleCard";
 import { useCustomValidationRules } from "../CustomValidationRules/useCustomValidationRules";
+import { setupFieldStyles } from "~/components/design/setup/SetupFields";
+
+// One shared empty value, so a question without validation doesn't hand
+// useSelector a new object on every call (and re-render on every action).
+const NO_VALIDATION = {};
 
 /**
  * Validation tab body. Shows only the *active* rules as cards (Required pinned
@@ -24,7 +28,7 @@ function ValidationRulesPanel({ code, t, validationRules }) {
   );
 
   const validationState = useSelector(
-    (state) => state.designState[code]?.validation || {}
+    (state) => state.designState[code]?.validation || NO_VALIDATION
   );
 
   const hasRequired = presetCatalog.includes("validation_required");
@@ -53,8 +57,7 @@ function ValidationRulesPanel({ code, t, validationRules }) {
     );
 
   return (
-    <Box>
-
+    <div className={setupFieldStyles.stack}>
       {hasRequired && (
         <PresetRuleCard
           code={code}
@@ -97,7 +100,7 @@ function ValidationRulesPanel({ code, t, validationRules }) {
         onAddCustom={onAddRule}
         t={t}
       />
-    </Box>
+    </div>
   );
 }
 

@@ -1,6 +1,5 @@
 import React from "react";
-import { IconButton, TextField, Typography } from "@mui/material";
-import { EditOutlined, RestartAltOutlined } from "@mui/icons-material";
+import { Pencil, RotateCcw } from "lucide-react";
 import styles from "./ValidationSetupMessage.module.css";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
@@ -10,6 +9,10 @@ import {
   changeContent,
   changeValidationValue,
 } from "~/state/design/designState";
+import {
+  SetupIconButton,
+  setupFieldStyles,
+} from "~/components/design/setup/SetupFields";
 
 function ValidationSetupMessage({ validationRule, code, rule, t }) {
   const dispatch = useDispatch();
@@ -96,58 +99,52 @@ function ValidationSetupMessage({ validationRule, code, rule, t }) {
     }
   };
 
+  const headingId = `${code}-${rule}-message`;
+
   return (
-    <div>
-      <Typography fontWeight={700} className={styles.heading}>
+    <div role="group" aria-labelledby={headingId} className={styles.messages}>
+      <span id={headingId} className={styles.heading}>
         {t("error_message")}
-      </Typography>
+      </span>
       {languagesList.map((l) => {
         const isEditing = editingLangs.has(l.code);
+        const standard = t(rule, { ns: "run", lng: l.code, ...validationRule });
         return (
           <div className={styles.messageRow} key={l.code}>
-            <div className={styles.rowLabel}>{l.code}:</div>
+            <span className={setupFieldStyles.langCode} title={l.name}>
+              {l.code.toUpperCase()}
+            </span>
             <div className={styles.rowContent}>
               {isEditing ? (
-                <TextField
-                  fullWidth
-                  size="small"
-                  variant="standard"
-                  placeholder={t(rule, {
-                    ns: "run",
-                    lng: l.code,
-                    ...validationRule,
-                  })}
+                <input
+                  type="text"
+                  dir="auto"
+                  aria-label={`${t("error_message")} (${l.name})`}
+                  placeholder={standard}
                   autoFocus={focusLang === l.code}
                   value={customFor(l.code)}
                   onChange={(event) =>
                     onContentUpdate(l.code, event.target.value)
                   }
                   onBlur={() => onFieldBlur(l.code)}
+                  className={`${setupFieldStyles.input} ${setupFieldStyles.inputShort}`}
                 />
               ) : (
-                <span className={styles.standardText}>
-                  {t(rule, { ns: "run", lng: l.code, ...validationRule })}
-                </span>
+                <span className={styles.standardText}>{standard}</span>
               )}
             </div>
             {isEditing ? (
-              <IconButton
-                size="small"
-                aria-label={t("reset_to_standard_error")}
-                title={t("reset_to_standard_error")}
+              <SetupIconButton
+                label={t("reset_to_standard_error")}
+                icon={RotateCcw}
                 onClick={() => resetToStandard(l.code)}
-              >
-                <RestartAltOutlined fontSize="small" />
-              </IconButton>
+              />
             ) : (
-              <IconButton
-                size="small"
-                aria-label={t("edit_error_message")}
-                title={t("edit_error_message")}
+              <SetupIconButton
+                label={t("edit_error_message")}
+                icon={Pencil}
                 onClick={() => startEditing(l.code)}
-              >
-                <EditOutlined fontSize="small" />
-              </IconButton>
+              />
             )}
           </div>
         );

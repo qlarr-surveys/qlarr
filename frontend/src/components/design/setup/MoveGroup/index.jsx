@@ -1,13 +1,14 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createSelector } from "@reduxjs/toolkit";
-import { IconButton, Typography } from "@mui/material";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import CustomTooltip from "~/components/common/Tooltip/Tooltip";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { onDrag } from "~/state/design/designState";
 import { groupTypeOf } from "~/utils/design/utils";
-import styles from "./MoveGroup.module.css";
+import {
+  SetupIconButton,
+  SetupLabel,
+  setupFieldStyles,
+} from "~/components/design/setup/SetupFields";
 
 export default function MoveGroup({ code, t }) {
   const dispatch = useDispatch();
@@ -51,34 +52,21 @@ export default function MoveGroup({ code, t }) {
   };
 
   return (
-    <div className={styles.moveRow}>
-      <Typography fontWeight={700}>{t("move_page")}</Typography>
-      <div className={styles.actions}>
-        <CustomTooltip title={t("move_page_up")} showIcon={false}>
-          <span>
-            <IconButton
-              size="small"
-              disabled={prevIndex < 0}
-              onClick={move(prevIndex)}
-              aria-label={t("move_page_up")}
-            >
-              <KeyboardArrowUpIcon />
-            </IconButton>
-          </span>
-        </CustomTooltip>
-        <CustomTooltip title={t("move_page_down")} showIcon={false}>
-          <span>
-            <IconButton
-              size="small"
-              disabled={nextIndex < 0}
-              onClick={move(nextIndex)}
-              aria-label={t("move_page_down")}
-            >
-              <KeyboardArrowDownIcon />
-            </IconButton>
-          </span>
-        </CustomTooltip>
-      </div>
-    </div>
+    <SetupLabel label={t("move_page")}>
+      <span className={setupFieldStyles.actions}>
+        <SetupIconButton
+          label={t("move_page_up")}
+          icon={ChevronUp}
+          disabled={prevIndex < 0}
+          onClick={move(prevIndex)}
+        />
+        <SetupIconButton
+          label={t("move_page_down")}
+          icon={ChevronDown}
+          disabled={nextIndex < 0}
+          onClick={move(nextIndex)}
+        />
+      </span>
+    </SetupLabel>
   );
 }

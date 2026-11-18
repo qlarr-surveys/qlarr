@@ -6,7 +6,9 @@ const buildField = (code, state, mainLang) => {
   // state (they aren't builder-addressable — the author targets the template).
   // Any index entry with no state entry is skipped rather than dereferenced.
   if (!component) return null;
-  const label = state.index[code] + ". " + stripTags(component.content?.[mainLang]?.label);
+  // An untitled question or group is named by its code alone, not "Q3. undefined".
+  const text = stripTags(component.content?.[mainLang]?.label || "").trim();
+  const label = text ? `${state.index[code]}. ${text}` : state.index[code];
   return { code: code, label: label };
 };
 

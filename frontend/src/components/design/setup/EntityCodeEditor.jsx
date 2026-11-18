@@ -1,11 +1,4 @@
-import React, { useEffect } from "react";
-import {
-  Box,
-  Button,
-  TextField,
-  InputAdornment,
-  Typography,
-} from "@mui/material";
+import React, { useEffect, useId } from "react";
 import { useDispatch, useSelector, shallowEqual } from "react-redux";
 import {
   designStateReceived,
@@ -21,12 +14,24 @@ import {
   computePrefixAndSuffix,
   getErrorMessage,
 } from "~/utils/design/codeUtils";
+import {
+  SetupField,
+  SetupHint,
+  useSetupHelp,
+} from "~/components/design/setup/SetupFields";
+import styles from "./EntityCodeEditor.module.css";
+
+const cx = (...names) => names.filter(Boolean).join(" ");
 
 function EntityCodeEditor({ code }) {
   const dispatch = useDispatch();
   const designService = useService("design");
   const { guard, modal } = useReleaseGuard();
   const { t } = useTranslation(NAMESPACES.DESIGN_CORE);
+  const help = useSetupHelp();
+  const inputId = useId();
+  const messageId = useId();
+  const inputRef = React.useRef(null);
 
   const { currentSetup, saving } = useSelector(
     (state) => ({
@@ -85,51 +90,77 @@ function EntityCodeEditor({ code }) {
       if (suffix) {
         handleEntityCodeSave();
       }
+    } else if (event.key === "Escape" && isDirty) {
+      // Back to the saved code, as the design's field does.
+      event.preventDefault();
+      setParts(computePrefixAndSuffix(code));
+      setError(null);
     }
   };
 
+  const canSubmit = !!code && isDirty && !saving && !!suffix;
+
+  // The prefix reads as the code's fixed first letter: pressing it puts the
+  // caret straight after it, at the start of the part that can be edited.
+  const focusAfterPrefix = (event) => {
+    event.preventDefault();
+    const input = inputRef.current;
+    if (!input) return;
+    input.focus();
+    input.setSelectionRange(0, 0);
+  };
+
   return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "flex-end",
-        gap: 1,
-        mb: 1,
-      }}
-    >
-      <TextField
-        fullWidth
-        size="small"
-        label={t("entity_code")}
-        value={suffix}
-        onChange={(e) => handleEntityCodeChange(e.target.value)}
-        onKeyDown={handleKeyDown}
-        error={!!error}
-        helperText={getErrorMessage(error, t)}
-        InputProps={{
-          startAdornment: prefix && (
-            <InputAdornment position="start" sx={{ mr: 0.2 }}>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{ fontWeight: 500 }}
-              >
-                {prefix}
-              </Typography>
-            </InputAdornment>
-          ),
-        }}
-      />
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleEntityCodeSave}
-        disabled={!code || !isDirty || saving || !suffix}
+    <SetupField label={t("entity_code")} help={help("entity_code")} htmlFor={inputId}>
+      <div
+        className={cx(
+          styles.box,
+          isDirty && styles.dirty,
+          !!error && styles.error
+        )}
       >
-        {t("submit")}
-      </Button>
+        {/* Codes only take a-z, 0-9 and _, so the code reads left to right
+            in every language, Arabic included, with the prefix first. */}
+        <div className={styles.code} dir="ltr">
+          {prefix && (
+            <span
+              className={styles.prefix}
+              aria-hidden="true"
+              onMouseDown={focusAfterPrefix}
+            >
+              {prefix}
+            </span>
+          )}
+          <input
+            ref={inputRef}
+            id={inputId}
+            type="text"
+            value={suffix}
+            onChange={(e) => handleEntityCodeChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            aria-invalid={!!error}
+            aria-describedby={error ? messageId : undefined}
+            spellCheck={false}
+            autoComplete="off"
+            className={styles.input}
+          />
+        </div>
+        <button
+          type="button"
+          onClick={handleEntityCodeSave}
+          disabled={!canSubmit}
+          className={styles.submit}
+        >
+          {t("change_code")}
+        </button>
+      </div>
+      {error && (
+        <SetupHint id={messageId} error>
+          {getErrorMessage(error, t)}
+        </SetupHint>
+      )}
       {modal}
-    </Box>
+    </SetupField>
   );
 }
 

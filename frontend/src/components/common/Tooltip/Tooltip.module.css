@@ -22,6 +22,11 @@
   transition: background-color 0.15s ease, color 0.15s ease;
 }
 
+.iconButtonMd {
+  width: 26px;
+  height: 26px;
+}
+
 .iconButton:hover,
 .iconButton[aria-expanded="true"] {
   background: #eceefb;

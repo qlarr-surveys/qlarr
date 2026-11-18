@@ -1,0 +1,98 @@
+/* The element code and the button that applies it, in one box
+   (docs/design/editor-phase-3.3.html). The code's fixed prefix ("Q", "G")
+   reads as its first letter rather than as a separate chip. */
+
+.box {
+  display: flex;
+  align-items: stretch;
+  height: 48px;
+  border: 1.5px solid #dfe2ef;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.box:hover {
+  border-color: #b9bff0;
+}
+
+/* Edited and not applied yet. */
+.dirty,
+.dirty:hover,
+.box:focus-within {
+  border-color: #3a46d8;
+}
+
+.box:focus-within {
+  box-shadow: 0 0 0 2px #e3e6ff;
+}
+
+.error,
+.error:hover,
+.error:focus-within {
+  border-color: #b3261e;
+}
+
+/* Codes are identifiers: set in monospace. The prefix and the input share
+   the font, so the editable rest follows the prefix like the next letter. */
+.code {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
+  padding-left: 12px;
+  font: 500 16px/22px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.02em;
+}
+
+/* Muted: part of the code, but not editable. */
+.prefix {
+  flex: none;
+  display: flex;
+  align-items: center;
+  color: #6b7194;
+  cursor: text;
+  user-select: none;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  padding: 0 12px 0 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  letter-spacing: inherit;
+  color: #1b2150;
+}
+
+.submit {
+  flex: none;
+  min-width: 72px;
+  padding: 0 14px;
+  border: 0;
+  border-inline-start: 1px solid #dfe2ef;
+  background: #f3f4f8;
+  font: 600 14px Rubik, sans-serif;
+  color: #6b7194;
+  cursor: not-allowed;
+}
+
+.submit:not(:disabled) {
+  border-inline-start-color: #3a46d8;
+  background: #3a46d8;
+  color: #fff;
+  cursor: pointer;
+}
+
+.submit:not(:disabled):hover {
+  background: #2f3bc4;
+}
+
+/* Inside the box, which clips anything drawn outside it. */
+.submit:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: -5px;
+}

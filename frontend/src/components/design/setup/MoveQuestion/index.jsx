@@ -1,11 +1,7 @@
-import React from "react";
+import React, { useId } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { IconButton, MenuItem, Select, Typography } from "@mui/material";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
-import CustomTooltip from "~/components/common/Tooltip/Tooltip";
-import { isDisplay, questionIconByType } from "~/components/Questions/utils";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { isDisplay } from "~/components/Questions/utils";
 import { onDrag } from "~/state/design/designState";
 import {
   groupTypeOf,
@@ -13,6 +9,13 @@ import {
   pageLabels,
   stripTags,
 } from "~/utils/design/utils";
+import {
+  SetupField,
+  SetupIconButton,
+  SetupLabel,
+  SetupSelect,
+  setupFieldStyles,
+} from "~/components/design/setup/SetupFields";
 import styles from "./MoveQuestion.module.css";
 
 const selectPages = (state) => {
@@ -35,6 +38,7 @@ const selectPages = (state) => {
 
 export default function MoveQuestion({ code, t }) {
   const dispatch = useDispatch();
+  const selectId = useId();
   const pages = useSelector(selectPages, isEquivalent);
   const type = useSelector((state) => state.designState[code]?.type);
 
@@ -101,33 +105,36 @@ export default function MoveQuestion({ code, t }) {
     else if (nextPage) reparent(nextPage.code);
   };
 
-  // One option per landing spot: a page means its top, a question means
-  // right after it. The moved question itself is left out.
+  // One option per landing spot, grouped by page: a page's first option is
+  // its top, each other one is right after a question. The moved question
+  // itself is left out. A page the question can't go to is greyed out.
   const pageNames = pageLabels(pages, t);
-  const options = pages.flatMap((target, i) => {
-    const disabled = !accepts(target);
-    const questions = target.questions.filter(
-      (question) => question.code !== code
-    );
-    return [
+  const questionName = (question) =>
+    question.label
+      ? `${question.displayCode}. ${question.label}`
+      : question.displayCode;
+  const groups = pages.map((target, i) => ({
+    code: target.code,
+    name: pageNames[i],
+    disabled: !accepts(target),
+    options: [
       {
         value: target.code,
         page: target.code,
         position: 0,
-        isPage: true,
-        disabled,
-        displayCode: pageNames[i],
-        label: target.label,
+        text: `${pageNames[i]} · ${t("move_question_top")}`,
       },
-      ...questions.map((question, j) => ({
-        ...question,
-        value: question.code,
-        page: target.code,
-        position: j + 1,
-        disabled,
-      })),
-    ];
-  });
+      ...target.questions
+        .filter((question) => question.code !== code)
+        .map((question, j) => ({
+          value: question.code,
+          page: target.code,
+          position: j + 1,
+          text: t("move_question_after", { question: questionName(question) }),
+        })),
+    ],
+  }));
+  const options = groups.flatMap((group) => group.options);
   const current = isFirst ? page.code : others[position - 1].code;
 
   const onChange = (e) => {
@@ -137,118 +144,41 @@ export default function MoveQuestion({ code, t }) {
     }
   };
 
-  const renderOption = (option) => (
-    <span className={styles.option}>
-      <Typography component="span" variant="body2" color="text.secondary">
-        {t(
-          option.isPage
-            ? "move_question_before_prefix"
-            : "move_question_after_prefix"
-        )}
-      </Typography>
-      <span className={styles.optionIcon}>
-        {option.isPage ? (
-          <FormatListBulletedIcon fontSize="small" />
-        ) : (
-          questionIconByType(option.type)
-        )}
-      </span>
-      <Typography component="span" variant="body2" className={styles.optionCode}>
-        {option.displayCode}
-      </Typography>
-      <Typography
-        component="span"
-        variant="body2"
-        color="text.secondary"
-        noWrap
-        className={styles.optionLabel}
-      >
-        {option.label}
-      </Typography>
-    </span>
-  );
-
-  const renderValue = (value) => {
-    const option = options.find((o) => o.value === value);
-    if (!option) return null;
-    const text = option.isPage
-      ? `${option.displayCode} · ${t("move_question_top")}`
-      : t("move_question_after", {
-          question: option.label
-            ? `${option.displayCode}. ${option.label}`
-            : option.displayCode,
-        });
-    return (
-      <span className={styles.option}>
-        <span className={styles.optionIcon}>
-          {option.isPage ? (
-            <FormatListBulletedIcon fontSize="small" />
-          ) : (
-            questionIconByType(option.type)
-          )}
-        </span>
-        <Typography component="span" variant="body2" noWrap className={styles.optionLabel}>
-          {text}
-        </Typography>
-      </span>
-    );
-  };
-
   return (
     <div className={styles.moveQuestion}>
-      <div className={styles.moveRow}>
-        <Typography fontWeight={700}>{t("move_question")}</Typography>
-        <div className={styles.actions}>
-          <CustomTooltip title={t("move_question_up")} showIcon={false}>
-            <span>
-              <IconButton
-                size="small"
-                disabled={!canMoveUp}
-                onClick={moveUp}
-                aria-label={t("move_question_up")}
-              >
-                <KeyboardArrowUpIcon />
-              </IconButton>
-            </span>
-          </CustomTooltip>
-          <CustomTooltip title={t("move_question_down")} showIcon={false}>
-            <span>
-              <IconButton
-                size="small"
-                disabled={!canMoveDown}
-                onClick={moveDown}
-                aria-label={t("move_question_down")}
-              >
-                <KeyboardArrowDownIcon />
-              </IconButton>
-            </span>
-          </CustomTooltip>
-        </div>
-      </div>
-
-      <Typography fontWeight={700} variant="body2" sx={{ mb: 0.5 }}>
-        {t("move_question_position")}
-      </Typography>
-      <Select
-        size="small"
-        fullWidth
-        value={current}
-        onChange={onChange}
-        renderValue={renderValue}
-        inputProps={{ "aria-label": t("move_question_position") }}
-        MenuProps={{ PaperProps: { sx: { maxWidth: 420 } } }}
-      >
-        {options.map((option) => (
-          <MenuItem
-            key={option.value}
-            value={option.value}
-            disabled={option.disabled}
-            sx={option.isPage ? undefined : { paddingInlineStart: 4 }}
-          >
-            {renderOption(option)}
-          </MenuItem>
-        ))}
-      </Select>
+      <SetupLabel label={t("move_question")}>
+        <span className={setupFieldStyles.actions}>
+          <SetupIconButton
+            label={t("move_question_up")}
+            icon={ChevronUp}
+            disabled={!canMoveUp}
+            onClick={moveUp}
+          />
+          <SetupIconButton
+            label={t("move_question_down")}
+            icon={ChevronDown}
+            disabled={!canMoveDown}
+            onClick={moveDown}
+          />
+        </span>
+      </SetupLabel>
+      <SetupField label={t("move_question_position")} htmlFor={selectId}>
+        <SetupSelect id={selectId} value={current} onChange={onChange}>
+          {groups.map((group) => (
+            <optgroup
+              key={group.code}
+              label={group.name}
+              disabled={group.disabled}
+            >
+              {group.options.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.text}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </SetupSelect>
+      </SetupField>
     </div>
   );
 }

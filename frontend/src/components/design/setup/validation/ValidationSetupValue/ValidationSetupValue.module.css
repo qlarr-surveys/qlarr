@@ -1,13 +1,22 @@
-.valueValidationItems {
-  display: flex;
-  align-items: center;
-}
-
+/* A rule's value: what it asks for ("Minimum"), then its input(s). */
 .valueValidationItemsContainer {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.valueValidationItemsContainer .error {
-  color: red;
+.subtitle {
+  font: 500 13.5px Rubik, sans-serif;
+  color: #1b2150;
+}
+
+.valueValidationItems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.valueField {
+  flex: 1 1 120px;
+  min-width: 0;
 }

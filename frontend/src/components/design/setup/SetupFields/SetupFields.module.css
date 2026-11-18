@@ -1,0 +1,801 @@
+/* The rows of the settings panel, drawn to docs/design/editor-phase-3.3.html
+   (its question settings). A row is a line: the ⓘ, the setting's name, and
+   whatever ends the line; a field adds its control under that line. */
+
+/* ====== Line ====== */
+
+.inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  font-family: Rubik, sans-serif;
+}
+
+/* The ⓘ's round target hangs into the panel's padding, so its glyph, not its
+   hover circle, lines up with the edge of the rows below. */
+.help {
+  flex: none;
+  display: flex;
+  margin-inline-start: -4px;
+}
+
+/* Above "Show advanced settings": the quick settings, set small. */
+.basicLabel {
+  flex: 1;
+  min-width: 0;
+  font: 400 14px/20px Rubik, sans-serif;
+  color: #2a2f4a;
+}
+
+/* The name of a control set under it, in the general settings: small caps,
+   on a line no taller than the name. */
+.basicFieldLabel {
+  flex: 1;
+  min-width: 0;
+  font: 600 11px/1 Rubik, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5b6189;
+}
+
+.inlineTight {
+  min-height: 0;
+}
+
+/* Inside an advanced tab. */
+.label {
+  flex: 1;
+  min-width: 0;
+  font: 600 15px/20px Rubik, sans-serif;
+  color: #1b2150;
+}
+
+/* The Logic tab's sections. */
+.sectionLabel {
+  flex: 1;
+  min-width: 0;
+  font: 600 16px/22px Rubik, sans-serif;
+  color: #1b2150;
+}
+
+.labelDisabled {
+  color: #8a90ad;
+}
+
+/* The line above a field's control. */
+.head {
+  margin-bottom: 8px;
+}
+
+.headTight {
+  margin-bottom: 5px;
+}
+
+/* What a switch opens up, under its line. */
+.below {
+  margin-top: 10px;
+}
+
+/* ====== Switch ====== */
+
+.switch {
+  flex: none;
+  display: inline-flex;
+  justify-content: flex-start;
+  width: 38px;
+  height: 22px;
+  padding: 2px;
+  border: 0;
+  border-radius: 11px;
+  background: #cfd3e4;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.switchSmall {
+  width: 34px;
+  height: 20px;
+  border-radius: 10px;
+}
+
+.switchOn {
+  justify-content: flex-end;
+  background: #3a46d8;
+}
+
+.knob {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.switchSmall .knob {
+  width: 16px;
+  height: 16px;
+}
+
+.switch:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
+}
+
+.switch:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ====== Select ====== */
+
+.selectWrap {
+  position: relative;
+  display: block;
+}
+
+/* The end padding is the chevron's room. Logical properties, not left/right,
+   so the chevron moves to the left in a right-to-left interface. */
+.select {
+  display: block;
+  width: 100%;
+  height: 48px;
+  padding-block: 0;
+  padding-inline: 14px 44px;
+  border: 1px solid #dfe2ef;
+  border-radius: 8px;
+  background: #fff;
+  font: 400 15px/1.2 Rubik, sans-serif;
+  color: #1b2150;
+  text-overflow: ellipsis;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.select:hover:not(:disabled) {
+  border-color: #b9bff0;
+}
+
+.select:focus-visible {
+  border-color: #3a46d8;
+  outline: none;
+  box-shadow: 0 0 0 2px #e3e6ff;
+}
+
+.select:disabled {
+  background: #f3f4f8;
+  color: #6b7194;
+  cursor: not-allowed;
+}
+
+/* The general settings' select: the height of their switches' lines. */
+.selectSmall {
+  height: 32px;
+  padding-inline: 10px 32px;
+  border-color: #dfe2ee;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* Decorative, and the select underneath owns the clicks. */
+.chevron {
+  position: absolute;
+  inset-inline-end: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #4c5474;
+  pointer-events: none;
+}
+
+.chevronSmall {
+  inset-inline-end: 10px;
+}
+
+/* ====== Input ====== */
+
+.input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  padding: 0 12px;
+  border: 1.5px solid #cfd5e8;
+  border-radius: 8px;
+  background: #fff;
+  font: 400 15px/1.2 Rubik, sans-serif;
+  color: #1b2150;
+  box-sizing: border-box;
+}
+
+.textarea {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #cfd5e8;
+  border-radius: 8px;
+  background: #fff;
+  font: 400 14.5px/21px Rubik, sans-serif;
+  color: #1b2150;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+/* A number or a date: a value, not a sentence. */
+.inputShort {
+  height: 40px;
+}
+
+/* An expression or a style sheet: code, set in monospace. */
+.code {
+  font: 400 13.5px/20px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: #a3a8c3;
+}
+
+/* ====== Translatable text ====== */
+
+.langList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.langInput {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid #dfe2ef;
+  border-radius: 8px;
+  background: #fff;
+  box-sizing: border-box;
+  cursor: text;
+}
+
+.langInput:hover {
+  border-color: #b9bff0;
+}
+
+.langInput:focus-within {
+  border-color: #3a46d8;
+  box-shadow: 0 0 0 2px #e3e6ff;
+}
+
+.langCode {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 5px;
+  background: #f0f2fa;
+  font: 600 11px Rubik, sans-serif;
+  letter-spacing: 0.04em;
+  color: #3c447a;
+  box-sizing: border-box;
+}
+
+.langField {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: 400 14.5px Rubik, sans-serif;
+  color: #1b2150;
+}
+
+.langField::placeholder {
+  color: #a3a8c3;
+}
+
+.input:focus,
+.textarea:focus {
+  border-color: #3a46d8;
+  outline: none;
+  box-shadow: 0 0 0 2px #e3e6ff;
+}
+
+.invalid,
+.invalid:focus {
+  border-color: #b3261e;
+}
+
+/* ====== Buttons ====== */
+
+/* The outlined button a row puts beside its name, e.g. Up and Down. */
+.secondaryButton {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  min-width: 72px;
+  padding: 0 12px;
+  border: 1px solid #cfd5e8;
+  border-radius: 8px;
+  background: #fff;
+  font: 500 14px Rubik, sans-serif;
+  color: #1b2150;
+  cursor: pointer;
+}
+
+.secondaryButton:hover:not(:disabled) {
+  border-color: #b9bff0;
+  background: #f5f6ff;
+}
+
+.secondaryButton:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.secondaryButton:disabled {
+  border-color: #e3e6f0;
+  color: #a3a8c3;
+  cursor: not-allowed;
+}
+
+/* Buttons that end a setting's line, side by side. */
+.actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.iconButton {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #cfd5e8;
+  border-radius: 8px;
+  background: #fff;
+  color: #2b34a8;
+  cursor: pointer;
+}
+
+.iconButton:hover:not(:disabled) {
+  border-color: #b9bff0;
+  background: #eef0fb;
+}
+
+.iconButton:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.iconButton:disabled {
+  border-color: #e3e6f0;
+  color: #a3a8c3;
+  cursor: not-allowed;
+}
+
+/* ====== Segmented choice ====== */
+
+.segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid #eceef3;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.segmentedGrid {
+  display: grid;
+  padding: 5px;
+}
+
+.segment {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 44px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font: 500 15px/19px Rubik, sans-serif;
+  color: #5b6189;
+  cursor: pointer;
+}
+
+.segment:hover:not(:disabled) {
+  background: #f5f6fa;
+}
+
+.segmentOn {
+  background: #eceef3;
+  font-weight: 600;
+  color: #1b2150;
+}
+
+.segmentOn:hover:not(:disabled) {
+  background: #e4e7ef;
+}
+
+.segmentTall {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 6px 4px;
+  font-size: 14px;
+  line-height: 18px;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+.segment:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #3a46d8;
+}
+
+.segment:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ====== Check list ====== */
+
+.checkList {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checkItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 4px 6px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.checkItem:hover {
+  background: #f5f6fa;
+}
+
+/* The real checkbox stays for the keyboard and screen readers; the box
+   beside it is what shows. */
+.checkInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+}
+
+.checkBox {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  box-sizing: border-box;
+  border: 1.5px solid #9aa1b8;
+  border-radius: 6px;
+  background: #fff;
+  color: #fff;
+}
+
+.checkBoxOn {
+  border-color: #3a46d8;
+  background: #3a46d8;
+}
+
+.checkInput:focus-visible + .checkBox {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #3a46d8;
+}
+
+.checkCode {
+  flex: none;
+  max-width: 120px;
+  overflow: hidden;
+  padding: 3px 8px;
+  border-radius: 5px;
+  background: #f0f1f4;
+  font: 400 13.5px ui-monospace, Menlo, Consolas, monospace;
+  color: #3d4459;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.checkText {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font: 400 14.5px Rubik, sans-serif;
+  color: #1b2150;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.checkNote {
+  flex: none;
+  font: 500 12px Rubik, sans-serif;
+  color: #2b34a8;
+}
+
+/* ====== Cards ====== */
+
+.card {
+  border: 1px solid #dfe2ef;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.cardInvalid {
+  border-color: #e9b8b3;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 4px;
+  padding-inline-start: 12px;
+  border-bottom: 1px solid #eceef6;
+  background: #f7f8fb;
+  box-sizing: border-box;
+}
+
+.cardTitle {
+  flex: 1;
+  min-width: 0;
+  font: 600 14px Rubik, sans-serif;
+  color: #1b2150;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+}
+
+.removeButton {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #5b6189;
+  cursor: pointer;
+}
+
+.removeButton:hover {
+  background: #fdf1f0;
+  color: #b3261e;
+}
+
+.removeButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #3a46d8;
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 6px 10px;
+  border: 1px solid #dfe2ef;
+  border-radius: 8px;
+  background: #fff;
+  font: 600 14.5px/18px Rubik, sans-serif;
+  color: #1b2150;
+  text-align: center;
+  cursor: pointer;
+}
+
+.addButton:hover:not(:disabled) {
+  border-color: #b9bff0;
+  background: #f5f6fa;
+}
+
+.addButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #3a46d8;
+}
+
+.addButton:disabled {
+  color: #a3a8c3;
+  cursor: not-allowed;
+}
+
+/* ====== Groupings ====== */
+
+/* The controls of one setting, one under the other. */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* What a setting opens up, boxed off from the settings around it. */
+.panelBox {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #e6e8f0;
+  border-radius: 10px;
+  background: #f7f8fb;
+}
+
+/* Words and a control on one line: "Show [2] of 5". */
+.sentence {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font: 500 14.5px Rubik, sans-serif;
+  color: #1b2150;
+}
+
+.selectWrapInline {
+  display: inline-block;
+  width: 84px;
+}
+
+.stackLoose {
+  gap: 18px;
+}
+
+.subField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.subFieldHead {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.subFieldLabel {
+  font: 500 13.5px Rubik, sans-serif;
+  color: #1b2150;
+}
+
+.prefixInput {
+  display: flex;
+  align-items: stretch;
+  height: 44px;
+  overflow: hidden;
+  border: 1.5px solid #cfd5e8;
+  border-radius: 8px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.prefixInput:focus-within {
+  border-color: #3a46d8;
+  box-shadow: 0 0 0 2px #e3e6ff;
+}
+
+.prefixInput.invalid {
+  border-color: #b3261e;
+}
+
+.prefixText {
+  flex: none;
+  display: flex;
+  align-items: center;
+  max-width: 55%;
+  padding: 0 10px;
+  overflow: hidden;
+  border-inline-end: 1px solid #dfe2ef;
+  background: #f3f4f8;
+  font: 500 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: #3c447a;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prefixField {
+  flex: 1;
+  min-width: 0;
+  padding: 0 10px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: 400 14px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: #1b2150;
+}
+
+/* A line of its own that is still part of a setting: a switch's name in
+   lighter type than the setting's. */
+.subToggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 32px;
+  font: 400 14px Rubik, sans-serif;
+  color: #1b2150;
+}
+
+.subToggle > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.subToggleDisabled {
+  color: #8a90ad;
+}
+
+/* A quiet action under a setting, e.g. "Use manual expression". */
+.textLink {
+  align-self: flex-end;
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  font: 500 13px Rubik, sans-serif;
+  color: #2b34a8;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.textLink:hover {
+  background: #eef0fb;
+}
+
+.textLink:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #3a46d8;
+}
+
+/* Undoes the setting, e.g. "Remove carry forward". */
+.textLinkDanger {
+  color: #b3261e;
+}
+
+.textLinkDanger:hover {
+  background: #fdf1f0;
+}
+
+/* ====== Small print ====== */
+
+.hint {
+  margin: 6px 2px 0;
+  font: 400 12px/16px Rubik, sans-serif;
+  color: #5b6189;
+}
+
+.hintError {
+  color: #b3261e;
+}

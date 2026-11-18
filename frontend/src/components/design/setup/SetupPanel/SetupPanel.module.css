@@ -1,31 +1,269 @@
-.sectionTitle {
-  font-size: 16px;
-  font-weight: bold;
-}
+/* The settings panel, drawn to docs/design/editor-phase-3.3.html (its
+   question settings): the selection's header, the general settings, then the
+   advanced settings behind their button, in tabs. No height or overflow here:
+   the enclosing aside owns the scroll container, and the advanced button and
+   the tabs stick to its top. */
 
-.rightContent {
-  /* No height or overflow here: the enclosing aside owns the scroll container. */
+.panel {
   width: 100%;
-  background-color: white;
+  background: #fff;
+  font-family: Rubik, sans-serif;
+  color: #1b2150;
 }
 
-.tabContainer :global(.MuiTabs-scrollButtons.Mui-disabled) {
-  opacity: 0.3;
+/* ====== Header ====== */
+
+.header {
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid #eceef6;
+  background: #fff;
 }
 
-.titleContainer {
+.headerLine {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0px 10px;
-  margin-bottom: 10px;
-  margin-top: 10px;
+  gap: 8px;
+  min-width: 0;
 }
 
-.tabStyle {
-  margin: 0 !important;
+.code {
+  flex: none;
+  font: 600 12px/1 Rubik, sans-serif;
+  letter-spacing: 0.1em;
+  color: #3a46d8;
 }
 
-.setupContainer {
-  padding: 8px 16px 16px;
+.subtitle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font: 400 13px/18px Rubik, sans-serif;
+  color: #6b7194;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.close {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #6b7194;
+  cursor: pointer;
+}
+
+.close:hover {
+  background: #f3f4fa;
+}
+
+.close:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 0;
+}
+
+.title {
+  margin-top: 6px;
+  font: 600 15px/1.45 Rubik, sans-serif;
+  color: #1b2150;
+  overflow-wrap: anywhere;
+}
+
+.titleEmpty {
+  font-weight: 400;
+  color: #8a90ad;
+}
+
+/* ====== General settings ====== */
+
+.basics {
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid #eceef6;
+}
+
+.basicRows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ====== Advanced button ====== */
+
+.advancedBar {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 66px;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border-bottom: 1px solid #eceef6;
+  background: #fff;
+}
+
+.advancedButton {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid #cfd5e8;
+  border-radius: 8px;
+  background: #fff;
+  font: 500 14px Rubik, sans-serif;
+  color: #2b34a8;
+  cursor: pointer;
+}
+
+.advancedButtonOpen {
+  border-color: #b9bff0;
+  background: #f5f6ff;
+}
+
+.advancedButton:hover {
+  border-color: #b9bff0;
+  background: #eef0fb;
+}
+
+.advancedButton:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
+}
+
+.advancedLabel {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.advancedChevron {
+  flex: none;
+  transition: transform 0.15s ease;
+}
+
+.advancedButtonOpen .advancedChevron {
+  transform: rotate(180deg);
+}
+
+/* ====== Tabs ====== */
+
+.advanced {
+  display: flex;
+  flex-direction: column;
+}
+
+.tabs {
+  position: sticky;
+  /* Under the advanced bar, which is 66px tall. */
+  top: 66px;
+  z-index: 3;
+  display: flex;
+  gap: 2px;
+  padding: 0 12px;
+  border-bottom: 1px solid #dfe2ef;
+  background: #fff;
+  box-shadow: 0 6px 10px -8px rgba(20, 24, 52, 0.18);
+}
+
+/* No general settings, so no advanced bar above the tabs. */
+.advancedOnly .tabs {
+  top: 0;
+}
+
+/* Sized by their names and sharing what is left, so a longer name such as
+   "Validation" (or "Validierung") is not cut off to keep the tabs equal. */
+.tab {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 42px;
+  padding: 0 6px;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  box-shadow: inset 0 -2px 0 transparent;
+  font: 500 14px Rubik, sans-serif;
+  color: #5b6189;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.tab:hover {
+  background: #f7f8fc;
+  color: #1b2150;
+}
+
+.tabSelected {
+  box-shadow: inset 0 -2px 0 #3a46d8;
+  font-weight: 600;
+  color: #1b2150;
+}
+
+.tab:focus-visible {
+  outline: none;
+  box-shadow: inset 0 -3px 0 #3a46d8;
+}
+
+.tabPanel {
+  padding: 16px;
+  outline: none;
+  transition: background-color 0.4s ease;
+}
+
+.panelFlash {
+  background: #f5f6ff;
+}
+
+.tabRows {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* The Logic tab's settings are sections, each ruled off from the last. */
+.logicRows {
+  gap: 22px;
+}
+
+.logicRows > .row:not(:empty) ~ .row:not(:empty) {
+  padding-top: 18px;
+  border-top: 1px solid #eceef6;
+}
+
+/* An answer's or the logo's settings: no tabs, one list. */
+.flatRows {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 16px;
+}
+
+/* ====== Rows ====== */
+
+/* Clear of the sticky bar and tabs when a highlight scrolls one into view. */
+.row {
+  scroll-margin-top: 120px;
+  border-radius: 8px;
+  transition: background-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+/* A rule whose component draws nothing takes no room and no divider. */
+.row:empty {
+  display: none;
+}
+
+.rowFlash {
+  background: #eef0ff;
+  box-shadow: 0 0 0 6px #eef0ff;
 }
