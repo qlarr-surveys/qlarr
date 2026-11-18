@@ -36,7 +36,6 @@ import EntityCodeEditor from "../EntityCodeEditor";
 import CustomCSS from "../CustomCss";
 import ConvertQuestionType from "../ConvertQuestionType";
 import LogoSetup from "../LogoSetup";
-import AdvancedModeMenu from "./AdvancedModeMenu";
 import { useSetupView } from "./useSetupView";
 import styles from "./SetupPanel.module.css";
 
@@ -234,8 +233,7 @@ function Row({ rule, flash, children }) {
 }
 
 /**
- * The general settings, the advanced button with its "…" menu, and the
- * advanced tabs. A selection with no general settings (the survey's page
+ * The general settings, the advanced button, and the advanced tabs. A selection with no general settings (the survey's page
  * order) opens straight onto its tabs; one whose rules have no tabs at all
  * (an answer, the logo) is a plain list.
  */
@@ -243,7 +241,12 @@ const SetupBody = React.memo(function SetupBody({ setupInfo, rules, code, t }) {
   const { i18n } = useTranslation();
   const isRtl = rtlLanguage.includes(i18n.language);
   const ids = React.useId();
-  const advancedButtonRef = React.useRef(null);
+  const barRef = React.useRef(null);
+  const basicsRef = React.useRef(null);
+  const advancedRef = React.useRef(null);
+  // Where the button sat before it toggled, so the switch can slide it from
+  // there; only the button sets it, so a selection never animates.
+  const slideFrom = React.useRef(null);
 
   const tabs = React.useMemo(
     () => (rules || []).filter((tab) => (tab.rules || []).length > 0),
@@ -260,6 +263,38 @@ const SetupBody = React.memo(function SetupBody({ setupInfo, rules, code, t }) {
   );
 
   const view = useSetupView({ setupInfo, tabs, basicRules });
+
+  // The switch itself is instant; this then slides the button from where it
+  // was to where it now is, the advanced settings riding up beneath it or the
+  // general settings fading in behind it as it comes back down. Transform and
+  // opacity only, so nothing is laid out again frame by frame.
+  React.useLayoutEffect(() => {
+    const from = slideFrom.current;
+    slideFrom.current = null;
+    const bar = barRef.current;
+    if (
+      !from ||
+      !bar ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+    const offset = from.top - bar.getBoundingClientRect().top;
+    if (!offset) {
+      return;
+    }
+    const timing = { duration: 320, easing: "cubic-bezier(0.4, 0, 0.2, 1)" };
+    const shifted = `translateY(${offset}px)`;
+    bar.animate([{ transform: shifted }, { transform: "none" }], timing);
+    if (from.opening) {
+      advancedRef.current?.animate(
+        [{ transform: shifted, opacity: 0 }, { transform: "none", opacity: 1 }],
+        timing
+      );
+    } else {
+      basicsRef.current?.animate([{ opacity: 0 }, { opacity: 1 }], timing);
+    }
+  }, [view.open]);
 
   if (!hasTitles) {
     return (
@@ -283,18 +318,20 @@ const SetupBody = React.memo(function SetupBody({ setupInfo, rules, code, t }) {
   const advancedId = `${ids}advanced`;
 
   const toggleAdvanced = () => {
+    // Back to the top first, so the switch happens where the button is
+    // rather than somewhere down a tab that is about to collapse.
+    let scroller = barRef.current?.parentElement;
+    while (scroller && getComputedStyle(scroller).overflowY !== "auto") {
+      scroller = scroller.parentElement;
+    }
+    if (scroller) {
+      scroller.scrollTop = 0;
+    }
+    slideFrom.current = {
+      top: barRef.current.getBoundingClientRect().top,
+      opening: !view.open,
+    };
     view.setOpen(!view.open);
-    // Back to the top, so the switch happens where the button is rather than
-    // somewhere down a tab that just collapsed.
-    requestAnimationFrame(() => {
-      let scroller = advancedButtonRef.current?.parentElement;
-      while (scroller && getComputedStyle(scroller).overflowY !== "auto") {
-        scroller = scroller.parentElement;
-      }
-      if (scroller) {
-        scroller.scrollTop = 0;
-      }
-    });
   };
 
   // Arrow keys move between tabs (mirrored right to left), Home and End jump.
@@ -317,7 +354,11 @@ const SetupBody = React.memo(function SetupBody({ setupInfo, rules, code, t }) {
   return (
     <>
       {!open && (
-        <section aria-label={t("general_settings")} className={styles.basics}>
+        <section
+          ref={basicsRef}
+          aria-label={t("general_settings")}
+          className={styles.basics}
+        >
           <SetupVariant.Provider value="basic">
             <div className={styles.basicRows}>
               {basicRules.map((rule) => (
@@ -331,9 +372,8 @@ const SetupBody = React.memo(function SetupBody({ setupInfo, rules, code, t }) {
       )}
 
       {!advancedOnly && (
-        <div className={styles.advancedBar}>
+        <div ref={barRef} className={styles.advancedBar}>
           <button
-            ref={advancedButtonRef}
             type="button"
             className={cx(styles.advancedButton, open && styles.advancedButtonOpen)}
             aria-expanded={open}
@@ -352,16 +392,12 @@ const SetupBody = React.memo(function SetupBody({ setupInfo, rules, code, t }) {
               className={styles.advancedChevron}
             />
           </button>
-          <AdvancedModeMenu
-            alwaysExpand={view.alwaysExpand}
-            onChange={view.setAlwaysExpand}
-            t={t}
-          />
         </div>
       )}
 
       {open && (
         <div
+          ref={advancedRef}
           id={advancedId}
           role="region"
           aria-label={t("advanced_settings")}
