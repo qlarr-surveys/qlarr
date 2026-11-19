@@ -788,6 +788,80 @@
   background: #fdf1f0;
 }
 
+/* ====== Asking first ====== */
+
+/* Before something is lost, e.g. a manual expression or every skip rule. */
+.confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+  padding: 10px 12px;
+  border: 1px solid #f3d29a;
+  border-radius: 9px;
+  background: #fff8ec;
+}
+
+.confirmText {
+  flex: 1 1 180px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  font: 400 13.5px/19px Rubik, sans-serif;
+  color: #5c3a00;
+}
+
+.confirmIcon {
+  flex: none;
+  margin-top: 2px;
+  color: #8a4a00;
+}
+
+.confirmActions {
+  flex: none;
+  display: flex;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+
+.confirmCancel {
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid #cfd5e8;
+  border-radius: 8px;
+  background: #fff;
+  font: 600 14px Rubik, sans-serif;
+  color: #1b2150;
+  cursor: pointer;
+}
+
+.confirmCancel:hover {
+  border-color: #b9bff0;
+  background: #f5f6ff;
+}
+
+.confirmButton {
+  height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  background: #1f2b36;
+  font: 600 14px Rubik, sans-serif;
+  color: #fff;
+  cursor: pointer;
+}
+
+.confirmButton:hover {
+  background: #121a22;
+}
+
+.confirmCancel:focus-visible,
+.confirmButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #3a46d8;
+}
+
 /* ====== Small print ====== */
 
 .hint {

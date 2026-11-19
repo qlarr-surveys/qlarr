@@ -62,6 +62,7 @@
   "image_width": "Adjust how wide the image appears within the question.",
   "relevance_manual_expression": "A JavaScript expression that controls visibility. Returns <code>true</code> to show this question, <code>false</code> to hide it.\n\nExamples:\n<code>Q1.value === 'yes'</code>\n<code>Q1.relevance && Q2.value > 5</code>\n<code>['A1', 'A2'].includes(Q1.value)</code>\n<code>Survey.mode === 'offline'</code>",
   "skip_manual_expression": "A JavaScript expression that triggers this skip rule. Returns <code>true</code> to skip to the chosen destination.\n\nExamples:\n<code>['A1', 'A2'].includes(Qthis.value)</code>\n<code>Q1.value > 5 && Qthis.value === 'A3'</code>",
+  "skip_logic": "Send respondents forward to a later question or page, or end the survey, when a rule's condition is met.",
   "relevance": "Control when this page or question is visible. You can:\n\n● Always show it\n● Show it only when specific conditions are met\n\nConditions can be based on:\n\n● Survey mode (online/offline)\n● Survey language\n● Answers to previous questions\n● Whether another question or page is shown or valid\n\nAdd multiple conditions to customize the flow for each respondent.",
   "prefill": "Enable prefilling of this question's response value. When enabled, you can set a default value or use data from previous answers.",
   "validation_required": "Make this question mandatory before users can continue.",

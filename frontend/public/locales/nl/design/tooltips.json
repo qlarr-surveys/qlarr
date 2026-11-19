@@ -63,6 +63,7 @@
   "ranking": "Rangschik verschillende teksten in volgorde van voorkeur",
   "relevance_manual_expression": "Een JavaScript-expressie die de zichtbaarheid bepaalt. Geeft <code>true</code> om deze vraag te tonen, <code>false</code> om hem te verbergen.\n\nVoorbeelden:\n<code>Q1.value === 'yes'</code>\n<code>Q1.relevance && Q2.value > 5</code>\n<code>['A1', 'A2'].includes(Q1.value)</code>\n<code>Survey.mode === 'offline'</code>",
   "skip_manual_expression": "Een JavaScript-expressie die deze overslaanregel activeert. Geeft <code>true</code> terug om naar de gekozen bestemming te springen.\n\nVoorbeelden:\n<code>['A1', 'A2'].includes(Qthis.value)</code>\n<code>Q1.value > 5 && Qthis.value === 'A3'</code>",
+  "skip_logic": "Stuur respondenten door naar een latere vraag of pagina, of beëindig de enquête, wanneer aan de voorwaarde van een regel is voldaan.",
   "relevance": "Bepaal wanneer deze pagina of vraag zichtbaar is. Je kunt:\n\n● Het altijd tonen\n● Het alleen tonen wanneer specifieke voorwaarden zijn vervuld\n\nVoorwaarden kunnen gebaseerd zijn op:\n\n● Enquête modus (online/offline)\n● Enquête taal\n● Antwoorden op eerdere vragen\n● Of een andere vraag of pagina wordt getoond of geldig is\n\nVoeg meerdere voorwaarden toe om de flow voor elke respondent aan te passen.",
   "rows_order": "Kies de weergavevolgorde van rijen—zoals het is, willekeurig, omgekeerd of aangepast.",
   "rows_priority": "Toon elke respondent slechts enkele rijen. Kies hoeveel er worden getoond — de rest wordt per respondent willekeurig verborgen.",

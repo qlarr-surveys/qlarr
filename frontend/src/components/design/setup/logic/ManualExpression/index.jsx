@@ -1,8 +1,9 @@
-import React, { useEffect, useId, useRef, useState } from "react";
-import { TriangleAlert, X } from "lucide-react";
+import React, { useId, useRef, useState } from "react";
+import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import {
+  SetupConfirm,
   SetupHelp,
   SetupHint,
   setupFieldStyles,
@@ -31,18 +32,11 @@ export default function ManualExpression({
   const labelId = useId();
   const inputId = useId();
   const confirmId = useId();
-  const confirmTextId = useId();
   const closeRef = useRef(null);
-  const cancelRef = useRef(null);
-  const inputRef = useRef(null);
   const [asking, setAsking] = useState(false);
 
   const label = t("manual_expression");
   const invalid = errors.length > 0;
-
-  useEffect(() => {
-    if (asking) cancelRef.current?.focus();
-  }, [asking]);
 
   const askToClose = () => {
     if (!(value || "").trim()) {
@@ -50,19 +44,6 @@ export default function ManualExpression({
       return;
     }
     setAsking(!asking);
-  };
-
-  const cancel = (focus) => {
-    setAsking(false);
-    focus?.current?.focus();
-  };
-
-  const onConfirmKeyDown = (event) => {
-    if (event.key === "Escape") {
-      event.preventDefault();
-      event.stopPropagation();
-      cancel(closeRef);
-    }
   };
 
   return (
@@ -91,7 +72,6 @@ export default function ManualExpression({
       </div>
 
       <textarea
-        ref={inputRef}
         id={inputId}
         rows={3}
         dir="ltr"
@@ -115,43 +95,19 @@ export default function ManualExpression({
         ))}
 
       {asking && (
-        <div
+        <SetupConfirm
           id={confirmId}
-          role="alertdialog"
-          aria-labelledby={confirmTextId}
-          onKeyDown={onConfirmKeyDown}
-          className={styles.confirm}
-        >
-          <p id={confirmTextId} className={styles.confirmText}>
-            <TriangleAlert
-              aria-hidden="true"
-              size={16}
-              strokeWidth={2}
-              className={styles.confirmIcon}
-            />
-            {t("switch_to_visual_warning")}
-          </p>
-          <div className={styles.confirmActions}>
-            <button
-              ref={cancelRef}
-              type="button"
-              onClick={() => cancel(inputRef)}
-              className={styles.cancel}
-            >
-              {t("cancel")}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setAsking(false);
-                onClose();
-              }}
-              className={styles.confirmButton}
-            >
-              {t("confirm_switch")}
-            </button>
-          </div>
-        </div>
+          message={t("switch_to_visual_warning")}
+          confirmLabel={t("confirm_switch")}
+          onCancel={() => {
+            setAsking(false);
+            closeRef.current?.focus();
+          }}
+          onConfirm={() => {
+            setAsking(false);
+            onClose();
+          }}
+        />
       )}
     </div>
   );
