@@ -451,7 +451,11 @@ function SkipRule({
           <div className={styles.errorDisplay} role="alert">
             <ErrorOutlineOutlined className={styles.errorIcon} />
             <span className={styles.errorText}>
-              {t("invalid_skip_destination_err", { code: rule.skipTo })}
+              <Trans
+                t={t}
+                i18nKey="invalid_skip_destination_err"
+                values={{ code: rule.skipTo }}
+              />
             </span>
             <button
               type="button"
