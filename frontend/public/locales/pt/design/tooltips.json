@@ -62,6 +62,7 @@
   "questions_priority": "Mostra apenas algumas perguntas desta página a cada participante. Escolha quantas mostrar — as restantes são ocultadas, ao acaso para cada participante.",
   "ranking": "Classificar diferentes textos em ordem de preferência",
   "relevance_manual_expression": "Uma expressão JavaScript que controla a visibilidade. Retorna <code>true</code> para exibir esta pergunta, <code>false</code> para ocultá-la.\n\nExemplos:\n<code>Q1.value === 'yes'</code>\n<code>Q1.relevance && Q2.value > 5</code>\n<code>['A1', 'A2'].includes(Q1.value)</code>\n<code>Survey.mode === 'offline'</code>",
+  "skip_manual_expression": "Uma expressão JavaScript que aciona esta regra de salto. Retorna <code>true</code> para pular para o destino escolhido.\n\nExemplos:\n<code>['A1', 'A2'].includes(Qthis.value)</code>\n<code>Q1.value > 5 && Qthis.value === 'A3'</code>",
   "relevance": "Controlar quando esta página ou pergunta é visível. Você pode:\n\n● Sempre mostrá-la\n● Mostrá-la apenas quando condições específicas forem atendidas\n\nAs condições podem ser baseadas em:\n\n● Modo de pesquisa (online/offline)\n● Idioma da pesquisa\n● Respostas a perguntas anteriores\n● Se outra pergunta ou página é mostrada ou válida\n\nAdicione múltiplas condições para personalizar o fluxo para cada respondente.",
   "rows_order": "Escolher a ordem de exibição das linhas—como está, aleatória, invertida ou personalizada.",
   "rows_priority": "Mostra apenas algumas linhas a cada participante. Escolha quantas mostrar — as restantes são ocultadas, ao acaso para cada participante.",

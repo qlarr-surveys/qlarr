@@ -62,6 +62,7 @@
   "questions_priority": "Muestra solo algunas preguntas de esta página a cada participante. Elige cuántas mostrar — las demás se ocultan, al azar para cada participante.",
   "ranking": "Clasificar diferentes textos en orden de preferencia",
   "relevance_manual_expression": "Una expresión JavaScript que controla la visibilidad. Devuelve <code>true</code> para mostrar esta pregunta, <code>false</code> para ocultarla.\n\nEjemplos:\n<code>Q1.value === 'yes'</code>\n<code>Q1.relevance && Q2.value > 5</code>\n<code>['A1', 'A2'].includes(Q1.value)</code>\n<code>Survey.mode === 'offline'</code>",
+  "skip_manual_expression": "Una expresión JavaScript que activa esta regla de salto. Devuelve <code>true</code> para saltar al destino elegido.\n\nEjemplos:\n<code>['A1', 'A2'].includes(Qthis.value)</code>\n<code>Q1.value > 5 && Qthis.value === 'A3'</code>",
   "relevance": "Controlar cuándo esta página o pregunta es visible. Puedes:\n\n● Mostrarla siempre\n● Mostrarla solo cuando se cumplan condiciones específicas\n\nLas condiciones pueden basarse en:\n\n● Modo de encuesta (en línea/sin conexión)\n● Idioma de la encuesta\n● Respuestas a preguntas anteriores\n● Si otra pregunta o página se muestra o es válida\n\nAgrega múltiples condiciones para personalizar el flujo para cada encuestado.",
   "rows_order": "Elegir el orden de visualización de las filas—tal como está, aleatorio, invertido o personalizado.",
   "rows_priority": "Muestra solo algunas filas a cada participante. Elige cuántas mostrar — las demás se ocultan, al azar para cada participante.",

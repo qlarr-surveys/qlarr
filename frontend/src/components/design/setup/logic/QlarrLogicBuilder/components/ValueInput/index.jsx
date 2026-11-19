@@ -11,7 +11,7 @@ import { TimeInput } from './TimeInput';
 import { DateTimeInput } from './DateTimeInput';
 import { RangeInput } from './RangeInput';
 
-export function ValueInput({ fieldCode, operator, value, onChange, compact = false }) {
+export function ValueInput({ fieldCode, operator, value, onChange, compact = false, autoOpen = false }) {
   const { getFieldDefinition, t } = useLogicBuilder();
 
   const field = fieldCode ? getFieldDefinition(fieldCode) : undefined;
@@ -44,6 +44,7 @@ export function ValueInput({ fieldCode, operator, value, onChange, compact = fal
         onChange={onChange}
         t={t}
         compact={compact}
+        autoOpen={autoOpen}
       />
     );
   }
@@ -117,4 +118,5 @@ ValueInput.propTypes = {
   ]),
   onChange: PropTypes.func.isRequired,
   compact: PropTypes.bool,
+  autoOpen: PropTypes.bool,
 };

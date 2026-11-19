@@ -112,6 +112,7 @@ export function buildDesignState(state, payload) {
   // template. `latest`/diff below then never round-trip a copy back to the engine —
   // copies are transient validation output. (componentIndexList is left untouched.)
   stripRepeatedCopies(newState);
+  migrateSkipConditions(newState);
 
   const newKeys = Object.keys(newState).filter(
     (el) => !UI_STATE_KEYS.includes(el),
@@ -1204,13 +1205,17 @@ export function addSkipRule(state, payload) {
   if (!state[code].skip_logic) {
     state[code].skip_logic = [];
   }
-  state[code].skip_logic.push({ condition: [], skipTo: null });
+  state[code].skip_logic.push({ logic: null, skipTo: null });
 }
 
 export function updateSkipRule(state, payload) {
   const { code, ruleIndex, updates } = payload;
   const rule = state[code].skip_logic[ruleIndex];
   Object.assign(rule, updates);
+  // Switching between visual and manual mode clears the other one
+  Object.keys(rule).forEach((key) => {
+    if (rule[key] === undefined) delete rule[key];
+  });
   // Reset toEnd/disqualify if destination is not a group
   if (updates.skipTo && !updates.skipTo.startsWith("G")) {
     rule.toEnd = false;
@@ -1382,6 +1387,9 @@ export function recompileLogic(state) {
     if (relevance) {
       addRelevanceInstructions(state, code, relevance);
     }
+    if (state[code]?.skip_logic?.length) {
+      addSkipInstructions(state, code);
+    }
   });
   refreshQuotaInstructions(state);
 }
@@ -1511,6 +1519,23 @@ const cleanupSkipDestinations = (state, deletedCode) => {
         addSkipInstructions(state, key);
       }
     }
+  });
+};
+
+// Skip rules used to hold `condition`, a list of this question's answer codes.
+// They now hold a show/hide style `logic`; convert old rules on load. Their
+// instructions are equivalent, so they are only rebuilt on the next edit.
+const migrateSkipConditions = (state) => {
+  Object.keys(state).forEach((code) => {
+    const skipLogic = state[code]?.skip_logic;
+    if (!Array.isArray(skipLogic)) return;
+    skipLogic.forEach((rule) => {
+      if (!("condition" in rule)) return;
+      rule.logic = rule.condition?.length
+        ? { in: [{ var: code }, [...rule.condition]] }
+        : null;
+      delete rule.condition;
+    });
   });
 };
 
@@ -1847,6 +1872,13 @@ const refreshRelevanceReferencing = (state, questionCode) => {
     if (relevance?.logic && logicRefersToQuestion(relevance.logic, questionCode)) {
       addRelevanceInstructions(state, code, relevance);
     }
+    const skipLogic = state[code]?.skip_logic;
+    if (
+      Array.isArray(skipLogic) &&
+      skipLogic.some((rule) => logicRefersToQuestion(rule.logic, questionCode))
+    ) {
+      addSkipInstructions(state, code);
+    }
   });
 };
 
@@ -1911,7 +1943,7 @@ const creatNewState = (
   if (newState.skip_logic) {
     delete newState.skip_logic;
     newState.instructionList = newState.instructionList.filter(
-      (eq) => !eq.code.startsWith("skip_to_on_"),
+      (eq) => !eq.code.startsWith("skip_to_"),
     );
   }
   newState.instructionList?.forEach((eq) => {

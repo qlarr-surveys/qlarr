@@ -9,9 +9,16 @@ import { treeToJsonLogic } from './utils/jsonLogic';
  * Component is "uncontrolled" - initializes from props but maintains its own state
  * This allows incomplete rules to exist in the UI while only saving valid rules
  */
-function InlineLogicBuilderSync({ onChange, jsonLogic }) {
+function InlineLogicBuilderSync({ onChange, jsonLogic, initialRule, moreActions }) {
   const { state, dispatch, fields } = useLogicBuilder();
   const { tree, isDirty } = state;
+
+  // Open with a condition row (blank or prefilled) instead of the empty state
+  useEffect(() => {
+    if (initialRule && tree.children.length === 0) {
+      dispatch({ type: 'ADD_RULE', rule: initialRule });
+    }
+  }, []);
 
   // Use ref to store onChange to avoid triggering effect when callback reference changes
   const onChangeRef = useRef(onChange);
@@ -41,7 +48,7 @@ function InlineLogicBuilderSync({ onChange, jsonLogic }) {
     }
   }, [jsonLogic, dispatch, fields]);
 
-  return <QlarrLogicBuilderInline />;
+  return <QlarrLogicBuilderInline moreActions={moreActions} />;
 }
 
 const serialize = (logic) => JSON.stringify(logic ?? null);
@@ -59,6 +66,9 @@ export function QlarrLogicBuilderInlineWrapper({
   mainLang,
   langList,
   t,
+  includeSelf,
+  initialRule,
+  moreActions,
 }) {
   return (
     <LogicBuilderProvider
@@ -69,8 +79,14 @@ export function QlarrLogicBuilderInlineWrapper({
       mainLang={mainLang}
       langList={langList}
       t={t}
+      includeSelf={includeSelf}
     >
-      <InlineLogicBuilderSync onChange={onChange} jsonLogic={jsonLogic} />
+      <InlineLogicBuilderSync
+        onChange={onChange}
+        jsonLogic={jsonLogic}
+        initialRule={initialRule}
+        moreActions={moreActions}
+      />
     </LogicBuilderProvider>
   );
 }
@@ -84,9 +100,14 @@ QlarrLogicBuilderInlineWrapper.propTypes = {
   mainLang: PropTypes.string.isRequired,
   langList: PropTypes.arrayOf(PropTypes.string).isRequired,
   t: PropTypes.func.isRequired,
+  includeSelf: PropTypes.bool,
+  initialRule: PropTypes.object,
+  moreActions: PropTypes.node,
 };
 
 InlineLogicBuilderSync.propTypes = {
   onChange: PropTypes.func.isRequired,
   jsonLogic: PropTypes.object,
+  initialRule: PropTypes.object,
+  moreActions: PropTypes.node,
 };

@@ -27,6 +27,7 @@ export function buildLogicFields({
   mainLang,
   langList = [],
   labels = DEFAULT_FIELD_LABELS,
+  includeSelf = false,
 }) {
   const fields = [
     {
@@ -55,6 +56,17 @@ export function buildLogicFields({
           .map((el) => el.code)
           .filter((code) => isGroup(code) || isQuestion(code))
       : accessibleDependencies(componentIndices, currentCode);
+  // Skip logic runs once the question (or page) is answered, so it may read
+  // the question itself, or a page's own questions
+  if (includeSelf) {
+    if (isGroup(currentCode)) {
+      (componentIndices || [])
+        .filter((el) => el.parent === currentCode)
+        .forEach((el) => dependencies.push(el.code));
+    } else {
+      dependencies.push(currentCode);
+    }
+  }
   const indexMap = new Map((componentIndices || []).map((el) => [el.code, el]));
 
   const sortedDependencies = [...dependencies].sort((a, b) => {
