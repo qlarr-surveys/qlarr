@@ -36,16 +36,34 @@ export const InlineFieldSelector = React.memo(function InlineFieldSelector({
     });
   }, [fields]);
 
+  // A code and a title each run in their own direction (<bdi>), so in the
+  // Arabic editor "Q2." keeps its dot after it and an English title its "?"
+  // at its end; an Arabic title in the English editor likewise
   const renderOption = (option) =>
     option.lead ? (
       <span className={styles.fieldOption}>
-        <span className={styles.fieldOptionCode}>{option.lead}</span>
-        <span className={styles.fieldOptionText}>{option.text}</span>
+        <span className={styles.fieldOptionCode}>
+          <bdi>{option.lead}</bdi>
+        </span>
+        <span className={styles.fieldOptionText}>
+          <bdi>{option.text}</bdi>
+        </span>
       </span>
     ) : (
       <span className={styles.fieldOption}>
-        <span className={styles.fieldOptionName}>{option.text}</span>
+        <span className={styles.fieldOptionName}>
+          <bdi>{option.text}</bdi>
+        </span>
       </span>
+    );
+
+  const renderValue = (option) =>
+    option.lead ? (
+      <>
+        <bdi>{option.lead}</bdi> <bdi>{option.text}</bdi>
+      </>
+    ) : (
+      <bdi>{option.text}</bdi>
     );
 
   return (
@@ -58,6 +76,7 @@ export const InlineFieldSelector = React.memo(function InlineFieldSelector({
       noOptionsText={t('logic_builder.no_options')}
       searchable
       renderOption={renderOption}
+      renderValue={renderValue}
       ariaLabel={ariaLabel}
       defaultOpen={defaultOpen}
     />

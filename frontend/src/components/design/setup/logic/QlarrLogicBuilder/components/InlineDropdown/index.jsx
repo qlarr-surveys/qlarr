@@ -219,7 +219,8 @@ export function InlineDropdown({
     if (renderValue && selectedOption) {
       return renderValue(selectedOption);
     }
-    return selectedOption?.label || placeholder;
+    // Labels are the author's text: each runs in its own direction
+    return selectedOption?.label ? <bdi>{selectedOption.label}</bdi> : placeholder;
   }, [renderValue, selectedOption, placeholder]);
 
   const isPlaceholder = !selectedOption;
@@ -227,7 +228,9 @@ export function InlineDropdown({
   // Default option content renderer
   const renderDefaultOption = (option) => (
     <span className={styles.optionBody}>
-      <span className={styles.optionText}>{option.label}</span>
+      <span className={styles.optionText}>
+        <bdi>{option.label}</bdi>
+      </span>
       {option.description && (
         <span className={styles.optionDescription}>{option.description}</span>
       )}
