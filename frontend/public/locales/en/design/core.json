@@ -435,6 +435,7 @@
   "use_visual_builder": "Use visual builder",
   "switch_to_visual_warning": "This will erase your expression and reset to the visual builder.",
   "confirm_switch": "Confirm",
+  "close_manual_expression": "Close manual expression",
   "response_expiry": "Response expiry (time since start)",
   "select_icon": "Select Icon",
   "search_icons": "Search for icons",

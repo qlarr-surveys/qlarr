@@ -430,6 +430,7 @@
   "use_visual_builder": "استخدام المنشئ المرئي",
   "switch_to_visual_warning": "سيؤدي هذا إلى مسح تعبيرك وإعادة ضبط المنشئ المرئي.",
   "confirm_switch": "تأكيد",
+  "close_manual_expression": "إغلاق التعبير اليدوي",
   "response_expiry": "انتهاء صلاحية الرد (الوقت منذ البداية)",
   "rows_count": "الصفوف: ",
   "data_uploaded": "تم تحميل البيانات بنجاح",

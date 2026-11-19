@@ -430,6 +430,7 @@
   "use_visual_builder": "Visuellen Builder verwenden",
   "switch_to_visual_warning": "Dadurch wird Ihr Ausdruck gelöscht und auf den visuellen Builder zurückgesetzt.",
   "confirm_switch": "Bestätigen",
+  "close_manual_expression": "Manuellen Ausdruck schließen",
   "response_expiry": "Antwortablauf (Zeit seit Beginn)",
   "rows_count": "Zeilen: ",
   "data_uploaded": "Daten erfolgreich hochgeladen",

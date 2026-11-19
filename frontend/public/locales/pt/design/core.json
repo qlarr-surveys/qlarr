@@ -226,6 +226,7 @@
   "use_visual_builder": "Usar construtor visual",
   "switch_to_visual_warning": "Isso apagará sua expressão e redefinirá para o construtor visual.",
   "confirm_switch": "Confirmar",
+  "close_manual_expression": "Fechar expressão manual",
   "last_modified": "Última modificação: ",
   "launch": "Lançar",
   "logic": "Lógica",
