@@ -65,13 +65,6 @@ export function convertChoiceQuestion(
 ) {
   const srcGroup = mediaGroup(currentType);
   const dstGroup = mediaGroup(newType);
-  const srcSingle = isSingleSelect(currentType);
-  const dstSingle = isSingleSelect(newType);
-
-  // Remove skip_logic when converting from single-select to multi-select
-  if (srcSingle && !dstSingle) {
-    delete currentQuestion.skip_logic;
-  }
 
   // Remove validations incompatible with the new selection model (and any stale
   // engine value-validation for the old one). currentQuestion.type is already

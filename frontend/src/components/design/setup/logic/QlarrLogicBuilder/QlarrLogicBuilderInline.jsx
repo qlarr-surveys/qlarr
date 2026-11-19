@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Typography, Button, IconButton, Tooltip, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import { AddOutlined, Close } from '@mui/icons-material';
 import { useLogicBuilder } from './LogicBuilderContext';
@@ -12,12 +12,15 @@ import styles from './QlarrLogicBuilderInline.module.css';
  * Inline version of QlarrLogicBuilder for sidebar display
  * Natural language style: "Show when [field] [operator] [value]"
  */
-export function QlarrLogicBuilderInline() {
+export function QlarrLogicBuilderInline({ moreActions }) {
   const { state, dispatch, getFieldDefinition, t } = useLogicBuilder();
   const { tree } = state;
+  // With moreActions, the footer folds behind a "More…" button
+  const [showMore, setShowMore] = useState(false);
 
   const handleAddRule = () => {
     dispatch({ type: 'ADD_RULE' });
+    setShowMore(false);
   };
 
   const handleRemoveRule = (ruleId) => {
@@ -123,6 +126,7 @@ export function QlarrLogicBuilderInline() {
                         operator={rule.operator}
                         value={rule.value}
                         onChange={(value) => handleValueChange(rule.id, value)}
+                        autoOpen={rule.autoOpen}
                         compact
                       />
                     </Box>
@@ -146,16 +150,25 @@ export function QlarrLogicBuilderInline() {
       )}
 
       {/* Add condition button */}
-      <Box className={styles.footerRow}>
-        <Button
-          variant="text"
-          startIcon={<AddOutlined />}
-          onClick={handleAddRule}
-          size="small"
-        >
-          {t('logic_builder.add_condition')}
-        </Button>
-      </Box>
+      {moreActions && !showMore ? (
+        <Box className={styles.footerRow}>
+          <Button variant="text" size="small" onClick={() => setShowMore(true)}>
+            {t('logic_builder.more')}
+          </Button>
+        </Box>
+      ) : (
+        <Box className={styles.footerRow}>
+          <Button
+            variant="text"
+            startIcon={<AddOutlined />}
+            onClick={handleAddRule}
+            size="small"
+          >
+            {t('logic_builder.add_condition')}
+          </Button>
+          {moreActions}
+        </Box>
+      )}
     </Box>
   );
 }

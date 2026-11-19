@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { TextField, Autocomplete, Chip, Select, MenuItem, FormControl, Checkbox, ListItemText } from '@mui/material';
 import styles from '../../QlarrLogicBuilder.module.css';
 
-export const SelectInput = React.memo(function SelectInput({ field, value, onChange, t, compact = false }) {
+export const SelectInput = React.memo(function SelectInput({ field, value, onChange, t, compact = false, autoOpen = false }) {
   const options = field.options || [];
   const rawValues = Array.isArray(value) ? value : value ? [value] : [];
   const selectedValues = rawValues.filter((v) => options.some((o) => o.value === v));
@@ -15,6 +15,7 @@ export const SelectInput = React.memo(function SelectInput({ field, value, onCha
         <Select
           variant="outlined"
           multiple
+          defaultOpen={autoOpen}
           value={selectedValues}
           onChange={(e) => onChange(e.target.value)}
           displayEmpty
@@ -140,4 +141,5 @@ SelectInput.propTypes = {
   onChange: PropTypes.func.isRequired,
   t: PropTypes.func.isRequired,
   compact: PropTypes.bool,
+  autoOpen: PropTypes.bool,
 };

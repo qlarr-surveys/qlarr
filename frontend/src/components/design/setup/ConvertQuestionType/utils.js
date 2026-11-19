@@ -21,9 +21,6 @@ export function computeChoiceLostAttributes(question, answers, newType) {
   const dstGroup = mediaGroup(newType);
 
   if (srcSingle && !dstSingle) {
-    if (question?.skip_logic?.length > 0) {
-      lost.push("lost_skip_logic");
-    }
     if (question?.validation?.validation_required?.isActive) {
       lost.push("lost_validation_required");
     }

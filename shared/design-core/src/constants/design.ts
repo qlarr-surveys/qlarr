@@ -73,13 +73,26 @@ export const setupOptions = (type) => {
   const movable = !NOT_MOVABLE_TYPES.includes(type);
   return result.map((section) => {
     if (section.key === "logic") {
-      return { ...section, rules: [...(section.rules || []), "repetition"] };
+      return {
+        ...section,
+        rules: [...withSkipLogic(type, section.rules || []), "repetition"],
+      };
     }
     if (section.key === "general" && movable) {
       return { ...section, rules: ["move_question", ...(section.rules || [])] };
     }
     return section;
   });
+};
+
+// Every question and page can skip ahead, except the end page (nothing
+// follows it). Placed before order_instructions, as single choice has it.
+const withSkipLogic = (type, rules) => {
+  if (type === "end" || rules.includes("skip_logic")) return rules;
+  const orderIndex = rules.indexOf("order_instructions");
+  return orderIndex === -1
+    ? [...rules, "skip_logic"]
+    : [...rules.slice(0, orderIndex), "skip_logic", ...rules.slice(orderIndex)];
 };
 
 const baseSetupOptions = (type) => {

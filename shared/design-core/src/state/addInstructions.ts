@@ -35,31 +35,7 @@ export const cleanupDefaultValue = (component) => {
 
 export const addSkipInstructions = (state, code) => {
   const component = state[code];
-  if (
-    component.type != "scq" &&
-    component.type != "image_scq" &&
-    component.type != "icon_scq"
-  ) {
-    return;
-  }
-
-  // Clean up skip_logic conditions to remove invalid answer codes
-  if (component.skip_logic && Array.isArray(component.skip_logic)) {
-    const validAnswerCodes =
-      component.children?.map((child) => child.code) || [];
-
-    component.skip_logic = component.skip_logic
-      .map((rule) => ({
-        ...rule,
-        condition:
-          rule.condition?.filter((answerCode) =>
-            validAnswerCodes.includes(answerCode),
-          ) || [],
-      }))
-      .filter((rule) => rule.condition.length > 0);
-  }
-
-  const instructions = scqSkipEquations(code, component);
+  const instructions = skipEquations(code, component, state);
   instructions.forEach((instruction) => {
     changeInstruction(state[code], instruction);
   });
@@ -727,7 +703,7 @@ const editInstruction = (componentState, instruction) => {
   }
 };
 
-const scqSkipEquations = (qualifiedCode, component) => {
+const skipEquations = (qualifiedCode, component, state) => {
   const skipLogic = component.skip_logic || [];
   const instructionList = [];
 
@@ -743,21 +719,18 @@ const scqSkipEquations = (qualifiedCode, component) => {
     }
   });
 
-  // Generate new instructions from array-based skip_logic
   skipLogic.forEach((rule, index) => {
     const instructionCode = "skip_to_auto" + (index + 1);
+    const text = skipConditionText(rule, state);
 
-    if (!rule.condition?.length || !rule.skipTo) {
+    if (!text || !rule.skipTo) {
       instructionList.push({ code: instructionCode, remove: true });
       return;
     }
 
-    // Build condition using includes: ["A1", "A2"].includes(Q1.value)
-    const conditionText = `[${rule.condition.map((code) => `"${code}"`).join(", ")}].includes(${qualifiedCode}.value)`;
-
     instructionList.push({
       code: instructionCode,
-      text: conditionText,
+      text,
       returnType: "boolean",
       isActive: true,
       skipToComponent: rule.skipTo,
@@ -768,6 +741,20 @@ const scqSkipEquations = (qualifiedCode, component) => {
 
   return instructionList;
 };
+
+// A skip rule's condition is either visual `logic` or a manual `text`
+// expression, the same two modes show/hide has.
+export const isManualSkipRule = (rule) => typeof rule.text === "string";
+
+const skipConditionText = (rule, state) =>
+  isManualSkipRule(rule)
+    ? rule.text.trim()
+    : jsonToJs(
+        rule.logic,
+        false,
+        (code) => state[code]?.type,
+        (code) => getQuestionType(state, code),
+      );
 
 const validationEquation = (qualifiedCode, component, key, validation) => {
   if (

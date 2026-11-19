@@ -26,7 +26,7 @@ function createInitialState({ jsonLogic, fields }) {
 function logicReducer(state, action) {
   switch (action.type) {
     case 'ADD_RULE': {
-      const newRule = createEmptyRule();
+      const newRule = { ...createEmptyRule(), ...action.rule };
       return {
         ...state,
         tree: {
