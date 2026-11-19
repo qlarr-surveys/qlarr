@@ -1,56 +1,52 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { Typography, Box } from '@mui/material';
+import { ChevronDown } from 'lucide-react';
 import { useLogicBuilder } from '../LogicBuilderContext';
-import { InlineDropdown } from './InlineDropdown';
+import styles from '../QlarrLogicBuilderInline.module.css';
 
 /**
- * InlineOperatorSelector - Operator selector using inline dropdown style
- * Displays selected operator as text, opens dropdown on click
+ * InlineOperatorSelector - a condition's rule ("Is", "Includes", "Is
+ * answered"), as a native select drawn flat inside the condition's card.
+ * A rule the field doesn't offer reads as unset rather than as another one.
  */
 export const InlineOperatorSelector = React.memo(function InlineOperatorSelector({
   fieldCode,
   value,
   onChange,
+  ariaLabel,
 }) {
   const { getOperatorsForField, t } = useLogicBuilder();
 
-  // Get operators available for this field
   const operators = fieldCode ? getOperatorsForField(fieldCode) : [];
-
-  // Transform operators to options format for InlineDropdown
-  const options = useMemo(() => {
-    return operators.map((op) => ({
-      value: op.key,
-      label: t(op.labelKey, { defaultValue: op.displayLabel }),
-      description: op.descriptionKey
-        ? t(op.descriptionKey, { defaultValue: '' })
-        : undefined,
-    }));
-  }, [operators, t]);
-
-  // Custom render for dropdown options (with description)
-  const renderOption = (option) => (
-    <Box>
-      <Typography variant="body2">{option.label}</Typography>
-      {option.description && (
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-          {option.description}
-        </Typography>
-      )}
-    </Box>
-  );
+  const known = operators.some((op) => op.key === value);
 
   return (
-    <InlineDropdown
-      value={value}
-      options={options}
-      onChange={onChange}
-      placeholder={t('logic_builder.select_operator')}
-      noOptionsText={t('logic_builder.no_options')}
-      disabled={!fieldCode || operators.length === 0}
-      renderOption={renderOption}
-    />
+    <span className={styles.selectWrap}>
+      <select
+        aria-label={ariaLabel}
+        value={known ? value : ''}
+        onChange={(event) => onChange(event.target.value)}
+        disabled={operators.length === 0}
+        className={styles.select}
+      >
+        {!known && (
+          <option value="" disabled>
+            {t('logic_builder.select_operator')}
+          </option>
+        )}
+        {operators.map((op) => (
+          <option key={op.key} value={op.key}>
+            {t(op.labelKey, { defaultValue: op.displayLabel })}
+          </option>
+        ))}
+      </select>
+      <ChevronDown
+        aria-hidden="true"
+        size={16}
+        strokeWidth={2}
+        className={styles.selectChevron}
+      />
+    </span>
   );
 });
 
@@ -58,4 +54,5 @@ InlineOperatorSelector.propTypes = {
   fieldCode: PropTypes.string,
   value: PropTypes.string,
   onChange: PropTypes.func.isRequired,
+  ariaLabel: PropTypes.string,
 };

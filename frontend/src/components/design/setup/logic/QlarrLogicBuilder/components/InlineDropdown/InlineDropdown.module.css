@@ -1,40 +1,42 @@
+/* A condition's field, drawn to docs/design/editor-phase-3.3.html (Logic tab,
+   Show when): a flat line inside the condition's card, and under it a list
+   with a search box. */
+
 .container {
   position: relative;
   display: flex;
   align-items: center;
-  outline: none;
-  min-width: 0;
   flex: 1;
   width: 100%;
+  min-width: 0;
+  border-radius: 7px;
+  outline: none;
 }
 
-.container:focus-visible .trigger {
-  outline: 2px solid #1976d2;
-  outline-offset: 2px;
+.container:focus-visible {
+  box-shadow: 0 0 0 2px #3a46d8;
 }
 
+/* The end padding is the chevron's room, so it follows the reading
+   direction. */
 .trigger {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 4px;
-  cursor: pointer;
-  padding: 2px 4px;
-  border-radius: 6px;
-  background-color: transparent;
-  transition: background-color 0.2s ease;
-  border: 1px solid transparent;
-  min-width: 0;
   flex: 1;
   width: 100%;
+  min-width: 0;
+  height: 44px;
+  padding-inline: 12px 36px;
+  border-radius: 7px;
+  background: transparent;
+  box-sizing: border-box;
+  cursor: pointer;
 }
 
-.trigger:hover {
-  background-color: rgba(0, 0, 0, 0.04);
-}
-
+.trigger:hover,
 .triggerOpen {
-  background-color: rgba(0, 0, 0, 0.08);
-  border-color: #e0e0e0;
+  background: #eceef3;
 }
 
 .triggerDisabled {
@@ -43,125 +45,141 @@
 }
 
 .triggerDisabled:hover {
-  background-color: transparent;
+  background: transparent;
 }
 
 .triggerText {
-  font-size: 14px;
-  color: #181735;
+  flex: 1;
   min-width: 0;
   overflow: hidden;
+  font: 400 15px/1.2 Rubik, sans-serif;
+  color: #1b2150;
+  text-align: start;
   text-overflow: ellipsis;
   white-space: nowrap;
-  flex: 1;
 }
 
 .triggerPlaceholder {
-  color: #9e9e9e;
-  font-style: italic;
+  color: #6b7194;
 }
 
 .chevron {
-  color: #666;
-  width: 18px;
-  height: 18px;
-  transition: transform 0.2s ease;
-  flex-shrink: 0;
+  position: absolute;
+  inset-inline-end: 12px;
+  top: 50%;
+  margin-top: -7px;
+  color: #4c5474;
+  transition: transform 0.15s ease;
+  pointer-events: none;
 }
 
 .chevronOpen {
   transform: rotate(180deg);
 }
 
+/* Portalled to the body, so it sets its own type. */
 .dropdown {
-  /* Positioning is now handled via inline styles in Portal */
-  min-width: 200px;
-  max-width: 320px;
-  max-height: 300px;
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
-  border: 1px solid #e0e0e0;
   z-index: 1400;
-  overflow: visible;
   display: flex;
   flex-direction: column;
+  max-width: 340px;
+  max-height: 320px;
+  overflow: hidden;
+  border: 1px solid #dfe2ef;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(20, 24, 52, 0.18);
+  font-family: Rubik, sans-serif;
 }
 
 .searchContainer {
-  padding: 8px;
-  border-bottom: 1px solid #e8e8e8;
   flex-shrink: 0;
+  padding: 8px;
+  border-bottom: 1px solid #eceef6;
 }
 
 .searchInput {
-  font-size: 14px;
-  padding: 6px 10px;
-  background-color: #f5f5f5;
-  border-radius: 6px;
+  display: block;
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 7px;
+  background: #f3f4f8;
+  font: 400 14.5px Rubik, sans-serif;
+  color: #1b2150;
+  box-sizing: border-box;
 }
 
-.searchInput input {
-  padding: 0;
+.searchInput::placeholder {
+  color: #8a90ad;
+}
+
+.searchInput:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #3a46d8;
 }
 
 .optionsList {
-  overflow-y: auto;
   flex: 1;
-  padding: 4px 0;
+  padding: 4px;
+  overflow-y: auto;
 }
 
 .groupHeader {
-  display: block;
-  padding: 8px 12px 4px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #666;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  background-color: #fafafa;
   position: sticky;
-  top: 0;
+  top: -4px;
+  z-index: 1;
+  padding: 8px 12px 4px;
+  background: #fff;
+  font: 600 11px Rubik, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5b6189;
 }
 
 .option {
   display: flex;
-  flex-direction: column;
-  padding: 8px 12px;
+  align-items: center;
+  min-height: 44px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  box-sizing: border-box;
   cursor: pointer;
-  transition: background-color 0.15s ease;
 }
 
 .option:hover {
-  background-color: #f5f5f5;
+  background: #f5f6fa;
+}
+
+.optionSelected,
+.optionSelected:hover {
+  background: #eef3fe;
 }
 
 .optionFocused {
-  background-color: #e3f2fd;
+  box-shadow: inset 0 0 0 2px #3a46d8;
 }
 
-.optionSelected {
-  background-color: #e8f4fd;
-}
-
-.optionSelected:hover {
-  background-color: #d6ebfc;
+.optionBody {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .optionText {
-  font-size: 14px;
-  color: #181735;
-  line-height: 1.4;
+  font: 400 15px/1.3 Rubik, sans-serif;
+  color: #1b2150;
 }
 
 .optionDescription {
-  font-size: 12px;
-  color: #666;
   margin-top: 2px;
-  line-height: 1.3;
+  font: 400 12.5px/1.3 Rubik, sans-serif;
+  color: #5b6189;
 }
 
 .noOptions {
-  padding: 16px 12px;
-  text-align: center;
+  padding: 12px;
+  font: 400 13.5px Rubik, sans-serif;
+  color: #5b6189;
 }

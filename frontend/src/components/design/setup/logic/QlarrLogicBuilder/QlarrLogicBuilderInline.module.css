@@ -1,103 +1,316 @@
-.container {
-  margin-top: 8px;
-}
+/* The conditions of a rule, drawn to docs/design/editor-phase-3.3.html
+   (Logic tab, Show when). */
 
-/* Each condition as a card */
-.ruleRow {
+.builder {
   display: flex;
-  align-items: flex-start;
-  gap: 4px;
-  padding: 4px;
-  margin-bottom: 4px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e8e8e8;
-  overflow: visible; /* Allow dropdowns to extend beyond */
+  flex-direction: column;
+  gap: 12px;
 }
 
-.ruleRow:last-of-type {
-  margin-bottom: 0;
+/* ====== No conditions yet ====== */
+
+.empty {
+  padding: 26px 14px;
+  border: 1.5px dashed #d6dae8;
+  border-radius: 10px;
+  background: #f7f8fb;
+  text-align: center;
 }
 
-/* Conjunction row with toggle buttons */
-.conjunctionRow {
+.emptyTitle {
+  margin: 0;
+  font: 400 16px/22px Rubik, sans-serif;
+  color: #4c5474;
+}
+
+.emptyHint {
+  margin: 8px 0 0;
+  font: 400 13.5px/19px Rubik, sans-serif;
+  color: #5b6189;
+}
+
+/* ====== "Show when [All | Any] conditions are met" ====== */
+
+.match {
   display: flex;
-  justify-content: flex-start;
-  margin-bottom: 12px;
-}
-
-.toggleGroup {
-  height: 28px;
-}
-
-.toggleButton {
-  text-transform: none;
-  font-size: 12px;
-  padding: 4px 12px;
-}
-
-/* Selectors container - single column: field, operator, value each on own row */
-.selectorsContainer {
-  display: grid;
-  grid-template-columns: 1fr;
-  align-items: center;
-  gap: 2px;
-  flex: 1;
-  min-width: 0;
-  overflow: visible; /* Allow dropdowns to extend beyond */
-}
-
-/* Each grid cell: field cell or (connector + operator) cell */
-.selectorCell {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  min-width: 0;
-  overflow: visible;
-  width: 100%;
-}
-
-/* Connector text between selectors (e.g., "is") */
-.connector {
-  color: #666;
-  font-size: 14px;
-  padding: 0 2px;
-  flex-shrink: 0;
-}
-
-/* Value input - spans both columns on row 2 */
-.valueInputWrapper {
-  grid-column: 1 / -1;
-  min-width: 0;
-  width: 100%;
-}
-
-.deleteButton {
-  flex-shrink: 0;
-  opacity: 0.6;
-  align-self: flex-start;
-  margin-top: 2px;
-}
-
-.deleteButton:hover {
-  opacity: 1;
-}
-
-/* Footer with add button */
-.footerRow {
-  display: flex;
-  justify-content: flex-start;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  margin-top: 8px;
+  font: 500 13.5px Rubik, sans-serif;
+  color: #1b2150;
 }
 
-/* Empty state styling */
-.emptyState {
-  padding: 16px;
-  margin: 8px 0;
-  text-align: center;
-  background-color: #f5f5f5;
+.join {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
   border-radius: 8px;
-  border: 1px dashed #e0e0e0;
+  background: #eceef3;
+}
+
+.joinOption {
+  height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  font: 400 13.5px Rubik, sans-serif;
+  color: #1b2150;
+  cursor: pointer;
+}
+
+.joinOptionOn {
+  background: #fff;
+  font-weight: 600;
+}
+
+.joinOption:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #3a46d8;
+}
+
+/* ====== A condition ====== */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Amber until it is complete: only complete conditions count. */
+.condition {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid #e6e8f0;
+  border-radius: 10px;
+  background: #f7f8fb;
+}
+
+.conditionIncomplete {
+  border-color: #f0d3a8;
+}
+
+.fields {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.value {
+  padding-top: 2px;
+}
+
+.hint {
+  margin: 4px 0;
+  padding-inline-start: 12px;
+  font: 400 12.5px/17px Rubik, sans-serif;
+  color: #8a4a00;
+}
+
+.remove {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #8a90a3;
+  cursor: pointer;
+}
+
+.remove:hover {
+  background: #fdf1f0;
+  color: #b3261e;
+}
+
+.remove:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #3a46d8;
+}
+
+/* The rule: a native select, flat inside the card like the field above it.
+   The end padding is the chevron's room. */
+.selectWrap {
+  position: relative;
+  display: block;
+}
+
+.select {
+  display: block;
+  width: 100%;
+  height: 44px;
+  padding-block: 0;
+  padding-inline: 12px 44px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  font: 400 15px/1.2 Rubik, sans-serif;
+  color: #1b2150;
+  text-overflow: ellipsis;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.select:hover:not(:disabled) {
+  background: #eceef3;
+}
+
+.select:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #3a46d8;
+}
+
+.select:disabled {
+  color: #6b7194;
+  cursor: not-allowed;
+}
+
+.selectChevron {
+  position: absolute;
+  inset-inline-end: 16px;
+  top: 50%;
+  margin-top: -8px;
+  color: #4c5474;
+  pointer-events: none;
+}
+
+/* A field in the list: its code, then its text. */
+.fieldOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.fieldOptionCode {
+  flex: none;
+  min-width: 30px;
+  font: 600 15px Rubik, sans-serif;
+  color: #1b2150;
+}
+
+.fieldOptionText {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font: 400 13px Rubik, sans-serif;
+  color: #5b6189;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fieldOptionName {
+  flex: 1;
+  min-width: 0;
+  font: 500 15px/1.3 Rubik, sans-serif;
+  color: #1b2150;
+}
+
+/* ====== Add condition ====== */
+
+.add {
+  position: relative;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  inset-inline: 0;
+  z-index: 40;
+  padding: 6px;
+  border: 1px solid #dfe2ef;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(20, 24, 52, 0.18);
+}
+
+.menuTitle {
+  margin: 4px 8px 6px;
+  font: 600 12.5px Rubik, sans-serif;
+  color: #5b6189;
+}
+
+.menuItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  text-align: start;
+  cursor: pointer;
+}
+
+.menuItem:hover {
+  background: #f5f6fa;
+}
+
+.menuItemCurrent,
+.menuItemCurrent:hover {
+  background: #f5f6ff;
+}
+
+.menuItem:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #3a46d8;
+}
+
+.menuIcon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #eef0ff;
+  font: 600 14px ui-monospace, Menlo, Consolas, monospace;
+  color: #2b34a8;
+}
+
+.menuText {
+  flex: 1;
+  min-width: 0;
+}
+
+.menuName {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 600 14.5px Rubik, sans-serif;
+  color: #1b2150;
+}
+
+.menuBadge {
+  padding: 1px 7px;
+  border-radius: 9px;
+  background: #eef0ff;
+  font: 500 11.5px Rubik, sans-serif;
+  color: #2b34a8;
+}
+
+.menuDescription {
+  display: block;
+  margin-top: 2px;
+  font: 400 12.5px/17px Rubik, sans-serif;
+  color: #5b6189;
+}
+
+/* "Use manual expression", once there are conditions to turn into one. */
+button.manualLink {
+  margin-top: -4px;
 }

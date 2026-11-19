@@ -295,15 +295,7 @@ function SkipRule({
                 ? {}
                 : undefined
           }
-          moreActions={
-            <button
-              type="button"
-              onClick={onSwitchToManual}
-              className={cx(setupFieldStyles.textLink, styles.inlineLink)}
-            >
-              {t("use_manual_expression")}
-            </button>
-          }
+          onManual={onSwitchToManual}
         />
       ) : (
         <div className={styles.conditionActions}>

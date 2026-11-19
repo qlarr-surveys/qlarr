@@ -8,6 +8,8 @@
  */
 export function getCompactTextFieldProps(compact, label) {
   if (compact) {
+    // A condition's value, drawn to docs/design/editor-phase-3.3.html: a
+    // white box under the condition's rule.
     return {
       placeholder: label,
       size: 'small',
@@ -17,27 +19,34 @@ export function getCompactTextFieldProps(compact, label) {
         width: '100%',
         minWidth: '50px',
         '& .MuiOutlinedInput-root': {
-          height: 32,
-          fontSize: 14,
+          height: 44,
+          fontFamily: 'Rubik, sans-serif',
+          fontSize: 15,
           backgroundColor: '#fff !important',
-          borderRadius: '6px',
+          borderRadius: '8px',
           '& fieldset': {
-            borderColor: '#e0e0e0',
+            borderColor: '#d6dae8',
           },
           '&:hover fieldset': {
-            borderColor: '#bdbdbd',
+            borderColor: '#b9bff0',
           },
           '&.Mui-focused': {
             backgroundColor: '#fff !important',
+            boxShadow: '0 0 0 2px #e3e6ff',
+          },
+          '&.Mui-focused fieldset': {
+            borderColor: '#3a46d8',
+            borderWidth: '1px',
           },
         },
         '& .MuiOutlinedInput-input': {
-          padding: '6px 8px',
+          padding: '0 12px',
+          height: '100%',
           minWidth: '40px',
           backgroundColor: '#fff !important',
-          color: '#181735',
+          color: '#1b2150',
           '&::placeholder': {
-            color: '#9e9e9e',
+            color: '#a3a8c3',
             opacity: 1,
           },
           // Remove default number input styling

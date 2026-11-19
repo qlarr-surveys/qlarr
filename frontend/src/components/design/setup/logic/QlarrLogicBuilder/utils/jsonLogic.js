@@ -80,7 +80,7 @@ export function treeToJsonLogic(tree) {
 /**
  * Check if a rule has all required fields
  */
-function isRuleValid(rule) {
+export function isRuleValid(rule) {
   if (!rule.field || !rule.operator) {
     return false;
   }

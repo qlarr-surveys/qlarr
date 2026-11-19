@@ -1,14 +1,19 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback, useId } from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
-import { Box, Typography, InputBase } from '@mui/material';
-import { KeyboardArrowDown } from '@mui/icons-material';
+import { ChevronDown } from 'lucide-react';
 import styles from './InlineDropdown.module.css';
 import { isSessionRtl } from '~/utils/common';
 
+const cx = (...names) => names.filter(Boolean).join(' ');
+
 /**
- * InlineDropdown - A text-like dropdown that appears as regular text
- * and reveals a dropdown menu on click.
+ * InlineDropdown - a condition's field: a flat line that shows the choice and
+ * opens a searchable list under it (docs/design/editor-phase-3.3.html).
+ *
+ * The list is portalled so the settings panel's scroll doesn't clip it, and it
+ * follows the line when the panel scrolls. `defaultOpen` opens it on mount,
+ * for a condition that was just added and still needs its field.
  */
 export function InlineDropdown({
   value,
@@ -22,10 +27,11 @@ export function InlineDropdown({
   disabled = false,
   renderValue,
   renderOption,
-  size = 'small',
-  triggerMaxWidth,
+  ariaLabel,
+  defaultOpen = false,
 }) {
   const isRtl = isSessionRtl();
+  const listId = useId();
 
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -78,7 +84,7 @@ export function InlineDropdown({
 
     const rect = triggerRef.current.getBoundingClientRect();
     setDropdownPosition({
-      top: rect.bottom + 4, // 4px gap, matching margin-top from original CSS
+      top: rect.bottom + 4,
       left: rect.left,
       right: window.innerWidth - rect.right,
       width: rect.width,
@@ -98,6 +104,17 @@ export function InlineDropdown({
     setFocusedIndex(-1);
     updateDropdownPosition();
   }, [disabled, updateDropdownPosition]);
+
+  const toggle = useCallback(() => {
+    if (open) handleClose();
+    else handleOpen();
+  }, [open, handleClose, handleOpen]);
+
+  useEffect(() => {
+    if (defaultOpen) handleOpen();
+    // Only on mount: a condition that was just added opens its list once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Handle click outside to close, and reposition on scroll/resize
   useEffect(() => {
@@ -149,6 +166,7 @@ export function InlineDropdown({
     (optionValue) => {
       onChange(optionValue);
       handleClose();
+      containerRef.current?.focus();
     },
     [onChange, handleClose]
   );
@@ -176,11 +194,15 @@ export function InlineDropdown({
           event.preventDefault();
           if (focusedIndex >= 0 && flatOptions[focusedIndex]) {
             handleSelect(flatOptions[focusedIndex].value);
+          } else if (flatOptions.length === 1) {
+            handleSelect(flatOptions[0].value);
           }
           break;
         case 'Escape':
           event.preventDefault();
+          event.stopPropagation();
           handleClose();
+          containerRef.current?.focus();
           break;
         case 'Tab':
           handleClose();
@@ -204,54 +226,71 @@ export function InlineDropdown({
 
   // Default option content renderer
   const renderDefaultOption = (option) => (
-    <Box>
-      <Typography variant="body2" className={styles.optionText}>
-        {option.label}
-      </Typography>
+    <span className={styles.optionBody}>
+      <span className={styles.optionText}>{option.label}</span>
       {option.description && (
-        <Typography variant="caption" className={styles.optionDescription}>
-          {option.description}
-        </Typography>
+        <span className={styles.optionDescription}>{option.description}</span>
       )}
-    </Box>
+    </span>
+  );
+
+  const renderOptionRow = (option, index) => (
+    <div
+      key={option.value}
+      ref={(el) => (optionRefs.current[index] = el)}
+      className={cx(
+        styles.option,
+        option.value === value && styles.optionSelected,
+        index === focusedIndex && styles.optionFocused
+      )}
+      onClick={() => handleSelect(option.value)}
+      role="option"
+      aria-selected={option.value === value}
+    >
+      {renderOption ? renderOption(option) : renderDefaultOption(option)}
+    </div>
   );
 
   return (
-    <Box
+    <div
       ref={containerRef}
       className={styles.container}
       onKeyDown={handleKeyDown}
       tabIndex={disabled ? -1 : 0}
       role="combobox"
+      aria-label={ariaLabel}
       aria-expanded={open}
       aria-haspopup="listbox"
+      aria-controls={open ? listId : undefined}
       aria-disabled={disabled}
     >
-      {/* Trigger */}
-      <Box
+      <div
         ref={triggerRef}
-        className={`${styles.trigger} ${open ? styles.triggerOpen : ''} ${disabled ? styles.triggerDisabled : ''}`}
-        onClick={handleOpen}
+        className={cx(
+          styles.trigger,
+          open && styles.triggerOpen,
+          disabled && styles.triggerDisabled
+        )}
+        onClick={toggle}
       >
-        <Typography
-          component="span"
-          className={`${styles.triggerText} ${isPlaceholder ? styles.triggerPlaceholder : ''}`}
-          variant={size === 'small' ? 'body2' : 'body1'}
-          sx={triggerMaxWidth ? { width: triggerMaxWidth, maxWidth: triggerMaxWidth } : undefined}
+        <span
+          className={cx(styles.triggerText, isPlaceholder && styles.triggerPlaceholder)}
         >
           {displayText}
-        </Typography>
-        <KeyboardArrowDown
-          className={`${styles.chevron} ${open ? styles.chevronOpen : ''}`}
+        </span>
+        <ChevronDown
+          aria-hidden="true"
+          size={14}
+          strokeWidth={2}
+          className={cx(styles.chevron, open && styles.chevronOpen)}
         />
-      </Box>
+      </div>
 
-      {/* Dropdown - rendered via Portal */}
       {open && createPortal(
-        <Box
+        <div
           ref={dropdownRef}
           className={styles.dropdown}
-          role="listbox"
+          dir={isRtl ? 'rtl' : 'ltr'}
           style={{
             position: 'fixed',
             top: `${dropdownPosition.top}px`,
@@ -261,85 +300,54 @@ export function InlineDropdown({
             minWidth: `${Math.max(dropdownPosition.width, 200)}px`,
           }}
         >
-          {/* Search input */}
           {searchable && (
-            <Box className={styles.searchContainer}>
-              <InputBase
+            <div className={styles.searchContainer}>
+              <input
                 ref={searchInputRef}
+                type="search"
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
                   setFocusedIndex(0);
                 }}
                 placeholder={searchPlaceholder}
+                aria-label={searchPlaceholder}
+                aria-controls={listId}
                 className={styles.searchInput}
-                size="small"
-                fullWidth
               />
-            </Box>
+            </div>
           )}
 
-          {/* Options list */}
-          <Box className={styles.optionsList}>
+          <div id={listId} role="listbox" aria-label={ariaLabel} className={styles.optionsList}>
             {groupBy
               ? Object.entries(groupedOptions).map(([groupName, groupOptions]) => {
                   if (groupOptions.length === 0) return null;
                   return (
-                    <Box key={groupName}>
+                    <div key={groupName} role="group" aria-label={groupName || undefined}>
                       {groupName && (
-                        <Typography className={styles.groupHeader} variant="caption">
-                          {groupName}
-                        </Typography>
+                        <div className={styles.groupHeader}>{groupName}</div>
                       )}
-                      {groupOptions.map((option) => {
-                        const flatIndex = flatOptions.findIndex(
-                          (o) => o.value === option.value
-                        );
-                        return (
-                          <Box
-                            key={option.value}
-                            ref={(el) => (optionRefs.current[flatIndex] = el)}
-                            className={`${styles.option} ${
-                              option.value === value ? styles.optionSelected : ''
-                            } ${flatIndex === focusedIndex ? styles.optionFocused : ''}`}
-                            onClick={() => handleSelect(option.value)}
-                            role="option"
-                            aria-selected={option.value === value}
-                          >
-                            {renderOption ? renderOption(option) : renderDefaultOption(option)}
-                          </Box>
-                        );
-                      })}
-                    </Box>
+                      {groupOptions.map((option) =>
+                        renderOptionRow(
+                          option,
+                          flatOptions.findIndex((o) => o.value === option.value)
+                        )
+                      )}
+                    </div>
                   );
                 })
-              : flatOptions.map((option, index) => (
-                  <Box
-                    key={option.value}
-                    ref={(el) => (optionRefs.current[index] = el)}
-                    className={`${styles.option} ${
-                      option.value === value ? styles.optionSelected : ''
-                    } ${index === focusedIndex ? styles.optionFocused : ''}`}
-                    onClick={() => handleSelect(option.value)}
-                    role="option"
-                    aria-selected={option.value === value}
-                  >
-                    {renderOption ? renderOption(option) : renderDefaultOption(option)}
-                  </Box>
-                ))}
+              : flatOptions.map((option, index) => renderOptionRow(option, index))}
 
             {flatOptions.length === 0 && (
-              <Box className={styles.noOptions}>
-                <Typography variant="body2" color="text.secondary">
-                  {noOptionsText}
-                </Typography>
-              </Box>
+              <div className={styles.noOptions} role="presentation">
+                {noOptionsText}
+              </div>
             )}
-          </Box>
-        </Box>,
+          </div>
+        </div>,
         document.body
       )}
-    </Box>
+    </div>
   );
 }
 
@@ -363,8 +371,8 @@ InlineDropdown.propTypes = {
   disabled: PropTypes.bool,
   renderValue: PropTypes.func,
   renderOption: PropTypes.func,
-  size: PropTypes.oneOf(['small', 'medium']),
-  triggerMaxWidth: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  ariaLabel: PropTypes.string,
+  defaultOpen: PropTypes.bool,
 };
 
 export default InlineDropdown;

@@ -21,7 +21,7 @@ export const SelectInput = React.memo(function SelectInput({ field, value, onCha
           displayEmpty
           renderValue={(selected) => {
             if (selected.length === 0) {
-              return <span style={{ color: '#9e9e9e' }}>{t('logic_builder.value', 'Value')}</span>;
+              return <span style={{ color: '#a3a8c3' }}>{t('logic_builder.value', 'Value')}</span>;
             }
             return (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
@@ -38,20 +38,31 @@ export const SelectInput = React.memo(function SelectInput({ field, value, onCha
               </div>
             );
           }}
+          // A condition's answers, drawn like its other values
+          // (docs/design/editor-phase-3.3.html): a white box, 44px tall
           sx={{
-            minHeight: 32,
+            minHeight: 44,
             height: 'auto',
-            fontSize: 14,
+            fontFamily: 'Rubik, sans-serif',
+            fontSize: 15,
+            color: '#1b2150',
             backgroundColor: '#fff',
-            borderRadius: '6px',
+            borderRadius: '8px',
             '& .MuiOutlinedInput-notchedOutline': {
-              borderColor: '#e0e0e0',
+              borderColor: '#d6dae8',
             },
             '&:hover .MuiOutlinedInput-notchedOutline': {
-              borderColor: '#bdbdbd',
+              borderColor: '#b9bff0',
+            },
+            '&.Mui-focused': {
+              boxShadow: '0 0 0 2px #e3e6ff',
+            },
+            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+              borderColor: '#3a46d8',
+              borderWidth: '1px',
             },
             '& .MuiSelect-select': {
-              padding: '6px 8px',
+              padding: '8px 12px',
               display: 'flex',
               alignItems: 'center',
               minHeight: 'auto',
