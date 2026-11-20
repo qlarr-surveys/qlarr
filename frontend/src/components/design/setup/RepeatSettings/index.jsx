@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useId } from "react";
+import React, { useMemo, useCallback, useId, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   accessibleDependencies,
@@ -52,6 +52,9 @@ function RepeatSettings({ code, t }) {
   const max = config?.max ?? REPEAT_NUMBER_MAX;
   const count = config?.count ?? REPEAT_CONSTANT_MIN;
   const carryOther = !!config?.carryOther;
+  // Typed text while the count input is focused; committed (and clamped) on blur,
+  // so intermediate keystrokes like the "1" of "10" aren't clamped to the min.
+  const [countDraft, setCountDraft] = useState(null);
 
   const index = designState.index || {};
   const mainLang = designState.langInfo?.mainLang;
@@ -83,7 +86,12 @@ function RepeatSettings({ code, t }) {
 
   const onToggle = (checked) => {
     if (checked) {
-      dispatch(enableRepetition({ code }));
+      // Start on a fixed count when nothing can drive an option/count repeat.
+      const deps = accessibleDependencies(designState.componentIndex, code) || [];
+      const hasSource = deps.some((dep) =>
+        [...MCQ_SOURCE_TYPES, ...NUMBER_SOURCE_TYPES].includes(designState[dep]?.type),
+      );
+      dispatch(enableRepetition({ code, kind: hasSource ? undefined : "constant" }));
     } else {
       dispatch(disableRepetition({ code }));
     }
@@ -106,11 +114,12 @@ function RepeatSettings({ code, t }) {
     }
   };
 
-  const onCount = (e) => {
-    const value = parseInt(e.target.value, 10);
+  const onCountBlur = () => {
+    const value = parseInt(countDraft, 10);
     if (!Number.isNaN(value)) {
       dispatch(updateRepetitionSource({ code, count: value }));
     }
+    setCountDraft(null);
   };
 
   const onCarryOther = (checked) =>
@@ -144,8 +153,9 @@ function RepeatSettings({ code, t }) {
                 type="number"
                 min={REPEAT_CONSTANT_MIN}
                 max={REPEAT_NUMBER_MAX}
-                value={count}
-                onChange={onCount}
+                value={countDraft ?? count}
+                onChange={(e) => setCountDraft(e.target.value)}
+                onBlur={onCountBlur}
                 className={`${setupFieldStyles.input} ${setupFieldStyles.inputShort}`}
               />
             </SetupSubField>
