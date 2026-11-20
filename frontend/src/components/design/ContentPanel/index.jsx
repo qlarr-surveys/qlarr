@@ -38,6 +38,10 @@ import {
 } from "@qlarr/design-core/constants/design";
 import { qlarrCssVars } from "~/components/Questions/qlarrVars";
 
+// How long a change already on screen shows its color before the editor
+// glides to it.
+const SEEN_BEFORE_SCROLL_MS = 300;
+
 const ALIGNMENT_TO_FLEX = {
   left: "flex-start",
   center: "center",
@@ -64,7 +68,6 @@ function ContentPanel({ designMode, navigatorRef }, ref) {
       "--design-error-color": theme.palette.error.main,
       "--design-error-tint": alpha(theme.palette.error.main, 0.06),
       "--new-item-flash": alpha(theme.palette.primary.main, 0.18),
-      "--new-item-flash-end": alpha(theme.palette.primary.main, 0.04),
       "--question-prefix-color":
         theme.contrast?.onPaper || theme.palette.text.primary,
       "--page-label-color": alpha(
@@ -291,28 +294,49 @@ function ContentPanel({ designMode, navigatorRef }, ref) {
       (it) => it.name === ELEMENTS.GROUP && it.group.code === groupCode
     );
 
-  const scrollToElement = (code, groupCode, onArrive) => {
+  // `smooth` glides there instead of jumping, for following changes as they
+  // land. It waits for each glide to settle before correcting, so it gets
+  // more frames. `onSeen` runs once, as soon as the element is in the
+  // page: on screen already, the glide waits a moment after it.
+  const scrollRunRef = useRef(0);
+  const scrollToElement = (code, groupCode, onArrive, { smooth = false, onSeen } = {}) => {
     const itemIndex = groupItemIndex(groupCode);
     if (itemIndex === -1 || !virtuosoRef.current) {
       return;
     }
-    virtuosoRef.current.scrollToIndex({
-      index: itemIndex,
-      align: "start",
-      behavior: "auto",
-    });
+    const behavior = smooth ? "smooth" : "auto";
+    // A newer scroll takes over: the older one stops correcting.
+    const run = ++scrollRunRef.current;
+    const rendered = virtuosoWrapperRef.current?.querySelector(`[data-code="${code}"]`);
+    let seen = false;
+    if (rendered && onSeen) {
+      seen = true;
+      onSeen(rendered);
+    }
+    if (!rendered) {
+      virtuosoRef.current.scrollToIndex({
+        index: itemIndex,
+        align: "start",
+        behavior,
+      });
+    }
 
     let frames = 0;
     let lastScrollTop = null;
     let stableFrames = 0;
     const reveal = () => {
+      if (run !== scrollRunRef.current) return;
       const wrapper = virtuosoWrapperRef.current;
       const scroller = wrapper?.querySelector("[data-virtuoso-scroller]");
       const element = wrapper?.querySelector(`[data-code="${code}"]`);
-      const outOfFrames = frames++ > 60;
+      const outOfFrames = frames++ > (smooth ? 180 : 60);
       if (!scroller || !element) {
         if (!outOfFrames) requestAnimationFrame(reveal);
         return;
+      }
+      if (onSeen && !seen) {
+        seen = true;
+        onSeen(element);
       }
       stableFrames =
         scroller.scrollTop === lastScrollTop ? stableFrames + 1 : 0;
@@ -339,14 +363,15 @@ function ContentPanel({ designMode, navigatorRef }, ref) {
           scroller.scrollHeight - scroller.clientHeight
         );
         if (Math.abs(target - scroller.scrollTop) > 1) {
-          scroller.scrollTop = target;
+          scroller.scrollTo({ top: target, behavior });
           requestAnimationFrame(reveal);
           return;
         }
       }
       onArrive?.(element);
     };
-    requestAnimationFrame(reveal);
+    if (rendered && onSeen) setTimeout(() => requestAnimationFrame(reveal), SEEN_BEFORE_SCROLL_MS);
+    else requestAnimationFrame(reveal);
   };
 
   const flashSearchHit = (element) => {
@@ -364,14 +389,19 @@ function ContentPanel({ designMode, navigatorRef }, ref) {
   useImperativeHandle(
     navigatorRef,
     () => ({
-      navigateTo: ({ code, groupCode, type }) => {
+      // `select: false` only scrolls there, leaving the setup panel as it is;
+      // `smooth` glides there.
+      navigateTo: ({ code, groupCode, type }, { select = true, smooth = false } = {}) => {
         if (groupItemIndex(groupCode) === -1 || !virtuosoRef.current) {
           return;
         }
-        if (designMode == DESIGN_SURVEY_MODE.DESIGN) {
+        if (select && designMode == DESIGN_SURVEY_MODE.DESIGN) {
           dispatch(setup({ code, rules: setupOptions(type) }));
         }
-        scrollToElement(code, groupCode, flashSearchHit);
+        // Following a change: it lights up first, then the editor glides
+        // to it.
+        if (smooth) scrollToElement(code, groupCode, null, { smooth, onSeen: flashSearchHit });
+        else scrollToElement(code, groupCode, flashSearchHit);
       },
     }),
     [items, designMode, dispatch]

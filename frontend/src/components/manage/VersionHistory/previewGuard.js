@@ -39,14 +39,19 @@ const VIEWING_KEYS = [
 const ALWAYS_BLOCKED = ["beforeinput", "paste", "cut", "drop", "dragstart", "submit", "change"];
 const POINTER = ["click", "dblclick", "mousedown", "pointerdown", "touchstart"];
 
-function blocks(event) {
+// Shortcuts that only read: copy, select all, find.
+const READING_SHORTCUTS = ["c", "a", "f"];
+
+function blocks(event, live) {
   const target = event.target instanceof Element ? event.target : null;
   if (!target) return false;
   if (!target.closest(DENIED) && target.closest(ALLOWED)) return false;
   if (ALWAYS_BLOCKED.includes(event.type)) return true;
   if (event.type === "keydown") {
     // Shortcuts (copy, find) pass; an edit through one is cut at beforeinput.
-    if (event.ctrlKey || event.metaKey) return false;
+    // On the live design an editor shortcut (undo) would change the survey,
+    // so only the reading ones pass there.
+    if (event.ctrlKey || event.metaKey) return live && !READING_SHORTCUTS.includes(event.key.toLowerCase());
     if (!target.closest(EDITABLE)) return false;
     const opensList = target.closest("[role='combobox']");
     return opensList || !VIEWING_KEYS.includes(event.key);
@@ -54,16 +59,18 @@ function blocks(event) {
   return !!target.closest(CONTROLS);
 }
 
-function stop(event) {
-  if (!blocks(event)) return;
-  event.preventDefault();
-  event.stopPropagation();
-}
-
 const EVENTS = [...ALWAYS_BLOCKED, ...POINTER, "keydown"];
 
-/** Guards `node` and everything in it; returns the undo. */
-export function guardPreview(node) {
+/**
+ * Guards `node` and everything in it; returns the undo. `live` is the real
+ * design made read-only for a while, where no store ignores edits.
+ */
+export function guardPreview(node, { live = false } = {}) {
+  const stop = (event) => {
+    if (!blocks(event, live)) return;
+    event.preventDefault();
+    event.stopPropagation();
+  };
   EVENTS.forEach((type) => node.addEventListener(type, stop, true));
   return () => EVENTS.forEach((type) => node.removeEventListener(type, stop, true));
 }

@@ -251,15 +251,25 @@
   color: white;
 }
 
+/* The tint is laid over the item's own background, not in place of it, and
+   fades all the way out: nothing jumps when the class comes off. */
+@property --search-hit-tint {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: transparent;
+}
+
 .searchHit {
-  animation: searchHitFlash 2s ease-out;
+  background-image: linear-gradient(var(--search-hit-tint), var(--search-hit-tint));
+  animation: searchHitFlash 2.6s ease-in-out;
 }
 
 @keyframes searchHitFlash {
-  0% {
-    background-color: var(--new-item-flash);
+  0%,
+  25% {
+    --search-hit-tint: var(--new-item-flash);
   }
   100% {
-    background-color: var(--new-item-flash-end);
+    --search-hit-tint: transparent;
   }
 }
