@@ -17,6 +17,8 @@ export {
 } from "./utils/formatInstructions";
 export { isQuestion, isGroup, buildCodeIndex } from "./utils/pureUtils";
 export { accessibleDependencies } from "./utils/dependencies";
+export { jumpDestinations } from "./utils/jumpDestinations";
+export { buildReferences } from "./utils/buildReferences";
 export { getFieldType, hasOtherOption, isRankingType } from "./factory/fieldTypes";
 export {
   isArrayType,

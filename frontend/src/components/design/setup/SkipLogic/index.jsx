@@ -2,7 +2,7 @@ import { AddOutlined, ErrorOutlineOutlined } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import { QlarrLogicBuilderInlineWrapper } from "~/components/design/setup/logic/QlarrLogicBuilder";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
-import { jumpDestinations } from "~/utils/design/access/jumpDestinations";
+import { jumpDestinations } from "@qlarr/design-core";
 import {
   addSkipRule,
   updateSkipRule,
