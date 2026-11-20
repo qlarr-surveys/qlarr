@@ -5,6 +5,7 @@ import { DesignSnapshots0000000000004 } from './4-DesignSnapshots';
 import { DropCalculationJobs0000000000005 } from './5-DropCalculationJobs';
 import { Jobs0000000000006 } from './6-Jobs';
 import { JobFailures0000000000007 } from './7-JobFailures';
+import { ChangeDescriptions0000000000008 } from './8-ChangeDescriptions';
 
 /** Migrations applied to the database, in order. */
 export const MIGRATIONS = [
@@ -15,4 +16,5 @@ export const MIGRATIONS = [
   DropCalculationJobs0000000000005,
   Jobs0000000000006,
   JobFailures0000000000007,
+  ChangeDescriptions0000000000008,
 ];

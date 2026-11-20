@@ -52,4 +52,12 @@ export class VersionEntity {
   /** Who last saved this version; a snapshot of it credits them. */
   @Column({ name: 'last_modified_by', type: 'uuid', nullable: true })
   lastModifiedBy: string | null;
+
+  /** The described change the last save belonged to. */
+  @Column({ name: 'last_change_id', type: 'text', nullable: true })
+  lastChangeId: string | null;
+
+  /** What that change did; a snapshot of this version keeps it. */
+  @Column({ name: 'last_change', type: 'text', nullable: true })
+  lastChange: string | null;
 }

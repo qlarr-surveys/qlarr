@@ -17,6 +17,10 @@ export class DesignSnapshotEntity {
   @Column({ name: 'created_by', type: 'uuid', nullable: true })
   createdBy: string | null;
 
+  /** The latest change in the snapshotted design, when it was a described one. */
+  @Column({ type: 'text', nullable: true })
+  description: string | null;
+
   @Column({ type: 'text', select: false })
   data: string;
 }

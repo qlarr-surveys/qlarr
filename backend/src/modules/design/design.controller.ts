@@ -26,8 +26,30 @@ import {
   SnapshotListDto,
   VersionDto,
 } from './design.dto';
-import { DesignService } from './design.service';
+import { DesignChange, DesignService } from './design.service';
 import { QuotaStatusDto } from './quota.service';
+
+const MAX_CHANGE_ID = 64;
+const MAX_CHANGE_DESCRIPTION = 500;
+
+/**
+ * The described change a save belongs to (`change_id` + `change_description`),
+ * or null for a plain edit. Every save of one change sends the same pair.
+ */
+function changeFrom(id: string | undefined, description: string | undefined): DesignChange | null {
+  if (id === undefined && description === undefined) return null;
+  if (!id || id.length > MAX_CHANGE_ID) {
+    throw new BadRequestException(
+      `change_id is required with change_description, at most ${MAX_CHANGE_ID} characters`,
+    );
+  }
+  if (!description?.trim() || description.length > MAX_CHANGE_DESCRIPTION) {
+    throw new BadRequestException(
+      `change_description is required with change_id, at most ${MAX_CHANGE_DESCRIPTION} characters`,
+    );
+  }
+  return { id, description: description.trim() };
+}
 
 /**
  * Survey design endpoints (the edit-loop subset).
@@ -67,13 +89,15 @@ export class DesignController {
     @Query('version') version: string,
     @Query('sub_version') subVersion: string,
     @CurrentUser() user: CurrentUserPrincipal,
+    @Query('change_id') changeId?: string,
+    @Query('change_description') changeDescription?: string,
   ): Promise<DesignDto> {
     return this.design.setDesign(
       surveyId,
       design,
       parseInt(version, 10),
       parseInt(subVersion, 10),
-      { userId: user.userId },
+      { userId: user.userId, change: changeFrom(changeId, changeDescription) },
     );
   }
 
@@ -86,6 +110,8 @@ export class DesignController {
     @Query('version') version: string,
     @Query('sub_version') subVersion: string,
     @CurrentUser() user: CurrentUserPrincipal,
+    @Query('change_id') changeId?: string,
+    @Query('change_description') changeDescription?: string,
   ): Promise<DesignDto> {
     return this.design.changeCode(
       surveyId,
@@ -94,6 +120,7 @@ export class DesignController {
       parseInt(version, 10),
       parseInt(subVersion, 10),
       user.userId,
+      changeFrom(changeId, changeDescription),
     );
   }
 

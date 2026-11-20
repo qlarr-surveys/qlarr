@@ -18,6 +18,8 @@ export interface VersionDto {
 export interface DesignDto {
   designerInput: DesignerInput;
   versionDto: VersionDto;
+  /** The snapshot this save took, if it took one. */
+  snapshotId?: string | null;
 }
 
 /** ≈ PublishInfo — a published version marker the offline app holds. Also used
@@ -45,6 +47,7 @@ export interface SnapshotDto {
   id: string;
   savedAt: string;
   createdBy: { id: string; name: string | null } | null;
+  description: string | null;
 }
 
 export interface SnapshotListDto {

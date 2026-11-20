@@ -27,6 +27,13 @@ export interface SnapshotInput {
   survey: Record<string, unknown>;
   savedAt: string;
   userId?: string | null;
+  /** The latest change in `survey`, when it was a described one. */
+  description?: string | null;
+}
+
+export interface LoadedSnapshot {
+  survey: Record<string, unknown>;
+  description: string | null;
 }
 
 @Injectable()
@@ -48,21 +55,26 @@ export class DesignSnapshotService {
     });
   }
 
-  async create(input: SnapshotInput, manager: EntityManager = this.db.manager): Promise<void> {
+  /** Stores a snapshot and returns its id. */
+  async create(input: SnapshotInput, manager: EntityManager = this.db.manager): Promise<string> {
+    const id = randomUUID();
     await manager.query(
       `INSERT INTO design_snapshots
-         (id, survey_id, saved_at, created_by, data)
-       VALUES ($1, $2, $3, $4, $5)`,
+         (id, survey_id, saved_at, created_by, description, data)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
       [
-        randomUUID(),
+        id,
         input.surveyId,
         input.savedAt,
         input.userId ?? null,
+        input.description ?? null,
         JSON.stringify(input.survey),
       ],
     );
     // Thin out with age: every snapshot from the last hour, the newest per
     // 30-minute block for the last day, the newest per day before that.
+    // Described snapshots (one per described change) are restore points and stay;
+    // only the cap below removes them.
     await manager.query(
       `DELETE FROM design_snapshots WHERE id IN (
          SELECT id FROM (
@@ -74,7 +86,7 @@ export class DesignSnapshotService {
                       ELSE 'd' || saved_at::date
                     END
                     ORDER BY saved_at DESC, id DESC) AS rank
-             FROM design_snapshots WHERE survey_id = $1) ranked
+             FROM design_snapshots WHERE survey_id = $1 AND description IS NULL) ranked
           WHERE rank > 1)`,
       [input.surveyId, nowUtcString()],
     );
@@ -84,6 +96,7 @@ export class DesignSnapshotService {
           ORDER BY saved_at DESC, id DESC LIMIT $2)`,
       [input.surveyId, MAX_SNAPSHOTS],
     );
+    return id;
   }
 
   async list(surveyId: string): Promise<SnapshotDto[]> {
@@ -91,10 +104,11 @@ export class DesignSnapshotService {
       id: string;
       saved_at: Date | string;
       created_by: string | null;
+      description: string | null;
       first_name: string | null;
       last_name: string | null;
     }> = await this.db.manager.query(
-      `SELECT s.id, s.saved_at, s.created_by, u.first_name, u.last_name
+      `SELECT s.id, s.saved_at, s.created_by, s.description, u.first_name, u.last_name
          FROM design_snapshots s
          LEFT JOIN users u ON u.id = s.created_by
         WHERE s.survey_id = $1
@@ -110,17 +124,18 @@ export class DesignSnapshotService {
             name: [r.first_name, r.last_name].filter(Boolean).join(' ') || null,
           }
         : null,
+      description: r.description,
     }));
   }
 
-  async load(surveyId: string, id: string): Promise<Record<string, unknown> | null> {
+  async load(surveyId: string, id: string): Promise<LoadedSnapshot | null> {
     const row = await this.repo()
       .createQueryBuilder('s')
       .addSelect('s.data')
       .where('s.id = :id AND s.survey_id = :surveyId', { id, surveyId })
       .getOne();
     if (!row) return null;
-    return JSON.parse(row.data);
+    return { survey: JSON.parse(row.data), description: row.description };
   }
 
   /**

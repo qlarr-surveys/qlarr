@@ -481,6 +481,117 @@ describe('Design snapshots', () => {
     });
   });
 
+  describe('described changes', () => {
+    const saveIn = (id: string, diff: Record<string, unknown>, changeId: string, description: string) => {
+      const { version, subVersion } = lastRead.get(id)!;
+      return request(server())
+        .post(
+          `/survey/${id}/design?version=${version}&sub_version=${subVersion}&change_id=${changeId}&change_description=${encodeURIComponent(description)}`,
+        )
+        .set('Authorization', SUPER)
+        .send(diff);
+    };
+
+    // Snapshots in the same second sort by id, so look them up by id.
+    const byId = (snapshots: Array<{ id: string }>, snapshotId: string) =>
+      snapshots.find((s) => s.id === snapshotId);
+
+    const draftChange = async (id: string) =>
+      (
+        await root.query(
+          `SELECT last_change_id, last_change FROM versions WHERE survey_id = $1 ORDER BY version DESC LIMIT 1`,
+          [id],
+        )
+      )[0];
+
+    it("snapshots once per change, inside the minute, with the captured state's latest change", async () => {
+      const id = await newSurvey();
+      await save(id, await edit(id, 'Plain')).expect(201);
+      expect((await list(id)).snapshots).toHaveLength(1);
+
+      // A new change snapshots even though the last snapshot is seconds old.
+      const first = await saveIn(id, await edit(id, 'Card one'), 'c1', 'Card one').expect(201);
+      expect(first.body.snapshotId).toEqual(expect.any(String));
+      let { snapshots } = await list(id);
+      expect(snapshots).toHaveLength(2);
+      expect(byId(snapshots, first.body.snapshotId)).toMatchObject({ description: null });
+
+      // More saves of the same change take none.
+      const again = await saveIn(id, await edit(id, 'Card one, more'), 'c1', 'Card one').expect(201);
+      expect(again.body.snapshotId).toBeNull();
+      expect((await list(id)).snapshots).toHaveLength(2);
+      expect(await draftChange(id)).toEqual({ last_change_id: 'c1', last_change: 'Card one' });
+
+      // The next change's snapshot holds card one's result, described as such.
+      const second = await saveIn(id, await edit(id, 'Card two'), 'c2', 'Card two').expect(201);
+      ({ snapshots } = await list(id));
+      expect(snapshots).toHaveLength(3);
+      expect(byId(snapshots, second.body.snapshotId)).toMatchObject({ description: 'Card one' });
+
+      // Undoing card two restores card one's result and its description.
+      const restored = await request(server())
+        .post(`/survey/${id}/design/snapshots/${second.body.snapshotId}/restore?${await at(id)}`)
+        .set('Authorization', SUPER)
+        .expect(201);
+      expect(restored.body.designerInput.state.G1.content.en.label).toBe('Card one, more');
+      expect(await draftChange(id)).toEqual({ last_change_id: null, last_change: 'Card one' });
+    });
+
+    it('a plain edit clears the latest change', async () => {
+      const id = await newSurvey();
+      await saveIn(id, await edit(id, 'Card'), 'c1', 'Card').expect(201);
+      await save(id, await edit(id, 'By hand')).expect(201);
+      expect(await draftChange(id)).toEqual({ last_change_id: null, last_change: null });
+
+      const next = await saveIn(id, await edit(id, 'Next card'), 'c2', 'Next card').expect(201);
+      const { snapshots } = await list(id);
+      expect(byId(snapshots, next.body.snapshotId)).toMatchObject({ description: null });
+    });
+
+    it('change_code takes part in a change', async () => {
+      const id = await newSurvey();
+      await saveIn(id, await edit(id, 'Card'), 'c1', 'Card').expect(201);
+      const renamed = await request(server())
+        .post(`/survey/${id}/change_code?from=G2&to=G9&${await at(id)}&change_id=c2&change_description=Rename`)
+        .set('Authorization', SUPER)
+        .expect(201);
+      const { snapshots } = await list(id);
+      expect(byId(snapshots, renamed.body.snapshotId)).toMatchObject({ description: 'Card' });
+      expect(await draftChange(id)).toEqual({ last_change_id: 'c2', last_change: 'Rename' });
+    });
+
+    it('thinning keeps described snapshots', async () => {
+      const id = await newSurvey();
+      const threeHours = "(now() at time zone 'utc') - interval '3 hours'";
+      await root.query(
+        `INSERT INTO design_snapshots (id, survey_id, saved_at, description, data) VALUES
+           (gen_random_uuid(), $1, ${threeHours}, 'Card A', '{}'),
+           (gen_random_uuid(), $1, ${threeHours} + interval '1 second', 'Card B', '{}'),
+           (gen_random_uuid(), $1, ${threeHours}, NULL, '{}'),
+           (gen_random_uuid(), $1, ${threeHours} + interval '1 second', NULL, '{}')`,
+        [id],
+      );
+      await save(id, await edit(id, 'One')).expect(201);
+      const { snapshots } = await list(id);
+      const old = snapshots.slice(1).map((s: { description: string | null }) => s.description);
+      expect(old.sort()).toEqual(['Card A', 'Card B', null]);
+    });
+
+    it('needs both change_id and change_description', async () => {
+      const id = await newSurvey();
+      await request(server())
+        .post(`/survey/${id}/design?${await at(id)}&change_id=c1`)
+        .set('Authorization', SUPER)
+        .send(await edit(id, 'X'))
+        .expect(400);
+      await request(server())
+        .post(`/survey/${id}/design?${await at(id)}&change_description=Card`)
+        .set('Authorization', SUPER)
+        .send(await edit(id, 'X'))
+        .expect(400);
+    });
+  });
+
   it('keeps at most 100 per survey, evicting the oldest', async () => {
     const id = await newSurvey();
     // 100 snapshots inside the last hour (so none is thinned), the newest 90s old.

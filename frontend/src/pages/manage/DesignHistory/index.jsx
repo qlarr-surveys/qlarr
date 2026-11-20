@@ -9,6 +9,7 @@ import {
   Slide,
   ListItemButton,
   ListItemText,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
@@ -234,10 +235,34 @@ function DesignHistory() {
                 <ListItemText
                   primary={entryLabel(entry)}
                   secondary={
-                    entry.id === CURRENT_VERSION
-                      ? versionDto?.lastModified &&
-                        formatDate(versionDto.lastModified)
-                      : entry.createdBy?.name
+                    entry.id === CURRENT_VERSION ? (
+                      versionDto?.lastModified &&
+                      formatDate(versionDto.lastModified)
+                    ) : (
+                      <>
+                        {entry.description && (
+                          // The described change this snapshot's design ends with.
+                          <Tooltip
+                            title={entry.description}
+                            placement="right"
+                            enterDelay={300}
+                          >
+                            <Box
+                              component="span"
+                              sx={{
+                                display: "-webkit-box",
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: "vertical",
+                                overflow: "hidden",
+                              }}
+                            >
+                              {entry.description}
+                            </Box>
+                          </Tooltip>
+                        )}
+                        {entry.createdBy?.name}
+                      </>
+                    )
                   }
                 />
                 {entry.id === loadingId && <CircularProgress size={18} />}

@@ -53,7 +53,26 @@ import {
 export interface SaveOptions {
   sampleSurvey?: boolean;
   userId?: string | null;
+  change?: DesignChange | null;
 }
+
+/**
+ * A described change: several saves that together make one change. All of
+ * them carry the same id: the first one snapshots the design as it was before
+ * the change, the rest don't.
+ */
+export interface DesignChange {
+  id: string;
+  description: string;
+}
+
+/** What the draft records about its latest change; both null for a plain edit. */
+interface DraftChange {
+  id: string | null;
+  description: string | null;
+}
+
+const NO_CHANGE: DraftChange = { id: null, description: null };
 
 export interface ProcessedSurvey {
   survey: SurveyEntity;
@@ -106,12 +125,19 @@ export class DesignService {
       const toSave = withCleanLanguages(design);
       if (opts.sampleSurvey) {
         const output = await this.engine.validate(JSON.stringify(toSave));
-        return this.saveDraft(survey, latest, output, null, opts.userId);
+        return this.saveDraft(survey, latest, output, null, opts.userId, NO_CHANGE);
       }
       const before = await this.loadOutput(surveyId, latest.version);
       const output = await this.engine.process(toSave, before.survey);
-      const snapshot = await this.snapshotBefore(survey, latest, before);
-      return this.saveDraft(survey, latest, output, snapshot, opts.userId);
+      const snapshot = await this.snapshotBefore(survey, latest, before, opts.change);
+      return this.saveDraft(
+        survey,
+        latest,
+        output,
+        snapshot,
+        opts.userId,
+        opts.change ?? NO_CHANGE,
+      );
     });
   }
 
@@ -126,8 +152,10 @@ export class DesignService {
       const { survey, latest } = await this.editableDraft(surveyId, version, subVersion);
       const target = await this.snapshots.load(surveyId, snapshotId);
       if (!target) throw new SnapshotNotFoundException();
-      const output = await this.engine.validate(JSON.stringify(target));
-      return this.saveDraft(survey, latest, output, null, userId, (tx) =>
+      const output = await this.engine.validate(JSON.stringify(target.survey));
+      // The restored design's latest change is the one its snapshot recorded.
+      const restored: DraftChange = { id: null, description: target.description };
+      return this.saveDraft(survey, latest, output, null, userId, restored, (tx) =>
         this.snapshots.deleteFrom(surveyId, snapshotId, tx),
       );
     });
@@ -140,7 +168,7 @@ export class DesignService {
   ): Promise<{ designerInput: DesignDto['designerInput'] }> {
     const target = await this.snapshots.load(surveyId, snapshotId);
     if (!target) throw new SnapshotNotFoundException();
-    const output = await this.engine.validate(JSON.stringify(target));
+    const output = await this.engine.validate(JSON.stringify(target.survey));
     return { designerInput: this.engine.toDesignerInput(output) };
   }
 
@@ -248,18 +276,30 @@ export class DesignService {
     return { survey, latest };
   }
 
-  /** The design as it was before this save, if a snapshot is due. */
+  /**
+   * The design as it was before this save, if a snapshot is due. The first
+   * save of a described change always takes one, timed now, so it marks the
+   * moment the change started; its later saves take none. A plain edit takes
+   * one at most once a minute. Either way the snapshot keeps the description
+   * of the latest change in the design it captures.
+   */
   private async snapshotBefore(
     survey: SurveyEntity,
     latest: VersionEntity,
     before: ValidationJsonOutput,
+    change: DesignChange | null | undefined,
   ): Promise<SnapshotInput | null> {
-    if (!(await this.snapshots.isDue(survey.id))) return null;
+    if (change) {
+      if (change.id === latest.lastChangeId) return null;
+    } else if (!(await this.snapshots.isDue(survey.id))) {
+      return null;
+    }
     return {
       surveyId: survey.id,
       survey: before.survey,
-      savedAt: latest.lastModified,
+      savedAt: change ? nowUtcString() : latest.lastModified,
       userId: latest.lastModifiedBy,
+      description: latest.lastChange ?? null,
     };
   }
 
@@ -269,6 +309,7 @@ export class DesignService {
     output: ValidationJsonOutput,
     snapshot: SnapshotInput | null,
     userId: string | null | undefined,
+    draftChange: DraftChange,
     alsoInTx?: (tx: EntityManager) => Promise<void>,
   ): Promise<DesignDto> {
     const versionToSave = latest.published ? latest.version + 1 : latest.version;
@@ -286,8 +327,9 @@ export class DesignService {
 
     // Version row + survey stamp + calculations reset as one transaction.
     survey.lastModified = nowUtcString();
+    let snapshotId: string | null = null;
     const entity = await this.db.manager.transaction(async (tx) => {
-      if (snapshot) await this.snapshots.create(snapshot, tx);
+      if (snapshot) snapshotId = await this.snapshots.create(snapshot, tx);
       if (alsoInTx) await alsoInTx(tx);
       const e = await this.versions.save(
         {
@@ -299,6 +341,8 @@ export class DesignService {
           schema: output.schema,
           lastModified: nowUtcString(),
           lastModifiedBy: userId ?? null,
+          lastChangeId: draftChange.id,
+          lastChange: draftChange.description,
         },
         tx,
       );
@@ -310,6 +354,7 @@ export class DesignService {
     return {
       designerInput: this.engine.toDesignerInput(output),
       versionDto: this.toVersionDto(entity, survey.status),
+      snapshotId,
     };
   }
 
@@ -367,6 +412,7 @@ export class DesignService {
     version: number,
     subVersion: number,
     userId: string | null = null,
+    change: DesignChange | null = null,
   ): Promise<DesignDto> {
     return this.exclusive(surveyId, async () => {
       const { survey, latest } = await this.editableDraft(surveyId, version, subVersion);
@@ -377,8 +423,8 @@ export class DesignService {
       );
       const output = await this.engine.changeCode(savedDesign, from, to);
       const before = JSON.parse(savedDesign) as ValidationJsonOutput;
-      const snapshot = await this.snapshotBefore(survey, latest, before);
-      return this.saveDraft(survey, latest, output, snapshot, userId, (tx) =>
+      const snapshot = await this.snapshotBefore(survey, latest, before, change);
+      return this.saveDraft(survey, latest, output, snapshot, userId, change ?? NO_CHANGE, (tx) =>
         renameCodeInCalculations(tx, surveyId, from, to),
       );
     });
