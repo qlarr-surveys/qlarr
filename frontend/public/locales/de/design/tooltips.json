@@ -2,6 +2,8 @@
   "has_relevance": "Hat eine Sichtbarkeitsbedingung",
   "is_disabled": "Ist deaktiviert",
   "has_validation": "Hat eine Validierung",
+  "is_repeatable": "Ist wiederholbar",
+  "is_carried": "Übernimmt Optionen aus einer anderen Frage",
   "is_randomized": "Ist Teil einer gültigen Zufallsgruppe (innerhalb des übergeordneten Elements)",
   "is_prioritized": "Ist Teil einer gültigen Prioritätsgruppe (innerhalb des übergeordneten Elements)",
   "has_skip": "Hat eine aktive Überspring-Logik",
