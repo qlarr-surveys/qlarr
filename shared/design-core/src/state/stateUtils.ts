@@ -113,9 +113,16 @@ function collectExistingGroupCodes(groups) {
   return ids;
 }
 
+// The part of a preferred code after its Q/G prefix, lowercased; undefined if
+// it isn't a valid code body ([a-z0-9_]+), so the caller falls back to a random id.
+const preferredBare = (preferredCode, prefix) => {
+  const bare = preferredCode?.replace(prefix, "").toLowerCase();
+  return bare && /^[a-z0-9_]+$/.test(bare) ? bare : undefined;
+};
+
 export const nextGroupId = (groups, preferredCode) => {
   const existing = collectExistingGroupCodes(groups);
-  const bare = preferredCode?.replace(/^G/, "");
+  const bare = preferredBare(preferredCode, /^G/);
   if (bare && !existing.has("G" + bare)) {
     return bare;
   }
@@ -160,7 +167,7 @@ function generateId(existing) {
 
 export const nextQuestionId = (state, groups, preferredCode) => {
   const existing = collectExistingIds(state, groups);
-  const bare = preferredCode?.replace(/^Q/, "");
+  const bare = preferredBare(preferredCode, /^Q/);
   if (bare && !existing.has("Q" + bare)) {
     return bare;
   }

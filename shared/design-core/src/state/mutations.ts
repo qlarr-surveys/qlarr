@@ -1464,6 +1464,7 @@ export function addComponent(state, payload) {
       destination: destinationGroupCode,
       questionType,
       toIndex,
+      code,
     });
   }
   state.index = buildCodeIndex(state);

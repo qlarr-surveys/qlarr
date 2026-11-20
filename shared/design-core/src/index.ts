@@ -34,6 +34,10 @@ export {
 } from "./constants/design";
 export { STRIP_TAGS_PATTERN } from "./constants/instruction";
 export { DESIGN_SURVEY_MODE } from "./constants/designMode";
+// Survey theme: defaults, font/size choices, and color/backdrop helpers (shared
+// with the AI theme agent).
+export * from "./constants/surveyTheme";
+export * from "./utils/surveyTheme";
 export {
   MAX_FILE_SIZE_BYTES,
   MAX_VIDEO_FILE_SIZE_BYTES,
