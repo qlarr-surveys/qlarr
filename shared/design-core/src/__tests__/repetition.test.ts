@@ -359,3 +359,39 @@ describe("buildRepeatInfo (pure)", () => {
     ).toBeNull();
   });
 });
+
+describe("repetition — constant", () => {
+  let state;
+  let target;
+  beforeEach(() => {
+    state = freshState();
+    target = addQuestion(state, "text", "rep");
+  });
+
+  it("derives range as 1..count with an always-true, token-bearing relevance", () => {
+    enableRepetition(state, { code: target });
+    updateRepetitionSource(state, { code: target, kind: "constant", count: 4 });
+
+    const info = state[target].repeatInfo;
+    expect(info.range).toEqual(["1", "2", "3", "4"]);
+    expect(info.relevanceInstruction).toBe(`${REPEAT_TOKEN_PLACEHOLDER} > 0`);
+  });
+
+  it("defaults count to 2 and clamps it to [2, 12]", () => {
+    enableRepetition(state, { code: target });
+    updateRepetitionSource(state, { code: target, kind: "constant" });
+    expect(state[target].repeatSource.count).toBe(2);
+    expect(state[target].repeatInfo.range).toHaveLength(2);
+
+    updateRepetitionSource(state, { code: target, count: 1 });
+    expect(state[target].repeatSource.count).toBe(2);
+    updateRepetitionSource(state, { code: target, count: 50 });
+    expect(state[target].repeatSource.count).toBe(REPEAT_NUMBER_MAX);
+  });
+
+  it("enables directly as constant", () => {
+    enableRepetition(state, { code: target, kind: "constant", count: 3 });
+    expect(state[target].repeatSource.kind).toBe("constant");
+    expect(state[target].repeatInfo.range).toEqual(["1", "2", "3"]);
+  });
+});

@@ -7,7 +7,9 @@ import {
   CornerDownRight,
   Eye,
   EyeOff,
+  Forward,
   GitBranch,
+  Repeat,
   ShieldCheck,
   Shuffle,
   Trash2,
@@ -101,6 +103,35 @@ function ActionToolbar({ code, isGroup, parentCode, showActions }) {
         code,
         rules: setupOptions(type),
         highlighted: "validation",
+      })
+    );
+  };
+
+  // repeatInfo is only derived once the config can actually repeat (has a source).
+  const isRepeatable = useSelector(
+    (state) => state.designState[code]?.repeatInfo?.type === "repeatable"
+  );
+
+  const expandRepetition = () => {
+    dispatch(
+      setup({
+        code,
+        rules: setupOptions(type),
+        highlighted: "repetition",
+      })
+    );
+  };
+
+  const isCarried = useSelector(
+    (state) => !isGroup && !!state.designState[code]?.carryForward
+  );
+
+  const expandCarryForward = () => {
+    dispatch(
+      setup({
+        code,
+        rules: setupOptions(type),
+        highlighted: "carry_forward",
       })
     );
   };
@@ -206,6 +237,26 @@ function ActionToolbar({ code, isGroup, parentCode, showActions }) {
             onClick={() => expandValidation()}
           >
             <ShieldCheck size={20} strokeWidth={ICON_STROKE} />
+          </IconButton>
+        </CustomTooltip>
+      )}
+      {isRepeatable && (
+        <CustomTooltip title={tTooltips("is_repeatable")} showIcon={false}>
+          <IconButton
+            className={styles.statusIcon}
+            onClick={() => expandRepetition()}
+          >
+            <Repeat size={20} strokeWidth={ICON_STROKE} />
+          </IconButton>
+        </CustomTooltip>
+      )}
+      {isCarried && (
+        <CustomTooltip title={tTooltips("is_carried")} showIcon={false}>
+          <IconButton
+            className={styles.statusIcon}
+            onClick={() => expandCarryForward()}
+          >
+            <Forward size={20} strokeWidth={ICON_STROKE} />
           </IconButton>
         </CustomTooltip>
       )}

@@ -27,6 +27,8 @@
   "has_relevance": "Heeft Tonen/Verbergen Voorwaarde",
   "has_skip": "Heeft actieve Overslaan Logica",
   "has_validation": "Heeft Validatie",
+  "is_repeatable": "Is Herhaalbaar",
+  "is_carried": "Neemt Opties Over uit een Andere Vraag",
   "hide_text": "Stel in of je de tekst wilt verbergen",
   "icon_mcq": "Laat gebruikers meerdere pictogrammen selecteren",
   "icon_scq": "Laat gebruikers één optie selecteren met pictogrammen",

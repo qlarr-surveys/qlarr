@@ -47,14 +47,14 @@ const enclosingRepeatSource = (componentIndices, code, state) => {
 };
 
 // "Repeat label" reference; engine substitutes $repeat_token per copy.
-//   number -> iteration number; mcq -> picked option's label
+//   number / constant -> iteration number; mcq -> picked option's label
 //   (carryOther: the "other" copy shows the write-in, hence the branch).
 const buildRepeatLabelReference = (repeatSource) => {
   if (!repeatSource || !repeatSource.kind) return null;
   const { kind, sourceCode } = repeatSource;
 
   let instruction;
-  if (kind === "number") {
+  if (kind === "number" || kind === "constant") {
     instruction = REPEAT_TOKEN_PLACEHOLDER;
   } else if (kind === "mcq") {
     if (!sourceCode) return null;

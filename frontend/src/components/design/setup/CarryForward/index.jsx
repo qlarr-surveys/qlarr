@@ -81,6 +81,7 @@ function AxisConfig({ code, axis, axisLabel, sources, hasOtherFor, t }) {
                 { value: "selected", label: t("carry_mode_selected") },
                 { value: "unselected", label: t("carry_mode_unselected") },
               ]}
+              columns={2}
               value={mode}
               onChange={onMode}
             />
