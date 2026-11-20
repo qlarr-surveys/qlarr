@@ -1,5 +1,5 @@
 // @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
-import { isGroup, isQuestion } from "./pureUtils";
+import { isGroup, isQuestion, repeatedCopyScope } from "./pureUtils";
 
 export const accessibleDependencies = (componentIndices, code) => {
   let dependencies = [];
@@ -30,21 +30,21 @@ export const accessibleDependencies = (componentIndices, code) => {
 
 // Repetition rule: a reference from `source` to `target` is allowed iff the
 // target is global (`repetitionScope == null`), shares the source's scope, or is
-// a repeated copy of a different repeatable than the source's
-// (`repetitionSource`). So: inside -> out is fine; a repeatable template is never
+// a repeated copy of a different repeatable than the source's (the repeat code
+// in the copy's `_N` scope). So: inside -> out is fine; a repeatable template is never
 // reachable from outside; copies of the same repeatable can't reach each other.
 // A no-op for non-repeating surveys (all scopes null).
 const filterByRepetitionScope = (componentIndices, source, dependencies) => {
   const sourceScope = source.repetitionScope ?? null;
-  const sourceOrigin = source.repetitionSource ?? null;
+  const sourceOrigin = repeatedCopyScope(source)?.source ?? sourceScope;
   return dependencies.filter((depCode) => {
     const target = componentIndices.find((el) => el.code === depCode);
     const targetScope = target?.repetitionScope ?? null;
+    const targetCopy = repeatedCopyScope(target);
     return (
       targetScope === null ||
       targetScope === sourceScope ||
-      (target.repetitionType === "REPEATED" &&
-        (target.repetitionSource ?? null) !== sourceOrigin)
+      (targetCopy !== null && targetCopy.source !== sourceOrigin)
     );
   });
 };

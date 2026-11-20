@@ -238,10 +238,10 @@ const validatedWithCopies = () => ({
     componentIndexList: [
       { code: "G1", parent: "Survey", minIndex: 0, maxIndex: 2, children: ["Qbrands"] },
       { code: "Qbrands", parent: "G1", minIndex: 1, maxIndex: 1 },
-      { code: "Grep", parent: "Survey", minIndex: 3, maxIndex: 4, children: ["Qx"], repetitionScope: "Grep", repetitionType: "REPEATABLE", repetitionSource: "Grep" },
-      { code: "Qx", parent: "Grep", minIndex: 4, maxIndex: 4, repetitionScope: "Grep", repetitionType: "REPEATABLE", repetitionSource: "Grep" },
-      { code: "Grep_1", parent: "Survey", minIndex: 5, maxIndex: 6, children: ["Qx_1"], repetitionScope: "Grep_1", repetitionType: "REPEATED", repetitionSource: "Grep" },
-      { code: "Qx_1", parent: "Grep_1", minIndex: 6, maxIndex: 6, repetitionScope: "Grep_1", repetitionType: "REPEATED", repetitionSource: "Grep" },
+      { code: "Grep", parent: "Survey", minIndex: 3, maxIndex: 4, children: ["Qx"], repetitionScope: "Grep", repetitionType: "REPEATABLE" },
+      { code: "Qx", parent: "Grep", minIndex: 4, maxIndex: 4, repetitionScope: "Grep", repetitionType: "REPEATABLE" },
+      { code: "Grep_1", parent: "Survey", minIndex: 5, maxIndex: 6, children: ["Qx_1"], repetitionScope: "Grep_1", repetitionType: "REPEATED" },
+      { code: "Qx_1", parent: "Grep_1", minIndex: 6, maxIndex: 6, repetitionScope: "Grep_1", repetitionType: "REPEATED" },
       { code: "G2", parent: "Survey", minIndex: 7, maxIndex: 8, children: ["Qafter"] },
       { code: "Qafter", parent: "G2", minIndex: 8, maxIndex: 8 },
     ],
@@ -293,14 +293,14 @@ describe("accessibleDependencies — repetition scope", () => {
   });
 
   const twoRepetitions = () => [
-    { code: "Ga_1", parent: "Survey", minIndex: 0, maxIndex: 0, children: ["Qa_1"], repetitionScope: "Ga_1", repetitionType: "REPEATED", repetitionSource: "Ga" },
-    { code: "Qa_1", parent: "Ga_1", minIndex: 0, maxIndex: 0, repetitionScope: "Ga_1", repetitionType: "REPEATED", repetitionSource: "Ga" },
-    { code: "Ga_2", parent: "Survey", minIndex: 1, maxIndex: 1, children: ["Qa_2"], repetitionScope: "Ga_2", repetitionType: "REPEATED", repetitionSource: "Ga" },
-    { code: "Qa_2", parent: "Ga_2", minIndex: 0, maxIndex: 0, repetitionScope: "Ga_2", repetitionType: "REPEATED", repetitionSource: "Ga" },
-    { code: "Gb", parent: "Survey", minIndex: 2, maxIndex: 2, children: ["Qb"], repetitionScope: "Gb", repetitionType: "REPEATABLE", repetitionSource: "Gb" },
-    { code: "Qb", parent: "Gb", minIndex: 0, maxIndex: 0, repetitionScope: "Gb", repetitionType: "REPEATABLE", repetitionSource: "Gb" },
-    { code: "Gb_1", parent: "Survey", minIndex: 3, maxIndex: 3, children: ["Qb_1"], repetitionScope: "Gb_1", repetitionType: "REPEATED", repetitionSource: "Gb" },
-    { code: "Qb_1", parent: "Gb_1", minIndex: 0, maxIndex: 0, repetitionScope: "Gb_1", repetitionType: "REPEATED", repetitionSource: "Gb" },
+    { code: "Ga_1", parent: "Survey", minIndex: 0, maxIndex: 0, children: ["Qa_1"], repetitionScope: "Ga_1", repetitionType: "REPEATED" },
+    { code: "Qa_1", parent: "Ga_1", minIndex: 0, maxIndex: 0, repetitionScope: "Ga_1", repetitionType: "REPEATED" },
+    { code: "Ga_2", parent: "Survey", minIndex: 1, maxIndex: 1, children: ["Qa_2"], repetitionScope: "Ga_2", repetitionType: "REPEATED" },
+    { code: "Qa_2", parent: "Ga_2", minIndex: 0, maxIndex: 0, repetitionScope: "Ga_2", repetitionType: "REPEATED" },
+    { code: "Gb", parent: "Survey", minIndex: 2, maxIndex: 2, children: ["Qb"], repetitionScope: "Gb", repetitionType: "REPEATABLE" },
+    { code: "Qb", parent: "Gb", minIndex: 0, maxIndex: 0, repetitionScope: "Gb", repetitionType: "REPEATABLE" },
+    { code: "Gb_1", parent: "Survey", minIndex: 3, maxIndex: 3, children: ["Qb_1"], repetitionScope: "Gb_1", repetitionType: "REPEATED" },
+    { code: "Qb_1", parent: "Gb_1", minIndex: 0, maxIndex: 0, repetitionScope: "Gb_1", repetitionType: "REPEATED" },
   ];
 
   it("blocks a copy -> another copy of the same repeatable", () => {

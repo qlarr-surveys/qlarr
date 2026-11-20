@@ -125,3 +125,11 @@ export const firstIndexInArray = (array, func) => {
   }
   return -1;
 };
+
+// A repeated copy's scope is its repeat's code plus `_N` (Grep_2, Qline_3):
+// returns that repeat code and N, or null for anything that isn't a copy.
+export const repeatedCopyScope = (entry) => {
+  if (entry?.repetitionType !== "REPEATED") return null;
+  const match = /^(.+)_(\d+)$/.exec(entry.repetitionScope ?? "");
+  return match ? { source: match[1], number: match[2] } : null;
+};

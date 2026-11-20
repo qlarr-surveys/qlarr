@@ -1623,7 +1623,7 @@ const reorderQuestions = (state, survey, payload) => {
 const newQuestion = (state, payload) => {
   const survey = state.Survey;
   // A caller may name the question (the part after Q); the editor doesn't.
-  let questionId = payload.code ?? nextQuestionId(state, survey.children);
+  let questionId = nextQuestionId(state, survey.children, payload.code);
   const questionObject: any = createQuestion(
     payload.questionType,
     questionId,

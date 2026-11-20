@@ -11,6 +11,7 @@ import {
   isQuestion,
   stripTags,
   buildCodeIndex,
+  repeatedCopyScope,
 } from '../utils/pureUtils';
 
 export const DEFAULT_FIELD_LABELS = {
@@ -123,16 +124,13 @@ export function buildLogicFields({
 
 // A repeat copy's template and repeat number: Qline_user_2 → Qline_user, 2.
 function copyOf(entry) {
-  if (entry?.repetitionType !== 'REPEATED' || !entry.repetitionSource) {
-    return null;
-  }
-  const suffix = entry.repetitionScope.slice(entry.repetitionSource.length);
-  if (!suffix || !entry.code.endsWith(suffix)) {
+  const copy = repeatedCopyScope(entry);
+  if (!copy || !entry.code.endsWith(`_${copy.number}`)) {
     return null;
   }
   return {
-    template: entry.code.slice(0, -suffix.length),
-    number: suffix.replace(/^_/, ''),
+    template: entry.code.slice(0, -(copy.number.length + 1)),
+    number: copy.number,
   };
 }
 

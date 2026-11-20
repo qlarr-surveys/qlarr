@@ -115,8 +115,9 @@ function collectExistingGroupCodes(groups) {
 
 export const nextGroupId = (groups, preferredCode) => {
   const existing = collectExistingGroupCodes(groups);
-  if (preferredCode && !existing.has(preferredCode)) {
-    return preferredCode.replace(/^G/, "");
+  const bare = preferredCode?.replace(/^G/, "");
+  if (bare && !existing.has("G" + bare)) {
+    return bare;
   }
   return generateId(existing);
 };
@@ -159,8 +160,9 @@ function generateId(existing) {
 
 export const nextQuestionId = (state, groups, preferredCode) => {
   const existing = collectExistingIds(state, groups);
-  if (preferredCode && !existing.has(preferredCode)) {
-    return preferredCode.replace(/^Q/, "");
+  const bare = preferredCode?.replace(/^Q/, "");
+  if (bare && !existing.has("Q" + bare)) {
+    return bare;
   }
   return generateId(existing);
 };
