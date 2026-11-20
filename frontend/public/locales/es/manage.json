@@ -141,6 +141,7 @@
   },
   "email_required": "El Correo Electrónico es Requerido",
   "error_title": "Error",
+  "reload": "Recargar",
   "error": {
     "invalid_email": "Correo Electrónico Inválido",
     "invalid_first_name": "Nombre Inválido",
@@ -275,7 +276,7 @@
     "wrong_credentials": "Correo electrónico o contraseña incorrectos",
     "wrong_password": "Contraseña incorrecta",
     "component_deleted": "No se pueden eliminar elementos de la encuesta después de que la encuesta fue publicada",
-    "design_out_of_sync": "Alguien más está editando el diseño de la encuesta",
+    "design_out_of_sync": "El diseño se cambió en otro lugar. Recarga para obtener la última versión.",
     "wrong_reset_token": "Este Token de Restablecimiento es incorrecto.",
     "wrong_confirmation_token": "Este Token de Confirmación es incorrecto, Por favor Regístrate Una Vez Más",
     "survey_quota": "Lo sentimos, esta encuesta ya no está aceptando respuestas.",

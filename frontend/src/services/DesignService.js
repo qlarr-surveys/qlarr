@@ -71,11 +71,11 @@ class DesignService extends BaseService {
     return response.data;
   }
 
-  async changeCode(from, to, surveyId = null) {
+  async changeCode(from, to, version, subVersion, surveyId = null) {
     const id = surveyId || sessionStorage.getItem("surveyId");
     const response = await this.handleRequest(() =>
       authenticatedApi.post(`/survey/${id}/change_code`, null, {
-        params: { from, to },
+        params: { from, to, version, sub_version: subVersion },
       })
     );
     return response.data;

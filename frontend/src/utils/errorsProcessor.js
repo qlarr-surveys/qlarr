@@ -15,7 +15,7 @@ export const PROCESSED_ERRORS = {
   WRONG_RESET_TOKEN: { name: "wrong_reset_token", handleGlobally: false },
   COMPONENT_DELETED: { name: "component_deleted", handleGlobally: false },
   CODE_CHANGED_AFTER_PUBLISH: { name: "code_changed_after_publish", handleGlobally: false },
-  DESIGN_OUT_OF_SYNC: { name: "design_out_of_sync", handleGlobally: false },
+  DESIGN_OUT_OF_SYNC: { name: "design_out_of_sync", handleGlobally: true },
   WRONG_CREDENTIALS: { name: "wrong_credentials", handleGlobally: false },
   WRONG_PIN: { name: "code_invalid", handleGlobally: false },
   DESIGN_NOT_AVAILABLE_EXCEPTION: {

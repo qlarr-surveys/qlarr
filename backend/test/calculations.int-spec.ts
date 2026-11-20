@@ -104,10 +104,24 @@ describe('Calculations', () => {
       .set('Authorization', SUPER)
       .send({ calculations, revision });
 
-  const rename = (id: string, from: string, to: string) =>
-    request(server())
-      .post(`/survey/${id}/change_code?from=${from}&to=${to}`)
+  /** The design's current version and sub-version, as the editor holds them. */
+  const versionOf = async (id: string) =>
+    (await app.get(DesignService).getDesign(id)).versionDto;
+
+  /** A design save with no changes, from the latest version. */
+  const touchDesign = async (id: string) => {
+    const { version, subVersion } = await versionOf(id);
+    return app.get(DesignService).setDesign(id, {}, version, subVersion);
+  };
+
+  const rename = async (id: string, from: string, to: string) => {
+    const { version, subVersion } = await versionOf(id);
+    return request(server())
+      .post(
+        `/survey/${id}/change_code?from=${from}&to=${to}&version=${version}&sub_version=${subVersion}`,
+      )
       .set('Authorization', SUPER);
+  };
 
   const compute = (id: string) =>
     request(server()).post(`${base(id)}/compute`).set('Authorization', SUPER);
@@ -358,7 +372,7 @@ describe('Calculations', () => {
       await compute(id).expect(200);
       await settle(id);
 
-      await app.get(DesignService).setDesign(id, {}, 1);
+      await touchDesign(id);
 
       expect(await calculationsOf(r1)).toEqual([]);
       expect(await state(id)).toMatchObject({ status: 'none', uncomputedCount: 3 });
@@ -389,7 +403,7 @@ describe('Calculations', () => {
       const similar = { code: 'similar', label: 'Similar', expression: 'Q880htpx.value' };
       await save(id, [DOUBLE, similar], 0).expect(200);
 
-      await rename(id, 'Q880htp', 'Q880new').expect(201);
+      expect((await rename(id, 'Q880htp', 'Q880new')).status).toBe(201);
 
       const after = await state(id);
       expect(after.calculations[0]).toMatchObject({
@@ -405,7 +419,7 @@ describe('Calculations', () => {
       const { id } = await createSurvey();
       await save(id, [DOUBLE], 0).expect(200);
 
-      await rename(id, 'G2', 'G9').expect(201);
+      expect((await rename(id, 'G2', 'G9')).status).toBe(201);
 
       expect(await state(id)).toMatchObject({
         revision: 1,
@@ -416,10 +430,9 @@ describe('Calculations', () => {
     it('a design change marks every calculation out of date, once, keeping its other errors', async () => {
       const { id } = await createSurvey();
       await save(id, [DOUBLE, BAD_REF], 0).expect(200);
-      const design = app.get(DesignService);
 
-      await design.setDesign(id, {}, 1);
-      await design.setDesign(id, {}, 2);
+      await touchDesign(id);
+      await touchDesign(id);
 
       const { calculations, revision } = await state(id);
       expect(calculations[0].errors).toEqual([OUT_OF_DATE]);
@@ -433,7 +446,7 @@ describe('Calculations', () => {
     it('out of date calculations hide from responses, and a Save brings them back', async () => {
       const { id, r1 } = await createSurvey();
       await save(id, [DOUBLE], 0).expect(200);
-      await app.get(DesignService).setDesign(id, {}, 1);
+      await touchDesign(id);
       expect(await calculationsOf(r1)).toEqual([]);
 
       await save(id, [DOUBLE], 1).expect(200);
@@ -445,7 +458,7 @@ describe('Calculations', () => {
     it('Test runs nothing on out of date calculations', async () => {
       const { id } = await createSurvey();
       await save(id, [DOUBLE], 0).expect(200);
-      await app.get(DesignService).setDesign(id, {}, 1);
+      await touchDesign(id);
 
       const { body } = await request(server())
         .post(`${base(id)}/test`)
@@ -457,7 +470,7 @@ describe('Calculations', () => {
     it('Compute runs nothing on out of date calculations', async () => {
       const { id, r1 } = await createSurvey();
       await save(id, [DOUBLE], 0).expect(200);
-      await app.get(DesignService).setDesign(id, {}, 1);
+      await touchDesign(id);
 
       await compute(id).expect(200);
 
@@ -470,7 +483,7 @@ describe('Calculations', () => {
       const { id } = await createSurvey();
       await save(id, [DOUBLE], 0).expect(200);
       const design = app.get(DesignService);
-      await design.setDesign(id, {}, 1);
+      await touchDesign(id);
       await save(id, [DOUBLE], 1).expect(200);
 
       await design.restorePublished(id, 2, 1);
@@ -481,7 +494,7 @@ describe('Calculations', () => {
     it('discarding unpublished changes deletes the results', async () => {
       const { id, r1 } = await createSurvey();
       const design = app.get(DesignService);
-      await design.setDesign(id, {}, 1);
+      await touchDesign(id);
       await save(id, [DOUBLE], 0).expect(200);
       await compute(id).expect(200);
       await settle(id);
@@ -519,7 +532,7 @@ describe('Calculations', () => {
       await save(id, [DOUBLE], 0).expect(200);
       await runningJob(id);
 
-      await app.get(DesignService).setDesign(id, {}, 1);
+      await touchDesign(id);
 
       expect(await lastJob(id)).toBe('cancelled');
     });

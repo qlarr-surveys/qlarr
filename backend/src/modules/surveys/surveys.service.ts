@@ -110,6 +110,7 @@ export class SurveysService {
         entity.id,
         JSON.parse(this.engine.newSurvey(req.name)) as Record<string, unknown>,
         1,
+        1,
         { sampleSurvey: true },
       );
     } catch (err) {

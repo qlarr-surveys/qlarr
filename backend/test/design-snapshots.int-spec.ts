@@ -65,15 +65,25 @@ describe('Design snapshots', () => {
     return id;
   };
 
-  const getDesign = async (id: string) =>
-    (await request(server()).get(`/survey/${id}/design`).set('Authorization', SUPER).expect(200))
-      .body;
+  // The version each survey's design was last read at: a client saves from
+  // the design it holds.
+  const lastRead = new Map<string, { version: number; subVersion: number }>();
 
-  const save = (id: string, diff: Record<string, unknown>, version = 1) =>
-    request(server())
-      .post(`/survey/${id}/design?version=${version}`)
+  const getDesign = async (id: string) => {
+    const design = (
+      await request(server()).get(`/survey/${id}/design`).set('Authorization', SUPER).expect(200)
+    ).body;
+    lastRead.set(id, design.versionDto);
+    return design;
+  };
+
+  const save = (id: string, diff: Record<string, unknown>) => {
+    const { version, subVersion } = lastRead.get(id)!;
+    return request(server())
+      .post(`/survey/${id}/design?version=${version}&sub_version=${subVersion}`)
       .set('Authorization', SUPER)
       .send(diff);
+  };
 
   const edit = async (id: string, label: string) => {
     const { designerInput } = await getDesign(id);
@@ -202,10 +212,11 @@ describe('Design snapshots', () => {
       await age(id, '1 minute');
 
       const other = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+      const diff = await edit(id, 'By other');
       await request(server())
-        .post(`/survey/${id}/design?version=1`)
+        .post(`/survey/${id}/design?${await at(id)}`)
         .set('Authorization', bearer({ userId: other, authorities: ['super_admin'] }))
-        .send(await edit(id, 'By other'))
+        .send(diff)
         .expect(201);
 
       const { snapshots } = await list(id);
@@ -219,11 +230,11 @@ describe('Design snapshots', () => {
     it('a rename takes one too, at most once a minute', async () => {
       const id = await newSurvey();
       await request(server())
-        .post(`/survey/${id}/change_code?from=G2&to=G9`)
+        .post(`/survey/${id}/change_code?from=G2&to=G9&${await at(id)}`)
         .set('Authorization', SUPER)
         .expect(201);
       await request(server())
-        .post(`/survey/${id}/change_code?from=G9&to=G8`)
+        .post(`/survey/${id}/change_code?from=G9&to=G8&${await at(id)}`)
         .set('Authorization', SUPER)
         .expect(201);
       expect((await list(id)).snapshots).toHaveLength(1);
@@ -402,7 +413,7 @@ describe('Design snapshots', () => {
       const published = await getDesign(id);
 
       await save(id, await removeQuestion(id, 'Q293sqi')).expect(201);
-      await save(id, await removeQuestion(id, 'Q510beg'), 2).expect(201);
+      await save(id, await removeQuestion(id, 'Q510beg')).expect(201);
       expect((await list(id)).snapshots).toHaveLength(1);
       const res = await request(server())
         .post(`/survey/${id}/design/restore_published?${await at(id)}`)
@@ -444,7 +455,7 @@ describe('Design snapshots', () => {
       await publish(id);
       await save(id, await removeQuestion(id, 'Q293sqi')).expect(201);
       const stale = await at(id);
-      await save(id, await edit(id, 'Other tab'), 2).expect(201);
+      await save(id, await edit(id, 'Other tab')).expect(201);
 
       const res = await request(server())
         .post(`/survey/${id}/design/restore_published?${stale}`)
@@ -487,7 +498,7 @@ describe('Design snapshots', () => {
       [id],
     );
     await request(server())
-      .post(`/survey/${id}/change_code?from=G2&to=G9`)
+      .post(`/survey/${id}/change_code?from=G2&to=G9&${await at(id)}`)
       .set('Authorization', SUPER)
       .expect(201);
 

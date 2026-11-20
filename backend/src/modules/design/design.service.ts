@@ -98,18 +98,21 @@ export class DesignService {
     surveyId: string,
     design: Record<string, unknown>,
     version: number,
+    subVersion: number,
     opts: SaveOptions = {},
   ): Promise<DesignDto> {
-    const { survey, latest } = await this.editableDraft(surveyId, version);
-    const toSave = withCleanLanguages(design);
-    if (opts.sampleSurvey) {
-      const output = await this.engine.validate(JSON.stringify(toSave));
-      return this.saveDraft(survey, latest, output, null, opts.userId);
-    }
-    const before = await this.loadOutput(surveyId, latest.version);
-    const output = await this.engine.process(toSave, before.survey);
-    const snapshot = await this.snapshotBefore(survey, latest, before);
-    return this.saveDraft(survey, latest, output, snapshot, opts.userId);
+    return this.exclusive(surveyId, async () => {
+      const { survey, latest } = await this.editableDraft(surveyId, version, subVersion);
+      const toSave = withCleanLanguages(design);
+      if (opts.sampleSurvey) {
+        const output = await this.engine.validate(JSON.stringify(toSave));
+        return this.saveDraft(survey, latest, output, null, opts.userId);
+      }
+      const before = await this.loadOutput(surveyId, latest.version);
+      const output = await this.engine.process(toSave, before.survey);
+      const snapshot = await this.snapshotBefore(survey, latest, before);
+      return this.saveDraft(survey, latest, output, snapshot, opts.userId);
+    });
   }
 
   async restoreSnapshot(
@@ -119,13 +122,15 @@ export class DesignService {
     subVersion: number,
     userId: string | null = null,
   ): Promise<DesignDto> {
-    const { survey, latest } = await this.editableDraft(surveyId, version, subVersion);
-    const target = await this.snapshots.load(surveyId, snapshotId);
-    if (!target) throw new SnapshotNotFoundException();
-    const output = await this.engine.validate(JSON.stringify(target));
-    return this.saveDraft(survey, latest, output, null, userId, (tx) =>
-      this.snapshots.deleteFrom(surveyId, snapshotId, tx),
-    );
+    return this.exclusive(surveyId, async () => {
+      const { survey, latest } = await this.editableDraft(surveyId, version, subVersion);
+      const target = await this.snapshots.load(surveyId, snapshotId);
+      if (!target) throw new SnapshotNotFoundException();
+      const output = await this.engine.validate(JSON.stringify(target));
+      return this.saveDraft(survey, latest, output, null, userId, (tx) =>
+        this.snapshots.deleteFrom(surveyId, snapshotId, tx),
+      );
+    });
   }
 
   /** A snapshot as the designer loads it, for a read-only preview. Writes nothing. */
@@ -144,33 +149,35 @@ export class DesignService {
     version: number,
     subVersion: number,
   ): Promise<DesignDto> {
-    const { survey, latest } = await this.editableDraft(surveyId, version, subVersion);
-    const published = await this.versions.findLatestPublished(surveyId);
-    if (!published || latest.published) throw new NothingToRevertException();
-    const output = await this.loadOutput(surveyId, published.version);
+    return this.exclusive(surveyId, async () => {
+      const { survey, latest } = await this.editableDraft(surveyId, version, subVersion);
+      const published = await this.versions.findLatestPublished(surveyId);
+      if (!published || latest.published) throw new NothingToRevertException();
+      const output = await this.loadOutput(surveyId, published.version);
 
-    // No undo: every restore point is newer than the published version (publish
-    // clears the history), so they all go with the draft.
-    survey.lastModified = nowUtcString();
-    await this.db.manager.transaction(async (tx) => {
-      // First: it locks the calculations row before the responses, the order
-      // a Compute's results write takes them in, so the two can't deadlock.
-      await this.jobs.onDesignChange(tx, surveyId);
-      await this.snapshots.deleteAll(surveyId, tx);
-      await this.versions.repointResponses(surveyId, latest.version, published.version, tx);
-      await this.versions.deleteVersion(surveyId, latest.version, tx);
-      await tx.getRepository(SurveyEntity).save(survey);
+      // No undo: every restore point is newer than the published version (publish
+      // clears the history), so they all go with the draft.
+      survey.lastModified = nowUtcString();
+      await this.db.manager.transaction(async (tx) => {
+        // First: it locks the calculations row before the responses, the order
+        // a Compute's results write takes them in, so the two can't deadlock.
+        await this.jobs.onDesignChange(tx, surveyId);
+        await this.snapshots.deleteAll(surveyId, tx);
+        await this.versions.repointResponses(surveyId, latest.version, published.version, tx);
+        await this.versions.deleteVersion(surveyId, latest.version, tx);
+        await tx.getRepository(SurveyEntity).save(survey);
+      });
+      try {
+        await this.files.delete(surveyId, SurveyFolder.Design, String(latest.version));
+      } catch {
+        // best-effort cleanup: the next draft reuses this version and overwrites the file
+      }
+
+      return {
+        designerInput: this.engine.toDesignerInput(output),
+        versionDto: this.toVersionDto(published, survey.status),
+      };
     });
-    try {
-      await this.files.delete(surveyId, SurveyFolder.Design, String(latest.version));
-    } catch {
-      // best-effort cleanup: the next draft reuses this version and overwrites the file
-    }
-
-    return {
-      designerInput: this.engine.toDesignerInput(output),
-      versionDto: this.toVersionDto(published, survey.status),
-    };
   }
 
   async listSnapshots(surveyId: string): Promise<SnapshotListDto> {
@@ -180,23 +187,53 @@ export class DesignService {
   }
 
   /**
-   * The draft to write to. Restores also pass `subVersion`: they replace the
-   * whole design, so any save since the client's last read is a conflict.
-   * Autosave sends a diff, which merges, so it only checks `version`.
+   * The draft to write to. Every write names the version and sub-version it
+   * was made from, and any save since then is a conflict: the client has to
+   * reload before it can write again. Call it inside `exclusive`, so nothing
+   * can save between this check and the write.
    */
   private async editableDraft(
     surveyId: string,
     version: number,
-    subVersion?: number,
+    subVersion: number,
   ): Promise<{ survey: SurveyEntity; latest: VersionEntity }> {
     const draft = await this.loadDraft(surveyId);
-    if (
-      version !== draft.latest.version ||
-      (subVersion !== undefined && subVersion !== draft.latest.subVersion)
-    ) {
+    if (version !== draft.latest.version || subVersion !== draft.latest.subVersion) {
       throw new DesignOutOfSyncException(draft.latest.subVersion);
     }
     return draft;
+  }
+
+  /**
+   * Runs `write` while holding the survey's design lock, so a survey's design
+   * writes happen one at a time, across requests and server instances. The
+   * lock is a Postgres session advisory lock on its own connection: the write
+   * itself stores files outside any transaction, so a row lock can't cover it.
+   *
+   * A write that finds the lock taken doesn't wait: every write names the
+   * sub-version it was made from, and the one in progress is about to move
+   * it, so this one is already out of date.
+   */
+  private async exclusive<T>(surveyId: string, write: () => Promise<T>): Promise<T> {
+    const runner = this.db.manager.connection.createQueryRunner();
+    await runner.connect();
+    try {
+      const [{ locked }] = await runner.query(
+        'SELECT pg_try_advisory_lock(hashtextextended($1, 0)) AS locked',
+        [surveyId],
+      );
+      if (!locked) {
+        const { latest } = await this.loadDraft(surveyId);
+        throw new DesignOutOfSyncException(latest.subVersion);
+      }
+      try {
+        return await write();
+      } finally {
+        await runner.query('SELECT pg_advisory_unlock(hashtextextended($1, 0))', [surveyId]);
+      }
+    } finally {
+      await runner.release();
+    }
   }
 
   private async loadDraft(
@@ -312,7 +349,13 @@ export class DesignService {
     const diff = Object.fromEntries(codes.map((code) => [code, state[code]]));
     return {
       updated: changes.length,
-      design: await this.setDesign(surveyId, diff, design.versionDto.version, { userId }),
+      design: await this.setDesign(
+        surveyId,
+        diff,
+        design.versionDto.version,
+        design.versionDto.subVersion,
+        { userId },
+      ),
     };
   }
 
@@ -321,20 +364,24 @@ export class DesignService {
     surveyId: string,
     from: string,
     to: string,
+    version: number,
+    subVersion: number,
     userId: string | null = null,
   ): Promise<DesignDto> {
-    const { survey, latest } = await this.loadDraft(surveyId);
-    const savedDesign = await this.files.getText(
-      surveyId,
-      SurveyFolder.Design,
-      String(latest.version),
-    );
-    const output = await this.engine.changeCode(savedDesign, from, to);
-    const before = JSON.parse(savedDesign) as ValidationJsonOutput;
-    const snapshot = await this.snapshotBefore(survey, latest, before);
-    return this.saveDraft(survey, latest, output, snapshot, userId, (tx) =>
-      renameCodeInCalculations(tx, surveyId, from, to),
-    );
+    return this.exclusive(surveyId, async () => {
+      const { survey, latest } = await this.editableDraft(surveyId, version, subVersion);
+      const savedDesign = await this.files.getText(
+        surveyId,
+        SurveyFolder.Design,
+        String(latest.version),
+      );
+      const output = await this.engine.changeCode(savedDesign, from, to);
+      const before = JSON.parse(savedDesign) as ValidationJsonOutput;
+      const snapshot = await this.snapshotBefore(survey, latest, before);
+      return this.saveDraft(survey, latest, output, snapshot, userId, (tx) =>
+        renameCodeInCalculations(tx, surveyId, from, to),
+      );
+    });
   }
 
   /**
@@ -349,121 +396,123 @@ export class DesignService {
     version: number,
     subVersion: number,
   ): Promise<VersionDto> {
-    const latest = await this.versions.findLatest(surveyId);
-    if (!latest) throw new DesignException();
-    const latestPublished = await this.versions.findLatestPublished(surveyId);
-    if (version !== latest.version || subVersion !== latest.subVersion) {
-      throw new DesignOutOfSyncException(latest.subVersion);
-    }
-    if (!latest.valid) throw new InvalidDesignException();
-    if (
-      (!latestPublished && latest.version !== 1) ||
-      (latestPublished && latest.version - latestPublished.version > 1)
-    ) {
-      throw new DesignOutOfSyncException(latest.subVersion);
-    }
+    return this.exclusive(surveyId, async () => {
+      const latest = await this.versions.findLatest(surveyId);
+      if (!latest) throw new DesignException();
+      const latestPublished = await this.versions.findLatestPublished(surveyId);
+      if (version !== latest.version || subVersion !== latest.subVersion) {
+        throw new DesignOutOfSyncException(latest.subVersion);
+      }
+      if (!latest.valid) throw new InvalidDesignException();
+      if (
+        (!latestPublished && latest.version !== 1) ||
+        (latestPublished && latest.version - latestPublished.version > 1)
+      ) {
+        throw new DesignOutOfSyncException(latest.subVersion);
+      }
 
-    const survey = await this.surveys().findOne({ where: { id: surveyId } });
-    if (!survey) throw new SurveyNotFoundException();
-    if (survey.status !== 'ACTIVE') {
-      survey.status = 'ACTIVE';
-      survey.lastModified = nowUtcString();
-      await this.surveys().save(survey);
-    }
+      const survey = await this.surveys().findOne({ where: { id: surveyId } });
+      if (!survey) throw new SurveyNotFoundException();
+      if (survey.status !== 'ACTIVE') {
+        survey.status = 'ACTIVE';
+        survey.lastModified = nowUtcString();
+        await this.surveys().save(survey);
+      }
 
-    const newJson = await this.files.getText(
-      surveyId,
-      SurveyFolder.Design,
-      String(latest.version),
-    );
-    const newOutput = JSON.parse(newJson) as ValidationJsonOutput;
-
-    let saved: VersionEntity;
-    if (!latestPublished) {
-      // First publish ever — the row write and clearing the history, together.
-      saved = await this.db.manager.transaction(async (tx) => {
-        await this.snapshots.deleteAll(surveyId, tx);
-        return this.versions.save(
-          {
-            ...latest,
-            published: true,
-            version: 1,
-            subVersion: 1,
-            lastModified: nowUtcString(),
-          },
-          tx,
-        );
-      });
-    } else {
-      const oldJson = await this.files.getText(
+      const newJson = await this.files.getText(
         surveyId,
         SurveyFolder.Design,
-        String(latestPublished.version),
+        String(latest.version),
       );
-      const oldIndex = (JSON.parse(oldJson) as ValidationJsonOutput).componentIndexList;
-      survey.lastModified = nowUtcString();
+      const newOutput = JSON.parse(newJson) as ValidationJsonOutput;
 
-      if (sameComponentIndex(oldIndex, newOutput.componentIndexList)) {
-        // No material change → fold the working version into the published one.
-        // Upload the folded design to the published slot FIRST: S3 can't join
-        // the DB transaction, so ordering it before the row delete leaves both
-        // design files on a mid-failure (recoverable) rather than neither.
-        await this.files.uploadText(
-          surveyId,
-          SurveyFolder.Design,
-          newJson,
-          String(latestPublished.version),
-        );
-        // Re-point responses, drop the working version row, bump the published
-        // row, and stamp the survey as ONE transaction — a failure here rolls
-        // back all of it, so responses never end up pointing at a deleted
-        // version.
+      let saved: VersionEntity;
+      if (!latestPublished) {
+        // First publish ever — the row write and clearing the history, together.
         saved = await this.db.manager.transaction(async (tx) => {
           await this.snapshots.deleteAll(surveyId, tx);
-          await this.versions.repointResponses(
-            surveyId,
-            latest.version,
-            latestPublished.version,
-            tx,
-          );
-          await this.versions.deleteVersion(surveyId, latest.version, tx);
-          await tx.getRepository(SurveyEntity).save(survey);
-          return this.versions.save(
-            {
-              ...latestPublished,
-              published: true,
-              subVersion: latestPublished.subVersion + 1,
-              lastModified: nowUtcString(),
-            },
-            tx,
-          );
-        });
-        // Post-commit cleanup: the working version row is gone, so its design
-        // file is now unreferenced; an orphan here is harmless and re-pruned.
-        await this.files.delete(surveyId, SurveyFolder.Design, String(latest.version));
-      } else {
-        // Material change → a new published version + survey stamp, together.
-        saved = await this.db.manager.transaction(async (tx) => {
-          await this.snapshots.deleteAll(surveyId, tx);
-          await tx.getRepository(SurveyEntity).save(survey);
           return this.versions.save(
             {
               ...latest,
               published: true,
+              version: 1,
               subVersion: 1,
               lastModified: nowUtcString(),
             },
             tx,
           );
         });
+      } else {
+        const oldJson = await this.files.getText(
+          surveyId,
+          SurveyFolder.Design,
+          String(latestPublished.version),
+        );
+        const oldIndex = (JSON.parse(oldJson) as ValidationJsonOutput).componentIndexList;
+        survey.lastModified = nowUtcString();
+
+        if (sameComponentIndex(oldIndex, newOutput.componentIndexList)) {
+          // No material change → fold the working version into the published one.
+          // Upload the folded design to the published slot FIRST: S3 can't join
+          // the DB transaction, so ordering it before the row delete leaves both
+          // design files on a mid-failure (recoverable) rather than neither.
+          await this.files.uploadText(
+            surveyId,
+            SurveyFolder.Design,
+            newJson,
+            String(latestPublished.version),
+          );
+          // Re-point responses, drop the working version row, bump the published
+          // row, and stamp the survey as ONE transaction — a failure here rolls
+          // back all of it, so responses never end up pointing at a deleted
+          // version.
+          saved = await this.db.manager.transaction(async (tx) => {
+            await this.snapshots.deleteAll(surveyId, tx);
+            await this.versions.repointResponses(
+              surveyId,
+              latest.version,
+              latestPublished.version,
+              tx,
+            );
+            await this.versions.deleteVersion(surveyId, latest.version, tx);
+            await tx.getRepository(SurveyEntity).save(survey);
+            return this.versions.save(
+              {
+                ...latestPublished,
+                published: true,
+                subVersion: latestPublished.subVersion + 1,
+                lastModified: nowUtcString(),
+              },
+              tx,
+            );
+          });
+          // Post-commit cleanup: the working version row is gone, so its design
+          // file is now unreferenced; an orphan here is harmless and re-pruned.
+          await this.files.delete(surveyId, SurveyFolder.Design, String(latest.version));
+        } else {
+          // Material change → a new published version + survey stamp, together.
+          saved = await this.db.manager.transaction(async (tx) => {
+            await this.snapshots.deleteAll(surveyId, tx);
+            await tx.getRepository(SurveyEntity).save(survey);
+            return this.versions.save(
+              {
+                ...latest,
+                published: true,
+                subVersion: 1,
+                lastModified: nowUtcString(),
+              },
+              tx,
+            );
+          });
+        }
       }
-    }
 
-    const resources = this.engine.resources(newOutput);
-    if (survey.image) resources.push(survey.image);
-    await this.cleanUnusedResources(surveyId, new Set(resources));
+      const resources = this.engine.resources(newOutput);
+      if (survey.image) resources.push(survey.image);
+      await this.cleanUnusedResources(surveyId, new Set(resources));
 
-    return this.toVersionDto(saved, survey.status);
+      return this.toVersionDto(saved, survey.status);
+    });
   }
 
   /**

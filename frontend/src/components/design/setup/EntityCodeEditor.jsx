@@ -33,10 +33,12 @@ function EntityCodeEditor({ code }) {
   const messageId = useId();
   const inputRef = React.useRef(null);
 
-  const { currentSetup, saving } = useSelector(
+  const { currentSetup, saving, versionDto } = useSelector(
     (state) => ({
       currentSetup: state.designState.setup,
-      saving: state.designState.saving,
+      // A pending autosave would land first and leave the rename out of date.
+      saving: state.designState.isSaving,
+      versionDto: state.designState.versionDto,
     }),
     shallowEqual
   );
@@ -66,7 +68,7 @@ function EntityCodeEditor({ code }) {
     setError(null);
 
     designService
-      .changeCode(code, fullCode)
+      .changeCode(code, fullCode, versionDto.version, versionDto.subVersion)
       .then((response) => {
         dispatch(designStateReceived(response));
         dispatch(setup({ ...currentSetup, code: fullCode }));
@@ -77,7 +79,7 @@ function EntityCodeEditor({ code }) {
       .finally(() => {
         dispatch(setSaving(false));
       });
-  }, [code, dispatch, designService, fullCode, currentSetup]);
+  }, [code, dispatch, designService, fullCode, currentSetup, versionDto]);
 
   const handleEntityCodeSave = React.useCallback(() => {
     if (!code || !isDirty) return;

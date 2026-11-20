@@ -141,6 +141,7 @@
   },
   "email_required": "L'E-mail est Requis",
   "error_title": "Erreur",
+  "reload": "Recharger",
   "error": {
     "invalid_email": "E-mail Invalide",
     "invalid_first_name": "Prénom Invalide",
@@ -275,7 +276,7 @@
     "wrong_credentials": "E-mail ou mot de passe incorrect",
     "wrong_password": "Mot de passe incorrect",
     "component_deleted": "Impossible de supprimer les éléments du sondage après la publication du sondage",
-    "design_out_of_sync": "Quelqu'un d'autre modifie la conception du sondage",
+    "design_out_of_sync": "Le design a été modifié ailleurs. Rechargez pour obtenir la dernière version.",
     "wrong_reset_token": "Ce Jeton de Réinitialisation est incorrect.",
     "wrong_confirmation_token": "Ce Jeton de Confirmation est incorrect, Veuillez Vous Inscrire à Nouveau",
     "survey_quota": "Désolé, ce sondage n'accepte plus de réponses.",

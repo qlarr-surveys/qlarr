@@ -165,6 +165,7 @@
     "go_home": "Zur Startseite"
   },
   "error_title": "Fehler",
+  "reload": "Neu laden",
   "event_response": {
     "details": "Einzelheiten",
     "direction": "Richtung",
@@ -300,7 +301,7 @@
     "size_limit_exceeded": "Die Massendateien überschreiten 200 MB. Bitte reduzieren Sie den Bereich oder filtern Sie nach vollständigen/unvollständigen Antworten.",
     "backend_down": "Backend ist nicht erreichbar... Bitte versuchen Sie es später erneut",
     "component_deleted": "Umfrageelemente können nicht gelöscht werden, nachdem die Umfrage veröffentlicht wurde",
-    "design_out_of_sync": "Jemand anderes bearbeitet das Umfragedesign",
+    "design_out_of_sync": "Das Design wurde an anderer Stelle geändert. Lade neu, um die neueste Version zu erhalten.",
     "duplicate_email": "E-Mail-Adresse ist bereits registriert.",
     "duplicate_survey_name": "Doppelter Umfragename",
     "expired_confirmation_token": "Abgelaufenes Bestätigungstoken, bitte erneut registrieren",

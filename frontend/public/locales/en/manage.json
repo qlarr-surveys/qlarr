@@ -256,6 +256,7 @@
   "component_deleted_title": "Deletion not allowed",
   "ok": "OK",
   "error_title": "Error",
+  "reload": "Reload",
   "processed_errors": {
     "invalid_file_for_survey_export": "This ZIP file doesn't contain a valid Qlarr Survey. Please check that you exported the survey correctly.",
     "backend_down": "Backend is Unreachable... Please Try again later",
@@ -275,7 +276,7 @@
     "wrong_credentials": "Wrong email or password",
     "wrong_password": "Wrong password",
     "component_deleted": "Cannot delete survey elements after survey was published",
-    "design_out_of_sync": "Someone else is editing the survey design",
+    "design_out_of_sync": "The design was changed somewhere else. Reload to get the latest version.",
     "wrong_reset_token": "This Reset Token is incorrect.",
     "wrong_confirmation_token": "This Confirmation Token is incorrect, Please Register Once more",
     "survey_quota": "Sorry, this survey is no longer accepting responses.",

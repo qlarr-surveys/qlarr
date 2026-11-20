@@ -141,6 +141,7 @@
   },
   "email_required": "O E-mail é Obrigatório",
   "error_title": "Erro",
+  "reload": "Recarregar",
   "error": {
     "invalid_email": "E-mail Inválido",
     "invalid_first_name": "Nome Inválido",
@@ -275,7 +276,7 @@
     "wrong_credentials": "E-mail ou senha incorretos",
     "wrong_password": "Senha incorreta",
     "component_deleted": "Não é possível excluir elementos da pesquisa após a pesquisa ser publicada",
-    "design_out_of_sync": "Alguém mais está editando o design da pesquisa",
+    "design_out_of_sync": "O design foi alterado em outro lugar. Recarregue para obter a versão mais recente.",
     "wrong_reset_token": "Este Token de Redefinição está incorreto.",
     "wrong_confirmation_token": "Este Token de Confirmação está incorreto, Por favor Registre-se Mais Uma Vez",
     "survey_quota": "Desculpe, esta pesquisa não está mais aceitando respostas.",

@@ -33,10 +33,12 @@ function InlineCodeEditor({ qualifiedCode, designMode, compact }) {
   const [error, setError] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const { answerType, currentSetup } = useSelector(
+  const { answerType, currentSetup, versionDto, autosaving } = useSelector(
     (state) => ({
       answerType: state.designState[qualifiedCode]?.type,
       currentSetup: state.designState.setup,
+      versionDto: state.designState.versionDto,
+      autosaving: state.designState.isSaving,
     }),
     shallowEqual
   );
@@ -85,7 +87,12 @@ function InlineCodeEditor({ qualifiedCode, designMode, compact }) {
       dispatch(setSaving(true));
 
       designService
-        .changeCode(qualifiedCode, newFullCode)
+        .changeCode(
+          qualifiedCode,
+          newFullCode,
+          versionDto.version,
+          versionDto.subVersion
+        )
         .then((response) => {
           dispatch(designStateReceived(response));
           if (currentSetup?.code === qualifiedCode) {
@@ -101,12 +108,13 @@ function InlineCodeEditor({ qualifiedCode, designMode, compact }) {
           dispatch(setSaving(false));
         });
     },
-    [qualifiedCode, designService, dispatch, currentSetup]
+    [qualifiedCode, designService, dispatch, currentSetup, versionDto]
   );
 
   const handleSave = useCallback(() => {
     // `pending` short-circuits the blur that fires when the confirm modal steals focus.
-    if (isSaving || pending) return;
+    // A pending autosave would land first and leave the rename out of date.
+    if (isSaving || pending || autosaving) return;
 
     const newFullCode = prefix + editValue;
     if (!editValue.trim() || newFullCode === qualifiedCode) {
@@ -122,7 +130,7 @@ function InlineCodeEditor({ qualifiedCode, designMode, compact }) {
         setError(null);
       },
     });
-  }, [isSaving, pending, prefix, editValue, qualifiedCode, guard, performSave]);
+  }, [isSaving, pending, autosaving, prefix, editValue, qualifiedCode, guard, performSave]);
 
   const handleKeyDown = useCallback(
     (e) => {

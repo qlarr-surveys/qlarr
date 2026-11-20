@@ -141,6 +141,7 @@
   },
   "email_required": "E-mail is Verplicht",
   "error_title": "Fout",
+  "reload": "Opnieuw laden",
   "error": {
     "invalid_email": "Ongeldige E-mail",
     "invalid_first_name": "Ongeldige Voornaam",
@@ -275,7 +276,7 @@
     "wrong_credentials": "Verkeerd e-mailadres of wachtwoord",
     "wrong_password": "Verkeerd wachtwoord",
     "component_deleted": "Kan enquête elementen niet verwijderen nadat enquête is gepubliceerd",
-    "design_out_of_sync": "Iemand anders bewerkt het enquête ontwerp",
+    "design_out_of_sync": "Het ontwerp is ergens anders gewijzigd. Laad opnieuw om de nieuwste versie te krijgen.",
     "wrong_reset_token": "Deze Reset Token is onjuist.",
     "wrong_confirmation_token": "Deze Bevestiging Token is onjuist, Registreer Opnieuw",
     "survey_quota": "Sorry, deze enquête accepteert geen reacties meer.",

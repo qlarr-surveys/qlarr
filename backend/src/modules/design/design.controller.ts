@@ -65,11 +65,16 @@ export class DesignController {
     @Param('surveyId') surveyId: string,
     @Body() design: Record<string, unknown>,
     @Query('version') version: string,
+    @Query('sub_version') subVersion: string,
     @CurrentUser() user: CurrentUserPrincipal,
   ): Promise<DesignDto> {
-    return this.design.setDesign(surveyId, design, parseInt(version, 10), {
-      userId: user.userId,
-    });
+    return this.design.setDesign(
+      surveyId,
+      design,
+      parseInt(version, 10),
+      parseInt(subVersion, 10),
+      { userId: user.userId },
+    );
   }
 
   @Post(':surveyId/change_code')
@@ -78,9 +83,18 @@ export class DesignController {
     @Param('surveyId') surveyId: string,
     @Query('from') from: string,
     @Query('to') to: string,
+    @Query('version') version: string,
+    @Query('sub_version') subVersion: string,
     @CurrentUser() user: CurrentUserPrincipal,
   ): Promise<DesignDto> {
-    return this.design.changeCode(surveyId, from, to, user.userId);
+    return this.design.changeCode(
+      surveyId,
+      from,
+      to,
+      parseInt(version, 10),
+      parseInt(subVersion, 10),
+      user.userId,
+    );
   }
 
   @Post(':surveyId/design/publish')

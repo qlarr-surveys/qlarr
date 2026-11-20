@@ -85,6 +85,15 @@ describe('Survey design (get + set)', () => {
 
   const server = () => app.getHttpServer();
 
+  /** `version` and `sub_version` query params for the survey's latest version. */
+  const at = async (surveyId: string) => {
+    const [row] = await root.query(
+      `SELECT version, sub_version FROM versions WHERE survey_id = $1 ORDER BY version DESC LIMIT 1`,
+      [surveyId],
+    );
+    return `version=${row.version}&sub_version=${row.sub_version}`;
+  };
+
   describe('GET /survey/:id/design', () => {
     it('returns the designer input + version metadata', async () => {
       const res = await request(server())
@@ -112,7 +121,7 @@ describe('Survey design (get + set)', () => {
   describe('POST /survey/:id/design', () => {
     it('validates + stores a new sub-version', async () => {
       const res = await request(server())
-        .post(`/survey/${SURVEY}/design?version=1`)
+        .post(`/survey/${SURVEY}/design?version=1&sub_version=1`)
         .set('Authorization', SUPER)
         .send({})
         .expect(201);
@@ -141,7 +150,7 @@ describe('Survey design (get + set)', () => {
       const en = { code: 'en', name: 'English' };
       const de = { code: 'de', name: 'Deutsch' };
       await request(server())
-        .post(`/survey/${SURVEY}/design?version=1`)
+        .post(`/survey/${SURVEY}/design?${await at(SURVEY)}`)
         .set('Authorization', SUPER)
         .send({ Survey: { defaultLang: en, additionalLang: [en, de, en, de] } })
         .expect(201);
@@ -157,20 +166,52 @@ describe('Survey design (get + set)', () => {
     // the auth guard (401, not a pre-handler 413).
     it('does not 413 a >100kb JSON body (raised body limit)', () =>
       request(server())
-        .post(`/survey/${SURVEY}/design?version=1`)
+        .post(`/survey/${SURVEY}/design?version=1&sub_version=1`)
         .send({ _pad: 'x'.repeat(300 * 1024) })
         .expect(401));
 
     it('400 when editing from a stale version', () =>
       request(server())
-        .post(`/survey/${SURVEY}/design?version=99`)
+        .post(`/survey/${SURVEY}/design?version=99&sub_version=1`)
         .set('Authorization', SUPER)
         .send({})
         .expect(400));
 
+    it('400 when another save landed since the sub-version the client read', async () => {
+      const [row] = await root.query(
+        `SELECT sub_version FROM versions WHERE survey_id = $1 AND version = 1`,
+        [SURVEY],
+      );
+      const read = row.sub_version as number;
+      await request(server())
+        .post(`/survey/${SURVEY}/design?version=1&sub_version=${read}`)
+        .set('Authorization', SUPER)
+        .send({})
+        .expect(201);
+
+      const res = await request(server())
+        .post(`/survey/${SURVEY}/design?version=1&sub_version=${read}`)
+        .set('Authorization', SUPER)
+        .send({})
+        .expect(400);
+      expect(res.body.error).toBe('DesignOutOfSyncException');
+    });
+
+    it('lets only one of two saves from the same sub-version through', async () => {
+      const params = await at(SURVEY);
+      const save = () =>
+        request(server())
+          .post(`/survey/${SURVEY}/design?${params}`)
+          .set('Authorization', SUPER)
+          .send({});
+
+      const statuses = (await Promise.all([save(), save(), save()])).map((r) => r.status);
+      expect(statuses.sort()).toEqual([201, 400, 400]);
+    });
+
     it('400 when the survey is closed', () =>
       request(server())
-        .post(`/survey/${SURVEY_CLOSED}/design?version=1`)
+        .post(`/survey/${SURVEY_CLOSED}/design?version=1&sub_version=1`)
         .set('Authorization', SUPER)
         .send({})
         .expect(400));
@@ -179,7 +220,7 @@ describe('Survey design (get + set)', () => {
   describe('POST /survey/:id/change_code', () => {
     it('renames a component and stores a new version', async () => {
       const res = await request(server())
-        .post(`/survey/${SURVEY}/change_code?from=G2&to=G9`)
+        .post(`/survey/${SURVEY}/change_code?from=G2&to=G9&${await at(SURVEY)}`)
         .set('Authorization', SUPER)
         .expect(201);
       // stored a design whose component index now has G9, not G1
@@ -190,21 +231,29 @@ describe('Survey design (get + set)', () => {
       expect(res.body.versionDto.published).toBe(false);
     });
 
-    it('400 on identical from/to', () =>
+    it('400 on identical from/to', async () =>
       request(server())
-        .post(`/survey/${SURVEY}/change_code?from=G2&to=G2`)
+        .post(`/survey/${SURVEY}/change_code?from=G2&to=G2&${await at(SURVEY)}`)
         .set('Authorization', SUPER)
         .expect(400));
 
-    it('400 when the from code does not exist', () =>
+    it('400 when the from code does not exist', async () =>
       request(server())
-        .post(`/survey/${SURVEY}/change_code?from=Gnope&to=G9`)
+        .post(`/survey/${SURVEY}/change_code?from=Gnope&to=G9&${await at(SURVEY)}`)
         .set('Authorization', SUPER)
         .expect(400));
 
-    it('403 for a non-admin role', () =>
+    it('400 when another save landed since the sub-version the client read', async () => {
+      const res = await request(server())
+        .post(`/survey/${SURVEY}/change_code?from=G2&to=G9&version=1&sub_version=1`)
+        .set('Authorization', SUPER)
+        .expect(400);
+      expect(res.body.error).toBe('DesignOutOfSyncException');
+    });
+
+    it('403 for a non-admin role', async () =>
       request(server())
-        .post(`/survey/${SURVEY}/change_code?from=G2&to=G9`)
+        .post(`/survey/${SURVEY}/change_code?from=G2&to=G9&${await at(SURVEY)}`)
         .set('Authorization', SURVEYOR)
         .expect(403));
   });

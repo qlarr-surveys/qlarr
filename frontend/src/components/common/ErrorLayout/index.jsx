@@ -47,6 +47,36 @@ function ErrorLayout({ setErrorSeen, error }) {
       </Dialog>
     );
   }
+  if (error.name === "design_out_of_sync") {
+    // The design moved on since this page loaded it. Every later write would
+    // fail the same way, so the only way on is to load it again.
+    return (
+      <Dialog open={true} maxWidth="sm" fullWidth>
+        <DialogContent sx={{ textAlign: "center", py: 4 }}>
+          <Typography variant="h3" paragraph>
+            {t("error_title")}
+          </Typography>
+          <Typography sx={{ color: "text.secondary" }}>
+            {t("processed_errors.design_out_of_sync")}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button
+            fullWidth
+            size="large"
+            variant="contained"
+            onClick={() => window.location.reload()}
+            style={{
+              backgroundColor: theme.palette.primary.main,
+              color: theme.palette.primary.contrastText,
+            }}
+          >
+            {t("reload")}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
+  }
   if (error.name === "survey_not_found") {
     // On the dashboard itself the list is refreshed there; just dismiss.
     const onDashboard = location.pathname === routes.dashboard;
