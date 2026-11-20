@@ -113,8 +113,14 @@ function collectExistingGroupCodes(groups) {
   return ids;
 }
 
-export const nextGroupId = (groups) => {
+// A caller may ask for a code (`preferredCode`, with or without the G/Q
+// prefix); it gets it unless a component already has it.
+export const nextGroupId = (groups, preferredCode) => {
   const existing = collectExistingGroupCodes(groups);
+  const preferred = preferredCode?.replace(/^G/, "");
+  if (preferred && !existing.has(`G${preferred}`)) {
+    return preferred;
+  }
   return generateId(existing);
 };
 
@@ -154,8 +160,12 @@ function generateId(existing) {
   return id;
 }
 
-export const nextQuestionId = (state, groups) => {
+export const nextQuestionId = (state, groups, preferredCode) => {
   const existing = collectExistingIds(state, groups);
+  const preferred = preferredCode?.replace(/^Q/, "");
+  if (preferred && !existing.has(`Q${preferred}`)) {
+    return preferred;
+  }
   return generateId(existing);
 };
 

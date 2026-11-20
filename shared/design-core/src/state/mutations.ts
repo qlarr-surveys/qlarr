@@ -1445,13 +1445,13 @@ export function onDrag(state, payload) {
 }
 
 export function addComponent(state, payload) {
-  const { type, questionType } = payload;
+  const { type, questionType, code } = payload;
   const survey = state.Survey;
   state.skipScroll = false;
 
   if (type === "group") {
     const lastGroupIndex = Math.max(0, survey.children.length - 1);
-    newGroup(state, { toIndex: lastGroupIndex });
+    newGroup(state, { toIndex: lastGroupIndex, code });
   } else if (type === "question") {
     if (state.Survey.children.length == 1) {
       newGroup(state, { toIndex: 0 });
@@ -1622,7 +1622,8 @@ const reorderQuestions = (state, survey, payload) => {
 
 const newQuestion = (state, payload) => {
   const survey = state.Survey;
-  let questionId = nextQuestionId(state, survey.children);
+  // A caller may name the question; the editor doesn't.
+  let questionId = nextQuestionId(state, survey.children, payload.code);
   const questionObject: any = createQuestion(
     payload.questionType,
     questionId,
@@ -1670,7 +1671,8 @@ const newQuestion = (state, payload) => {
 
 const newGroup = (state, payload) => {
   const survey = state.Survey;
-  const group = createGroup("GROUP", nextGroupId(survey.children));
+  // A caller may name the group; the editor doesn't.
+  const group = createGroup("GROUP", nextGroupId(survey.children, payload.code));
   if (!survey.children) {
     survey.children = [];
   }
