@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { LogicBuilderProvider, useLogicBuilder } from './LogicBuilderContext';
 import { QlarrLogicBuilderInline } from './QlarrLogicBuilderInline';
-import { treeToJsonLogic } from './utils/jsonLogic';
+import { treeToJsonLogic } from '@qlarr/design-core/logic/jsonLogic';
 
 /**
  * Inner component that syncs state changes to parent
@@ -67,6 +67,7 @@ export function QlarrLogicBuilderInlineWrapper({
   langList,
   t,
   includeSelf,
+  includeCopies,
   initialRule,
   moreActions,
 }) {
@@ -80,6 +81,7 @@ export function QlarrLogicBuilderInlineWrapper({
       langList={langList}
       t={t}
       includeSelf={includeSelf}
+      includeCopies={includeCopies}
     >
       <InlineLogicBuilderSync
         onChange={onChange}
@@ -101,6 +103,7 @@ QlarrLogicBuilderInlineWrapper.propTypes = {
   langList: PropTypes.arrayOf(PropTypes.string).isRequired,
   t: PropTypes.func.isRequired,
   includeSelf: PropTypes.bool,
+  includeCopies: PropTypes.bool,
   initialRule: PropTypes.object,
   moreActions: PropTypes.node,
 };

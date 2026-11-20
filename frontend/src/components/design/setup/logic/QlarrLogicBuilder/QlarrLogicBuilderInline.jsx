@@ -5,7 +5,7 @@ import { useLogicBuilder } from './LogicBuilderContext';
 import { InlineFieldSelector } from './components/InlineFieldSelector';
 import { InlineOperatorSelector } from './components/InlineOperatorSelector';
 import { ValueInput } from './components/ValueInput';
-import { OPERATORS } from './config/operators';
+import { OPERATORS } from '@qlarr/design-core/logic/operators';
 import styles from './QlarrLogicBuilderInline.module.css';
 
 /**

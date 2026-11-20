@@ -148,7 +148,8 @@ export const resyncRepeatablesForSource = (state, changedCode) => {
 // see or edit those — they are transient runtime artifacts. Strip every copy root
 // (`repeatInfo.type === "repeated"`) and its whole subtree from the flat design
 // state and drop the dangling child refs. `componentIndexList` is left as-is
-// (copies stay there; the closed-scope reference rule excludes them anyway).
+// (copies stay there and are referenceable; builder UIs skip codes with no
+// design-state entry, so copies are never offered).
 // Only the copy ROOT carries `repeatInfo.type === "repeated"`; its descendants
 // keep the template's own repeatInfo (usually none), so copies are found by root
 // and removed by subtree walk.

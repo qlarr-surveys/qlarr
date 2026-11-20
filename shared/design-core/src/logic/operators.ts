@@ -1,3 +1,4 @@
+// @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
 /**
  * Operator registry - replaces the 700-line config.jsx
  * Each operator defines:
