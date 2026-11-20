@@ -7,7 +7,7 @@ import {
   withBackdrop,
   withImageAdded,
   withImageRemoved,
-} from "./background";
+} from "@qlarr/design-core/utils/surveyTheme";
 
 const TEXT_STYLES = ["group", "question", "text"];
 

@@ -1,6 +1,7 @@
-import { accessibleDependencies } from "@qlarr/design-core/utils/dependencies";
-import { REPEAT_TOKEN_PLACEHOLDER } from "@qlarr/design-core/state/repetition";
-import { isQuestion, stripTags } from "~/utils/design/utils";
+// @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
+import { accessibleDependencies } from "./dependencies";
+import { REPEAT_TOKEN_PLACEHOLDER } from "../state/repetition";
+import { isQuestion, stripTags } from "./pureUtils";
 
 export const buildReferences = (componentIndices, code, state, mainLang) => {
   let dependencies = accessibleDependencies(componentIndices, code);
@@ -13,7 +14,7 @@ export const buildReferences = (componentIndices, code, state, mainLang) => {
     returnResult.push(repeatLabel);
   }
   dependencies.forEach((el) => {
-    if (isQuestion(el)) {
+    if (isQuestion(el) && state[el]) {
       const reference = buildReference(el, state[el], state, mainLang);
       if (reference.length) {
         returnResult = returnResult.concat(reference);

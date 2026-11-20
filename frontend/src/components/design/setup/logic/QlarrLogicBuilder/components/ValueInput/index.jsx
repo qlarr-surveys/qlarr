@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { OPERATORS } from '../../config/operators';
+import { OPERATORS } from '@qlarr/design-core/logic/operators';
 import { FIELD_TYPES, SELECT_FIELD_TYPES } from '../../config/constants';
 import { useLogicBuilder } from '../../LogicBuilderContext';
 import { TextInput } from './TextInput';

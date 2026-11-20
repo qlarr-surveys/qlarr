@@ -201,6 +201,7 @@ function Relevance({ code, t }) {
               mainLang={mainLang}
               langList={langList}
               t={tCore}
+              includeCopies
             />
             <button
               type="button"

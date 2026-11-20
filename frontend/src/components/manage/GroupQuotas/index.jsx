@@ -32,8 +32,8 @@ import { routes } from "~/routes";
 import { isNotEmptyHtml } from "~/utils/design/utils";
 import { QlarrLogicBuilderInlineWrapper } from "~/components/design/setup/logic/QlarrLogicBuilder";
 import { useFieldConfig } from "~/components/design/setup/logic/QlarrLogicBuilder/hooks/useFieldConfig";
-import { jsonLogicToTree } from "~/components/design/setup/logic/QlarrLogicBuilder/utils/jsonLogic";
-import { OPERATORS } from "~/components/design/setup/logic/QlarrLogicBuilder/config/operators";
+import { jsonLogicToTree } from "@qlarr/design-core/logic/jsonLogic";
+import { OPERATORS } from "@qlarr/design-core/logic/operators";
 import { fieldStyles, SettingRow } from "~/components/manage/SettingsFields";
 import styles from "./GroupQuotas.module.css";
 

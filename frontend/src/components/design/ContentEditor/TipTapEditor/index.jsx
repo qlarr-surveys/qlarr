@@ -9,7 +9,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import { sanitizePastedText } from "../sanitizePastedText";
 import Toolbar from "./Toolbar";
 import CollapsibleSettings from "./CollapsibleSettings";
-import { buildReferences } from "~/components/Questions/buildReferences";
+import { buildReferences } from "@qlarr/design-core";
 import { manageStore } from "~/store";
 import "~/styles/tiptap-editor.css";
 import { EDITOR_CONSTANTS } from "~/constants/editor";

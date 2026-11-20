@@ -1,4 +1,5 @@
-import { isGroup, isQuestion, stripTags } from "~/utils/design/utils";
+// @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
+import { isGroup, isQuestion, stripTags } from "./pureUtils";
 
 const buildField = (code, state, mainLang) => {
   const component = state[code];

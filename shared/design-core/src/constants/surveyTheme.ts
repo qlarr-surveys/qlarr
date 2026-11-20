@@ -67,3 +67,19 @@ export const defaultSurveyTheme = {
   bgColor: BG_COLOR,
   paperColor: PAPER_COLOR,
 };
+/*
+ * The values the theme panel offers, and so the only ones the assistant sets:
+ * each list leads with the survey default, and the `MORE_` lists are behind
+ * the panel's "More fonts" / "More sizes".
+ */
+export const FONTS = [FONT_FAMILY, "Roboto", "Open Sans"];
+export const MORE_FONTS = ["Lato", "Poppins", "Raleway", "Merriweather", "Georgia", "Times New Roman", "Arial", "Courier New"];
+
+export const TITLE_SIZES = [24, 28, GROUP_FONT_SIZE, 38];
+export const MORE_TITLE_SIZES = [20, 22, 26, 30, 34, 36, 40, 44, 48];
+
+export const QUESTION_SIZES = [15, QUESTION_FONT_SIZE, 20, 22];
+export const MORE_QUESTION_SIZES = [14, 16, 17, 19, 21, 24, 26, 28];
+
+export const ANSWER_SIZES = [13, TEXT_FONT_SIZE, 16];
+export const MORE_ANSWER_SIZES = [12, 15, 17, 18, 20];

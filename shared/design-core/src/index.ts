@@ -17,6 +17,15 @@ export {
 } from "./utils/formatInstructions";
 export { isQuestion, isGroup, buildCodeIndex } from "./utils/pureUtils";
 export { accessibleDependencies } from "./utils/dependencies";
+export { jumpDestinations } from "./utils/jumpDestinations";
+export { buildReferences } from "./utils/buildReferences";
+export {
+  OPERATORS,
+  getOperatorsForFieldType,
+  findOperatorByJsonLogicOp,
+} from "./logic/operators";
+export { jsonLogicToTree, treeToJsonLogic } from "./logic/jsonLogic";
+export { buildLogicFields } from "./logic/buildFields";
 export { getFieldType, hasOtherOption, isRankingType } from "./factory/fieldTypes";
 export {
   isArrayType,

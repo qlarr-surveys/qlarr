@@ -1,13 +1,21 @@
 import {
   BACKDROP_COLOR,
   BG_COLOR,
-  FONT_FAMILY,
-  GROUP_FONT_SIZE,
   PAPER_COLOR,
   PRIMARY_COLOR,
-  QUESTION_FONT_SIZE,
   TEXT_COLOR,
-  TEXT_FONT_SIZE,
+} from "@qlarr/design-core/constants/surveyTheme";
+
+// The fonts and sizes live in design-core, where the AI theme agent reads them too.
+export {
+  ANSWER_SIZES,
+  FONTS,
+  MORE_ANSWER_SIZES,
+  MORE_FONTS,
+  MORE_QUESTION_SIZES,
+  MORE_TITLE_SIZES,
+  QUESTION_SIZES,
+  TITLE_SIZES,
 } from "@qlarr/design-core/constants/surveyTheme";
 
 /**
@@ -18,28 +26,6 @@ import {
  * values come from the phase-3.3 design; anything outside a list is still
  * reachable — colors through the custom picker, sizes through "More sizes".
  */
-
-export const FONTS = [FONT_FAMILY, "Roboto", "Open Sans"];
-
-export const MORE_FONTS = [
-  "Lato",
-  "Poppins",
-  "Raleway",
-  "Merriweather",
-  "Georgia",
-  "Times New Roman",
-  "Arial",
-  "Courier New",
-];
-
-export const TITLE_SIZES = [24, 28, GROUP_FONT_SIZE, 38];
-export const MORE_TITLE_SIZES = [20, 22, 26, 30, 34, 36, 40, 44, 48];
-
-export const QUESTION_SIZES = [15, QUESTION_FONT_SIZE, 20, 22];
-export const MORE_QUESTION_SIZES = [14, 16, 17, 19, 21, 24, 26, 28];
-
-export const ANSWER_SIZES = [13, TEXT_FONT_SIZE, 16];
-export const MORE_ANSWER_SIZES = [12, 15, 17, 18, 20];
 
 export const ACCENT_COLORS = [
   { value: PRIMARY_COLOR, labelKey: "theme_color_indigo" },

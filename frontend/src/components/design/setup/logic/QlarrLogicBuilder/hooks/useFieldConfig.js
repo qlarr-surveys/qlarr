@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { getOperatorsForFieldType } from '../config/operators';
-import { buildLogicFields } from '../utils/buildFields';
+import { getOperatorsForFieldType } from '@qlarr/design-core/logic/operators';
+import { buildLogicFields } from '@qlarr/design-core/logic/buildFields';
 
 export function useFieldConfig(
   componentIndices,
@@ -9,7 +9,8 @@ export function useFieldConfig(
   mainLang,
   langList,
   t,
-  includeSelf
+  includeSelf,
+  includeCopies
 ) {
   return useMemo(
     () =>
@@ -27,8 +28,9 @@ export function useFieldConfig(
           language: t('logic_builder.language'),
         },
         includeSelf,
+        includeCopies,
       }),
-    [componentIndices, currentCode, designState, mainLang, langList, t, includeSelf]
+    [componentIndices, currentCode, designState, mainLang, langList, t, includeSelf, includeCopies]
   );
 }
 
