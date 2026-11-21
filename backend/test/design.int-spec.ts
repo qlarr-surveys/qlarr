@@ -179,20 +179,20 @@ describe('Survey design (get + set)', () => {
   describe('POST /survey/:id/change_code', () => {
     it('renames a component and stores a new version', async () => {
       const res = await request(server())
-        .post(`/survey/${SURVEY}/change_code?from=G2&to=G9`)
+        .post(`/survey/${SURVEY}/change_code?from=Gend&to=G9`)
         .set('Authorization', SUPER)
         .expect(201);
-      // stored a design whose component index now has G9, not G1
+      // stored a design whose component index now has G9, not Gend
       const stored = JSON.parse(files.uploadText.mock.calls[0][2]);
       const codes = stored.componentIndexList.map((c: { code: string }) => c.code);
       expect(codes).toContain('G9');
-      expect(codes).not.toContain('G2');
+      expect(codes).not.toContain('Gend');
       expect(res.body.versionDto.published).toBe(false);
     });
 
     it('400 on identical from/to', () =>
       request(server())
-        .post(`/survey/${SURVEY}/change_code?from=G2&to=G2`)
+        .post(`/survey/${SURVEY}/change_code?from=Gend&to=Gend`)
         .set('Authorization', SUPER)
         .expect(400));
 
@@ -204,7 +204,7 @@ describe('Survey design (get + set)', () => {
 
     it('403 for a non-admin role', () =>
       request(server())
-        .post(`/survey/${SURVEY}/change_code?from=G2&to=G9`)
+        .post(`/survey/${SURVEY}/change_code?from=Gend&to=G9`)
         .set('Authorization', SURVEYOR)
         .expect(403));
   });
@@ -305,40 +305,40 @@ describe('Survey design (get + set)', () => {
       expect(res.text.charCodeAt(0)).toBe(0xfeff);
       expect(res.text.slice(1).split('\n')).toEqual([
         '"code","key","en","ar"',
-        '"G1","label","Feedback",""',
-        `"G2","label","${THANKS}",""`,
+        '"Gwelcome","label","Feedback",""',
+        `"Gend","label","${THANKS}",""`,
       ]);
     });
 
     it('writes each text with changeContent, as one design save', async () => {
       const res = await importCsv(
         SURVEY,
-        csv('code,key,en,ar', 'G1,label,Feedback,<p>ملاحظات {{1 + 1}}</p>', 'G2,label,Changed,'),
+        csv('code,key,en,ar', 'Gwelcome,label,Feedback,<p>ملاحظات {{1 + 1}}</p>', 'Gend,label,Changed,'),
       ).expect(200);
 
       expect(res.body.updated).toBe(1);
       expect(files.uploadText).toHaveBeenCalledTimes(1);
-      const { G1, G2 } = res.body.design.designerInput.state;
-      expect(G1.content.ar.label).toBe('<p>ملاحظات {{1 + 1}}</p>');
-      expect(G1.instructionList).toContainEqual(
+      const { Gwelcome, Gend } = res.body.design.designerInput.state;
+      expect(Gwelcome.content.ar.label).toBe('<p>ملاحظات {{1 + 1}}</p>');
+      expect(Gwelcome.instructionList).toContainEqual(
         expect.objectContaining({ code: 'format_label_ar_1', text: '1 + 1' }),
       );
       // the base language needs override_main_lang
-      expect(G2.content.en.label).toBe(THANKS);
+      expect(Gend.content.en.label).toBe(THANKS);
     });
 
     it('changes the base language with override_main_lang=true', async () => {
       const res = await importCsv(
         SURVEY,
-        csv('code,key,en,ar', 'G2,label,Thanks!,'),
+        csv('code,key,en,ar', 'Gend,label,Thanks!,'),
         '?override_main_lang=true',
       ).expect(200);
       expect(res.body.updated).toBe(1);
-      expect(res.body.design.designerInput.state.G2.content.en.label).toBe('Thanks!');
+      expect(res.body.design.designerInput.state.Gend.content.en.label).toBe('Thanks!');
     });
 
     it('saves nothing when the file changes nothing', async () => {
-      const res = await importCsv(SURVEY, csv('code,key,en,ar', 'G1,label,Feedback,')).expect(200);
+      const res = await importCsv(SURVEY, csv('code,key,en,ar', 'Gwelcome,label,Feedback,')).expect(200);
       expect(res.body.updated).toBe(0);
       expect(files.uploadText).not.toHaveBeenCalled();
     });
@@ -352,10 +352,10 @@ describe('Survey design (get + set)', () => {
       const bom = Buffer.from([0xef, 0xbb, 0xbf]);
       const res = await importCsv(
         SURVEY,
-        Buffer.concat([bom, csv('code,key,en,ar', 'G1,label,Feedback,<p>Café ملاحظات</p>')]),
+        Buffer.concat([bom, csv('code,key,en,ar', 'Gwelcome,label,Feedback,<p>Café ملاحظات</p>')]),
       ).expect(200);
       expect(res.body.updated).toBe(1);
-      expect(res.body.design.designerInput.state.G1.content.ar.label).toBe(
+      expect(res.body.design.designerInput.state.Gwelcome.content.ar.label).toBe(
         '<p>Café ملاحظات</p>',
       );
     });
@@ -388,7 +388,7 @@ describe('Survey design (get + set)', () => {
     it('400 when the survey is closed', async () => {
       const res = await importCsv(
         SURVEY_CLOSED,
-        csv('code,key,en,ar', 'G1,label,Feedback,مرحبا'),
+        csv('code,key,en,ar', 'Gwelcome,label,Feedback,مرحبا'),
       ).expect(400);
       expect(res.body.error).toBe('SurveyIsClosedException');
     });
