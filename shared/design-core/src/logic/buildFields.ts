@@ -1,16 +1,18 @@
+// @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
 import {
   getFieldType,
   hasOtherOption,
   isArrayType,
   isRankingType,
-} from '@qlarr/design-core/factory/fieldTypes';
-import { accessibleDependencies } from '@qlarr/design-core/utils/dependencies';
+} from '../factory/fieldTypes';
+import { accessibleDependencies } from '../utils/dependencies';
 import {
   isGroup,
   isQuestion,
   stripTags,
   buildCodeIndex,
-} from '@qlarr/design-core/utils/pureUtils';
+  repeatedCopyScope,
+} from '../utils/pureUtils';
 
 export const DEFAULT_FIELD_LABELS = {
   system: 'System',
@@ -28,6 +30,7 @@ export function buildLogicFields({
   langList = [],
   labels = DEFAULT_FIELD_LABELS,
   includeSelf = false,
+  includeCopies = false,
 }) {
   const fields = [
     {
@@ -92,7 +95,13 @@ export function buildLogicFields({
   });
 
   for (const code of sortedDependencies) {
-    const component = designState[code];
+    // A repeat's copies (Qline_user_1 …) are the engine's, not the designer's:
+    // only the show-when builder offers them, built from their template.
+    const copy = copyOf(indexMap.get(code));
+    if (copy && !includeCopies) {
+      continue;
+    }
+    const component = copy ? designState[copy.template] : designState[code];
     if (!component || (!isQuestion(code) && !isGroup(code))) {
       continue;
     }
@@ -103,12 +112,26 @@ export function buildLogicFields({
         designState,
         mainLang,
         labels,
-        numericCodes
+        copy
+          ? { [code]: `${numericCodes[copy.template] || copy.template} #${copy.number}` }
+          : numericCodes
       )
     );
   }
 
   return fields;
+}
+
+// A repeat copy's template and repeat number: Qline_user_2 → Qline_user, 2.
+function copyOf(entry) {
+  const copy = repeatedCopyScope(entry);
+  if (!copy || !entry.code.endsWith(`_${copy.number}`)) {
+    return null;
+  }
+  return {
+    template: entry.code.slice(0, -(copy.number.length + 1)),
+    number: copy.number,
+  };
 }
 
 function buildFieldDefinition(

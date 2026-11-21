@@ -3,7 +3,7 @@ import {
   createEmptyTree,
   createEmptyRule,
   jsonLogicToTree,
-} from '../utils/jsonLogic';
+} from '@qlarr/design-core/logic/jsonLogic';
 
 /**
  * Initial state factory

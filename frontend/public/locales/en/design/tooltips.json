@@ -2,6 +2,8 @@
   "has_relevance": "Has show/Hide Condition",
   "is_disabled": "Is Disabled",
   "has_validation": "Has Validation",
+  "is_repeatable": "Is Repeatable",
+  "is_carried": "Carries Options From Another Question",
   "is_randomized": "Is part of a valid Random Group (within parent)",
   "is_prioritized": "Is part of a valid Priority Group (within parent)",
   "has_skip": "Has active Skip Logic",

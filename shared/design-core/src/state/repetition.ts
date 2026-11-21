@@ -6,10 +6,11 @@
 // DERIVES the engine wire format `repeatInfo = { type, range, relevanceInstruction }`.
 // The author never edits `range`/`relevanceInstruction` directly.
 //
-// Two source kinds:
-//   - "mcq":    repeat once per selected option. range = the source option codes
-//               with their "A" answer-prefix stripped (A1..A7 -> "1".."7").
-//   - "number": repeat once per count. range = "1".."max" (max capped at 12).
+// Three kinds:
+//   - "mcq":      repeat once per selected option. range = the source option codes
+//                 with their "A" answer-prefix stripped (A1..A7 -> "1".."7").
+//   - "number":   repeat once per count. range = "1".."max" (max capped at 12).
+//   - "constant": repeat a fixed `count` times, no source. range = "1".."count".
 //
 // `repeatSource` (visual config) is persisted for the builder; `repeatInfo` is
 // regenerated from it and is pure derived state — a change to a source question's
@@ -21,6 +22,10 @@ import { removeInstruction } from "./addInstructions";
 
 export const REPEAT_TOKEN_PLACEHOLDER = "$repeat_token";
 export const REPEAT_NUMBER_MAX = 12;
+export const REPEAT_CONSTANT_MIN = 2;
+
+const REPEAT_KINDS = ["mcq", "number", "constant"];
+const normalizeKind = (kind) => (REPEAT_KINDS.indexOf(kind) > -1 ? kind : "mcq");
 
 // Source option types that never spawn a copy (mirror carry forward). "other" is
 // opt-in via `carryOther`, exactly like carry forward.
@@ -53,12 +58,30 @@ const clampMax = (max) => {
   return Math.min(n, REPEAT_NUMBER_MAX);
 };
 
+// A missing/invalid count falls back to the minimum; otherwise clamp to [2, cap].
+const clampCount = (count) => {
+  const n = Math.floor(Number(count));
+  if (count == null || count === "" || !Number.isFinite(n)) return REPEAT_CONSTANT_MIN;
+  return Math.min(Math.max(n, REPEAT_CONSTANT_MIN), REPEAT_NUMBER_MAX);
+};
+
 // Pure: derive the engine `repeatInfo` wire object from a visual `repeatSource`.
 // Returns null when the config can't yet produce a repeatable (no kind, no source,
 // or a source of the wrong type) — the caller then drops `repeatInfo` entirely.
 export const buildRepeatInfo = (state, repeatSource) => {
   if (!repeatSource || !repeatSource.kind) return null;
   const { kind, sourceCode } = repeatSource;
+
+  if (kind === "constant") {
+    const count = clampCount(repeatSource.count);
+    return {
+      type: "repeatable",
+      range: Array.from({ length: count }, (_, i) => String(i + 1)),
+      // Always true, but must mention the token (engine MISSING_REPEAT_TOKEN).
+      relevanceInstruction: `${REPEAT_TOKEN_PLACEHOLDER} > 0`,
+    };
+  }
+
   if (!sourceCode || !state[sourceCode]) return null;
   const sourceType = state[sourceCode].type;
 
@@ -125,7 +148,8 @@ export const resyncRepeatablesForSource = (state, changedCode) => {
 // see or edit those — they are transient runtime artifacts. Strip every copy root
 // (`repeatInfo.type === "repeated"`) and its whole subtree from the flat design
 // state and drop the dangling child refs. `componentIndexList` is left as-is
-// (copies stay there; the closed-scope reference rule excludes them anyway).
+// (copies stay there and are referenceable; builder UIs skip codes with no
+// design-state entry, so copies are never offered).
 // Only the copy ROOT carries `repeatInfo.type === "repeated"`; its descendants
 // keep the template's own repeatInfo (usually none), so copies are found by root
 // and removed by subtree walk.
@@ -185,9 +209,11 @@ export function enableRepetition(state, payload) {
   const target = state[code];
   if (!target || !(isGroup(code) || isQuestion(code))) return;
   if (!target.repeatSource) {
-    target.repeatSource = { kind: payload.kind === "number" ? "number" : "mcq" };
+    target.repeatSource = { kind: normalizeKind(payload.kind) };
     if (payload.sourceCode) target.repeatSource.sourceCode = payload.sourceCode;
     if (payload.max !== undefined) target.repeatSource.max = clampMax(payload.max);
+    if (payload.count !== undefined)
+      target.repeatSource.count = clampCount(payload.count);
     if (payload.carryOther !== undefined)
       target.repeatSource.carryOther = !!payload.carryOther;
   }
@@ -206,7 +232,7 @@ export function updateRepetitionSource(state, payload) {
   if (!target || !target.repeatSource) return;
   const rs = target.repeatSource;
   if (payload.kind !== undefined) {
-    rs.kind = payload.kind === "number" ? "number" : "mcq";
+    rs.kind = normalizeKind(payload.kind);
   }
   if (payload.sourceCode !== undefined) {
     rs.sourceCode = payload.sourceCode || undefined;
@@ -214,8 +240,15 @@ export function updateRepetitionSource(state, payload) {
   if (payload.max !== undefined) {
     rs.max = clampMax(payload.max);
   }
+  if (payload.count !== undefined) {
+    rs.count = clampCount(payload.count);
+  }
   if (payload.carryOther !== undefined) {
     rs.carryOther = !!payload.carryOther;
+  }
+  // Constant repetition always carries an explicit count, like number's max.
+  if (rs.kind === "constant" && rs.count == null) {
+    rs.count = REPEAT_CONSTANT_MIN;
   }
   // Number repetition always carries an explicit max (default = cap) so the input
   // value and the derived range never diverge.

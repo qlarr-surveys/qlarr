@@ -1,4 +1,5 @@
-import { OPERATORS, findOperatorByJsonLogicOp } from '../config/operators';
+// @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
+import { OPERATORS, findOperatorByJsonLogicOp } from './operators';
 
 /**
  * Build a mapping from JSON Logic operator names to our operator keys

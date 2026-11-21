@@ -1,6 +1,7 @@
-import { accessibleDependencies } from "@qlarr/design-core/utils/dependencies";
-import { REPEAT_TOKEN_PLACEHOLDER } from "@qlarr/design-core/state/repetition";
-import { isQuestion, stripTags } from "~/utils/design/utils";
+// @ts-nocheck — loose JS-origin logic; internals stay untyped, public API typed at index.ts
+import { accessibleDependencies } from "./dependencies";
+import { REPEAT_TOKEN_PLACEHOLDER } from "../state/repetition";
+import { isQuestion, stripTags } from "./pureUtils";
 
 export const buildReferences = (componentIndices, code, state, mainLang) => {
   let dependencies = accessibleDependencies(componentIndices, code);
@@ -13,7 +14,7 @@ export const buildReferences = (componentIndices, code, state, mainLang) => {
     returnResult.push(repeatLabel);
   }
   dependencies.forEach((el) => {
-    if (isQuestion(el)) {
+    if (isQuestion(el) && state[el]) {
       const reference = buildReference(el, state[el], state, mainLang);
       if (reference.length) {
         returnResult = returnResult.concat(reference);
@@ -47,14 +48,14 @@ const enclosingRepeatSource = (componentIndices, code, state) => {
 };
 
 // "Repeat label" reference; engine substitutes $repeat_token per copy.
-//   number -> iteration number; mcq -> picked option's label
+//   number / constant -> iteration number; mcq -> picked option's label
 //   (carryOther: the "other" copy shows the write-in, hence the branch).
 const buildRepeatLabelReference = (repeatSource) => {
   if (!repeatSource || !repeatSource.kind) return null;
   const { kind, sourceCode } = repeatSource;
 
   let instruction;
-  if (kind === "number") {
+  if (kind === "number" || kind === "constant") {
     instruction = REPEAT_TOKEN_PLACEHOLDER;
   } else if (kind === "mcq") {
     if (!sourceCode) return null;

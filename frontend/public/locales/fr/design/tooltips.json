@@ -27,6 +27,8 @@
   "has_relevance": "A une Condition Afficher/Masquer",
   "has_skip": "A une Logique de Saut active",
   "has_validation": "A une Validation",
+  "is_repeatable": "Est Répétable",
+  "is_carried": "Reprend les Options d'une Autre Question",
   "hide_text": "Définir si vous voulez que le texte soit masqué",
   "icon_mcq": "Permettre aux utilisateurs de sélectionner plusieurs icônes",
   "icon_scq": "Permettre aux utilisateurs de sélectionner une option en utilisant des icônes",

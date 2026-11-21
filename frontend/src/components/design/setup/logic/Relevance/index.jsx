@@ -140,6 +140,7 @@ function Relevance({ code, t }) {
             mainLang={mainLang}
             langList={langList}
             t={tCore}
+            includeCopies
             lead={tCore("logic_builder.show_when")}
             onManual={handleSwitchToRaw}
           />

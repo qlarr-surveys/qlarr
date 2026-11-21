@@ -6,9 +6,9 @@ import { useLogicBuilder } from './LogicBuilderContext';
 import { InlineFieldSelector } from './components/InlineFieldSelector';
 import { InlineOperatorSelector } from './components/InlineOperatorSelector';
 import { ValueInput } from './components/ValueInput';
-import { OPERATORS } from './config/operators';
+import { OPERATORS } from '@qlarr/design-core/logic/operators';
+import { isRuleValid } from '@qlarr/design-core/logic/jsonLogic';
 import { SELECT_FIELD_TYPES } from './config/constants';
-import { isRuleValid } from './utils/jsonLogic';
 import styles from './QlarrLogicBuilderInline.module.css';
 
 const cx = (...names) => names.filter(Boolean).join(' ');

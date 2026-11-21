@@ -873,3 +873,7 @@
 .hintError {
   color: #b3261e;
 }
+
+.hintWarning {
+  color: #b76e00;
+}

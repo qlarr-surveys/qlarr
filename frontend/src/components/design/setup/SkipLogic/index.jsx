@@ -3,7 +3,7 @@ import { ErrorOutlineOutlined } from "@mui/icons-material";
 import { QlarrLogicBuilderInlineWrapper } from "~/components/design/setup/logic/QlarrLogicBuilder";
 import ManualExpression from "~/components/design/setup/logic/ManualExpression";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
-import { jumpDestinations } from "~/utils/design/access/jumpDestinations";
+import { jumpDestinations } from "@qlarr/design-core";
 import { isGroup, stripTags } from "~/utils/design/utils";
 import {
   addSkipRule,

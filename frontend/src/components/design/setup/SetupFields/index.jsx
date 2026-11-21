@@ -520,12 +520,16 @@ export function SetupConfirm({ id, message, confirmLabel, onCancel, onConfirm })
 }
 
 /** The small print under a control; `error` turns it into the error line. */
-export function SetupHint({ id, error, children }) {
+export function SetupHint({ id, error, warning, children }) {
   return (
     <p
       id={id}
       role={error ? "alert" : undefined}
-      className={cx(styles.hint, error && styles.hintError)}
+      className={cx(
+        styles.hint,
+        error && styles.hintError,
+        warning && styles.hintWarning
+      )}
     >
       {children}
     </p>

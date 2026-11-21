@@ -82,12 +82,8 @@ function SetupPanel({ t }) {
     if (!isGroup(code) && !isQuestion(code)) return false;
     if (ds[code]?.type === "end") return false;
     // Can't nest a repeatable inside a repeatable (NESTED_REPEATABLE).
-    if (hasRepeatableAncestor(ds, code)) return false;
-    if (!ds.componentIndex) return false;
-    const deps = accessibleDependencies(ds.componentIndex, code) || [];
-    return deps.some((d) =>
-      ["mcq", "icon_mcq", "image_mcq", "number"].includes(ds[d]?.type),
-    );
+    // No source needed: a fixed-count repeat is always possible.
+    return !hasRepeatableAncestor(ds, code);
   });
 
   // The repeatable itself: its show-logic is the repeat condition, and a disabled

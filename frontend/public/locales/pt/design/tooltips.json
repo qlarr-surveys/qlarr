@@ -27,6 +27,8 @@
   "has_relevance": "Tem Condição de Mostrar/Ocultar",
   "has_skip": "Tem Lógica de Salto ativa",
   "has_validation": "Tem Validação",
+  "is_repeatable": "É Repetível",
+  "is_carried": "Traz Opções de Outra Pergunta",
   "hide_text": "Definir se você deseja que o texto esteja oculto",
   "icon_mcq": "Permitir que os usuários selecionem múltiplos ícones",
   "icon_scq": "Permitir que os usuários selecionem uma opção usando ícones",
