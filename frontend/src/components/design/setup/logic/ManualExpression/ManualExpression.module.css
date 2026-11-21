@@ -1,0 +1,64 @@
+/* A rule written by hand, drawn to docs/design/editor-phase-3.3.html (Logic
+   tab, Show when → Manual expression). */
+
+.box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-block: 8px 12px;
+  padding-inline: 12px 6px;
+  border: 1px solid #e6e8f0;
+  border-radius: 10px;
+  background: #f7f8fb;
+}
+
+/* Asking before the expression is erased. */
+.boxAsking {
+  border-color: #f3d29a;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  font: 600 15px/20px Rubik, sans-serif;
+  color: #1b2150;
+}
+
+.close {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #5b6189;
+  cursor: pointer;
+}
+
+.close:hover {
+  background: #eceef3;
+  color: #1b2150;
+}
+
+.close:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #3a46d8;
+}
+
+/* Code: left to right in every language, in monospace. */
+.expression {
+  min-height: 96px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font: 400 15px/24px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}

@@ -9,7 +9,7 @@ import { treeToJsonLogic } from '@qlarr/design-core/logic/jsonLogic';
  * Component is "uncontrolled" - initializes from props but maintains its own state
  * This allows incomplete rules to exist in the UI while only saving valid rules
  */
-function InlineLogicBuilderSync({ onChange, jsonLogic, initialRule, moreActions }) {
+function InlineLogicBuilderSync({ onChange, jsonLogic, initialRule, ...view }) {
   const { state, dispatch, fields } = useLogicBuilder();
   const { tree, isDirty } = state;
 
@@ -48,7 +48,7 @@ function InlineLogicBuilderSync({ onChange, jsonLogic, initialRule, moreActions 
     }
   }, [jsonLogic, dispatch, fields]);
 
-  return <QlarrLogicBuilderInline moreActions={moreActions} />;
+  return <QlarrLogicBuilderInline {...view} />;
 }
 
 const serialize = (logic) => JSON.stringify(logic ?? null);
@@ -69,7 +69,10 @@ export function QlarrLogicBuilderInlineWrapper({
   includeSelf,
   includeCopies,
   initialRule,
-  moreActions,
+  lead,
+  emptyState,
+  onManual,
+  firstRule,
 }) {
   return (
     <LogicBuilderProvider
@@ -87,7 +90,10 @@ export function QlarrLogicBuilderInlineWrapper({
         onChange={onChange}
         jsonLogic={jsonLogic}
         initialRule={initialRule}
-        moreActions={moreActions}
+        lead={lead}
+        emptyState={emptyState}
+        onManual={onManual}
+        firstRule={firstRule}
       />
     </LogicBuilderProvider>
   );
@@ -105,12 +111,14 @@ QlarrLogicBuilderInlineWrapper.propTypes = {
   includeSelf: PropTypes.bool,
   includeCopies: PropTypes.bool,
   initialRule: PropTypes.object,
-  moreActions: PropTypes.node,
+  lead: PropTypes.string,
+  emptyState: PropTypes.bool,
+  onManual: PropTypes.func,
+  firstRule: PropTypes.object,
 };
 
 InlineLogicBuilderSync.propTypes = {
   onChange: PropTypes.func.isRequired,
   jsonLogic: PropTypes.object,
   initialRule: PropTypes.object,
-  moreActions: PropTypes.node,
 };

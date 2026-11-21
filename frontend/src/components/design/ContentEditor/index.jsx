@@ -23,6 +23,10 @@ import { useReferenceTooltips } from "./useReferenceTooltips";
 
 const { CONTENT_EDITOR_CLASS, RTL_CLASS, LTR_CLASS } = EDITOR_CONSTANTS;
 
+// One empty list for every editor, so the selector below returns the same
+// value each time when there is nothing to show (a new [] re-renders)
+const NO_INSTRUCTIONS = [];
+
 function ContentEditor({
   placeholder,
   extended,
@@ -66,7 +70,9 @@ function ContentEditor({
   const renderedContentRef = useRef(null);
 
   const rawInstructionList = useSelector((state) => {
-    return isActive ? [] : state.designState[code].instructionList || [];
+    return isActive
+      ? NO_INSTRUCTIONS
+      : state.designState[code].instructionList || NO_INSTRUCTIONS;
   });
 
   const { fixedValue } = useReferenceTooltips({

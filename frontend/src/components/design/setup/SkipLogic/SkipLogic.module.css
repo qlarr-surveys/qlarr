@@ -1,30 +1,189 @@
-/* A skip rule's fields, inside its card (SetupCard). */
+/* Skip logic, drawn to docs/design/editor-phase-3.3.html (Logic tab): what
+   its switch opens, and a card per rule. */
 
-/* A rule without a condition: Add condition, then (for authors who already
-   used it once) the manual expression link beside it. */
-.conditionActions {
+.body {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.empty {
+  margin: 0;
+  padding: 12px;
+  border: 1px dashed #cfd5e8;
+  border-radius: 8px;
+  font: 400 13.5px/19px Rubik, sans-serif;
+  color: #5b6189;
+}
+
+.rules {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ====== A rule ====== */
+
+/* Amber until it has a condition and a destination; red with an error. Not
+   clipped: the "Add condition" menu hangs out of the card, so the shaded head
+   and arrival options round their own corners instead. */
+.rule {
+  border: 1px solid #dfe2ef;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.rule:focus {
+  outline: none;
+}
+
+.rule:focus-visible {
+  box-shadow: 0 0 0 2px #3a46d8;
+}
+
+.ruleIncomplete {
+  border-color: #f0d3a8;
+}
+
+.ruleInvalid {
+  border-color: #e9b8b3;
+}
+
+.ruleHead {
+  display: flex;
   align-items: center;
   gap: 8px;
+  min-height: 44px;
+  padding: 4px;
+  padding-inline-start: 12px;
+  border-bottom: 1px solid #eceef6;
+  border-radius: 11px 11px 0 0;
+  background: #f7f8fb;
+  box-sizing: border-box;
 }
 
-/* A text link sitting in a row of buttons, not under a field. */
-button.inlineLink {
-  align-self: center;
+.ruleName {
+  font: 600 14px Rubik, sans-serif;
+  color: #1b2150;
 }
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 11px;
+  font: 500 12px Rubik, sans-serif;
+}
+
+.statusDone {
+  background: #ecfdf3;
+  color: #14532d;
+}
+
+.statusTodo {
+  background: #fff4e5;
+  color: #8a4a00;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.ruleBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+}
+
+.fieldLabel {
+  font: 500 13.5px Rubik, sans-serif;
+  color: #1b2150;
+}
+
+/* "↓ then", between the condition and where it leads. */
+.then {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-block: 2px;
+  padding-inline-start: 10px;
+  color: #5b6189;
+  font: 500 12.5px Rubik, sans-serif;
+}
+
+/* Not chosen yet: amber, like an unfinished condition. Tag-qualified to
+   win over the shared select's own border. */
+select.destinationMissing {
+  border-color: #e0a35a;
+}
+
+.destinationHint {
+  margin: 0;
+  font: 400 12px/16px Rubik, sans-serif;
+  color: #5b6189;
+}
+
+.todo {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 2px 0 0;
+  font: 400 12.5px/17px Rubik, sans-serif;
+  color: #8a4a00;
+}
+
+.todo > span {
+  flex: none;
+  font-weight: 700;
+}
+
+/* ====== On arrival ====== */
 
 /* "To page end" and "Disqualify": what happens on arrival, set apart from
    where the rule goes. */
 .endOptions {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin: 2px -12px -12px;
-  padding: 6px 12px;
-  border-top: 1px solid #eceef6;
+  border-radius: 0 0 11px 11px;
   background: #fafbfd;
 }
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-top: 1px solid #eceef6;
+}
+
+.option > button {
+  margin-top: 1px;
+}
+
+.optionText {
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.optionName {
+  display: block;
+  font: 500 14px/19px Rubik, sans-serif;
+  color: #1b2150;
+}
+
+.optionDescription {
+  display: block;
+  margin-top: 2px;
+  font: 400 12.5px/17px Rubik, sans-serif;
+  color: #5b6189;
+}
+
+/* ====== Errors ====== */
 
 .errorDisplay {
   display: flex;
@@ -44,49 +203,4 @@ button.inlineLink {
 .errorText {
   flex: 1;
   min-width: 0;
-}
-
-/* Switching a manual expression back to the builder erases it: confirm first,
-   as show/hide does. */
-.confirm {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 12px;
-  border: 1px solid #f0c9a0;
-  border-radius: 8px;
-  background: #fff8f0;
-}
-
-.confirmText {
-  margin: 0;
-  font: 400 13.5px/19px Rubik, sans-serif;
-  color: #1b2150;
-}
-
-.confirmActions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.confirmButton {
-  height: 36px;
-  min-width: 72px;
-  padding: 0 14px;
-  border: 0;
-  border-radius: 8px;
-  background: #3a46d8;
-  font: 600 14px Rubik, sans-serif;
-  color: #fff;
-  cursor: pointer;
-}
-
-.confirmButton:hover {
-  background: #2f3bc4;
-}
-
-.confirmButton:focus-visible {
-  outline: 2px solid #3a46d8;
-  outline-offset: 2px;
 }

@@ -2,10 +2,11 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useId,
   useRef,
 } from "react";
-import { Check, ChevronDown, Plus, Trash2 } from "lucide-react";
+import { Check, ChevronDown, Plus, TriangleAlert, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
@@ -131,6 +132,7 @@ export function SetupToggle({
   onChange,
   disabled,
   switchLabel,
+  switchId,
   children,
 }) {
   const labelId = useId();
@@ -138,6 +140,7 @@ export function SetupToggle({
     <div>
       <SetupLabel label={label} help={help} id={labelId} disabled={disabled}>
         <SetupSwitch
+          id={switchId}
           checked={checked}
           onChange={onChange}
           disabled={disabled}
@@ -458,6 +461,61 @@ export function SetupAddButton({ children, className, ...props }) {
       <Plus aria-hidden="true" size={16} strokeWidth={2} />
       <span>{children}</span>
     </button>
+  );
+}
+
+/**
+ * Asks before something is lost: what will happen, then Cancel and the
+ * action. It takes the focus on Cancel, and Escape cancels.
+ */
+export function SetupConfirm({ id, message, confirmLabel, onCancel, onConfirm }) {
+  const { t } = useTranslation(NAMESPACES.DESIGN_CORE);
+  const textId = useId();
+  const cancelRef = useRef(null);
+
+  useEffect(() => {
+    cancelRef.current?.focus();
+  }, []);
+
+  const onKeyDown = (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+      onCancel();
+    }
+  };
+
+  return (
+    <div
+      id={id}
+      role="alertdialog"
+      aria-labelledby={textId}
+      onKeyDown={onKeyDown}
+      className={styles.confirm}
+    >
+      <p id={textId} className={styles.confirmText}>
+        <TriangleAlert
+          aria-hidden="true"
+          size={16}
+          strokeWidth={2}
+          className={styles.confirmIcon}
+        />
+        {message}
+      </p>
+      <div className={styles.confirmActions}>
+        <button
+          ref={cancelRef}
+          type="button"
+          onClick={onCancel}
+          className={styles.confirmCancel}
+        >
+          {t("cancel")}
+        </button>
+        <button type="button" onClick={onConfirm} className={styles.confirmButton}>
+          {confirmLabel}
+        </button>
+      </div>
+    </div>
   );
 }
 
