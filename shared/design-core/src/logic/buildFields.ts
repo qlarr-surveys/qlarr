@@ -30,7 +30,6 @@ export function buildLogicFields({
   langList = [],
   labels = DEFAULT_FIELD_LABELS,
   includeSelf = false,
-  includeCopies = false,
 }) {
   const fields = [
     {
@@ -56,6 +55,8 @@ export function buildLogicFields({
   const dependencies =
     currentCode === 'Survey'
       ? (componentIndices || [])
+          // a repeat's template is never reachable from outside it, only its copies
+          .filter((el) => el.repetitionType !== 'REPEATABLE')
           .map((el) => el.code)
           .filter((code) => isGroup(code) || isQuestion(code))
       : accessibleDependencies(componentIndices, currentCode);
@@ -96,11 +97,8 @@ export function buildLogicFields({
 
   for (const code of sortedDependencies) {
     // A repeat's copies (Qline_user_1 …) are the engine's, not the designer's:
-    // only the show-when builder offers them, built from their template.
+    // built from their template.
     const copy = copyOf(indexMap.get(code));
-    if (copy && !includeCopies) {
-      continue;
-    }
     const component = copy ? designState[copy.template] : designState[code];
     if (!component || (!isQuestion(code) && !isGroup(code))) {
       continue;

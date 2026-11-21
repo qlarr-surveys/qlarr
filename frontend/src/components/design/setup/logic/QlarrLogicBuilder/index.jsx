@@ -67,7 +67,6 @@ export function QlarrLogicBuilderInlineWrapper({
   langList,
   t,
   includeSelf,
-  includeCopies,
   initialRule,
   lead,
   emptyState,
@@ -84,7 +83,6 @@ export function QlarrLogicBuilderInlineWrapper({
       langList={langList}
       t={t}
       includeSelf={includeSelf}
-      includeCopies={includeCopies}
     >
       <InlineLogicBuilderSync
         onChange={onChange}
@@ -109,7 +107,6 @@ QlarrLogicBuilderInlineWrapper.propTypes = {
   langList: PropTypes.arrayOf(PropTypes.string).isRequired,
   t: PropTypes.func.isRequired,
   includeSelf: PropTypes.bool,
-  includeCopies: PropTypes.bool,
   initialRule: PropTypes.object,
   lead: PropTypes.string,
   emptyState: PropTypes.bool,
