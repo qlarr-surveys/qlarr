@@ -6,6 +6,16 @@ export const accessibleDependencies = (componentIndices, code) => {
   if (!componentIndices) {
     return dependencies;
   }
+  // Survey-level logic (quotas) may read any group or question outside a repeat
+  if (code === "Survey") {
+    return filterByRepetitionScope(
+      componentIndices,
+      { code },
+      componentIndices
+        .map((el) => el.code)
+        .filter((el) => isGroup(el) || isQuestion(el))
+    );
+  }
   let componentIndex = componentIndices.find(
     (element) => element.code === code
   );

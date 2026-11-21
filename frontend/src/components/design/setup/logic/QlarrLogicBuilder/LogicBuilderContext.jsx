@@ -21,7 +21,6 @@ export function LogicBuilderProvider({
   langList,
   t,
   includeSelf,
-  includeCopies,
 }) {
   // Build field configuration FIRST - needed for type-aware operator parsing
   const fields = useFieldConfig(
@@ -31,8 +30,7 @@ export function LogicBuilderProvider({
     mainLang,
     langList,
     t,
-    includeSelf,
-    includeCopies
+    includeSelf
   );
 
   // Initialize state hook with fields for proper operator resolution
@@ -96,7 +94,6 @@ LogicBuilderProvider.propTypes = {
   componentIndices: PropTypes.array.isRequired,
   currentCode: PropTypes.string.isRequired,
   includeSelf: PropTypes.bool,
-  includeCopies: PropTypes.bool,
   designState: PropTypes.object.isRequired,
   mainLang: PropTypes.string.isRequired,
   langList: PropTypes.arrayOf(PropTypes.string).isRequired,

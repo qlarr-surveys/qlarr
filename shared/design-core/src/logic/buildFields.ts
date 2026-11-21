@@ -30,7 +30,6 @@ export function buildLogicFields({
   langList = [],
   labels = DEFAULT_FIELD_LABELS,
   includeSelf = false,
-  includeCopies = false,
 }) {
   const fields = [
     {
@@ -53,12 +52,7 @@ export function buildLogicFields({
   const numericCodes =
     designState.index ?? (designState.Survey ? buildCodeIndex(designState) : {});
 
-  const dependencies =
-    currentCode === 'Survey'
-      ? (componentIndices || [])
-          .map((el) => el.code)
-          .filter((code) => isGroup(code) || isQuestion(code))
-      : accessibleDependencies(componentIndices, currentCode);
+  const dependencies = accessibleDependencies(componentIndices, currentCode);
   // Skip logic runs once the question (or page) is answered, so it may read
   // the question itself, or a page's own questions
   if (includeSelf) {
@@ -96,11 +90,8 @@ export function buildLogicFields({
 
   for (const code of sortedDependencies) {
     // A repeat's copies (Qline_user_1 …) are the engine's, not the designer's:
-    // only the show-when builder offers them, built from their template.
+    // built from their template.
     const copy = copyOf(indexMap.get(code));
-    if (copy && !includeCopies) {
-      continue;
-    }
     const component = copy ? designState[copy.template] : designState[code];
     if (!component || (!isQuestion(code) && !isGroup(code))) {
       continue;

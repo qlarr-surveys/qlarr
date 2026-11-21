@@ -9,8 +9,7 @@ export function useFieldConfig(
   mainLang,
   langList,
   t,
-  includeSelf,
-  includeCopies
+  includeSelf
 ) {
   return useMemo(
     () =>
@@ -28,9 +27,8 @@ export function useFieldConfig(
           language: t('logic_builder.language'),
         },
         includeSelf,
-        includeCopies,
       }),
-    [componentIndices, currentCode, designState, mainLang, langList, t, includeSelf, includeCopies]
+    [componentIndices, currentCode, designState, mainLang, langList, t, includeSelf]
   );
 }
 
