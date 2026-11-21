@@ -52,14 +52,7 @@ export function buildLogicFields({
   const numericCodes =
     designState.index ?? (designState.Survey ? buildCodeIndex(designState) : {});
 
-  const dependencies =
-    currentCode === 'Survey'
-      ? (componentIndices || [])
-          // a repeat's template is never reachable from outside it, only its copies
-          .filter((el) => el.repetitionType !== 'REPEATABLE')
-          .map((el) => el.code)
-          .filter((code) => isGroup(code) || isQuestion(code))
-      : accessibleDependencies(componentIndices, currentCode);
+  const dependencies = accessibleDependencies(componentIndices, currentCode);
   // Skip logic runs once the question (or page) is answered, so it may read
   // the question itself, or a page's own questions
   if (includeSelf) {
