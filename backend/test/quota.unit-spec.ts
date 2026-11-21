@@ -115,8 +115,8 @@ describe('quota engine binding', () => {
           ...(disqualifyOnQ1
             ? [
                 {
-                  code: 'skip_to_G2',
-                  skipToComponent: 'G2',
+                  code: 'skip_to_Gend',
+                  skipToComponent: 'Gend',
                   toEnd: false,
                   disqualify: true,
                   text: disqualifyOnQ1,
@@ -152,7 +152,7 @@ describe('quota engine binding', () => {
       processedSurvey: survey,
       lang: null,
       navigationMode: 'GROUP_BY_GROUP',
-      navigationIndex: { name: 'group', groupId: 'G1' },
+      navigationIndex: { name: 'group', groupId: 'Gwelcome' },
       navigationDirection: { name: 'NEXT' },
       skipInvalid: true,
       surveyMode: 'ONLINE',
@@ -258,7 +258,7 @@ describe('quota on a deleted question', () => {
       processedSurvey: JSON.stringify(processedSurvey),
       lang: null,
       navigationMode: 'GROUP_BY_GROUP',
-      navigationIndex: { name: 'group', groupId: 'G1' },
+      navigationIndex: { name: 'group', groupId: 'Gwelcome' },
       navigationDirection: { name: 'NEXT' },
       skipInvalid: true,
       surveyMode: 'ONLINE',
