@@ -15,7 +15,7 @@ import {
   ListItemText,
   MenuItem,
   Paper,
-  TablePagination,
+  CircularProgress,
   Typography,
   FormControl,
   Skeleton,
@@ -89,6 +89,8 @@ function ClampTwoLines({ children, sx }) {
   );
 }
 
+const PAGE_SIZE = 25;
+
 function ResponsesList({ refreshKey }) {
   const surveyService = useService("survey");
   const { t } = useTranslation(NAMESPACES.MANAGE);
@@ -124,8 +126,8 @@ function ResponsesList({ refreshKey }) {
   const [canExportFiles, setCanExportFiles] = useState(false);
   const [askedAboutFiles, setAskedAboutFiles] = useState(false);
 
-  const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [limit, setLimit] = useState(PAGE_SIZE);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const [exportDlgOpen, setExportDlgOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -136,7 +138,7 @@ function ResponsesList({ refreshKey }) {
 
   const processApirror = () => setFetching(false);
 
-  const fetchResponses = (deleted = false) => {
+  const fetchResponses = () => {
     setFetching(true);
 
     const confirmFilesExport = firstFetchThisVisitRef.current === true;
@@ -144,8 +146,8 @@ function ResponsesList({ refreshKey }) {
     surveyService
       .allResponse(
         surveyId,
-        page,
-        rowsPerPage,
+        1,
+        limit,
         status,
         surveyor,
         !askedAboutFiles,
@@ -153,19 +155,19 @@ function ResponsesList({ refreshKey }) {
       .then((data) => {
         if (data) {
           setAskedAboutFiles(true);
-          const totalPages = Math.ceil(data.totalCount / rowsPerPage) || 1;
-          const newPage = page > totalPages ? totalPages : page;
-          if (deleted && page > totalPages) setPage(newPage);
           if (!askedAboutFiles) {
             setAskedAboutFiles(true);
             setCanExportFiles(data.canExportFiles);
           }
           setAllResponse(data);
-          if (responseId && !data.responses?.some((r) => r.id === responseId)) {
+          const firstId = data.responses?.[0]?.id ?? null;
+          if (!responseId) {
+            setResponseId(firstId);
+          } else if (!data.responses?.some((r) => r.id === responseId)) {
             if (skipNextResponseClearRef.current) {
               skipNextResponseClearRef.current = false;
             } else {
-              setResponseId(null);
+              setResponseId(firstId);
               setSelected(null);
             }
           }
@@ -178,6 +180,7 @@ function ResponsesList({ refreshKey }) {
         setFetching(false);
       })
       .finally(() => {
+        setLoadingMore(false);
         if (firstFetchThisVisitRef.current) {
           firstFetchThisVisitRef.current = false;
         }
@@ -363,7 +366,7 @@ function ResponsesList({ refreshKey }) {
 
   useEffect(() => {
     fetchResponses();
-  }, [page, rowsPerPage, status, surveyor]);
+  }, [limit, status, surveyor]);
 
   // Refetch the page and the open response when the parent asks (refreshKey
   // changes; 0 is the first render, already fetched above). The page fetch
@@ -429,12 +432,13 @@ function ResponsesList({ refreshKey }) {
           setResponseId(null);
           setSelected(null);
         }
-        fetchResponses(true);
+        fetchResponses();
       })
       .catch(processApirror);
   };
 
   const onSurveyorClicked = (response) => {
+    setLimit(PAGE_SIZE);
     setStatus("all");
     setSurveyor(response.surveyorID || null);
   };
@@ -550,6 +554,9 @@ function ResponsesList({ refreshKey }) {
     }
   };
 
+  const shownCount = allResponse?.responses?.length || 0;
+  const totalCount = allResponse?.totalCount || 0;
+
   const quickExport = async () => {
     setExporting(true);
     try {
@@ -639,7 +646,7 @@ function ResponsesList({ refreshKey }) {
                       label={t("responses.filter_by_type")}
                       value={status}
                       onChange={(e) => {
-                        setPage(1);
+                        setLimit(PAGE_SIZE);
                         setStatus(e.target.value);
                       }}
                     >
@@ -705,7 +712,7 @@ function ResponsesList({ refreshKey }) {
               </Grid>
             </Box>
             <Divider />
-            {fetching ? (
+            {fetching && !loadingMore ? (
               <Box p={2}>
                 {[...Array(8)].map((_, i) => (
                   <Box
@@ -736,10 +743,7 @@ function ResponsesList({ refreshKey }) {
                       <ListItemButton
                         key={r.id}
                         selected={isSelected}
-                        onClick={() => {
-                          console.log("setResponseId", r.id);
-                          setResponseId(r.id);
-                        }}
+                        onClick={() => setResponseId(r.id)}
                         sx={{ alignItems: "flex-start" }}
                       >
                         <ListItemText
@@ -825,22 +829,39 @@ function ResponsesList({ refreshKey }) {
                 </List>
 
                 <Divider />
-                <TablePagination
-                  rowsPerPageOptions={[10, 25, 50, 100]}
-                  component="div"
-                  labelDisplayedRows={({ from, to, count }) =>
-                    t("responses.label_displayed_rows", { from, to, count })
-                  }
-                  labelRowsPerPage={t("responses.label_rows_per_page")}
-                  count={allResponse?.totalCount || 0}
-                  rowsPerPage={rowsPerPage}
-                  page={page - 1}
-                  onPageChange={(_, newPage) => setPage(newPage + 1)}
-                  onRowsPerPageChange={(e) => {
-                    setRowsPerPage(parseInt(e.target.value, 10));
-                    setPage(1);
-                  }}
-                />
+                <Box
+                  px={2}
+                  py={1}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  gap={1}
+                >
+                  <Typography variant="body2" color="text.secondary">
+                    {t("responses.showing_count", {
+                      shown: shownCount,
+                      count: totalCount,
+                    })}
+                  </Typography>
+                  {shownCount < totalCount && (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      disabled={loadingMore}
+                      endIcon={
+                        loadingMore ? (
+                          <CircularProgress size={16} color="inherit" />
+                        ) : null
+                      }
+                      onClick={() => {
+                        setLoadingMore(true);
+                        setLimit((current) => current + PAGE_SIZE);
+                      }}
+                    >
+                      {t("responses.show_more")}
+                    </Button>
+                  )}
+                </Box>
               </>
             )}
           </Paper>
