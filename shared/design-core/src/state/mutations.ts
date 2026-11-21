@@ -1138,6 +1138,14 @@ export function changeContent(state, payload) {
 }
 
 export function changeCustomCss(state, payload) {
+  // The {{ }} instructions are rebuilt from the new CSS: the old ones go first,
+  // or any beyond the new CSS's count would stay behind.
+  const component = state[payload.code];
+  component.instructionList
+    ?.filter((instruction) => instruction.code.startsWith("format_custom_css_"))
+    .forEach((instruction) =>
+      changeInstruction(component, { code: instruction.code, remove: true }),
+    );
   const referenceInstructions = buildFormatInstruction(
     payload.value,
     "custom",
