@@ -30,6 +30,7 @@ import {
   isArrayType,
   quotaMessageKey,
   setupOptions,
+  otherOptionSetup,
 } from "../constants/design";
 import { convertChoiceQuestion } from "./convertChoiceQuestion";
 import { convertArrayQuestion } from "./convertArrayQuestion";
@@ -354,7 +355,8 @@ export function changeAttribute(state, payload) {
     const component = state[payload.code];
     convertTextQuestion(component, payload.value === "number" ? "number" : "text");
     refreshOtherQuestionMask(state, payload.code);
-    setup(state, { code: payload.code, rules: setupOptions("other_text", component) });
+    const otherCode = payload.code.replace(/Atext$/, "");
+    setup(state, { code: otherCode, rules: otherOptionSetup(otherCode, component) });
   } else if (
     [
       "randomize_questions",

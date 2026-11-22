@@ -257,6 +257,11 @@ const SetupBody = React.memo(function SetupBody({ setupInfo, rules, code, t }) {
     () => BASIC_RULES.filter((rule) => flatRules.includes(rule)),
     [flatRules]
   );
+  const ruleCodes = React.useMemo(
+    () => Object.assign({}, ...tabs.map((tab) => tab.ruleCodes)),
+    [tabs]
+  );
+  const codeOf = (rule) => ruleCodes[rule] || code;
 
   const view = useSetupView({ setupInfo, tabs, basicRules });
 
@@ -298,7 +303,7 @@ const SetupBody = React.memo(function SetupBody({ setupInfo, rules, code, t }) {
         <div className={styles.flatRows}>
           {flatRules.map((rule) => (
             <Row key={rule} rule={rule} flash={view.flash}>
-              <SetupComponent code={code} rule={rule} t={t} />
+              <SetupComponent code={codeOf(rule)} rule={rule} t={t} />
             </Row>
           ))}
         </div>
@@ -359,7 +364,12 @@ const SetupBody = React.memo(function SetupBody({ setupInfo, rules, code, t }) {
             <div className={styles.basicRows}>
               {basicRules.map((rule) => (
                 <Row key={rule} rule={rule} flash={view.flash}>
-                  <SetupComponent code={code} rule={rule} t={t} isQuickOptions />
+                  <SetupComponent
+                    code={codeOf(rule)}
+                    rule={rule}
+                    t={t}
+                    isQuickOptions
+                  />
                 </Row>
               ))}
             </div>
@@ -443,7 +453,7 @@ const SetupBody = React.memo(function SetupBody({ setupInfo, rules, code, t }) {
           >
             {selectedTab.key === "validation" ? (
               <ValidationRulesPanel
-                code={code}
+                code={codeOf(selectedTab.rules[0])}
                 t={t}
                 validationRules={selectedTab.rules}
               />
@@ -459,7 +469,7 @@ const SetupBody = React.memo(function SetupBody({ setupInfo, rules, code, t }) {
                 >
                   {selectedTab.rules.map((rule) => (
                     <Row key={rule} rule={rule} flash={view.flash}>
-                      <SetupComponent code={code} rule={rule} t={t} />
+                      <SetupComponent code={codeOf(rule)} rule={rule} t={t} />
                     </Row>
                   ))}
                 </div>

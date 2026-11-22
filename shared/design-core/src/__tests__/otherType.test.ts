@@ -9,7 +9,7 @@ import {
 } from "../state/mutations";
 import { createQuestion } from "../factory/questionFactory";
 import { addQuestionValueInstruction } from "../state/addInstructions";
-import { setupOptions } from "../constants/design";
+import { otherOptionSetup } from "../constants/design";
 import { buildLogicFields } from "../logic/buildFields";
 import sample from "./fixtures/sample-survey.json";
 
@@ -48,9 +48,9 @@ describe("other text answer type", () => {
     const state = freshState();
     const code = addChoiceWithOther(state);
     expect(instruction(state, code, "value").returnType).toBe("string");
-    expect(rulesOf(setupOptions("other_text", state[code]), "validation")).toContain(
-      "validation_pattern",
-    );
+    expect(
+      rulesOf(otherOptionSetup("QothAother", state[code]), "validation"),
+    ).toContain("validation_pattern");
   });
 
   it("switching to number stores a number and offers number rules", () => {
@@ -60,11 +60,27 @@ describe("other text answer type", () => {
     changeAttribute(state, { code, key: "other_type", value: "number" });
 
     expect(instruction(state, code, "value").returnType).toBe("double");
-    const rules = setupOptions("other_text", state[code]);
+    const rules = otherOptionSetup("QothAother", state[code]);
     expect(rulesOf(rules, "general")).not.toContain("decimal_separator");
     expect(rulesOf(rules, "validation")).toContain("validation_between");
     expect(rulesOf(rules, "validation")).not.toContain("validation_pattern");
-    expect(state.setup).toEqual({ code, rules });
+  });
+
+  it("refreshes the Other option's settings panel, rows of the text box marked with its code", () => {
+    const state = freshState();
+    const code = addChoiceWithOther(state);
+
+    changeAttribute(state, { code, key: "other_type", value: "number" });
+
+    const rules = otherOptionSetup("QothAother", state[code]);
+    expect(state.setup).toEqual({ code: "QothAother", rules });
+    const general = rules.find((s) => s.key === "general");
+    expect(general.rules).toEqual(["changeCode", "disabled", "other_type", "maxChars"]);
+    expect(general.ruleCodes).toEqual({ other_type: code, maxChars: code });
+    const validation = rules.find((s) => s.key === "validation");
+    expect(validation.rules).toContain("validation_between");
+    expect(validation.ruleCodes.validation_between).toBe(code);
+    expect(rules.find((s) => s.key === "logic").ruleCodes).toBeUndefined();
   });
 
   it("drops rules the new type does not support", () => {

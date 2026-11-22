@@ -67,8 +67,8 @@ export const LOGO_SIZE_DIMENSIONS = {
 
 const NOT_MOVABLE_TYPES = ["group", "welcome", "end", "options", "other_text", "text_item"];
 
-export const setupOptions = (type, component?) => {
-  const result = baseSetupOptions(type, component);
+export const setupOptions = (type) => {
+  const result = baseSetupOptions(type);
   if (!result) return result;
   const movable = !NOT_MOVABLE_TYPES.includes(type);
   return result.map((section) => {
@@ -83,6 +83,23 @@ export const setupOptions = (type, component?) => {
     }
     return section;
   });
+};
+
+export const otherOptionSetup = (otherCode, otherText) => {
+  const textCode = `${otherCode}Atext`;
+  const [general, validation] = baseSetupOptions("other_text", otherText);
+  const forText = (rules) =>
+    Object.fromEntries(rules.map((rule) => [rule, textCode]));
+  return [
+    {
+      title: "general",
+      key: "general",
+      rules: ["changeCode", "disabled", ...general.rules],
+      ruleCodes: forText(general.rules),
+    },
+    { title: "logic", key: "logic", rules: ["relevance"] },
+    { ...validation, ruleCodes: forText(validation.rules) },
+  ];
 };
 
 // Every question and page can skip ahead, except the end page (nothing

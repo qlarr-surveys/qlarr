@@ -27,10 +27,6 @@
   opacity: 1;
 }
 
-.answerItem .answerIconOther:hover {
-  cursor: pointer;
-}
-
 .answerItem .answerNumberOrder {
   width: 30px;
   text-align: center;
@@ -67,10 +63,6 @@
 
 .textFieldOther :global(.MuiInputBase-input) {
   color: var(--qlarr-text-disabled);
-}
-
-.textFieldOtherHighlight :global(.MuiInputBase-root) {
-  background-color: var(--qlarr-contrast-color);
 }
 
 .textFieldInert {
