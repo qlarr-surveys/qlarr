@@ -15,6 +15,7 @@
   "date_format": "Stel het datumformaat in voor datum invoer",
   "date_time": "Verzamel zowel datum als tijd samen",
   "decimal_separator": "Stel het decimaal scheidingsteken in voor numerieke invoer",
+  "other_type": "Kies of het veld Anders tekst of een getal accepteert. Getal opent een numeriek toetsenbord op telefoons.",
   "description": "Geef een beschrijving voor je enquête om gebruikers te helpen het te begrijpen",
   "disabled": "Verberg deze vraag volledig zodat respondenten het niet kunnen zien of ermee kunnen interacteren. Alle zichtbaarheidsvoorwaarden worden gewist.",
   "email": "Verzamel en valideer e-mailadressen",

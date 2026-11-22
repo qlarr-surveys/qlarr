@@ -253,13 +253,15 @@ function buildOtherField(code, component, state, mainLang, parentLabel) {
   }
 
   const otherLabel = stripTags(otherState?.content?.[mainLang]?.label || '');
+  const valueType =
+    state[textChild.qualifiedCode]?.other_type === 'number' ? 'number' : 'text';
 
   return {
     code: `${code}AotherAtext`,
     label: `${parentLabel} [${otherLabel}]`,
     numericCode: null,
-    type: 'text',
-    questionType: 'text',
+    type: valueType,
+    questionType: valueType,
     defaultOperator: 'equal',
   };
 }

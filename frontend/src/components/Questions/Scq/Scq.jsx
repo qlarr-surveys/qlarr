@@ -10,6 +10,11 @@ import FormControl from "@mui/material/FormControl";
 import RadioGroup from "@mui/material/RadioGroup";
 import { setDirty } from "~/state/templateState";
 import Content from "~/components/run/Content";
+import {
+  SAFE_NUMBER_MAX_CHARS,
+  formatNumber,
+  parseNumberInput,
+} from "~/components/Questions/Number/numberInput";
 
 function SCQ(props) {
   const state = useSelector((state) => {
@@ -83,6 +88,7 @@ function ScqChoice(props) {
 
 function ScqChoiceOther(props) {
   const nestedTextChild = props.Choice.answers[0];
+  const isNumber = nestedTextChild.other_type === "number";
   const state = useSelector((state) => {
     let choiceState = state.runState.values[props.Choice.qualifiedCode];
     let childState = state.runState.values[nestedTextChild.qualifiedCode];
@@ -95,7 +101,7 @@ function ScqChoiceOther(props) {
         (show_errors || isChildDirty) &&
         childState?.relevance === true &&
         childState?.validity === false,
-      value: childState?.value || "",
+      value: childState?.value,
     };
   }, shallowEqual);
   const dispatch = useDispatch();
@@ -104,7 +110,9 @@ function ScqChoiceOther(props) {
     dispatch(
       valueChange({
         componentCode: event.target.name,
-        value: event.target.value,
+        value: isNumber
+          ? parseNumberInput(state.value, event.target.value)
+          : event.target.value,
       })
     );
   };
@@ -169,7 +177,17 @@ function ScqChoiceOther(props) {
             onChange={handleChange}
             onFocus={handleFocus}
             onBlur={lostFocus}
-            value={state.value}
+            value={
+              isNumber ? formatNumber(state.value) : state.value || ""
+            }
+            inputProps={
+              isNumber
+                ? {
+                    maxLength: SAFE_NUMBER_MAX_CHARS,
+                    inputMode: "numeric",
+                  }
+                : undefined
+            }
             helperText={
               state.childInvalid ? (
                 <Validation component={nestedTextChild} limit={1} />

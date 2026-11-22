@@ -186,6 +186,12 @@ export const refreshListForMultipleChoice = (component, state) => {
   return component;
 };
 
+const otherTextValue = (state, otherCode) => {
+  const value = `${otherCode}Atext.value`;
+  if (state[`${otherCode}Atext`]?.other_type !== "number") return value;
+  return `(${value} == undefined ? "" : ${value}.toString())`;
+};
+
 export const addMaskedValuesInstructions = (
   qualifiedCode,
   component,
@@ -286,7 +292,7 @@ export const addMaskedValuesInstructions = (
           component.children
             .map((el) =>
               el.type == "other"
-                ? `"${el.code}": ${el.qualifiedCode}Atext.value`
+                ? `"${el.code}": ${otherTextValue(state, el.qualifiedCode)}`
                 : `"${el.code}": QlarrScripts.stripTags(${el.qualifiedCode}.label)`,
             )
             .join(",") +
@@ -311,7 +317,7 @@ export const addMaskedValuesInstructions = (
           component.children.map((answer) => {
             return `"${answer.code}": ${
               answer.type == "other"
-                ? answer.qualifiedCode + "Atext.value"
+                ? otherTextValue(state, answer.qualifiedCode)
                 : `QlarrScripts.stripTags(${answer.qualifiedCode}.label)`
             }`;
           }) +
@@ -650,7 +656,7 @@ export const addAnswerInstructions = (
       changeInstruction(answer, {
         code: "value",
         isActive: false,
-        returnType: "string",
+        returnType: answer.other_type === "number" ? "double" : "string",
         text: "",
       });
       changeInstruction(answer, {

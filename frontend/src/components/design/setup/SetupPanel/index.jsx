@@ -752,6 +752,18 @@ const SetupComponent = React.memo(({ code, rule, t, isQuickOptions }) => {
           code={code}
         />
       );
+    case "other_type":
+      return (
+        <SelectValue
+          values={["text", "number"]}
+          labels={[t("other_type_text"), t("other_type_number")]}
+          key={code + rule}
+          defaultValue="text"
+          label="other_type"
+          rule={rule}
+          code={code}
+        />
+      );
     case "decimal_separator":
       const decimalValues = ["", ",", "."];
       const labels = [t("no_decimals_allowed"), ",", "."];

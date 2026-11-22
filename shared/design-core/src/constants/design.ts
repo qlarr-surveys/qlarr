@@ -67,8 +67,8 @@ export const LOGO_SIZE_DIMENSIONS = {
 
 const NOT_MOVABLE_TYPES = ["group", "welcome", "end", "options", "other_text", "text_item"];
 
-export const setupOptions = (type) => {
-  const result = baseSetupOptions(type);
+export const setupOptions = (type, component?) => {
+  const result = baseSetupOptions(type, component);
   if (!result) return result;
   const movable = !NOT_MOVABLE_TYPES.includes(type);
   return result.map((section) => {
@@ -95,7 +95,7 @@ const withSkipLogic = (type, rules) => {
     : [...rules.slice(0, orderIndex), "skip_logic", ...rules.slice(orderIndex)];
 };
 
-const baseSetupOptions = (type) => {
+const baseSetupOptions = (type, component?) => {
   switch (type) {
     case "group":
     case "welcome":
@@ -246,27 +246,19 @@ const baseSetupOptions = (type) => {
         },
       ];
 
-    case "other_text":
+    case "other_text": {
+      const isNumber = component?.other_type === "number";
       return [
         {
           title: "general",
           key: "general",
-          rules: ["maxChars"],
+          rules: ["other_type", "maxChars"],
         },
-        {
-          title: "validation",
-          key: "validation",
-          rules: [
-            "validation_required",
-            "validation_max_char_length",
-            "validation_min_char_length",
-            "validation_pattern",
-            "validation_contains",
-            "validation_not_contains",
-            "custom_validation_rules",
-          ],
-        },
+        baseSetupOptions(isNumber ? "number" : "text").find(
+          (section) => section.key === "validation",
+        ),
       ];
+    }
 
     case "text_item":
       return [

@@ -350,6 +350,11 @@ export function changeAttribute(state, payload) {
     addMaskedValuesInstructions(payload.code, state[payload.code], state);
   } else if (payload.key == "decimal_separator") {
     addMaskedValuesInstructions(payload.code, state[payload.code], state);
+  } else if (payload.key == "other_type") {
+    const component = state[payload.code];
+    convertTextQuestion(component, payload.value === "number" ? "number" : "text");
+    refreshOtherQuestionMask(state, payload.code);
+    setup(state, { code: payload.code, rules: setupOptions("other_text", component) });
   } else if (
     [
       "randomize_questions",
@@ -1858,6 +1863,11 @@ const buildIndex = (state) => {
 
 const splitQuestionCodes = (code) => {
   return code.split(/(A[a-z_0-9]+|Q[a-z_0-9]+)/).filter(Boolean);
+};
+
+const refreshOtherQuestionMask = (state, code) => {
+  const questionCode = code.replace(/AotherAtext$/, "");
+  addMaskedValuesInstructions(questionCode, state[questionCode], state);
 };
 
 const cleanupValidation = (state, code) => {

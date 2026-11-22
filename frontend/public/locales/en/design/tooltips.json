@@ -45,6 +45,7 @@
   "show_question_hint": "Add a subtle tip below the question for extra clarity.",
   "text_field_size": "Set the number of characters allowed in the text field",
   "decimal_separator": "Set the decimal separator for numeric input",
+  "other_type": "Choose whether the \"Other\" field takes text or a number. Number opens a number keypad on phones.",
   "lower_bound_hint": "Display a helpful hint on lowest value to guide responses",
   "upper_bound_hint": "Display a helpful hint on highest value to guide responses",
   "date_format": "Set the date format for date input",

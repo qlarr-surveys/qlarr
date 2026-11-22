@@ -39,6 +39,10 @@ function ChoiceItemDesign(props) {
     return state.designState[props.qualifiedCode];
   });
 
+  const otherText = useSelector(
+    (state) => state.designState[props.qualifiedCode + "Atext"]
+  );
+
   // Carried options are mirrored from the source and owned by the carry: no
   // reorder / recode / edit / delete. The target-local "None" stays editable.
   const carryOwned = useSelector(
@@ -265,7 +269,7 @@ function ChoiceItemDesign(props) {
                     dispatch(
                       setup({
                         code: props.qualifiedCode + "Atext",
-                        rules: setupOptions("other_text"),
+                        rules: setupOptions("other_text", otherText),
                       })
                     );
                   }}
