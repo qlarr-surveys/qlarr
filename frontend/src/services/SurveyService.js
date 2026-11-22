@@ -110,10 +110,10 @@ class SurveyService extends BaseService {
     };
   }
 
-  async downloadResponseFiles(surveyId, { from, to, statuses }) {
+  async downloadResponseFiles(surveyId, { from, to, statuses, nameBy }) {
     const url =
       `/survey/${surveyId}/response/files/download/${from}/${to}` +
-      `?status=${statuses.join(",")}`;
+      `?status=${statuses.join(",")}&name_by=${nameBy}`;
     const response = await this.handleRequest(() =>
       authenticatedApi.get(url, { responseType: "blob" })
     );

@@ -24,6 +24,7 @@ import { ResponseDetailRow, ResponseRepository } from "./response.repository";
 import {
   ExportOptions,
   ExportStatus,
+  FileNaming,
   ResponseDto,
   ResponseEventDto,
   ResponseStatus,
@@ -297,6 +298,7 @@ export class ResponseService {
     statuses: ExportStatus[],
     from: number,
     to: number,
+    naming: FileNaming,
   ): Promise<Readable | null> {
     const rows = await this.responses.findFilesInIndexRange(
       surveyId,
@@ -383,7 +385,8 @@ export class ResponseService {
           currentPass = pass;
           zip.addReadStream(
             pass,
-            `${file.index}-${file.questionId.split(".")[0]}` +
+            `${naming === "ID" ? file.responseId : file.index}_` +
+              file.questionId.split(".")[0] +
               extname(file.originalFilename),
           );
           dl.body.on("error", (err) => {

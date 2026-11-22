@@ -23,6 +23,7 @@ import { CrosstabService } from './crosstab.service';
 import {
   exportOptionsFrom,
   exportStatusesFrom,
+  fileNamingFrom,
   responseStatusFrom,
   ResponsesSummaryDto,
 } from './response.dto';
@@ -144,6 +145,7 @@ export class ResponseController {
     @Param('from') from: string,
     @Param('to') to: string,
     @Query('status') status: string | undefined,
+    @Query('name_by') nameBy: string | undefined,
     @Res() res: Response,
   ): Promise<void> {
     const zip = await this.responses.bulkDownloadResponses(
@@ -151,6 +153,7 @@ export class ResponseController {
       exportStatusesFrom(status),
       toInt(from) ?? 0,
       toInt(to) ?? 0,
+      fileNamingFrom(nameBy),
     );
     if (!zip) {
       res.status(204).end();
