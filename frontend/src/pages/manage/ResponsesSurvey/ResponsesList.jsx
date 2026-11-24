@@ -178,7 +178,11 @@ function ResponsesList({ refreshKey }) {
   // place of a deleted response, so the one after it (or the last) takes over.
   const fallbackIndexRef = useRef(0);
 
+  // Counts fetches, so one a later fetch has overtaken is dropped.
+  const fetchIdRef = useRef(0);
+
   const fetchResponses = () => {
+    const fetchId = ++fetchIdRef.current;
     if (!keepListRef.current) setFetching(true);
     keepListRef.current = false;
 
@@ -202,6 +206,7 @@ function ResponsesList({ refreshKey }) {
       ),
     )
       .then((results) => {
+        if (fetchId !== fetchIdRef.current) return;
         const data = results[0] && {
           ...results[0],
           responses: results.flatMap((result) => result?.responses || []),
@@ -248,11 +253,13 @@ function ResponsesList({ refreshKey }) {
         setFetching(false);
       })
       .catch((err) => {
-        processApirror(err);
         console.error(err);
+        if (fetchId !== fetchIdRef.current) return;
+        processApirror(err);
         setFetching(false);
       })
       .finally(() => {
+        if (fetchId !== fetchIdRef.current) return;
         setLoadingMore(false);
         if (firstFetchThisVisitRef.current) {
           firstFetchThisVisitRef.current = false;
@@ -513,8 +520,9 @@ function ResponsesList({ refreshKey }) {
           ...prev,
           responses: prev.responses.filter((r) => r.id !== deletedId),
         }));
+        // Refetches with the page and filters as they are now.
         keepListRef.current = true;
-        fetchResponses();
+        setPaging((prev) => ({ ...prev }));
       })
       .catch(processApirror);
   };
