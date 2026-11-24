@@ -85,6 +85,33 @@ export const setupOptions = (type) => {
   });
 };
 
+// All, None and Other have fixed codes, so their panels offer no code field.
+const FIXED_CODE_OPTION_TYPES = ["all", "none", "other"];
+
+export const optionSetup = (optionType) =>
+  setupOptions(
+    FIXED_CODE_OPTION_TYPES.includes(optionType)
+      ? "fixed_code_option"
+      : "options",
+  );
+
+export const otherOptionSetup = (otherCode, otherText) => {
+  const textCode = `${otherCode}Atext`;
+  const [general, validation] = baseSetupOptions("other_text", otherText);
+  const forText = (rules) =>
+    Object.fromEntries(rules.map((rule) => [rule, textCode]));
+  return [
+    {
+      title: "general",
+      key: "general",
+      rules: ["disabled", ...general.rules],
+      ruleCodes: forText(general.rules),
+    },
+    { title: "logic", key: "logic", rules: ["relevance"] },
+    { ...validation, ruleCodes: forText(validation.rules) },
+  ];
+};
+
 // Every question and page can skip ahead, except the end page (nothing
 // follows it). Placed before order_instructions, as single choice has it.
 const withSkipLogic = (type, rules) => {
@@ -95,7 +122,7 @@ const withSkipLogic = (type, rules) => {
     : [...rules.slice(0, orderIndex), "skip_logic", ...rules.slice(orderIndex)];
 };
 
-const baseSetupOptions = (type) => {
+const baseSetupOptions = (type, component?) => {
   switch (type) {
     case "group":
     case "welcome":
@@ -246,27 +273,28 @@ const baseSetupOptions = (type) => {
         },
       ];
 
-    case "other_text":
+    case "fixed_code_option":
+      return [
+        {
+          title: "",
+          key: "",
+          rules: ["disabled", "relevance"],
+        },
+      ];
+
+    case "other_text": {
+      const isNumber = component?.other_type === "number";
       return [
         {
           title: "general",
           key: "general",
-          rules: ["maxChars"],
+          rules: ["other_type", "maxChars"],
         },
-        {
-          title: "validation",
-          key: "validation",
-          rules: [
-            "validation_required",
-            "validation_max_char_length",
-            "validation_min_char_length",
-            "validation_pattern",
-            "validation_contains",
-            "validation_not_contains",
-            "custom_validation_rules",
-          ],
-        },
+        baseSetupOptions(isNumber ? "number" : "text").find(
+          (section) => section.key === "validation",
+        ),
       ];
+    }
 
     case "text_item":
       return [

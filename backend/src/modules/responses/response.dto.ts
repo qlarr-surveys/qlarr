@@ -36,6 +36,14 @@ export function exportStatusesFrom(input?: string): ExportStatus[] {
   return EXPORT_STATUSES.filter((s) => picked.includes(s));
 }
 
+/** What names a file in the response files ZIP: the response index or id. */
+export type FileNaming = 'INDEX' | 'ID';
+
+/** `id` names files by response id; anything else by response index. */
+export function fileNamingFrom(input?: string): FileNaming {
+  return input?.toLowerCase() === 'id' ? 'ID' : 'INDEX';
+}
+
 export interface ExportOptions {
   textHeaders: boolean;
   textValues: boolean;

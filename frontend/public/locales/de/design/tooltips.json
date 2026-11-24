@@ -45,6 +45,7 @@
   "show_question_hint": "Fügen Sie einen dezenten Hinweis unter der Frage hinzu, um zusätzliche Klarheit zu schaffen.",
   "text_field_size": "Anzahl der Zeichen im Textfeld festlegen",
   "decimal_separator": "Dezimaltrennzeichen für numerische Eingaben festlegen",
+  "other_type": "Legen Sie fest, ob das Feld „Andere“ Text oder eine Zahl annimmt. Bei Zahl öffnet sich auf Smartphones ein Ziffernblock.",
   "lower_bound_hint": "Zeigen Sie einen hilfreichen Hinweis zum niedrigsten Wert, um die Antworten zu erleichtern.",
   "upper_bound_hint": "Zeigen Sie einen hilfreichen Hinweis zum höchsten Wert, um die Antworten zu erleichtern.",
   "date_format": "Datumsformat für Datumseingabe festlegen",

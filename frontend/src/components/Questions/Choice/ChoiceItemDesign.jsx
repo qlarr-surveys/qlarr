@@ -13,7 +13,11 @@ import {
   removeAnswer,
   setup,
 } from "~/state/design/designState";
-import { setupOptions } from "@qlarr/design-core/constants/design";
+import {
+  optionSetup,
+  otherOptionSetup,
+  setupOptions,
+} from "@qlarr/design-core/constants/design";
 import { useDrag, useDrop } from "react-dnd";
 import { useEffect, useRef } from "react";
 import { contentEditable, inDesign } from "~/routes";
@@ -39,6 +43,10 @@ function ChoiceItemDesign(props) {
     return state.designState[props.qualifiedCode];
   });
 
+  const otherText = useSelector(
+    (state) => state.designState[props.qualifiedCode + "Atext"]
+  );
+
   // Carried options are mirrored from the source and owned by the carry: no
   // reorder / recode / edit / delete. The target-local "None" stays editable.
   const carryOwned = useSelector(
@@ -62,12 +70,6 @@ function ChoiceItemDesign(props) {
     ]?.["label"];
   });
 
-  const isInSetupText = useSelector((state) => {
-    return (
-      answer.type === "other" &&
-      state.designState.setup?.code == props.qualifiedCode + "Atext"
-    );
-  });
   const isInSetup = useSelector((state) => {
     return state.designState.setup?.code == props.qualifiedCode;
   });
@@ -233,8 +235,7 @@ function ChoiceItemDesign(props) {
             variant="outlined"
             size="small"
             fullWidth
-            className={`${styles.textFieldOther} ${isInSetupText ? styles.textFieldOtherHighlight : ""}`}
-            style={{ "--qlarr-contrast-color": contrastColor }}
+            className={styles.textFieldOther}
             value={content || ""}
             onChange={(e) => {
               if (contentEditable(props.designMode)) {
@@ -253,25 +254,6 @@ function ChoiceItemDesign(props) {
                 ? props.t("content_editor_placeholder_option")
                 : mainContent || props.t("content_editor_placeholder_option")
             }
-            InputProps={{
-              endAdornment: inDesign(props.designMode) ? (
-                <BuildIcon
-                  key="setup"
-                  color="action"
-                  className={`${styles.smallIcon} ${styles.answerIconOther}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    dispatch(
-                      setup({
-                        code: props.qualifiedCode + "Atext",
-                        rules: setupOptions("other_text"),
-                      })
-                    );
-                  }}
-                />
-              ) : undefined,
-            }}
           />
         ) : (
           <ContentEditor
@@ -319,9 +301,12 @@ function ChoiceItemDesign(props) {
                 dispatch(
                   setup({
                     code: props.qualifiedCode,
-                    rules: setupOptions(
-                      props.type === "text" ? "text_item" : "options",
-                    ),
+                    rules:
+                      answer.type === "other"
+                        ? otherOptionSetup(props.qualifiedCode, otherText)
+                        : props.type === "text"
+                          ? setupOptions("text_item")
+                          : optionSetup(answer.type),
                   })
                 );
               }}

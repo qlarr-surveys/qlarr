@@ -15,6 +15,7 @@ import {
   ListItemText,
   MenuItem,
   Paper,
+  CircularProgress,
   TablePagination,
   Typography,
   FormControl,
@@ -89,6 +90,27 @@ function ClampTwoLines({ children, sx }) {
   );
 }
 
+const PAGE_SIZES = [25, 50, 100];
+const PAGE_SIZE_KEY = "responses_rows_per_page";
+
+const readPageSize = () => {
+  try {
+    const stored = Number(localStorage.getItem(PAGE_SIZE_KEY));
+    return PAGE_SIZES.includes(stored) ? stored : PAGE_SIZES[0];
+  } catch {
+    // Private windows and blocked site data throw on access.
+    return PAGE_SIZES[0];
+  }
+};
+
+const writePageSize = (value) => {
+  try {
+    localStorage.setItem(PAGE_SIZE_KEY, String(value));
+  } catch {
+    // Kept for this visit either way.
+  }
+};
+
 function ResponsesList({ refreshKey }) {
   const surveyService = useService("survey");
   const { t } = useTranslation(NAMESPACES.MANAGE);
@@ -124,8 +146,16 @@ function ResponsesList({ refreshKey }) {
   const [canExportFiles, setCanExportFiles] = useState(false);
   const [askedAboutFiles, setAskedAboutFiles] = useState(false);
 
-  const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  // "Show more" adds the pages after `page` to the list, up to `lastPage`.
+  const [paging, setPaging] = useState(() => ({
+    page: 1,
+    lastPage: 1,
+    rowsPerPage: readPageSize(),
+  }));
+  const { page, lastPage, rowsPerPage } = paging;
+  const goToPage = (newPage) =>
+    setPaging((prev) => ({ ...prev, page: newPage, lastPage: newPage }));
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const [exportDlgOpen, setExportDlgOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -136,36 +166,86 @@ function ResponsesList({ refreshKey }) {
 
   const processApirror = () => setFetching(false);
 
-  const fetchResponses = (deleted = false) => {
-    setFetching(true);
+  // The list stays usable during some fetches, so a fetch that ends reads the
+  // selection as it is then.
+  const responseIdRef = useRef(responseId);
+  responseIdRef.current = responseId;
+
+  // Set before a fetch that should leave the list, and its scroll, in place.
+  const keepListRef = useRef(false);
+
+  // Where in the list the next fetch selects when nothing is selected: the
+  // place of a deleted response, so the one after it (or the last) takes over.
+  const fallbackIndexRef = useRef(0);
+
+  // Counts fetches, so one a later fetch has overtaken is dropped.
+  const fetchIdRef = useRef(0);
+
+  const fetchResponses = () => {
+    const fetchId = ++fetchIdRef.current;
+    if (!keepListRef.current) setFetching(true);
+    keepListRef.current = false;
 
     const confirmFilesExport = firstFetchThisVisitRef.current === true;
 
-    surveyService
-      .allResponse(
-        surveyId,
-        page,
-        rowsPerPage,
-        status,
-        surveyor,
-        !askedAboutFiles,
-      )
-      .then((data) => {
+    const pages = Array.from(
+      { length: lastPage - page + 1 },
+      (_, i) => page + i,
+    );
+
+    Promise.all(
+      pages.map((pageNumber, i) =>
+        surveyService.allResponse(
+          surveyId,
+          pageNumber,
+          rowsPerPage,
+          status,
+          surveyor,
+          i === 0 && !askedAboutFiles,
+        ),
+      ),
+    )
+      .then((results) => {
+        if (fetchId !== fetchIdRef.current) return;
+        const data = results[0] && {
+          ...results[0],
+          responses: results.flatMap((result) => result?.responses || []),
+        };
         if (data) {
           setAskedAboutFiles(true);
-          const totalPages = Math.ceil(data.totalCount / rowsPerPage) || 1;
-          const newPage = page > totalPages ? totalPages : page;
-          if (deleted && page > totalPages) setPage(newPage);
           if (!askedAboutFiles) {
             setAskedAboutFiles(true);
             setCanExportFiles(data.canExportFiles);
           }
+          const totalPages = Math.ceil(data.totalCount / rowsPerPage) || 1;
+          if (lastPage > totalPages) {
+            // Refetches: the rows of these pages are gone.
+            keepListRef.current = page <= totalPages;
+            if (page > totalPages && !responseIdRef.current) {
+              fallbackIndexRef.current = Infinity;
+            }
+            setPaging((prev) => ({
+              ...prev,
+              page: Math.min(prev.page, totalPages),
+              lastPage: Math.min(prev.lastPage, totalPages),
+            }));
+            return;
+          }
           setAllResponse(data);
-          if (responseId && !data.responses?.some((r) => r.id === responseId)) {
+          const fallbackIndex = Math.min(
+            fallbackIndexRef.current,
+            data.responses.length - 1,
+          );
+          fallbackIndexRef.current = 0;
+          const fallbackId = data.responses[fallbackIndex]?.id ?? null;
+          const currentId = responseIdRef.current;
+          if (!currentId) {
+            setResponseId(fallbackId);
+          } else if (!data.responses?.some((r) => r.id === currentId)) {
             if (skipNextResponseClearRef.current) {
               skipNextResponseClearRef.current = false;
             } else {
-              setResponseId(null);
+              setResponseId(fallbackId);
               setSelected(null);
             }
           }
@@ -173,11 +253,14 @@ function ResponsesList({ refreshKey }) {
         setFetching(false);
       })
       .catch((err) => {
-        processApirror(err);
         console.error(err);
+        if (fetchId !== fetchIdRef.current) return;
+        processApirror(err);
         setFetching(false);
       })
       .finally(() => {
+        if (fetchId !== fetchIdRef.current) return;
+        setLoadingMore(false);
         if (firstFetchThisVisitRef.current) {
           firstFetchThisVisitRef.current = false;
         }
@@ -363,7 +446,7 @@ function ResponsesList({ refreshKey }) {
 
   useEffect(() => {
     fetchResponses();
-  }, [page, rowsPerPage, status, surveyor]);
+  }, [paging, status, surveyor]);
 
   // Refetch the page and the open response when the parent asks (refreshKey
   // changes; 0 is the first render, already fetched above). The page fetch
@@ -425,16 +508,27 @@ function ResponsesList({ refreshKey }) {
     surveyService
       .deleteResponse(surveyId, deletedId)
       .then(() => {
-        if (responseId === deletedId) {
+        if (responseIdRef.current === deletedId) {
+          fallbackIndexRef.current = Math.max(
+            allResponse.responses.findIndex((r) => r.id === deletedId),
+            0,
+          );
           setResponseId(null);
           setSelected(null);
         }
-        fetchResponses(true);
+        setAllResponse((prev) => ({
+          ...prev,
+          responses: prev.responses.filter((r) => r.id !== deletedId),
+        }));
+        // Refetches with the page and filters as they are now.
+        keepListRef.current = true;
+        setPaging((prev) => ({ ...prev }));
       })
       .catch(processApirror);
   };
 
   const onSurveyorClicked = (response) => {
+    goToPage(1);
     setStatus("all");
     setSurveyor(response.surveyorID || null);
   };
@@ -550,6 +644,8 @@ function ResponsesList({ refreshKey }) {
     }
   };
 
+  const totalCount = allResponse?.totalCount || 0;
+
   const quickExport = async () => {
     setExporting(true);
     try {
@@ -639,7 +735,7 @@ function ResponsesList({ refreshKey }) {
                       label={t("responses.filter_by_type")}
                       value={status}
                       onChange={(e) => {
-                        setPage(1);
+                        goToPage(1);
                         setStatus(e.target.value);
                       }}
                     >
@@ -736,10 +832,7 @@ function ResponsesList({ refreshKey }) {
                       <ListItemButton
                         key={r.id}
                         selected={isSelected}
-                        onClick={() => {
-                          console.log("setResponseId", r.id);
-                          setResponseId(r.id);
-                        }}
+                        onClick={() => setResponseId(r.id)}
                         sx={{ alignItems: "flex-start" }}
                       >
                         <ListItemText
@@ -825,20 +918,55 @@ function ResponsesList({ refreshKey }) {
                 </List>
 
                 <Divider />
+                {lastPage * rowsPerPage < totalCount && (
+                  <Box px={2} pt={1} display="flex" justifyContent="center">
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      disabled={loadingMore}
+                      endIcon={
+                        loadingMore ? (
+                          <CircularProgress size={16} color="inherit" />
+                        ) : null
+                      }
+                      onClick={() => {
+                        setLoadingMore(true);
+                        keepListRef.current = true;
+                        setPaging((prev) => ({
+                          ...prev,
+                          lastPage: prev.lastPage + 1,
+                        }));
+                      }}
+                    >
+                      {t("responses.show_more")}
+                    </Button>
+                  </Box>
+                )}
                 <TablePagination
-                  rowsPerPageOptions={[10, 25, 50, 100]}
+                  rowsPerPageOptions={PAGE_SIZES}
                   component="div"
-                  labelDisplayedRows={({ from, to, count }) =>
-                    t("responses.label_displayed_rows", { from, to, count })
+                  labelDisplayedRows={({ to, count }) =>
+                    t("responses.label_displayed_rows", {
+                      from: count === 0 ? 0 : (page - 1) * rowsPerPage + 1,
+                      to,
+                      count,
+                    })
                   }
                   labelRowsPerPage={t("responses.label_rows_per_page")}
-                  count={allResponse?.totalCount || 0}
+                  count={totalCount}
                   rowsPerPage={rowsPerPage}
-                  page={page - 1}
-                  onPageChange={(_, newPage) => setPage(newPage + 1)}
+                  page={lastPage - 1}
+                  onPageChange={(_, newPage) =>
+                    goToPage(
+                      newPage >= lastPage
+                        ? newPage + 1
+                        : Math.max(page - 1, 1),
+                    )
+                  }
                   onRowsPerPageChange={(e) => {
-                    setRowsPerPage(parseInt(e.target.value, 10));
-                    setPage(1);
+                    const size = parseInt(e.target.value, 10);
+                    writePageSize(size);
+                    setPaging({ page: 1, lastPage: 1, rowsPerPage: size });
                   }}
                 />
               </>

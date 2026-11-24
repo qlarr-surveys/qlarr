@@ -6,8 +6,13 @@ import {
   DialogActions,
   Button,
   CircularProgress,
+  FormControl,
+  FormLabel,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
 } from "@mui/material";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { saveAs } from "file-saver";
@@ -26,16 +31,17 @@ import {
 const DEFAULT_VALUES = {
   range: "all",
   statuses: ALL_STATUSES,
+  nameBy: "index",
 };
 
 export async function downloadResponseFilesZip(
   surveyService,
   surveyId,
-  { range, from, to, statuses } = DEFAULT_VALUES
+  { range, from, to, statuses, nameBy } = DEFAULT_VALUES
 ) {
   const { blob, fileName } = await surveyService.downloadResponseFiles(
     surveyId,
-    { ...responseIndexBounds({ range, from, to }), statuses }
+    { ...responseIndexBounds({ range, from, to }), statuses, nameBy }
   );
   if (!blob || blob.size === 0) return false;
   saveAs(new File([blob], fileName, { type: "application/zip" }));
@@ -106,6 +112,28 @@ export default function ResponsesDownload({
         <DialogContent sx={{ display: "grid", gap: 2 }}>
           <RangeFields control={control} errors={errors} t={t} />
           <StatusesField control={control} t={t} />
+
+          <FormControl>
+            <FormLabel>{t("responses.name_files_by")}</FormLabel>
+            <Controller
+              name="nameBy"
+              control={control}
+              render={({ field }) => (
+                <RadioGroup row {...field}>
+                  <FormControlLabel
+                    value="index"
+                    control={<Radio />}
+                    label={t("responses.name_files_by_index")}
+                  />
+                  <FormControlLabel
+                    value="id"
+                    control={<Radio />}
+                    label={t("responses.name_files_by_id")}
+                  />
+                </RadioGroup>
+              )}
+            />
+          </FormControl>
         </DialogContent>
 
         <DialogActions>

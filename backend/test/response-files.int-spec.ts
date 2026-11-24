@@ -148,13 +148,24 @@ describe('Response file ops + bulk download', () => {
       expect(res.headers['content-type']).toContain('application/zip');
       expect(res.headers['content-disposition']).toContain(`filename="${SURVEY}.zip"`);
       expect(res.body.subarray(0, 2).toString('ascii')).toBe('PK'); // zip magic
-      expect(res.body.includes('1-q1.png')).toBe(true);
+      expect(res.body.includes('1_q1.png')).toBe(true);
+      expect(res.body.includes(`${R_FILE}_q1.png`)).toBe(false);
       expect(res.body.includes('photo.png')).toBe(false);
       expect(files.download).toHaveBeenCalledWith(
         SURVEY,
         expect.objectContaining({ path: 'responses/' + R_FILE }),
         'stored-1',
       );
+    });
+
+    it('names files by response id when asked', async () => {
+      const res = await request(server())
+        .get(`/survey/${SURVEY}/response/files/download/0/999999?name_by=id`)
+        .set('Authorization', SUPER)
+        .buffer(true)
+        .parse(binaryParser)
+        .expect(200);
+      expect(res.body.includes(`${R_FILE}_q1.png`)).toBe(true);
     });
 
     it('returns 204 when the range has no files', () =>

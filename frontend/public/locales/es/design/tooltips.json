@@ -15,6 +15,7 @@
   "date_format": "Establecer el formato de fecha para entrada de fecha",
   "date_time": "Recopilar fecha y hora juntas",
   "decimal_separator": "Establecer el separador decimal para entrada numérica",
+  "other_type": "Elija si el campo Otro acepta texto o un número. Número abre un teclado numérico en los teléfonos.",
   "description": "Proporcionar una descripción para tu encuesta para ayudar a los usuarios a entenderla",
   "disabled": "Ocultar completamente esta pregunta para que los encuestados no puedan verla o interactuar con ella. Cualquier condición de visibilidad será eliminada.",
   "email": "Recopilar y validar direcciones de correo electrónico",

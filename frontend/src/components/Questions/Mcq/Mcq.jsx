@@ -12,6 +12,11 @@ import { css, useTheme } from "@mui/material/styles";
 import { valueChange } from "~/state/runState";
 import { setDirty } from "~/state/templateState";
 import MCQAnswer from "./MCQAnswer";
+import {
+  SAFE_NUMBER_MAX_CHARS,
+  formatNumber,
+  parseNumberInput,
+} from "~/components/Questions/Number/numberInput";
 
 function MCQ(props) {
   const parentValue = useSelector((state) => {
@@ -67,6 +72,7 @@ function MCQ(props) {
 function McqAnswerOther(props) {
   const theme = useTheme();
   const nestedTextChild = props.Answer.answers[0];
+  const isNumber = nestedTextChild.other_type === "number";
   const parentValue = useSelector((state) => {
     return state.runState.values[props.parentCode].value || [];
   }, shallowEqual);
@@ -82,7 +88,7 @@ function McqAnswerOther(props) {
         (show_errors || isChildDirty) &&
         textChild?.relevance === true &&
         textChild?.validity === false,
-      textValue: textChild?.value || "",
+      textValue: textChild?.value,
       textRelevance: state.textChild?.relevance,
     };
   }, shallowEqual);
@@ -111,7 +117,9 @@ function McqAnswerOther(props) {
     dispatch(
       valueChange({
         componentCode: event.target.name,
-        value: event.target.value,
+        value: isNumber
+          ? parseNumberInput(state.textValue, event.target.value)
+          : event.target.value,
       })
     );
   };
@@ -180,7 +188,19 @@ function McqAnswerOther(props) {
             onChange={handleChange}
             onFocus={handleFocus}
             onBlur={lostFocus}
-            value={state.textValue}
+            value={
+              isNumber
+                ? formatNumber(state.textValue)
+                : state.textValue || ""
+            }
+            inputProps={
+              isNumber
+                ? {
+                    maxLength: SAFE_NUMBER_MAX_CHARS,
+                    inputMode: "numeric",
+                  }
+                : undefined
+            }
             helperText={
               state.childInvalid ? (
                 <Validation component={nestedTextChild} limit={1} />

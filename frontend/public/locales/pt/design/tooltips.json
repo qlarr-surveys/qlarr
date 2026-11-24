@@ -15,6 +15,7 @@
   "date_format": "Definir o formato de data para entrada de data",
   "date_time": "Coletar data e hora juntas",
   "decimal_separator": "Definir o separador decimal para entrada numérica",
+  "other_type": "Escolha se o campo Outro aceita texto ou um número. Número abre um teclado numérico nos telemóveis.",
   "description": "Fornecer uma descrição para sua pesquisa para ajudar os usuários a entendê-la",
   "disabled": "Ocultar completamente esta pergunta para que os respondentes não possam vê-la ou interagir com ela. Qualquer condição de visibilidade será removida.",
   "email": "Coletar e validar endereços de e-mail",
