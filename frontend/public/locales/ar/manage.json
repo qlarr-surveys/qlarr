@@ -323,7 +323,7 @@
     "filter_preview_show_preview": "الردود التجريبية (المعاينة) فقط",
     "ip_addr": "عنوان IP",
     "label_displayed_rows": "{{from}} - {{to}} من {{count}}",
-    "showing_count": "عرض {{shown}} من {{count}}",
+    "label_rows_per_page": "عدد الصفوف في كل صفحة:",
     "show_more": "عرض المزيد",
     "label_surveys_per_page": "الاستطلاعات لكل صفحة:",
     "lang": "اللغة",

@@ -372,7 +372,7 @@
     "status_incomplete": "Unvollständig",
     "ip_addr": "IP-Adresse",
     "label_displayed_rows": "{{from}}-{{to}} von {{count}}",
-    "showing_count": "{{shown}} von {{count}} angezeigt",
+    "label_rows_per_page": "Zeilen pro Seite:",
     "show_more": "Mehr anzeigen",
     "label_surveys_per_page": "Umfragen pro Seite:",
     "lang": "Sprache",

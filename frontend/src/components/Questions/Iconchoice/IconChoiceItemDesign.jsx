@@ -23,7 +23,7 @@ import { useResourceUpload } from "~/hooks/useResourceUpload";
 import { buildResourceUrl } from "~/networking/common";
 import DynamicSvg from "~/components/DynamicSvg";
 import { contentEditable, inDesign } from "~/routes";
-import { setupOptions } from "@qlarr/design-core/constants/design";
+import { optionSetup } from "@qlarr/design-core/constants/design";
 import { Build } from "@mui/icons-material";
 import ContentEditor from "~/components/design/ContentEditor";
 import InlineCodeEditor from "~/components/design/InlineCodeEditor";
@@ -270,7 +270,7 @@ function IconChoiceItemDesign({
                     dispatch(
                       setup({
                         code: qualifiedCode,
-                        rules: setupOptions("options"),
+                        rules: optionSetup(answer?.type),
                       }),
                     );
                   }}

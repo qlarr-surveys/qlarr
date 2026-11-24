@@ -319,7 +319,7 @@
     "filter_preview_show_preview": "Solo Respuestas de Prueba (Vista Previa)",
     "ip_addr": "Dirección IP",
     "label_displayed_rows": "{{from}}-{{to}} de {{count}}",
-    "showing_count": "Mostrando {{shown}} de {{count}}",
+    "label_rows_per_page": "Filas por página:",
     "show_more": "Mostrar más",
     "label_surveys_per_page": "Encuestas por página:",
     "lang": "Idioma",

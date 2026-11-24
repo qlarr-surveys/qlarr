@@ -319,7 +319,7 @@
     "filter_preview_show_preview": "Alleen Testreacties (Voorvertoning)",
     "ip_addr": "IP Adres",
     "label_displayed_rows": "{{from}}-{{to}} van {{count}}",
-    "showing_count": "{{shown}} van {{count}} getoond",
+    "label_rows_per_page": "Rijen per pagina:",
     "show_more": "Meer tonen",
     "label_surveys_per_page": "Enquêtes per pagina:",
     "lang": "Taal",

@@ -14,6 +14,7 @@ import {
   setup,
 } from "~/state/design/designState";
 import {
+  optionSetup,
   otherOptionSetup,
   setupOptions,
 } from "@qlarr/design-core/constants/design";
@@ -303,9 +304,9 @@ function ChoiceItemDesign(props) {
                     rules:
                       answer.type === "other"
                         ? otherOptionSetup(props.qualifiedCode, otherText)
-                        : setupOptions(
-                            props.type === "text" ? "text_item" : "options",
-                          ),
+                        : props.type === "text"
+                          ? setupOptions("text_item")
+                          : optionSetup(answer.type),
                   })
                 );
               }}

@@ -85,6 +85,16 @@ export const setupOptions = (type) => {
   });
 };
 
+// All, None and Other have fixed codes, so their panels offer no code field.
+const FIXED_CODE_OPTION_TYPES = ["all", "none", "other"];
+
+export const optionSetup = (optionType) =>
+  setupOptions(
+    FIXED_CODE_OPTION_TYPES.includes(optionType)
+      ? "fixed_code_option"
+      : "options",
+  );
+
 export const otherOptionSetup = (otherCode, otherText) => {
   const textCode = `${otherCode}Atext`;
   const [general, validation] = baseSetupOptions("other_text", otherText);
@@ -94,7 +104,7 @@ export const otherOptionSetup = (otherCode, otherText) => {
     {
       title: "general",
       key: "general",
-      rules: ["changeCode", "disabled", ...general.rules],
+      rules: ["disabled", ...general.rules],
       ruleCodes: forText(general.rules),
     },
     { title: "logic", key: "logic", rules: ["relevance"] },
@@ -260,6 +270,15 @@ const baseSetupOptions = (type, component?) => {
           title: "",
           key: "",
           rules: ["changeCode", "disabled", "relevance"],
+        },
+      ];
+
+    case "fixed_code_option":
+      return [
+        {
+          title: "",
+          key: "",
+          rules: ["disabled", "relevance"],
         },
       ];
 

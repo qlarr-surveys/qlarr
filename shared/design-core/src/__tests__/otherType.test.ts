@@ -75,7 +75,7 @@ describe("other text answer type", () => {
     const rules = otherOptionSetup("QothAother", state[code]);
     expect(state.setup).toEqual({ code: "QothAother", rules });
     const general = rules.find((s) => s.key === "general");
-    expect(general.rules).toEqual(["changeCode", "disabled", "other_type", "maxChars"]);
+    expect(general.rules).toEqual(["disabled", "other_type", "maxChars"]);
     expect(general.ruleCodes).toEqual({ other_type: code, maxChars: code });
     const validation = rules.find((s) => s.key === "validation");
     expect(validation.rules).toContain("validation_between");

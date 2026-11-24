@@ -23,7 +23,7 @@ import LoadingDots from "~/components/common/LoadingDots";
 import { useResourceUpload } from "~/hooks/useResourceUpload";
 import { contentEditable, inDesign } from "~/routes";
 import { Build } from "@mui/icons-material";
-import { setupOptions } from "@qlarr/design-core/constants/design";
+import { optionSetup } from "@qlarr/design-core/constants/design";
 import ContentEditor from "~/components/design/ContentEditor";
 import InlineCodeEditor from "~/components/design/InlineCodeEditor";
 import { useReleaseGuard } from "~/hooks/useReleaseGuard";
@@ -305,7 +305,7 @@ function ImageChoiceItemDesign({
                     dispatch(
                       setup({
                         code: qualifiedCode,
-                        rules: setupOptions("options"),
+                        rules: optionSetup(answer?.type),
                       })
                     );
                   }}
