@@ -446,7 +446,14 @@
     "filtered_base": "Filtered to {{count}} of {{total}} responses",
     "warn_noMatches": "No responses match these filters.",
     "plan_name": "Plan name",
-    "plan_name_taken": "A plan with this name already exists."
+    "plan_name_taken": "A plan with this name already exists.",
+    "setup": "Crosstab setup",
+    "swap": "Swap",
+    "swap_unavailable": "Only a single-choice question can be a column",
+    "show_in_cells": "Show in cells",
+    "heat_note": "Percentages are of each column. Darker cells have more responses.",
+    "table_caption": "{{row}} by {{column}}",
+    "delete_plan": "Delete {{name}}"
   },
   "jobs": {
     "failures_title": "Failed responses",

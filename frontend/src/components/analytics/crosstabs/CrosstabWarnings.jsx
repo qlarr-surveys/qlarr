@@ -1,6 +1,7 @@
-import { Alert, Stack } from '@mui/material';
+import { AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { NAMESPACES } from '~/hooks/useNamespaceLoader';
+import styles from './Crosstabs.module.css';
 
 /** Default English copy per warning code, with interpolated params. */
 const DEFAULTS = {
@@ -22,22 +23,29 @@ const DEFAULTS = {
 };
 
 // targetSum is the loudest problem; everything else is advisory.
-const severityOf = (code) => (code === 'targetSum' ? 'error' : 'warning');
+const isError = (code) => code === 'targetSum';
 
 export default function CrosstabWarnings({ warnings }) {
   const { t } = useTranslation(NAMESPACES.MANAGE);
   if (!warnings || warnings.length === 0) return null;
 
   return (
-    <Stack spacing={1} sx={{ mt: 2 }}>
+    <div className={styles.warnings}>
       {warnings.map((w, i) => (
-        <Alert key={`${w.code}-${i}`} severity={severityOf(w.code)} variant="outlined">
-          {t(`crosstabs.warn_${w.code}`, {
-            ...(w.params ?? {}),
-            defaultValue: DEFAULTS[w.code] ?? w.code,
-          })}
-        </Alert>
+        <div
+          key={`${w.code}-${i}`}
+          role={isError(w.code) ? 'alert' : undefined}
+          className={`${styles.warn} ${isError(w.code) ? styles.warnError : ''}`}
+        >
+          <AlertTriangle size={16} aria-hidden="true" />
+          <span>
+            {t(`crosstabs.warn_${w.code}`, {
+              ...(w.params ?? {}),
+              defaultValue: DEFAULTS[w.code] ?? w.code,
+            })}
+          </span>
+        </div>
       ))}
-    </Stack>
+    </div>
   );
 }

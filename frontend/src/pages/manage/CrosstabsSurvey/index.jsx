@@ -1,7 +1,8 @@
 import React, { useEffect, useReducer, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import { Box, Paper, Typography } from '@mui/material';
+import { Plus } from 'lucide-react';
 import { NAMESPACES } from '~/hooks/useNamespaceLoader';
 import { useService } from '~/hooks/use-service';
 import LoadingDots from '~/components/common/LoadingDots';
@@ -22,18 +23,23 @@ import SavePlanDialog from '~/components/analytics/crosstabs/SavePlanDialog';
 import WeightPanel from '~/components/analytics/crosstabs/WeightPanel';
 import CrosstabTable from '~/components/analytics/crosstabs/CrosstabTable';
 import CrosstabWarnings from '~/components/analytics/crosstabs/CrosstabWarnings';
+import styles from '~/components/analytics/crosstabs/Crosstabs.module.css';
 
 const COMPUTE_DEBOUNCE_MS = 350;
 
+/** Wraps text in Unicode first-strong isolates (FSI … PDI). */
+const isolate = (text) => `\u2068${text}\u2069`;
+
+/** A message alone on the canvas, for the states with no setup to show. */
 function EmptyCard({ children }) {
   return (
-    <Box sx={{ p: 3, maxWidth: 1240, mx: 'auto' }}>
-      <Paper variant="outlined" sx={{ p: 4, borderRadius: 3, textAlign: 'center' }}>
-        <Typography variant="body1" color="text.secondary">
+    <div className={styles.canvas}>
+      <div className={styles.column}>
+        <div role="status" className={styles.notice}>
           {children}
-        </Typography>
-      </Paper>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -55,6 +61,14 @@ function CrosstabsSurvey() {
   const [computeError, setComputeError] = useState(null);
   const computeSeq = useRef(0);
   const debounceRef = useRef(null);
+  // The editor's numbering ("Q5"), when the design is loaded (survey admins).
+  const codeIndex = useSelector((state) => state.designState?.index);
+  const codeOf = (id) => codeIndex?.[id];
+  // Labels are isolated so a Latin question title keeps its own order inside
+  // an Arabic line (and the reverse), even where only plain text can go: the
+  // native select's options, a tooltip, a sentence.
+  const nameOf = (id, label) =>
+    codeOf(id) ? `${codeOf(id)} · ${isolate(label)}` : isolate(label);
 
   // --- load catalogue + saved plans once ---
   useEffect(() => {
@@ -118,7 +132,13 @@ function CrosstabsSurvey() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requestKey, surveyId]);
 
-  if (loading) return <LoadingDots fullHeight />;
+  if (loading) {
+    return (
+      <div className={styles.loading}>
+        <LoadingDots fullHeight />
+      </div>
+    );
+  }
   if (loadError) return <EmptyCard>{loadError}</EmptyCard>;
   if (!catalogue || !config) return null;
 
@@ -191,28 +211,82 @@ function CrosstabsSurvey() {
     if (result) downloadCsv(crosstabToCsv(result, resultRowLabel, filterSummary));
   };
 
-  return (
-    <Box
-      sx={{
-        p: 5,
-        maxWidth: 1240,
-        mx: 'auto',
-        display: 'grid',
-        gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 2fr) minmax(0, 3fr)' },
-        gap: 5,
-        alignItems: 'start',
-      }}
-    >
-      <TabPlansPanel
-        plans={plans}
-        activePlanId={activePlanId}
-        onSelect={handleSelectPlan}
-        onNew={handleNewPlan}
-        onDelete={handleDeletePlan}
-      />
+  const resultRowCode = result ? codeOf(result.config.rowVar) : undefined;
 
-      <Box sx={{ minWidth: 0 }}>
-        <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 3, mb: 2 }}>
+  const resultBody = sameVar ? (
+    <p className={styles.message}>
+      {t('crosstabs.pick_two', 'Pick two different questions for rows and columns.')}
+    </p>
+  ) : computeError ? (
+    <p role="alert" className={`${styles.message} ${styles.messageError}`}>
+      {computeError}
+    </p>
+  ) : !result ? (
+    <LoadingDots />
+  ) : (
+    <>
+      <h2 className={styles.cardTitle}>
+        {resultRowCode && <span className={styles.code}>{resultRowCode} · </span>}
+        <bdi>{resultRowLabel}</bdi>
+      </h2>
+      <p className={styles.cardNote}>
+        {t('crosstabs.subtitle', {
+          column: nameOf(result.config.colVar, resultColLabel),
+          weighting: resultWeightLabel
+            ? t('crosstabs.weighted_on', {
+                label: isolate(resultWeightLabel),
+                defaultValue: 'weighted on {{label}}',
+              })
+            : t('crosstabs.unweighted', 'unweighted'),
+          defaultValue: 'By {{column}} · {{weighting}}',
+        })}
+        {result.multi ? ` · ${t('crosstabs.multi_note', 'multi-select: columns can exceed 100%')}` : ''}
+      </p>
+      {filterSummary.length > 0 && (
+        <p className={styles.cardNote}>
+          {t('crosstabs.filtered_base', {
+            count: result.filteredResponses,
+            total: result.totalResponses,
+            defaultValue: 'Filtered to {{count}} of {{total}} responses',
+          })}
+          {': '}
+          {filterSummary
+            .map((f) => `${isolate(f.label)} = ${isolate(f.values.join(', '))}`)
+            .join(' · ')}
+        </p>
+      )}
+      <CrosstabTable
+        result={result}
+        options={config.options}
+        corner={resultRowCode}
+        caption={t('crosstabs.table_caption', {
+          row: resultRowLabel,
+          column: resultColLabel,
+        })}
+      />
+      <p className={styles.tableNote}>
+        {t('crosstabs.heat_note')}
+        {result.notAnswered > 0 &&
+          ` ${t('crosstabs.not_answered', {
+            count: result.notAnswered,
+            defaultValue: 'Not answered: {{count}}',
+          })}`}
+      </p>
+      <CrosstabWarnings warnings={result.warnings} />
+    </>
+  );
+
+  return (
+    <div className={styles.workspace}>
+      <nav aria-labelledby="crosstab-setup-title" className={styles.rail}>
+        <h3 id="crosstab-setup-title" className={styles.railTitle}>
+          {t('crosstabs.setup')}
+        </h3>
+        <div className={styles.railBody}>
+          <button type="button" className={styles.btn} onClick={handleNewPlan}>
+            <Plus size={16} aria-hidden="true" />
+            {t('crosstabs.new_plan', 'New tab plan')}
+          </button>
           <CrosstabControls
             catalogue={catalogue}
             config={config}
@@ -220,65 +294,41 @@ function CrosstabsSurvey() {
             onExport={handleExport}
             onSavePlan={() => setSaveDialogOpen(true)}
             canExport={!!result && !sameVar}
+            nameOf={nameOf}
+            filters={
+              <CrosstabFilters
+                catalogue={catalogue}
+                config={config}
+                updateConfig={updateConfig}
+                nameOf={nameOf}
+              />
+            }
           />
-          <CrosstabFilters catalogue={catalogue} config={config} updateConfig={updateConfig} />
+        </div>
+        <TabPlansPanel
+          plans={plans}
+          activePlanId={activePlanId}
+          onSelect={handleSelectPlan}
+          onDelete={handleDeletePlan}
+        />
+      </nav>
+
+      <div className={styles.canvas}>
+        <div className={styles.column}>
+          <div className={styles.card}>{resultBody}</div>
+
           {weightDef && (
             <WeightPanel
               weightDef={weightDef}
+              title={nameOf(weightDef.code, weightDef.label)}
               config={config}
               updateConfig={updateConfig}
               weighting={result?.weighting}
               filteredCount={filterSummary.length ? result.filteredResponses : null}
             />
           )}
-        </Paper>
-
-        <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 3 }}>
-          {sameVar ? (
-            <Typography variant="body1" color="text.secondary">
-              {t('crosstabs.pick_two', 'Pick two different questions for rows and columns.')}
-            </Typography>
-          ) : computeError ? (
-            <Typography variant="body1" color="error">
-              {computeError}
-            </Typography>
-          ) : !result ? (
-            <LoadingDots />
-          ) : (
-            <>
-              <Typography variant="h6">{resultRowLabel}</Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                {t('crosstabs.subtitle', {
-                  column: resultColLabel,
-                  weighting: resultWeightLabel
-                    ? t('crosstabs.weighted_on', { label: resultWeightLabel, defaultValue: 'weighted on {{label}}' })
-                    : t('crosstabs.unweighted', 'unweighted'),
-                  defaultValue: 'By {{column}} · {{weighting}}',
-                })}
-                {result.multi ? ` · ${t('crosstabs.multi_note', 'multi-select: columns can exceed 100%')}` : ''}
-              </Typography>
-              {filterSummary.length > 0 && (
-                <Typography variant="body2" color="text.secondary" sx={{ mt: -1.5, mb: 2 }}>
-                  {t('crosstabs.filtered_base', {
-                    count: result.filteredResponses,
-                    total: result.totalResponses,
-                    defaultValue: 'Filtered to {{count}} of {{total}} responses',
-                  })}
-                  {': '}
-                  {filterSummary.map((f) => `${f.label} = ${f.values.join(', ')}`).join(' · ')}
-                </Typography>
-              )}
-              <CrosstabTable result={result} options={config.options} />
-              {result.notAnswered > 0 && (
-                <Typography variant="caption" color="text.disabled" sx={{ mt: 1, display: 'block' }}>
-                  {t('crosstabs.not_answered', { count: result.notAnswered, defaultValue: 'Not answered: {{count}}' })}
-                </Typography>
-              )}
-              <CrosstabWarnings warnings={result.warnings} />
-            </>
-          )}
-        </Paper>
-      </Box>
+        </div>
+      </div>
 
       <SavePlanDialog
         open={saveDialogOpen}
@@ -287,7 +337,7 @@ function CrosstabsSurvey() {
         onCancel={() => setSaveDialogOpen(false)}
         onSave={handleSavePlan}
       />
-    </Box>
+    </div>
   );
 }
 

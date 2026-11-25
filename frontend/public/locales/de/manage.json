@@ -484,7 +484,14 @@
     "filtered_base": "Gefiltert auf {{count}} von {{total}} Antworten",
     "warn_noMatches": "Keine Antworten entsprechen diesen Filtern.",
     "plan_name": "Planname",
-    "plan_name_taken": "Ein Plan mit diesem Namen existiert bereits."
+    "plan_name_taken": "Ein Plan mit diesem Namen existiert bereits.",
+    "setup": "Kreuztabellen einrichten",
+    "swap": "Tauschen",
+    "swap_unavailable": "Nur eine Einfachauswahl-Frage kann eine Spalte sein",
+    "show_in_cells": "In Zellen anzeigen",
+    "heat_note": "Prozentwerte beziehen sich auf jede Spalte. Dunklere Zellen haben mehr Antworten.",
+    "table_caption": "{{row}} nach {{column}}",
+    "delete_plan": "{{name}} löschen"
   },
   "jobs": {
     "failures_title": "Fehlgeschlagene Antworten",

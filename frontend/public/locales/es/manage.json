@@ -446,7 +446,14 @@
     "filtered_base": "Filtrado a {{count}} de {{total}} respuestas",
     "warn_noMatches": "Ninguna respuesta coincide con estos filtros.",
     "plan_name": "Nombre del plan",
-    "plan_name_taken": "Ya existe un plan con este nombre."
+    "plan_name_taken": "Ya existe un plan con este nombre.",
+    "setup": "Configuración de la tabulación cruzada",
+    "swap": "Intercambiar",
+    "swap_unavailable": "Solo una pregunta de opción única puede ser columna",
+    "show_in_cells": "Mostrar en las celdas",
+    "heat_note": "Los porcentajes son de cada columna. Las celdas más oscuras tienen más respuestas.",
+    "table_caption": "{{row}} por {{column}}",
+    "delete_plan": "Eliminar {{name}}"
   },
   "jobs": {
     "failures_title": "Respuestas fallidas",

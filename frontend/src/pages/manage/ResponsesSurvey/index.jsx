@@ -131,9 +131,10 @@ function ResponsesSurvey() {
             />
           ) : id === "analytics" ? (
             <AnalyticsSurvey />
+          ) : id === "crosstabs" ? (
+            <CrosstabsSurvey />
           ) : (
             <div className={styles.pane}>
-              {id === "crosstabs" && <CrosstabsSurvey />}
               {id === "calculations" && (
                 <CalculationsSurvey onDirtyChange={onCalculationsDirtyChange} />
               )}
