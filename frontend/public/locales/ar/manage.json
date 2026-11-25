@@ -1,13 +1,13 @@
 {
   "action_btn": {
     "retry": "إعادة المحاولة",
-    "add": "يضيف",
+    "add": "إضافة",
     "add_user": "إضافة مستخدم",
-    "cancel": "يلغي",
+    "cancel": "إلغاء",
     "clone": "استنساخ",
-    "close": "يغلق",
-    "delete": "يمسح",
-    "save": "يحفظ",
+    "close": "إغلاق",
+    "delete": "حذف",
+    "save": "حفظ",
     "create": "إنشاء",
     "export": "تصدير",
     "download": "تحميل",
