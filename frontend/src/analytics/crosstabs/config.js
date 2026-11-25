@@ -8,10 +8,17 @@ export const DEFAULT_OPTIONS = { counts: true, pct: true, significance: true };
 
 /** Pick sensible starting variables from a freshly loaded catalogue. */
 export function initialConfig(catalogue) {
-  const rowVar = catalogue?.rowVariables?.[0]?.id ?? null;
-  // Prefer a column that isn't the same underlying question as the row.
+  const rows = catalogue?.rowVariables ?? [];
   const cols = catalogue?.colVariables ?? [];
-  const colVar = (cols.find((c) => c.code !== rowVar) ?? cols[0])?.code ?? null;
+  // Prefer a column that isn't the same underlying question as the row.
+  let rowVar = rows[0]?.id ?? null;
+  let colVar = cols.find((c) => c.code !== rowVar)?.code ?? null;
+  // The first row is the only single-choice question, so it has to be the
+  // column: take the rows from another question instead of the same one.
+  if (colVar === null) {
+    colVar = cols[0]?.code ?? null;
+    rowVar = (rows.find((r) => r.id !== colVar) ?? rows[0])?.id ?? null;
+  }
   return {
     rowVar,
     colVar,
