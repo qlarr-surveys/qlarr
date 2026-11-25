@@ -1,16 +1,34 @@
-import {
-  Box,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  MenuItem,
-  Stack,
-  TextField,
-} from '@mui/material';
+import { ArrowUpDown, ChevronDown, Download } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { NAMESPACES } from '~/hooks/useNamespaceLoader';
+import styles from './Crosstabs.module.css';
 
-/** Row/Column/Weight selectors + display toggles + export/save actions. */
+/** A labelled native select, as the phase-3.3 rail draws it. */
+function Select({ label, value, onChange, children }) {
+  return (
+    <label className={styles.field}>
+      {label}
+      <span className={styles.selectWrap}>
+        <select
+          className={styles.select}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        >
+          {children}
+        </select>
+        <span aria-hidden="true" className={styles.chevron}>
+          <ChevronDown size={16} />
+        </span>
+      </span>
+    </label>
+  );
+}
+
+/**
+ * The crosstab setup in the rail: rows, columns and weight, the answer
+ * filters (passed in), what each cell shows, and export/save.
+ * `nameOf(id, label)` prefixes the editor's question code when it has one.
+ */
 export default function CrosstabControls({
   catalogue,
   config,
@@ -18,100 +36,124 @@ export default function CrosstabControls({
   onExport,
   onSavePlan,
   canExport,
+  nameOf,
+  filters,
 }) {
   const { t } = useTranslation(NAMESPACES.MANAGE);
   const rowVars = catalogue.rowVariables ?? [];
   const colVars = catalogue.colVariables ?? [];
+  // Only a single-choice question can be a column, so the rows can only move
+  // across when they are one.
+  const canSwap =
+    config.rowVar !== config.colVar &&
+    colVars.some((c) => c.code === config.rowVar);
 
   const toggle = (key) => (e) =>
     updateConfig({ type: 'SET_OPTION', key, value: e.target.checked });
 
   return (
-    <Box>
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
-          gap: 2,
-        }}
+    <>
+      <Select
+        label={t('crosstabs.rows', 'Rows')}
+        value={config.rowVar ?? ''}
+        onChange={(value) => updateConfig({ type: 'SET_ROW', value })}
       >
-        <TextField
-          select
-          size="small"
-          label={t('crosstabs.rows', 'Rows')}
-          value={config.rowVar ?? ''}
-          onChange={(e) => updateConfig({ type: 'SET_ROW', value: e.target.value })}
-        >
-          {rowVars.map((v) => (
-            <MenuItem key={v.id} value={v.id}>
-              {v.label}
-              {v.multi ? ` ${t('crosstabs.multi_tag', '(multi)')}` : ''}
-            </MenuItem>
-          ))}
-        </TextField>
+        {rowVars.map((v) => (
+          <option key={v.id} value={v.id}>
+            {nameOf(v.id, v.label)}
+            {v.multi ? ` ${t('crosstabs.multi_tag', '(multi)')}` : ''}
+          </option>
+        ))}
+      </Select>
 
-        <TextField
-          select
-          size="small"
-          label={t('crosstabs.columns', 'Columns (banner)')}
-          value={config.colVar ?? ''}
-          onChange={(e) => updateConfig({ type: 'SET_COL', value: e.target.value })}
-        >
-          {colVars.map((v) => (
-            <MenuItem key={v.code} value={v.code}>
-              {v.label}
-            </MenuItem>
-          ))}
-        </TextField>
-
-        <TextField
-          select
-          size="small"
-          label={t('crosstabs.weight', 'Weight')}
-          value={config.weightVar ?? ''}
-          onChange={(e) =>
-            updateConfig({ type: 'SET_WEIGHT', value: e.target.value })
-          }
-        >
-          <MenuItem value="">{t('crosstabs.weight_none', 'None')}</MenuItem>
-          {colVars.map((v) => (
-            <MenuItem key={v.code} value={v.code}>
-              {v.label}
-            </MenuItem>
-          ))}
-        </TextField>
-      </Box>
-
-      <Stack
-        direction="row"
-        sx={{ mt: 2, alignItems: 'center', flexWrap: 'wrap', gap: 1 }}
+      <button
+        type="button"
+        className={styles.link}
+        disabled={!canSwap}
+        title={canSwap ? undefined : t('crosstabs.swap_unavailable')}
+        onClick={() => updateConfig({ type: 'SWAP' })}
       >
-        <FormControlLabel
-          control={
-            <Checkbox size="small" checked={config.options.counts} onChange={toggle('counts')} />
-          }
-          label={t('crosstabs.counts', 'Counts')}
-        />
-        <FormControlLabel
-          control={
-            <Checkbox size="small" checked={config.options.pct} onChange={toggle('pct')} />
-          }
-          label={t('crosstabs.column_pct', 'Column %')}
-        />
-        <FormControlLabel
-          control={
-            <Checkbox size="small" checked={config.options.significance} onChange={toggle('significance')} />
-          }
-          label={t('crosstabs.significance', 'Significance (95%)')}
-        />
-        <Box sx={{ flexGrow: 1 }} />
-        <Button size="small" variant="outlined" onClick={onExport} disabled={!canExport}>
+        <ArrowUpDown size={15} aria-hidden="true" />
+        {t('crosstabs.swap')}
+      </button>
+
+      <Select
+        label={t('crosstabs.columns', 'Columns (banner)')}
+        value={config.colVar ?? ''}
+        onChange={(value) => updateConfig({ type: 'SET_COL', value })}
+      >
+        {colVars.map((v) => (
+          <option key={v.code} value={v.code}>
+            {nameOf(v.code, v.label)}
+          </option>
+        ))}
+      </Select>
+
+      <Select
+        label={t('crosstabs.weight', 'Weight')}
+        value={config.weightVar ?? ''}
+        onChange={(value) => updateConfig({ type: 'SET_WEIGHT', value })}
+      >
+        <option value="">{t('crosstabs.weight_none', 'None')}</option>
+        {colVars.map((v) => (
+          <option key={v.code} value={v.code}>
+            {nameOf(v.code, v.label)}
+          </option>
+        ))}
+      </Select>
+
+      {filters}
+
+      <fieldset className={styles.fieldset}>
+        <legend className={styles.legend}>
+          {t('crosstabs.show_in_cells')}
+        </legend>
+        <div className={styles.checks}>
+          <label className={styles.check}>
+            <input
+              type="checkbox"
+              checked={config.options.counts}
+              onChange={toggle('counts')}
+            />
+            {t('crosstabs.counts', 'Counts')}
+          </label>
+          <label className={styles.check}>
+            <input
+              type="checkbox"
+              checked={config.options.pct}
+              onChange={toggle('pct')}
+            />
+            {t('crosstabs.column_pct', 'Column %')}
+          </label>
+          <label className={styles.check}>
+            <input
+              type="checkbox"
+              checked={config.options.significance}
+              onChange={toggle('significance')}
+            />
+            {t('crosstabs.significance', 'Significance (95%)')}
+          </label>
+        </div>
+      </fieldset>
+
+      <div className={styles.buttons}>
+        <button
+          type="button"
+          className={styles.btn}
+          onClick={onExport}
+          disabled={!canExport}
+        >
+          <Download size={16} aria-hidden="true" />
           {t('crosstabs.export_csv', 'Export CSV')}
-        </Button>
-        <Button size="small" variant="contained" onClick={onSavePlan}>
+        </button>
+        <button
+          type="button"
+          className={`${styles.btn} ${styles.btnPrimary}`}
+          onClick={onSavePlan}
+        >
           {t('crosstabs.save_plan', 'Save tab plan')}
-        </Button>
-      </Stack>
-    </Box>
+        </button>
+      </div>
+    </>
   );
 }

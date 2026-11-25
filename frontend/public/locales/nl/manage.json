@@ -446,7 +446,14 @@
     "filtered_base": "Gefilterd tot {{count}} van {{total}} antwoorden",
     "warn_noMatches": "Geen antwoorden voldoen aan deze filters.",
     "plan_name": "Plannaam",
-    "plan_name_taken": "Er bestaat al een plan met deze naam."
+    "plan_name_taken": "Er bestaat al een plan met deze naam.",
+    "setup": "Kruistabellen instellen",
+    "swap": "Omwisselen",
+    "swap_unavailable": "Alleen een vraag met één keuze kan een kolom zijn",
+    "show_in_cells": "Tonen in cellen",
+    "heat_note": "Percentages zijn per kolom. Donkerdere cellen hebben meer antwoorden.",
+    "table_caption": "{{row}} per {{column}}",
+    "delete_plan": "{{name}} verwijderen"
   },
   "jobs": {
     "failures_title": "Mislukte antwoorden",

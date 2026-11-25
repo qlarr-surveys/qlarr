@@ -446,7 +446,14 @@
     "filtered_base": "Filtré sur {{count}} réponses sur {{total}}",
     "warn_noMatches": "Aucune réponse ne correspond à ces filtres.",
     "plan_name": "Nom du plan",
-    "plan_name_taken": "Un plan portant ce nom existe déjà."
+    "plan_name_taken": "Un plan portant ce nom existe déjà.",
+    "setup": "Configuration des tableaux croisés",
+    "swap": "Inverser",
+    "swap_unavailable": "Seule une question à choix unique peut servir de colonne",
+    "show_in_cells": "Afficher dans les cellules",
+    "heat_note": "Les pourcentages portent sur chaque colonne. Les cellules plus foncées ont plus de réponses.",
+    "table_caption": "{{row}} par {{column}}",
+    "delete_plan": "Supprimer {{name}}"
   },
   "jobs": {
     "failures_title": "Réponses en échec",

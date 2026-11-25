@@ -57,6 +57,10 @@ export function configReducer(state, action) {
       return { ...state, rowVar: action.value };
     case 'SET_COL':
       return { ...state, colVar: action.value };
+    // Rows and columns trade places. Callers only offer it when the row is a
+    // single-choice question, whose row id is its column code.
+    case 'SWAP':
+      return { ...state, rowVar: state.colVar, colVar: state.rowVar };
     case 'SET_WEIGHT':
       return { ...state, weightVar: action.value || null };
     case 'SET_TARGETS':

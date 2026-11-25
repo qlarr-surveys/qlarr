@@ -99,8 +99,9 @@
   color: #2b34a8;
 }
 
-/* The views below the strip. Individual Responses and Analytics fill it
-   edge to edge; the others keep the padding they were laid out for. */
+/* The views below the strip. Individual Responses, Analytics and Crosstabs
+   fill it edge to edge; Calculated fields keeps the padding it was laid out
+   for. */
 .panel {
   flex: 1;
   min-height: 0;
