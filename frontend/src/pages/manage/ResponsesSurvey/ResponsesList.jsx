@@ -30,6 +30,7 @@ import ResponsesExport, {
 import ResponseEvents from "~/components/manage/ResponseEvents";
 import CalculationValue from "~/components/manage/CalculationValue";
 import CustomTooltip from "~/components/common/Tooltip/Tooltip";
+import { escapeHtml } from "~/utils/escapeHtml";
 import {
   previewUrlByFilename,
   previewUrlByResponseIdAndCode,
@@ -261,6 +262,8 @@ function ResponsesList({ refreshKey, onTotalChange }) {
     "filename" in v &&
     "stored_filename" in v;
 
+  // The tooltip renders its title as HTML, and answers are whatever a
+  // respondent typed: callers escape this before handing it over.
   const getTooltipString = (val) => {
     if (val === null || val === undefined || val === "") return "—";
     if (Array.isArray(val) && val.every(isFileObj)) {
@@ -874,7 +877,10 @@ function ResponsesList({ refreshKey, onTotalChange }) {
               return (
                 <tr key={val.code}>
                   <td className={styles.cell}>
-                    <CustomTooltip showIcon={false} title={questionTooltip}>
+                    <CustomTooltip
+                      showIcon={false}
+                      title={escapeHtml(questionTooltip)}
+                    >
                       <div className={styles.clamp}>
                         <bdi>{val.key}</bdi>
                       </div>
@@ -882,7 +888,10 @@ function ResponsesList({ refreshKey, onTotalChange }) {
                   </td>
                   <td className={`${styles.cell} ${styles.answerCell}`}>
                     {answerTooltip.length > 20 ? (
-                      <CustomTooltip showIcon={false} title={answerTooltip}>
+                      <CustomTooltip
+                        showIcon={false}
+                        title={escapeHtml(answerTooltip)}
+                      >
                         <div>{answer}</div>
                       </CustomTooltip>
                     ) : (
