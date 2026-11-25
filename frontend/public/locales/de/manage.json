@@ -427,7 +427,11 @@
     "no_response_hint": "Wählen Sie unter „Nach Typ filtern“ einen anderen Typ, um Antworten zu sehen.",
     "export_button": "Exportieren",
     "download_button": "Herunterladen",
-    "status_preview": "Vorschau"
+    "status_preview": "Vorschau",
+    "answers": "Antworten",
+    "no_answers": "Keine Antworten gefunden",
+    "no_events": "Keine Ereignisse gefunden",
+    "audio_not_supported": "Ihr Browser unterstützt keine Audiowiedergabe"
   },
   "crosstabs": {
     "rows": "Zeilen",

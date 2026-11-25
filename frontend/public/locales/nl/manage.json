@@ -389,7 +389,11 @@
     "no_response_hint": "Kies een ander type bij ‘Filteren op type’ om reacties te zien.",
     "export_button": "Exporteren",
     "download_button": "Downloaden",
-    "status_preview": "Voorvertoning"
+    "status_preview": "Voorvertoning",
+    "answers": "Antwoorden",
+    "no_answers": "Geen antwoorden gevonden",
+    "no_events": "Geen gebeurtenissen gevonden",
+    "audio_not_supported": "Uw browser ondersteunt geen audioweergave"
   },
   "crosstabs": {
     "rows": "Rijen",

@@ -389,7 +389,11 @@
     "no_response_hint": "Escolha outro tipo em “Filtrar por tipo” para ver respostas.",
     "export_button": "Exportar",
     "download_button": "Baixar",
-    "status_preview": "Pré-visualização"
+    "status_preview": "Pré-visualização",
+    "answers": "Respostas",
+    "no_answers": "Nenhuma resposta encontrada",
+    "no_events": "Nenhum evento encontrado",
+    "audio_not_supported": "Seu navegador não suporta reprodução de áudio"
   },
   "crosstabs": {
     "rows": "Linhas",

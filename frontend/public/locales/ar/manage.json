@@ -393,7 +393,11 @@
     "no_response_hint": "اختر نوعًا آخر في «تصفية حسب النوع» لعرض الردود.",
     "export_button": "تصدير",
     "download_button": "تنزيل",
-    "status_preview": "معاينة"
+    "status_preview": "معاينة",
+    "answers": "الإجابات",
+    "no_answers": "لا توجد إجابات",
+    "no_events": "لا توجد أحداث",
+    "audio_not_supported": "متصفحك لا يدعم تشغيل الصوت"
   },
   "crosstabs": {
     "rows": "الصفوف",

@@ -389,7 +389,11 @@
     "no_response_hint": "Choose another type in Filter by type to see responses.",
     "export_button": "Export",
     "download_button": "Download",
-    "status_preview": "Preview"
+    "status_preview": "Preview",
+    "answers": "Answers",
+    "no_answers": "No answers found",
+    "no_events": "No events found",
+    "audio_not_supported": "Your browser does not support audio playback"
   },
   "crosstabs": {
     "rows": "Rows",
