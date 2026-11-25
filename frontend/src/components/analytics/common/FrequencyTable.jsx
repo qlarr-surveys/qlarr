@@ -13,7 +13,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { NAMESPACES } from '~/hooks/useNamespaceLoader';
 import usePagination from '~/hooks/usePagination';
-import { TABLE_HEADER_CELL_SX, EMPTY_STATE_SX } from './styles';
+import { TABLE_HEADER_CELL_SX, TABLE_SX, MUTED_CELL, EMPTY_STATE_SX } from './styles';
 
 export default function FrequencyTable({
   data,
@@ -36,10 +36,10 @@ export default function FrequencyTable({
 
   return (
     <Box>
-      <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
+      <TableContainer component={Paper} variant="outlined" sx={TABLE_SX}>
         <Table size="small">
           <TableHead>
-            <TableRow sx={{ bgcolor: 'grey.50' }}>
+            <TableRow>
               <TableCell sx={TABLE_HEADER_CELL_SX}>
                 {valueLabel || t('analytics.col_value')}
               </TableCell>
@@ -54,13 +54,13 @@ export default function FrequencyTable({
           <TableBody>
             {displayData.map((item, index) => (
               <TableRow key={index} hover>
-                <TableCell sx={{ fontWeight: 500, color: 'text.primary' }}>
+                <TableCell dir="auto">
                   {item.value || item.text || item.name}
                 </TableCell>
-                <TableCell align="right" sx={{ color: 'text.secondary' }}>
+                <TableCell align="right">
                   {item.count || item.value}
                 </TableCell>
-                <TableCell align="right" sx={{ color: 'text.secondary' }}>
+                <TableCell align="right" className={MUTED_CELL}>
                   {item.percentage}%
                 </TableCell>
               </TableRow>

@@ -55,7 +55,7 @@ export default function ImageSCQVisualization({ question }) {
 
         {viewType === 'donut' && (
           <>
-            <PieDonutChart data={data.pieData} height={350} showLegend={false} />
+            <PieDonutChart data={data.pieData} showLegend={false} />
             <CategoryLegend items={data.pieData} />
           </>
         )}

@@ -11,7 +11,7 @@ function ChartContainer({
     <Box>
       {/* Header */}
       {(title || actions) && (
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: '14px' }}>
           <Box>
             {title && (
               <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>

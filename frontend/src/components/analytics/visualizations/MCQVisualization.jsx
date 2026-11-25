@@ -48,9 +48,9 @@ export default function MCQVisualization({ question }) {
         <StatsRow stats={stats} columns={2} />
 
         {/* Chart */}
-        <Box sx={{ minHeight: 300 }}>
+        <Box>
           {chartType === 'donut' && (
-            <PieDonutChart data={data.pieData} height={350} />
+            <PieDonutChart data={data.pieData} />
           )}
           {chartType === 'bar' && (
             <HorizontalBarChart data={data.barData} height={300} />

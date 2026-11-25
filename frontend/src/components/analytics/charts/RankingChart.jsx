@@ -85,6 +85,9 @@ function RankingChart({
             <LabelList
               dataKey="averageRank"
               position="right"
+              // The bars run left to right in every language; under dir=rtl a
+              // "start" anchor would draw the value back over its bar.
+              direction="ltr"
               fill={grey[700]}
               fontSize={12}
             />

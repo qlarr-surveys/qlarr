@@ -54,7 +54,6 @@ export default function EmailVisualization({ question }) {
             </Typography>
             <PieDonutChart
               data={data.domainData.slice(0, 6).map((d) => ({ ...d, value: d.count }))}
-              height={280}
             />
           </Grid>
           <Grid item xs={12} md={6}>

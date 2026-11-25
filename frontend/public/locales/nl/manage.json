@@ -706,6 +706,7 @@
     "contact_support": "contact opnemen met support"
   },
   "analytics": {
+    "section_questions": "Vragen",
     "completed_count": "{{completed}} / {{total}} voltooid",
     "completion_rate": "Voltooiingspercentage",
     "photos_captured": "Vastgelegde foto's",

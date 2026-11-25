@@ -61,7 +61,7 @@ function HorizontalBarChart({
         margin={{ top: 5, right: 50, left: 5, bottom: 20 }}
       >
         {showGrid && <CartesianGrid strokeDasharray="3 3" horizontal={false} />}
-        <XAxis type="number" allowDecimals={false} />
+        <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12 }} />
         <YAxis
           type="category"
           dataKey="name"
@@ -84,6 +84,9 @@ function HorizontalBarChart({
             <LabelList
               dataKey={dataKey}
               position="right"
+              // The bars run left to right in every language; under dir=rtl a
+              // "start" anchor would draw the value back over its bar.
+              direction="ltr"
               fill={grey[700]}
               fontSize={12}
             />

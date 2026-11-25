@@ -710,6 +710,7 @@
     "contact_support": "تواصل مع الدعم"
   },
   "analytics": {
+    "section_questions": "الأسئلة",
     "completed_count": "{{completed}} / {{total}} مكتمل",
     "completion_rate": "معدل الإكمال",
     "photos_captured": "الصور الملتقطة",

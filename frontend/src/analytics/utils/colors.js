@@ -1,16 +1,19 @@
 // Chart color palettes for survey visualizations
 
+// Led by the phase-3.3 prototype's blue, green and orange. Its red comes
+// fifth, with violet between it and the orange, which it sits too close to
+// as a neighbour; its slate is left out, as it reads as "no data" gray. In
+// this order every neighbouring pair passes the dataviz palette validator's
+// colour-blind, normal-vision and 3:1 contrast checks on white.
 const CHART_COLORS = [
-  '#3b82f6', // blue
-  '#8b5cf6', // purple
-  '#22c55e', // green
-  '#f59e0b', // amber
-  '#ef4444', // red
-  '#06b6d4', // cyan
-  '#ec4899', // pink
-  '#84cc16', // lime
-  '#f97316', // orange
-  '#6366f1', // indigo
+  '#3a46d8', // blue
+  '#0e8a6b', // green
+  '#c2680a', // orange
+  '#6250d6', // violet
+  '#b3261e', // red
+  '#0f7ea8', // teal
+  '#c2417a', // magenta
+  '#6b7d00', // olive
 ];
 
 export const STATUS_COLORS = {
@@ -18,10 +21,12 @@ export const STATUS_COLORS = {
   preview: '#6b7280',   // medium gray
 };
 
+// As the phase-3.3 NPS card draws them: passives recede to gray, so the eye
+// lands on the two ends.
 export const NPS_COLORS = {
-  detractor: '#ef4444', // red (0-6)
-  passive: '#f59e0b',   // amber (7-8)
-  promoter: '#22c55e',  // green (9-10)
+  detractor: '#d9534f', // red (0-6)
+  passive: '#c9cde0',   // gray (7-8)
+  promoter: '#0e8a6b',  // green (9-10)
 };
 
 export const NPS_BENCHMARK_COLORS = {
