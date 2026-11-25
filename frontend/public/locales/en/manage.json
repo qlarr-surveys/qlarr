@@ -378,7 +378,22 @@
     "tab_individual": "Individual Responses",
     "tab_analytics": "Analytics",
     "tab_crosstabs": "Crosstabs",
-    "tab_calculations": "Calculated fields"
+    "tab_calculations": "Calculated fields",
+    "response_title": "Response #{{index}}",
+    "previous_response": "Previous response",
+    "next_response": "Next response",
+    "previous_page": "Previous page",
+    "next_page": "Next page",
+    "delete_response_n": "Delete response #{{index}}",
+    "no_response_title": "No response to show",
+    "no_response_hint": "Choose another type in Filter by type to see responses.",
+    "export_button": "Export",
+    "download_button": "Download",
+    "status_preview": "Preview",
+    "answers": "Answers",
+    "no_answers": "No answers found",
+    "no_events": "No events found",
+    "audio_not_supported": "Your browser does not support audio playback"
   },
   "crosstabs": {
     "rows": "Rows",

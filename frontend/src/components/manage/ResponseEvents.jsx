@@ -1,41 +1,34 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
-import {
-  Box,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@mui/material";
 import LoadingDots from "~/components/common/LoadingDots";
 import {
   formatlocalDateTime,
   serverDateTimeToLocalDateTime,
 } from "~/utils/DateUtils";
+import styles from "./ResponseEvents.module.css";
 
+/**
+ * A response's events, one row each: a dot for its kind, what happened
+ * (a move between pages, or an answer given), and when, with the time since
+ * the event before it.
+ */
 function ResponseEvents({ events, loading }) {
   const { t } = useTranslation(NAMESPACES.MANAGE);
 
   if (loading) {
     return (
-      <Box p={2}>
+      <div className={styles.loading}>
         <LoadingDots />
-      </Box>
+      </div>
     );
   }
 
   if (!events || events.length === 0) {
     return (
-      <Box p={4} textAlign="center">
-        <Typography color="text.secondary">
-          {t("responses.no_events", "No events found")}
-        </Typography>
-      </Box>
+      <div className={styles.none}>
+        {t("responses.no_events", "No events found")}
+      </div>
     );
   }
 
@@ -78,80 +71,70 @@ function ResponseEvents({ events, loading }) {
   };
 
   return (
-    <TableContainer component={Paper} variant="outlined">
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell sx={{ backgroundColor: "#212B36", color: "white" }}>
-              {t("responses.event_navigation", "Navigation")}
-            </TableCell>
-            <TableCell sx={{ backgroundColor: "#212B36", color: "white" }}>
-              {t("responses.event_time", "Time")}
-            </TableCell>
-            <TableCell sx={{ backgroundColor: "#212B36", color: "white" }}>
-              {t("responses.event_value", "Value")}
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {events.map((item, idx) => {
-            const { event, responseValue } = item;
-            const isNavigation = event?.name === "Navigation";
+    <ol aria-label={t("responses.events", "Events")} className={styles.events}>
+      {events.map((item, idx) => {
+        const { event, responseValue } = item;
+        const isNavigation = event?.name === "Navigation";
 
-            const currentTime = getTimeInMs(event?.time);
-            const previousTime = idx > 0 ? getTimeInMs(events[idx - 1]?.event?.time) : null;
-            const timeDiff = currentTime && previousTime ? currentTime - previousTime : null;
+        const currentTime = getTimeInMs(event?.time);
+        const previousTime =
+          idx > 0 ? getTimeInMs(events[idx - 1]?.event?.time) : null;
+        const timeDiff =
+          currentTime && previousTime ? currentTime - previousTime : null;
 
-            return (
-              <TableRow key={idx} hover>
-                <TableCell sx={{ verticalAlign: "top" }}>
-                  {isNavigation ? (
-                    <Typography variant="body2">
-                      {event.from || "Start"} → {event.to || "End"}
-                      {event.direction?.name && (
-                        <Typography variant="caption" display="block" color="text.secondary">
-                          ({event.direction.name})
-                        </Typography>
-                      )}
-                    </Typography>
-                  ) : (
-                    <Typography variant="body2" color="text.secondary">
-                      —
-                    </Typography>
+        const kind = isNavigation
+          ? "navigation"
+          : responseValue
+            ? "value"
+            : "other";
+
+        return (
+          <li key={idx} className={styles.event}>
+            <span
+              aria-hidden="true"
+              className={`${styles.eventDot} ${
+                styles[`eventDot_${kind}`] || ""
+              }`}
+            />
+            <div className={styles.eventBody}>
+              {isNavigation && (
+                <span dir="auto">
+                  {event.from || "Start"} → {event.to || "End"}
+                  {event.direction?.name && (
+                    <span className={styles.eventSub}>
+                      ({event.direction.name})
+                    </span>
                   )}
-                </TableCell>
-                <TableCell sx={{ verticalAlign: "top" }}>
-                  <Typography variant="body2">
-                    {formatTime(event?.time)}
-                  </Typography>
-                  {timeDiff && (
-                    <Typography variant="caption" display="block" color="primary.main">
-                      +{formatTimeDiff(timeDiff)}
-                    </Typography>
-                  )}
-                </TableCell>
-                <TableCell sx={{ verticalAlign: "top" }}>
-                  {responseValue ? (
-                    <Box>
-                      <Typography variant="body2" fontWeight={500}>
-                        {responseValue.key}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {String(responseValue.value)}
-                      </Typography>
-                    </Box>
-                  ) : (
-                    <Typography variant="body2" color="text.secondary">
-                      —
-                    </Typography>
-                  )}
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
-    </TableContainer>
+                </span>
+              )}
+              {responseValue && (
+                <span
+                  dir="auto"
+                  className={isNavigation ? styles.eventSub : undefined}
+                >
+                  <strong>{responseValue.key}</strong>
+                  <span className={styles.eventSub}>
+                    {String(responseValue.value)}
+                  </span>
+                </span>
+              )}
+              {!isNavigation && !responseValue && (
+                <span className={styles.empty}>—</span>
+              )}
+            </div>
+            <div className={styles.eventTime}>
+              <span dir="ltr">{formatTime(event?.time)}</span>
+              {/* A gap of 0 ms shows nothing, rather than a stray "0". */}
+              {timeDiff > 0 && (
+                <span className={styles.eventDelta} dir="ltr">
+                  +{formatTimeDiff(timeDiff)}
+                </span>
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 

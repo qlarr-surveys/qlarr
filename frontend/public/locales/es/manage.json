@@ -378,7 +378,22 @@
     "tab_individual": "Respuestas Individuales",
     "tab_analytics": "Analíticas",
     "tab_crosstabs": "Tabulaciones cruzadas",
-    "tab_calculations": "Campos calculados"
+    "tab_calculations": "Campos calculados",
+    "response_title": "Respuesta #{{index}}",
+    "previous_response": "Respuesta anterior",
+    "next_response": "Respuesta siguiente",
+    "previous_page": "Página anterior",
+    "next_page": "Página siguiente",
+    "delete_response_n": "Eliminar respuesta #{{index}}",
+    "no_response_title": "No hay respuestas para mostrar",
+    "no_response_hint": "Elija otro tipo en «Filtrar por tipo» para ver respuestas.",
+    "export_button": "Exportar",
+    "download_button": "Descargar",
+    "status_preview": "Vista previa",
+    "answers": "Respuestas",
+    "no_answers": "No se encontraron respuestas",
+    "no_events": "No se encontraron eventos",
+    "audio_not_supported": "Su navegador no admite la reproducción de audio"
   },
   "crosstabs": {
     "rows": "Filas",

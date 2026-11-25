@@ -1,0 +1,88 @@
+/* A response's events, as the Events tab of a response lists them. */
+
+.events {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  border: 1px solid #dce0ee;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.event {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f2f8;
+}
+
+.event:last-child {
+  border-bottom: 0;
+}
+
+.eventDot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: #4c5474;
+}
+
+.eventDot_navigation {
+  background: #3a46d8;
+}
+
+.eventDot_value {
+  background: #2e7d54;
+}
+
+.eventBody {
+  flex: 1;
+  min-width: 0;
+  font:
+    400 14.5px/21px Rubik,
+    sans-serif;
+  color: #1b2150;
+  overflow-wrap: anywhere;
+}
+
+.eventSub {
+  display: block;
+  font:
+    400 13px/18px Rubik,
+    sans-serif;
+  color: #5b6189;
+}
+
+.eventTime {
+  flex: none;
+  text-align: end;
+  font:
+    400 13.5px/21px Rubik,
+    sans-serif;
+  color: #5b6189;
+}
+
+.eventDelta {
+  display: block;
+  font:
+    500 12.5px/18px Rubik,
+    sans-serif;
+  color: #3a46d8;
+}
+
+.loading,
+.none {
+  padding: 32px;
+  text-align: center;
+  font:
+    400 15px/22px Rubik,
+    sans-serif;
+  color: #5b6189;
+}
+
+.empty {
+  color: #7a809e;
+}
