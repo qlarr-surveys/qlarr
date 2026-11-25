@@ -1,16 +1,19 @@
 // Chart color palettes for survey visualizations
 
-// The phase-3.3 prototype's five, then three more checked with the dataviz
-// palette validator so no neighbouring pair is hard to tell apart.
+// Led by the phase-3.3 prototype's blue, green and orange. Its red comes
+// fifth, with violet between it and the orange, which it sits too close to
+// as a neighbour; its slate is left out, as it reads as "no data" gray. In
+// this order every neighbouring pair passes the dataviz palette validator's
+// colour-blind, normal-vision and 3:1 contrast checks on white.
 const CHART_COLORS = [
   '#3a46d8', // blue
   '#0e8a6b', // green
   '#c2680a', // orange
-  '#b3261e', // red
-  '#5b6189', // slate
-  '#e87ba4', // magenta
-  '#008300', // leaf green
   '#6250d6', // violet
+  '#b3261e', // red
+  '#0f7ea8', // teal
+  '#c2417a', // magenta
+  '#6b7d00', // olive
 ];
 
 export const STATUS_COLORS = {
