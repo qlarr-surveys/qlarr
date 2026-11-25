@@ -23,21 +23,21 @@ export default function CategoryLegend({ items, showPercentage = true }) {
                 sx={{
                   width: 12,
                   height: 12,
-                  borderRadius: '50%',
+                  borderRadius: '3px',
                   bgcolor: item.color || item.fill,
                   flexShrink: 0,
                 }}
               />
-              <Typography variant="body2" sx={{ color: 'text.primary' }}>
+              <Typography variant="body2" dir="auto" sx={{ font: '400 13.5px Rubik, sans-serif', color: '#2c3358' }}>
                 {item.label || item.name}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.primary' }}>
+              <Typography variant="body2" sx={{ font: '600 13.5px Rubik, sans-serif', color: '#1b2150' }}>
                 {count}
               </Typography>
               {showPercentage && (
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                <Typography variant="body2" sx={{ font: '400 13.5px Rubik, sans-serif', color: '#5b6189' }}>
                   ({percentage}%)
                 </Typography>
               )}

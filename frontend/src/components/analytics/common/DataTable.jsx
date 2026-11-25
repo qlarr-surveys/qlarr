@@ -17,6 +17,7 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import { useTranslation } from 'react-i18next';
 import { NAMESPACES } from '~/hooks/useNamespaceLoader';
+import { TABLE_SX } from './styles';
 
 export default function DataTable({
   data,
@@ -149,7 +150,7 @@ export default function DataTable({
       )}
 
       {/* Table */}
-      <TableContainer component={Paper} variant="outlined">
+      <TableContainer component={Paper} variant="outlined" sx={TABLE_SX}>
         <Table size="small" stickyHeader>
           <TableHead>
             <TableRow>
@@ -157,7 +158,7 @@ export default function DataTable({
                 <TableCell
                   key={column.key}
                   align={column.align || 'left'}
-                  sx={{ fontWeight: 600, bgcolor: 'grey.50' }}
+
                 >
                   {column.sortable ? (
                     <TableSortLabel

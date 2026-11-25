@@ -1,16 +1,16 @@
 // Chart color palettes for survey visualizations
 
+// The phase-3.3 prototype's five, then three more checked with the dataviz
+// palette validator so no neighbouring pair is hard to tell apart.
 const CHART_COLORS = [
-  '#3b82f6', // blue
-  '#8b5cf6', // purple
-  '#22c55e', // green
-  '#f59e0b', // amber
-  '#ef4444', // red
-  '#06b6d4', // cyan
-  '#ec4899', // pink
-  '#84cc16', // lime
-  '#f97316', // orange
-  '#6366f1', // indigo
+  '#3a46d8', // blue
+  '#0e8a6b', // green
+  '#c2680a', // orange
+  '#b3261e', // red
+  '#5b6189', // slate
+  '#e87ba4', // magenta
+  '#008300', // leaf green
+  '#6250d6', // violet
 ];
 
 export const STATUS_COLORS = {
@@ -18,10 +18,12 @@ export const STATUS_COLORS = {
   preview: '#6b7280',   // medium gray
 };
 
+// As the phase-3.3 NPS card draws them: passives recede to gray, so the eye
+// lands on the two ends.
 export const NPS_COLORS = {
-  detractor: '#ef4444', // red (0-6)
-  passive: '#f59e0b',   // amber (7-8)
-  promoter: '#22c55e',  // green (9-10)
+  detractor: '#d9534f', // red (0-6)
+  passive: '#c9cde0',   // gray (7-8)
+  promoter: '#0e8a6b',  // green (9-10)
 };
 
 export const NPS_BENCHMARK_COLORS = {

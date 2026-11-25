@@ -707,6 +707,7 @@
     "contact_support": "Support kontaktieren"
   },
   "analytics": {
+    "section_questions": "Fragen",
     "completed_count": "{{completed}} / {{total}} abgeschlossen",
     "completion_rate": "Abschlussrate",
     "photos_captured": "Aufgenommene Fotos",

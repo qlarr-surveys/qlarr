@@ -16,7 +16,7 @@ import { NAMESPACES } from '~/hooks/useNamespaceLoader';
 import ChartContainer from '../common/ChartContainer';
 import { StatsRow } from '../common/StatCard';
 import { buildBaseStats } from '../common/buildBaseStats';
-import { TABLE_HEADER_CELL_SX, EMPTY_STATE_SX } from '../common/styles';
+import { TABLE_HEADER_CELL_SX, TABLE_SX, MUTED_CELL, EMPTY_STATE_SX } from '../common/styles';
 import { transformParagraphData } from '~/analytics/utils/dataTransformers';
 import usePagination from '~/hooks/usePagination';
 
@@ -42,10 +42,10 @@ export default function ParagraphVisualization({ question }) {
           </Box>
         ) : (
           <Box>
-            <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
+            <TableContainer component={Paper} variant="outlined" sx={TABLE_SX}>
               <Table size="small">
                 <TableHead>
-                  <TableRow sx={{ bgcolor: 'grey.50' }}>
+                  <TableRow>
                     <TableCell sx={{ ...TABLE_HEADER_CELL_SX, width: 60 }}>
                       #
                     </TableCell>
@@ -57,10 +57,10 @@ export default function ParagraphVisualization({ question }) {
                 <TableBody>
                   {displayData.map((response, index) => (
                     <TableRow key={startRow + index} hover>
-                      <TableCell sx={{ color: 'text.secondary', width: 60 }}>
+                      <TableCell className={MUTED_CELL} sx={{ width: 60 }}>
                         {startRow + index}
                       </TableCell>
-                      <TableCell sx={{ fontWeight: 500, color: 'text.primary', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                      <TableCell dir="auto" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                         {response}
                       </TableCell>
                     </TableRow>

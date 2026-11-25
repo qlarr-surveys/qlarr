@@ -129,9 +129,10 @@ function ResponsesSurvey() {
               refreshKey={responsesRefreshKey}
               onTotalChange={setResponsesTotal}
             />
+          ) : id === "analytics" ? (
+            <AnalyticsSurvey />
           ) : (
             <div className={styles.pane}>
-              {id === "analytics" && <AnalyticsSurvey />}
               {id === "crosstabs" && <CrosstabsSurvey />}
               {id === "calculations" && (
                 <CalculationsSurvey onDirtyChange={onCalculationsDirtyChange} />

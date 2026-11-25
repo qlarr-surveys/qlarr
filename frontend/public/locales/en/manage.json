@@ -679,6 +679,7 @@
     "reset_password": "Reset password"
   },
   "analytics": {
+    "section_questions": "Questions",
     "completed_count": "{{completed}} / {{total}} completed",
     "completion_rate": "Completion Rate",
     "photos_captured": "Photos Captured",

@@ -61,7 +61,7 @@ function HorizontalBarChart({
         margin={{ top: 5, right: 50, left: 5, bottom: 20 }}
       >
         {showGrid && <CartesianGrid strokeDasharray="3 3" horizontal={false} />}
-        <XAxis type="number" allowDecimals={false} />
+        <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12 }} />
         <YAxis
           type="category"
           dataKey="name"

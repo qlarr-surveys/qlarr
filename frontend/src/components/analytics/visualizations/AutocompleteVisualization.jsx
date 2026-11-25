@@ -32,9 +32,9 @@ export default function AutocompleteVisualization({ question }) {
     >
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
         <StatsRow stats={stats} columns={2} />
-        <Box sx={{ minHeight: 300 }}>
+        <Box>
           {chartType === 'bar' && <HorizontalBarChart data={data.barData} height={300} />}
-          {chartType === 'pie' && <PieDonutChart data={data.pieData} height={350} />}
+          {chartType === 'pie' && <PieDonutChart data={data.pieData} />}
         </Box>
       </Box>
     </ChartContainer>

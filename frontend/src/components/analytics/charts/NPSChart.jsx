@@ -98,7 +98,6 @@ function NPSChart({ score, categoryData, distributionData }) {
           <PieDonutChart
             data={categoryData}
             showLegend={false}
-            height={250}
           />
           <Box sx={{ mt: 2 }}>
             <CategoryLegend items={legendItems} />

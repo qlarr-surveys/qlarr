@@ -1,0 +1,132 @@
+/* ====== Canvas ====== */
+
+/* The questions on the grey canvas, in one centred column of cards. */
+.canvas {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 40px 40px 80px;
+  background: #eaecf4;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+  padding: 14px 20px;
+  background: #fff;
+  border: 1px solid #dce0ee;
+  border-radius: 12px;
+}
+
+.headerTitle {
+  margin: 0;
+  font:
+    600 15px Rubik,
+    sans-serif;
+  color: #1b2150;
+}
+
+.headerNote {
+  font:
+    400 13.5px Rubik,
+    sans-serif;
+  color: #5b6189;
+}
+
+.sectionTitle {
+  margin: 8px 0 0;
+  padding-top: 4px;
+  font:
+    600 13px/18px Rubik,
+    sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #4c5474;
+}
+
+.card {
+  padding: 22px 24px 24px;
+  background: #fff;
+  border: 1px solid #dce0ee;
+  border-radius: 12px;
+}
+
+.questionTitle {
+  margin: 0;
+  font:
+    600 16px/24px Rubik,
+    sans-serif;
+  color: #1b2150;
+}
+
+.questionCode {
+  font-weight: 500;
+  color: #5b6189;
+}
+
+.questionType {
+  margin: 4px 0 14px;
+  font:
+    400 13px Rubik,
+    sans-serif;
+  color: #5b6189;
+}
+
+/* ====== States ====== */
+
+.loading {
+  flex: 1;
+  padding-top: 100px;
+  text-align: center;
+}
+
+.notice {
+  padding: 32px 24px;
+  background: #fff;
+  border: 1px solid #dce0ee;
+  border-radius: 12px;
+  text-align: center;
+  font:
+    400 15px/22px Rubik,
+    sans-serif;
+  color: #5b6189;
+}
+
+.noticeError {
+  border-color: #f0c9c6;
+  background: #fdf6f5;
+  color: #8a231c;
+}
+
+.noticeTitle {
+  margin: 0 0 4px;
+  font:
+    600 17px Rubik,
+    sans-serif;
+  color: inherit;
+}
+
+.notice:not(.noticeError) .noticeTitle {
+  color: #1b2150;
+}
+
+@media (max-width: 959px) {
+  .canvas {
+    padding: 24px 16px 48px;
+  }
+
+  .card {
+    padding: 18px 16px 20px;
+  }
+}
