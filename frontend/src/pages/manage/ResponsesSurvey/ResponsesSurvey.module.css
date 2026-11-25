@@ -1,25 +1,865 @@
-.mainContainer {
-  margin: auto;
-  padding: 2rem 3rem;
-  min-width: 300px;
-  height: 100%;
-  overflow: auto;
+/* ====== Workspace ====== */
+
+.workspace {
   display: flex;
   flex-direction: column;
-}
-
-.loadingWrapper {
-  width: 100%;
   height: 100%;
-  text-align: center;
-  padding-top: 100px;
+  min-height: 0;
+  font-family: Rubik, sans-serif;
+  color: #1b2150;
 }
 
-.cardContent {
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Chevrons point the way the reading direction goes. */
+[dir="rtl"] .flip {
+  transform: scaleX(-1);
+}
+
+/* ====== View strip ====== */
+
+.strip {
+  flex: none;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 2rem 1.5rem;
-  border-radius: 18px;
-  background-color: #fff;
+  min-height: 62px;
+  padding: 8px 20px;
+  background: #fff;
+  border-bottom: 1px solid #dce0ee;
+}
+
+.views {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.view {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font:
+    500 15px/20px Rubik,
+    sans-serif;
+  color: #1b2150;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.view:hover {
+  background: #f4f6fc;
+}
+
+.view:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: -1px;
+}
+
+.viewOn,
+.viewOn:hover {
+  background: #eef0fb;
+  font-weight: 600;
+  color: #2b34a8;
+}
+
+.viewCount {
+  flex: none;
+  min-width: 24px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 11px;
+  background: #eef0f6;
+  font:
+    600 12.5px/22px Rubik,
+    sans-serif;
+  color: #1b2150;
+  text-align: center;
+}
+
+.viewOn .viewCount {
+  background: #fff;
+  color: #2b34a8;
+}
+
+/* The views below the strip. Individual Responses fills it edge to edge;
+   the others keep the padding they were laid out for. */
+.panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.pane {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 24px 48px 32px;
+}
+
+/* ====== Explorer (response list) ====== */
+
+.explorer {
+  flex: none;
+  width: 22rem;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-inline-end: 1px solid #dce0ee;
+}
+
+.tools {
+  flex: none;
+  padding: 11px 12px 0;
+}
+
+.selectWrap {
+  position: relative;
+  display: block;
+}
+
+.select {
+  appearance: none;
+  width: 100%;
+  height: 44px;
+  padding-inline: 14px 44px;
+  border: 1px solid #cfd5e8;
+  border-radius: 8px;
+  background: #fff;
+  font:
+    400 15px Rubik,
+    sans-serif;
+  color: #1b2150;
+  cursor: pointer;
+}
+
+.select:focus-visible,
+.pagerSelect:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.selectChevron {
+  position: absolute;
+  inset-inline-end: 16px;
+  top: 50%;
+  margin-top: -8px;
+  display: inline-flex;
+  color: #1b2150;
+  pointer-events: none;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* A dark button whose main part runs the quick action and whose end part
+   opens the options dialog. */
+.split {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  height: 38px;
+  border-radius: 8px;
+  background: #1b2559;
+  overflow: hidden;
+}
+
+.splitMain,
+.splitMore {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+
+.splitMain {
+  flex: 1;
+  min-width: 0;
+  gap: 7px;
+  padding: 0 8px;
+  font:
+    600 13.5px Rubik,
+    sans-serif;
+  white-space: nowrap;
+}
+
+.splitLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.splitMore {
+  flex: none;
+  width: 34px;
+  border-inline-start: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.splitMain:hover:not(:disabled),
+.splitMore:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.splitMain:focus-visible,
+.splitMore:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: -3px;
+}
+
+.splitMain:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.resetFilter {
+  margin-top: 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font:
+    500 13px Rubik,
+    sans-serif;
+  color: #3a46d8;
+  cursor: pointer;
+}
+
+.resetFilter:hover {
+  text-decoration: underline;
+}
+
+.listScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding: 12px 8px 16px;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid #e9ebf5;
+}
+
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #f0f2f8;
+}
+
+.row:hover {
+  background: #f7f8fc;
+}
+
+.rowOn,
+.rowOn:hover {
+  background: #eef0fb;
+}
+
+.rowOn::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 3px;
+  background: #3a46d8;
+}
+
+.rowBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.rowMain {
+  display: block;
+  width: 100%;
+  padding-block: 9px;
+  padding-inline: 14px 6px;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.rowMain:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: -2px;
+}
+
+/* The surveyor line sits under the row's button, as its own link. */
+.rowMainTight {
+  padding-bottom: 2px;
+}
+
+.rowTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rowIndex {
+  font:
+    600 15px Rubik,
+    sans-serif;
+  color: #1b2150;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 9px;
+  border: 1px solid #cfd5e8;
+  border-radius: 11px;
+  background: #fff;
+  font:
+    400 12.5px Rubik,
+    sans-serif;
+  color: #1b2150;
+  white-space: nowrap;
+}
+
+.rowDate {
+  display: block;
+  margin-top: 3px;
+  font:
+    400 13px Rubik,
+    sans-serif;
+  color: #5b6189;
+}
+
+.rowSurveyor {
+  padding-inline: 14px 6px;
+  padding-bottom: 9px;
+  font:
+    400 13px Rubik,
+    sans-serif;
+  color: #5b6189;
+}
+
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: #3a46d8;
+  text-align: start;
+  cursor: pointer;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.link:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.rowDelete {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  margin-inline-end: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #4c5474;
+  cursor: pointer;
+}
+
+.rowDelete:hover {
+  background: #fdecec;
+  color: #b3261e;
+}
+
+.rowDelete:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: -1px;
+}
+
+.skeletonRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 14px;
+}
+
+.more {
+  display: flex;
+  justify-content: center;
+  padding-top: 12px;
+}
+
+.moreBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid #cfd5e8;
+  border-radius: 8px;
+  background: #fff;
+  font:
+    500 13px Rubik,
+    sans-serif;
+  color: #1b2150;
+  cursor: pointer;
+}
+
+.moreBtn:hover:not(:disabled) {
+  background: #f4f6fc;
+}
+
+.moreBtn:disabled {
+  color: #7a809e;
+  cursor: default;
+}
+
+.pager {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid #e9ebf5;
+  font:
+    400 13px Rubik,
+    sans-serif;
+  color: #4c5474;
+}
+
+.pagerSize {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pagerSelect {
+  appearance: none;
+  height: 30px;
+  padding-inline: 8px 26px;
+  border: 1px solid #cfd5e8;
+  border-radius: 6px;
+  background: #fff;
+  font:
+    400 13px Rubik,
+    sans-serif;
+  color: #1b2150;
+  cursor: pointer;
+}
+
+.pagerSelectWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.pagerSelectWrap .selectChevron {
+  inset-inline-end: 8px;
+  margin-top: -7px;
+}
+
+/* The range and its arrows stay on one line; when the row runs out of room
+   (Arabic's longer label), they wrap together to the end of the next one. */
+.pagerNav {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.pagerBtn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #1b2150;
+  cursor: pointer;
+}
+
+.pagerBtn:hover:not(:disabled) {
+  background: #f4f6fc;
+}
+
+.pagerBtn:disabled {
+  color: #b4b9d0;
+  cursor: default;
+}
+
+.pagerBtn:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: -1px;
+}
+
+/* ====== Canvas (the selected response) ====== */
+
+.canvas {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 40px 40px 80px;
+  background: #eaecf4;
+}
+
+.loading {
+  flex: 1;
+  padding-top: 100px;
+  text-align: center;
+}
+
+.card {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 28px 28px;
+  background: #fff;
+  border: 1px solid #dce0ee;
+  border-radius: 12px;
+}
+
+.cardHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+  margin-bottom: 22px;
+}
+
+.cardTitle {
+  margin: 0;
+  font:
+    700 22px/28px Rubik,
+    sans-serif;
+  color: #1b2150;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 14px;
+  font:
+    500 14px Rubik,
+    sans-serif;
+  white-space: nowrap;
+}
+
+.status_preview {
+  background: #f1f2f6;
+  color: #3c447a;
+}
+
+.status_complete {
+  background: #e8f6ee;
+  color: #14653a;
+}
+
+.status_incomplete {
+  background: #fdf3e3;
+  color: #8a4a00;
+}
+
+.status_disqualified {
+  background: #fdecec;
+  color: #8a231c;
+}
+
+.headSpacer {
+  flex: 1;
+}
+
+.headActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepBtn {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #cfd5e8;
+  border-radius: 8px;
+  background: #fff;
+  color: #1b2150;
+  cursor: pointer;
+}
+
+.stepBtn:hover:not(:disabled) {
+  background: #f4f6fc;
+}
+
+.stepBtn:disabled {
+  color: #b4b9d0;
+  cursor: default;
+}
+
+.deleteBtn {
+  height: 42px;
+  padding: 0 16px;
+  border: 1px solid #f0c9c6;
+  border-radius: 8px;
+  background: #fff;
+  font:
+    500 15px Rubik,
+    sans-serif;
+  color: #b3261e;
+  cursor: pointer;
+}
+
+.deleteBtn:hover {
+  background: #fdf6f5;
+}
+
+.stepBtn:focus-visible,
+.deleteBtn:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 1px;
+}
+
+.meta {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px 32px;
+}
+
+.metaItem {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* Recordings carry audio players, too wide for a third of the card. */
+.metaWide {
+  grid-column: 1 / -1;
+}
+
+.metaKey {
+  flex: none;
+  width: 130px;
+  font:
+    400 15px Rubik,
+    sans-serif;
+  color: #5b6189;
+}
+
+.metaVal {
+  margin: 0;
+  min-width: 0;
+  font:
+    400 15px Rubik,
+    sans-serif;
+  color: #1b2150;
+  overflow-wrap: anywhere;
+}
+
+.metaLines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.metaNote {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+  color: #5b6189;
+}
+
+.audio {
+  width: 100%;
+  max-width: 300px;
+}
+
+.tabs {
+  display: flex;
+  gap: 28px;
+  margin-top: 30px;
+  border-bottom: 1px solid #dce0ee;
+}
+
+.tab {
+  position: relative;
+  padding: 10px 2px 12px;
+  border: 0;
+  background: transparent;
+  font:
+    600 15px Rubik,
+    sans-serif;
+  color: #5b6189;
+  cursor: pointer;
+}
+
+.tab:hover,
+.tabOn {
+  color: #1b2150;
+}
+
+.tabOn::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: -1px;
+  height: 3px;
+  background: #3a46d8;
+}
+
+.tab:focus-visible {
+  outline: 2px solid #3a46d8;
+  outline-offset: 2px;
+}
+
+.table {
+  width: 100%;
+  margin-top: 18px;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  table-layout: fixed;
+}
+
+.groupCell {
+  padding: 14px 12px;
+  border-bottom: 1px solid #eceef6;
+  background: #f4f5fa;
+  font:
+    600 16px Rubik,
+    sans-serif;
+  color: #1b2150;
+  text-align: start;
+}
+
+.cell {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f2f8;
+  font:
+    400 14.5px/21px Rubik,
+    sans-serif;
+  color: #2c3358;
+  vertical-align: top;
+  text-align: start;
+}
+
+.answerCell {
+  color: #1b2150;
+}
+
+.empty {
+  color: #7a809e;
+}
+
+.clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.fileLink {
+  color: #3a46d8;
+  word-break: break-all;
+}
+
+.notice {
+  max-width: 520px;
+  margin: 60px auto;
+  text-align: center;
+  font:
+    400 15px/22px Rubik,
+    sans-serif;
+  color: #5b6189;
+}
+
+.noticeTitle {
+  font:
+    600 17px Rubik,
+    sans-serif;
+  color: #1b2150;
+}
+
+.tabEmpty {
+  padding: 32px;
+  text-align: center;
+  font:
+    400 15px/22px Rubik,
+    sans-serif;
+  color: #5b6189;
+}
+
+/* The console goes down to 768px wide. Below this the list sits above the
+   response instead of beside it. */
+@media (max-width: 959px) {
+  .panel {
+    flex-direction: column;
+    overflow: auto;
+  }
+
+  .explorer {
+    width: auto;
+    max-height: 50vh;
+    border-inline-end: 0;
+    border-bottom: 1px solid #dce0ee;
+  }
+
+  .canvas {
+    flex: none;
+    overflow: visible;
+    padding: 24px 16px 48px;
+  }
+
+  .card {
+    padding: 20px 16px;
+  }
+
+  .pane {
+    padding: 24px;
+  }
 }

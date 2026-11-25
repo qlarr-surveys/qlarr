@@ -378,7 +378,18 @@
     "tab_individual": "Individuele Reacties",
     "tab_analytics": "Analyse",
     "tab_crosstabs": "Kruistabellen",
-    "tab_calculations": "Berekende velden"
+    "tab_calculations": "Berekende velden",
+    "response_title": "Reactie #{{index}}",
+    "previous_response": "Vorige reactie",
+    "next_response": "Volgende reactie",
+    "previous_page": "Vorige pagina",
+    "next_page": "Volgende pagina",
+    "delete_response_n": "Reactie #{{index}} verwijderen",
+    "no_response_title": "Geen reactie om te tonen",
+    "no_response_hint": "Kies een ander type bij ‘Filteren op type’ om reacties te zien.",
+    "export_button": "Exporteren",
+    "download_button": "Downloaden",
+    "status_preview": "Voorvertoning"
   },
   "crosstabs": {
     "rows": "Rijen",

@@ -416,7 +416,18 @@
     "tab_individual": "Einzelne Antworten",
     "tab_analytics": "Analytik",
     "tab_crosstabs": "Kreuztabellen",
-    "tab_calculations": "Berechnete Felder"
+    "tab_calculations": "Berechnete Felder",
+    "response_title": "Antwort #{{index}}",
+    "previous_response": "Vorherige Antwort",
+    "next_response": "Nächste Antwort",
+    "previous_page": "Vorherige Seite",
+    "next_page": "Nächste Seite",
+    "delete_response_n": "Antwort #{{index}} löschen",
+    "no_response_title": "Keine Antwort anzuzeigen",
+    "no_response_hint": "Wählen Sie unter „Nach Typ filtern“ einen anderen Typ, um Antworten zu sehen.",
+    "export_button": "Exportieren",
+    "download_button": "Herunterladen",
+    "status_preview": "Vorschau"
   },
   "crosstabs": {
     "rows": "Zeilen",

@@ -378,7 +378,18 @@
     "tab_individual": "Réponses Individuelles",
     "tab_analytics": "Analytique",
     "tab_crosstabs": "Tableaux croisés",
-    "tab_calculations": "Champs calculés"
+    "tab_calculations": "Champs calculés",
+    "response_title": "Réponse #{{index}}",
+    "previous_response": "Réponse précédente",
+    "next_response": "Réponse suivante",
+    "previous_page": "Page précédente",
+    "next_page": "Page suivante",
+    "delete_response_n": "Supprimer la réponse #{{index}}",
+    "no_response_title": "Aucune réponse à afficher",
+    "no_response_hint": "Choisissez un autre type dans « Filtrer par type » pour voir des réponses.",
+    "export_button": "Exporter",
+    "download_button": "Télécharger",
+    "status_preview": "Aperçu"
   },
   "crosstabs": {
     "rows": "Lignes",

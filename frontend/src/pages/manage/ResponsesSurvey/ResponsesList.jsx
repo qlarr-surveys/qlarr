@@ -1,45 +1,23 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
+import { Alert, CircularProgress, Skeleton, Snackbar } from "@mui/material";
 import {
-  Alert,
-  Box,
-  Button,
-  ButtonGroup,
-  Chip,
-  Divider,
-  IconButton,
-  List,
-  ListItemButton,
-  ListItemText,
-  MenuItem,
-  Paper,
-  CircularProgress,
-  TablePagination,
-  Typography,
-  FormControl,
-  Skeleton,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Grid,
-  Tabs,
-  Tab,
-  Snackbar,
-} from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Ellipsis,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import styles from "./ResponsesSurvey.module.css";
 import {
   formatlocalDateTime,
   serverDateTimeToLocalDateTime,
 } from "~/utils/DateUtils";
 import ConfirmActionModal from "~/components/common/ConfirmActionModal";
-import { RHFSelect } from "~/components/hook-form";
 import LoadingDots from "~/components/common/LoadingDots";
 import { useService } from "~/hooks/use-service";
 import ResponsesDownload, {
@@ -57,38 +35,43 @@ import {
   previewUrlByResponseIdAndCode,
 } from "~/networking/run";
 
-function InfoItem({ label, value }) {
+// A label and its value in the response's details. Dates and addresses are
+// read left to right in every language; the rest follows its own text.
+function MetaItem({ label, children, ltr, wide }) {
   return (
-    <Box
-      display="grid"
-      gridTemplateColumns={{ xs: "1fr 2fr", sm: "1fr 2fr", md: "160px 1fr" }}
-      gap={1}
-      py={0.5}
-    >
-      <Typography color="text.secondary" fontWeight={500}>
-        {label}
-      </Typography>
-      <Typography component="div">{value ?? "—"}</Typography>
-    </Box>
+    <div className={`${styles.metaItem} ${wide ? styles.metaWide : ""}`}>
+      <dt className={styles.metaKey}>{label}</dt>
+      <dd className={styles.metaVal} dir={ltr ? "ltr" : "auto"}>
+        {children ?? "—"}
+      </dd>
+    </div>
   );
 }
 
-function ClampTwoLines({ children, sx }) {
-  return (
-    <Box
-      sx={{
-        display: "-webkit-box",
-        WebkitLineClamp: 2,
-        WebkitBoxOrient: "vertical",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        ...sx,
-      }}
-    >
-      {children}
-    </Box>
-  );
-}
+const STATUS_FILTERS = [
+  ["all", "responses.filter_completed_show_all"],
+  ["preview", "responses.filter_preview_show_preview"],
+  ["complete", "responses.filter_completed_show_completed"],
+  ["incomplete", "responses.filter_completed_show_incomplete"],
+  ["disqualified", "responses.filter_completed_show_disqualified"],
+];
+
+// One status per response, in the order the list has always checked them.
+const statusOf = (response) =>
+  response.preview
+    ? "preview"
+    : response.disqualified
+      ? "disqualified"
+      : response.submitDate
+        ? "complete"
+        : "incomplete";
+
+const STATUS_LABELS = {
+  preview: ["responses.status_preview", "Preview"],
+  complete: ["responses.status_complete", "Complete"],
+  incomplete: ["responses.status_incomplete", "Incomplete"],
+  disqualified: ["responses.disqualified", "Disqualified"],
+};
 
 const PAGE_SIZES = [25, 50, 100];
 const PAGE_SIZE_KEY = "responses_rows_per_page";
@@ -111,7 +94,7 @@ const writePageSize = (value) => {
   }
 };
 
-function ResponsesList({ refreshKey }) {
+function ResponsesList({ refreshKey, onTotalChange }) {
   const surveyService = useService("survey");
   const { t } = useTranslation(NAMESPACES.MANAGE);
   const { surveyId } = useParams();
@@ -217,6 +200,10 @@ function ResponsesList({ refreshKey }) {
             setAskedAboutFiles(true);
             setCanExportFiles(data.canExportFiles);
           }
+          // Unfiltered, the total is every response the survey has.
+          if (status === "all" && !surveyor) {
+            onTotalChange?.(data.totalCount);
+          }
           const totalPages = Math.ceil(data.totalCount / rowsPerPage) || 1;
           if (lastPage > totalPages) {
             // Refetches: the rows of these pages are gone.
@@ -290,58 +277,33 @@ function ResponsesList({ refreshKey }) {
 
   const renderAnswerClamped = (code, respId, val) => {
     if (val === null || val === undefined || val === "") {
-      return <Typography variant="body2">—</Typography>;
+      return <span className={styles.empty}>—</span>;
     }
 
     if (Array.isArray(val) && val.every(isFileObj)) {
       return (
-        <ClampTwoLines>
-          <Box display="inline" sx={{ wordBreak: "break-word" }}>
-            {val.map((file, idx) => (
-              <React.Fragment key={file.stored_filename}>
-                {idx > 0 ? ", " : null}
-                {renderFileLink(code, respId, file)}
-              </React.Fragment>
-            ))}
-          </Box>
-        </ClampTwoLines>
+        <div className={styles.clamp}>
+          {val.map((file, idx) => (
+            <React.Fragment key={file.stored_filename}>
+              {idx > 0 ? ", " : null}
+              {renderFileLink(code, respId, file)}
+            </React.Fragment>
+          ))}
+        </div>
       );
     }
 
     if (isFileObj(val)) {
       return (
-        <ClampTwoLines>
-          <Box display="inline" sx={{ wordBreak: "break-word" }}>
-            {renderFileLink(code, respId, val)}
-          </Box>
-        </ClampTwoLines>
-      );
-    }
-
-    if (typeof val === "object") {
-      return (
-        <ClampTwoLines>
-          <Typography variant="body2" sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-            {JSON.stringify(val)}
-          </Typography>
-        </ClampTwoLines>
+        <div className={styles.clamp}>{renderFileLink(code, respId, val)}</div>
       );
     }
 
     return (
-      <ClampTwoLines>
-        <Typography variant="body2" sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-          {String(val)}
-        </Typography>
-      </ClampTwoLines>
+      <div className={styles.clamp}>
+        <bdi>{typeof val === "object" ? JSON.stringify(val) : String(val)}</bdi>
+      </div>
     );
-  };
-
-  const getQuestionCodeFromKey = (key) => {
-    if (!key) return "";
-    const first = String(key).split(".")[0].trim();
-    const m = first.match(/[A-Za-z]+[A-Za-z0-9]*/);
-    return (m && m[0]) || first;
   };
 
   const renderFileLink = (code, respId, file) => {
@@ -352,7 +314,7 @@ function ResponsesList({ refreshKey }) {
         rel="noreferrer"
         download={file.stored_filename}
         href={previewUrlByResponseIdAndCode(respId, code)}
-        style={{ wordBreak: "break-all" }}
+        className={styles.fileLink}
       >
         {file.filename} — {Math.round(file.size / 1000)}K
       </a>
@@ -398,18 +360,18 @@ function ResponsesList({ refreshKey }) {
     return formatlocalDateTime(date);
   };
 
-  const renderVoiceRecordings = (respId, events) => {
+  const renderVoiceRecordings = (events) => {
     const recordings = getVoiceRecordings(events);
     if (recordings.length === 0) return "—";
     return (
-      <Box display="flex" flexDirection="column" gap={1}>
+      <div className={styles.metaLines}>
         {recordings.map((recording, index) => (
-          <Box key={recording.fileName || index}>
-            <Typography variant="body2" color="text.secondary" mb={0.5}>
+          <div key={recording.fileName || index}>
+            <span className={styles.metaNote}>
               {t("responses.recording")} {index + 1} —{" "}
-              {formatEventTime(recording.time)}
-            </Typography>
-            <audio controls style={{ width: "100%", maxWidth: 300 }}>
+              <span dir="ltr">{formatEventTime(recording.time)}</span>
+            </span>
+            <audio controls className={styles.audio}>
               <source
                 src={previewUrlByFilename(recording.fileName)}
                 type="audio/mp4"
@@ -419,9 +381,9 @@ function ResponsesList({ refreshKey }) {
                 "Your browser does not support audio playback",
               )}
             </audio>
-          </Box>
+          </div>
         ))}
-      </Box>
+      </div>
     );
   };
 
@@ -429,14 +391,14 @@ function ResponsesList({ refreshKey }) {
     const locations = getLocations(events);
     if (locations.length === 0) return "—";
     return (
-      <Box display="flex" flexDirection="column" gap={0.5}>
+      <div className={styles.metaLines}>
         {locations.map((location, index) => (
-          <Typography key={index} sx={{ wordBreak: "break-word" }}>
+          <span key={index} dir="ltr">
             {formatEventTime(location.time)} — <strong>Lat:</strong>{" "}
             {location.latitude}, <strong>Long:</strong> {location.longitude}
-          </Typography>
+          </span>
         ))}
-      </Box>
+      </div>
     );
   };
 
@@ -458,7 +420,7 @@ function ResponsesList({ refreshKey }) {
     surveyService
       .getResponseById(responseId)
       .then((data) =>
-        setSelected((prev) => (prev?.id == data?.id ? data : prev))
+        setSelected((prev) => (prev?.id == data?.id ? data : prev)),
       )
       .catch((err) => console.error(err));
   }, [refreshKey]);
@@ -520,6 +482,9 @@ function ResponsesList({ refreshKey }) {
           ...prev,
           responses: prev.responses.filter((r) => r.id !== deletedId),
         }));
+        // A filtered refetch doesn't report the survey's total, so count the
+        // deletion here.
+        onTotalChange?.((total) => (total === null ? total : total - 1));
         // Refetches with the page and filters as they are now.
         keepListRef.current = true;
         setPaging((prev) => ({ ...prev }));
@@ -535,76 +500,11 @@ function ResponsesList({ refreshKey }) {
 
   if (fetching && !allResponse) {
     return (
-      <div className={styles.loadingWrapper}>
+      <div className={styles.loading}>
         <LoadingDots fullHeight />
       </div>
     );
   }
-
-  const renderEventsCell = (events) => {
-    if (!Array.isArray(events) || events.length === 0) {
-      return <Typography>—</Typography>;
-    }
-
-    let accumulatedMs = 0;
-
-    return (
-      <Box sx={{ maxHeight: 200, overflow: "auto", pr: 1 }}>
-        {events.map((e, idx) => {
-          const { time, name, timeMillis } = e || {};
-          const formattedDate = formatEventTime(time);
-
-          const prettyName =
-            {
-              START: "Started",
-              NEXT: "Next Page",
-              RESUME: "Resumed",
-              Value: "Answered",
-            }[name] ||
-            name ||
-            "—";
-
-          accumulatedMs += timeMillis ?? 0;
-          const timeSinceLastEvent =
-            typeof timeMillis === "number"
-              ? `+${(timeMillis / 1000).toFixed(1)}s`
-              : "";
-
-          return (
-            <Box
-              key={idx}
-              display="flex"
-              flexWrap="wrap"
-              alignItems="center"
-              justifyContent="space-between"
-              py={0.5}
-              sx={{
-                borderBottom:
-                  idx < events.length - 1
-                    ? "1px dashed rgba(0,0,0,0.08)"
-                    : "none",
-              }}
-            >
-              <Typography fontWeight={600}>{prettyName}</Typography>
-              <Typography color="text.secondary" sx={{ whiteSpace: "nowrap" }}>
-                {formattedDate}
-              </Typography>
-              <Box display="flex" gap={1}>
-                {timeSinceLastEvent && (
-                  <Chip
-                    size="small"
-                    variant="outlined"
-                    label={timeSinceLastEvent}
-                    sx={{ fontSize: "0.75rem" }}
-                  />
-                )}
-              </Box>
-            </Box>
-          );
-        })}
-      </Box>
-    );
-  };
 
   const closeNotice = () => setNotice((n) => ({ ...n, open: false }));
   const notifyNoResponses = () =>
@@ -631,7 +531,7 @@ function ResponsesList({ refreshKey }) {
     try {
       const downloaded = await downloadResponseFilesZip(
         surveyService,
-        surveyId
+        surveyId,
       );
       if (!downloaded) notifyNoFiles();
     } catch (e) {
@@ -658,21 +558,506 @@ function ResponsesList({ refreshKey }) {
     }
   };
 
+  const responses = allResponse?.responses || [];
+
+  // Previous and next walk the responses loaded in the list.
+  const selectedAt = responses.findIndex((r) => r.id === responseId);
+  const previousResponse = selectedAt > 0 ? responses[selectedAt - 1] : null;
+  const nextResponse =
+    selectedAt >= 0 && selectedAt < responses.length - 1
+      ? responses[selectedAt + 1]
+      : null;
+
+  const statusLabel = (response) => {
+    const [key, fallback] = STATUS_LABELS[statusOf(response)];
+    return t(key, fallback);
+  };
+
+  const formatDate = (date) =>
+    formatlocalDateTime(serverDateTimeToLocalDateTime(date));
+
+  const rangeFrom = totalCount === 0 ? 0 : (page - 1) * rowsPerPage + 1;
+  const rangeTo = Math.min(lastPage * rowsPerPage, totalCount);
+
+  const renderSurveyorLink = (response) => (
+    <button
+      type="button"
+      className={styles.link}
+      onClick={() => onSurveyorClicked(response)}
+    >
+      {response.surveyorName}
+    </button>
+  );
+
+  const renderExplorer = () => (
+    <nav aria-label={t("responses.title")} className={styles.explorer}>
+      <div className={styles.tools}>
+        <label className={styles.selectWrap}>
+          <span className={styles.srOnly}>{t("responses.filter_by_type")}</span>
+          <select
+            className={styles.select}
+            title={t("responses.filter_by_type")}
+            value={status}
+            onChange={(e) => {
+              goToPage(1);
+              setStatus(e.target.value);
+            }}
+          >
+            {STATUS_FILTERS.map(([value, label]) => (
+              <option key={value} value={value}>
+                {t(label)}
+              </option>
+            ))}
+          </select>
+          <span aria-hidden="true" className={styles.selectChevron}>
+            <ChevronDown size={16} strokeWidth={2} />
+          </span>
+        </label>
+
+        <div className={styles.actions}>
+          <div className={styles.split}>
+            <button
+              type="button"
+              className={styles.splitMain}
+              disabled={exporting}
+              onClick={quickExport}
+              title={t("responses.export")}
+            >
+              <Upload size={15} strokeWidth={2} aria-hidden="true" />
+              <span className={styles.splitLabel}>
+                {t("responses.export_button", "Export")}
+              </span>
+            </button>
+            <button
+              type="button"
+              className={styles.splitMore}
+              aria-label={t("responses.export_options")}
+              title={t("responses.export_options")}
+              onClick={() => setExportDlgOpen(true)}
+            >
+              <Ellipsis size={16} strokeWidth={2} aria-hidden="true" />
+            </button>
+          </div>
+
+          {canExportFiles && (
+            <div className={styles.split}>
+              <button
+                type="button"
+                className={styles.splitMain}
+                disabled={downloading}
+                onClick={quickDownloadFiles}
+                title={t("responses.download_files")}
+              >
+                <Download size={15} strokeWidth={2} aria-hidden="true" />
+                <span className={styles.splitLabel}>
+                  {t("responses.download_button", "Download")}
+                </span>
+              </button>
+              <button
+                type="button"
+                className={styles.splitMore}
+                aria-label={t("responses.download_options")}
+                title={t("responses.download_options")}
+                onClick={() => setDownloadDlgOpen(true)}
+              >
+                <Ellipsis size={16} strokeWidth={2} aria-hidden="true" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {surveyor && (
+          <button
+            type="button"
+            className={styles.resetFilter}
+            onClick={() => setSurveyor(null)}
+          >
+            {t("responses.reset_surveyor_filter")}
+          </button>
+        )}
+      </div>
+
+      <div className={styles.listScroll}>
+        {fetching ? (
+          <div className={styles.list}>
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className={styles.skeletonRow}>
+                <Skeleton variant="rounded" width={28} height={24} />
+                <Skeleton variant="text" width="50%" />
+                <Skeleton
+                  variant="rounded"
+                  width={80}
+                  height={22}
+                  style={{ marginInlineStart: "auto" }}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <>
+            <ul className={styles.list}>
+              {responses.map((r) => {
+                const isSelected = Boolean(responseId) && responseId === r.id;
+                return (
+                  <li
+                    key={r.id}
+                    className={`${styles.row} ${
+                      isSelected ? styles.rowOn : ""
+                    }`}
+                  >
+                    <div className={styles.rowBody}>
+                      <button
+                        type="button"
+                        aria-current={isSelected ? "true" : undefined}
+                        onClick={() => setResponseId(r.id)}
+                        className={`${styles.rowMain} ${
+                          r.surveyorName ? styles.rowMainTight : ""
+                        }`}
+                      >
+                        <span className={styles.rowTop}>
+                          <span className={styles.rowIndex}>#{r.index}</span>
+                          <span className={styles.chip}>{statusLabel(r)}</span>
+                        </span>
+                        <span className={styles.rowDate}>
+                          <span dir="ltr">{formatDate(r.startDate)}</span>
+                        </span>
+                      </button>
+                      {r.surveyorName && (
+                        <div className={styles.rowSurveyor}>
+                          {t("label.surveyor")}: {renderSurveyorLink(r)}
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.rowDelete}
+                      onClick={() => setResponseToDelete(r)}
+                      aria-label={t("responses.delete_response_n", {
+                        index: r.index,
+                        defaultValue: "Delete response #{{index}}",
+                      })}
+                      title={t("action_btn.delete")}
+                    >
+                      <Trash2 size={17} strokeWidth={2} aria-hidden="true" />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+
+            {lastPage * rowsPerPage < totalCount && (
+              <div className={styles.more}>
+                <button
+                  type="button"
+                  className={styles.moreBtn}
+                  disabled={loadingMore}
+                  onClick={() => {
+                    setLoadingMore(true);
+                    keepListRef.current = true;
+                    setPaging((prev) => ({
+                      ...prev,
+                      lastPage: prev.lastPage + 1,
+                    }));
+                  }}
+                >
+                  {t("responses.show_more")}
+                  {loadingMore && (
+                    <CircularProgress size={14} color="inherit" />
+                  )}
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {!fetching && (
+        <div className={styles.pager}>
+          <label className={styles.pagerSize}>
+            {t("responses.label_rows_per_page")}
+            <span className={styles.pagerSelectWrap}>
+              <select
+                className={styles.pagerSelect}
+                value={rowsPerPage}
+                onChange={(e) => {
+                  const size = parseInt(e.target.value, 10);
+                  writePageSize(size);
+                  setPaging({ page: 1, lastPage: 1, rowsPerPage: size });
+                }}
+              >
+                {PAGE_SIZES.map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+              <span aria-hidden="true" className={styles.selectChevron}>
+                <ChevronDown size={14} strokeWidth={2} />
+              </span>
+            </span>
+          </label>
+          <div className={styles.pagerNav}>
+            <span className={styles.pagerRange} aria-live="polite">
+              {t("responses.label_displayed_rows", {
+                from: rangeFrom,
+                to: rangeTo,
+                count: totalCount,
+              })}
+            </span>
+            <button
+              type="button"
+              className={styles.pagerBtn}
+              disabled={lastPage <= 1}
+              aria-label={t("responses.previous_page", "Previous page")}
+              title={t("responses.previous_page", "Previous page")}
+              onClick={() => goToPage(Math.max(page - 1, 1))}
+            >
+              <ChevronLeft
+                size={16}
+                strokeWidth={2}
+                className={styles.flip}
+                aria-hidden="true"
+              />
+            </button>
+            <button
+              type="button"
+              className={styles.pagerBtn}
+              disabled={lastPage * rowsPerPage >= totalCount}
+              aria-label={t("responses.next_page", "Next page")}
+              title={t("responses.next_page", "Next page")}
+              onClick={() => goToPage(lastPage + 1)}
+            >
+              <ChevronRight
+                size={16}
+                strokeWidth={2}
+                className={styles.flip}
+                aria-hidden="true"
+              />
+            </button>
+          </div>
+        </div>
+      )}
+    </nav>
+  );
+
+  const renderAnswers = () => (
+    <>
+      {selected.values && selected.values.length > 0 ? (
+        <table className={styles.table} aria-label={t("aria.answers_table")}>
+          <colgroup>
+            <col style={{ width: "62%" }} />
+            <col />
+          </colgroup>
+          <tbody>
+            {selected.values.map((val) => {
+              const isGroup = val.code.startsWith("G");
+              const answerTooltip = getTooltipString(val.value);
+              const questionTooltip = getTooltipString(val.key);
+              if (isGroup) {
+                return (
+                  <tr key={val.code}>
+                    <th
+                      colSpan={2}
+                      scope="colgroup"
+                      className={styles.groupCell}
+                    >
+                      <bdi>{val.key}</bdi>
+                    </th>
+                  </tr>
+                );
+              }
+              const answer = renderAnswerClamped(
+                val.code,
+                selected.id,
+                val.value,
+              );
+              return (
+                <tr key={val.code}>
+                  <td className={styles.cell}>
+                    <CustomTooltip showIcon={false} title={questionTooltip}>
+                      <div className={styles.clamp}>
+                        <bdi>{val.key}</bdi>
+                      </div>
+                    </CustomTooltip>
+                  </td>
+                  <td className={`${styles.cell} ${styles.answerCell}`}>
+                    {answerTooltip.length > 20 ? (
+                      <CustomTooltip showIcon={false} title={answerTooltip}>
+                        <div>{answer}</div>
+                      </CustomTooltip>
+                    ) : (
+                      answer
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      ) : (
+        <div className={styles.tabEmpty}>
+          {t("responses.no_answers", "No answers found")}
+        </div>
+      )}
+
+      {selected.calculations?.length > 0 && (
+        <table className={styles.table}>
+          <colgroup>
+            <col style={{ width: "62%" }} />
+            <col />
+          </colgroup>
+          <tbody>
+            <tr>
+              <th colSpan={2} scope="colgroup" className={styles.groupCell}>
+                {t("calculations.title", "Calculated fields")}
+              </th>
+            </tr>
+            {selected.calculations.map((calc) => (
+              <tr key={calc.code}>
+                <td className={styles.cell}>
+                  <bdi>{calc.label}</bdi>
+                </td>
+                <td className={`${styles.cell} ${styles.answerCell}`}>
+                  <CalculationValue state={calc.state} value={calc.value} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </>
+  );
+
+  const renderResponse = () => {
+    const recordings = getVoiceRecordings(selected.events);
+    const selectedStatus = statusOf(selected);
+    return (
+      <article className={styles.card} aria-labelledby="response-title">
+        <div className={styles.cardHead}>
+          <h2 id="response-title" className={styles.cardTitle}>
+            {t("responses.response_title", {
+              index: selected.index,
+              defaultValue: "Response #{{index}}",
+            })}
+          </h2>
+          <span
+            className={`${styles.status} ${styles[`status_${selectedStatus}`]}`}
+          >
+            {statusLabel(selected)}
+          </span>
+          <span className={styles.headSpacer} />
+          <div className={styles.headActions}>
+            <button
+              type="button"
+              className={styles.stepBtn}
+              disabled={!previousResponse}
+              aria-label={t("responses.previous_response", "Previous response")}
+              title={t("responses.previous_response", "Previous response")}
+              onClick={() => setResponseId(previousResponse.id)}
+            >
+              <ChevronLeft
+                size={14}
+                strokeWidth={2}
+                className={styles.flip}
+                aria-hidden="true"
+              />
+            </button>
+            <button
+              type="button"
+              className={styles.stepBtn}
+              disabled={!nextResponse}
+              aria-label={t("responses.next_response", "Next response")}
+              title={t("responses.next_response", "Next response")}
+              onClick={() => setResponseId(nextResponse.id)}
+            >
+              <ChevronRight
+                size={14}
+                strokeWidth={2}
+                className={styles.flip}
+                aria-hidden="true"
+              />
+            </button>
+            <button
+              type="button"
+              className={styles.deleteBtn}
+              onClick={() => setResponseToDelete(selected)}
+            >
+              {t("action_btn.delete")}
+            </button>
+          </div>
+        </div>
+
+        <dl className={styles.meta}>
+          <MetaItem label={t("responses.ip_addr")} ltr>
+            {selected.ipAddress || "—"}
+          </MetaItem>
+          <MetaItem label={t("label.surveyor")}>
+            {selected.surveyorName ? renderSurveyorLink(selected) : "—"}
+          </MetaItem>
+          <MetaItem label={t("responses.start_date")} ltr>
+            {formatDate(selected.startDate)}
+          </MetaItem>
+          <MetaItem label={t("responses.lang")}>
+            {t(`language.${selected.lang}`) || "—"}
+          </MetaItem>
+          <MetaItem label={t("responses.submit_date")} ltr>
+            {selected.submitDate ? formatDate(selected.submitDate) : "—"}
+          </MetaItem>
+          <MetaItem label={t("responses.disqualified")}>
+            {selected.disqualified ? t("responses.yes") : t("responses.no")}
+          </MetaItem>
+          <MetaItem
+            label={t("responses.voice_recordings")}
+            wide={recordings.length > 0}
+          >
+            {renderVoiceRecordings(selected.events)}
+          </MetaItem>
+          <MetaItem label={t("responses.locations")}>
+            {renderLocations(selected.events)}
+          </MetaItem>
+        </dl>
+
+        <div
+          role="tablist"
+          aria-label={t("responses.title")}
+          className={styles.tabs}
+        >
+          {[
+            t("responses.answers", "Answers"),
+            t("responses.events", "Events"),
+          ].map((label, index) => (
+            <button
+              key={index}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === index}
+              onClick={() => setActiveTab(index)}
+              className={`${styles.tab} ${
+                activeTab === index ? styles.tabOn : ""
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === 0 && renderAnswers()}
+        {activeTab === 1 && (
+          <ResponseEvents events={eventsData} loading={loadingEvents} />
+        )}
+      </article>
+    );
+  };
+
   return (
     <>
       <ResponsesExport
         open={exportDlgOpen}
         onClose={() => setExportDlgOpen(false)}
         onNoResponses={notifyNoResponses}
-        currentFrom={
-          allResponse?.responses?.length > 0
-            ? allResponse.responses[0].index
-            : 1
-        }
+        currentFrom={responses.length > 0 ? responses[0].index : 1}
         currentTo={
-          allResponse?.responses?.length > 0
-            ? allResponse.responses[allResponse.responses.length - 1].index
-            : 1
+          responses.length > 0 ? responses[responses.length - 1].index : 1
         }
         t={t}
       />
@@ -682,581 +1067,45 @@ function ResponsesList({ refreshKey }) {
         onClose={() => setDownloadDlgOpen(false)}
         onNoFiles={notifyNoFiles}
         onSizeLimit={notifyFilesSizeLimit}
-        currentFrom={
-          allResponse?.responses?.length > 0
-            ? allResponse.responses[0].index
-            : 1
-        }
+        currentFrom={responses.length > 0 ? responses[0].index : 1}
         currentTo={
-          allResponse?.responses?.length > 0
-            ? allResponse.responses[allResponse.responses.length - 1].index
-            : 1
+          responses.length > 0 ? responses[responses.length - 1].index : 1
         }
         t={t}
       />
 
-      <Box
-        sx={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-        }}
-      >
-        {surveyor && (
-          <Box mb={1}>
-            <Button sx={{ m: 1 }} onClick={() => setSurveyor(null)}>
-              {t("responses.reset_surveyor_filter")}
-            </Button>
-          </Box>
+      {renderExplorer()}
+
+      <div className={styles.canvas}>
+        {selected ? (
+          renderResponse()
+        ) : !fetching && responses.length === 0 ? (
+          <div role="status" className={styles.notice}>
+            <div className={styles.noticeTitle}>
+              {t("responses.no_response_title", "No response to show")}
+            </div>
+            {t(
+              "responses.no_response_hint",
+              "Choose another type in Filter by type to see responses.",
+            )}
+          </div>
+        ) : (
+          <div role="status" className={styles.notice}>
+            {t("responses.no_selection", "Select a response")}
+          </div>
         )}
+      </div>
 
-        <Box
-          display="grid"
-          gridTemplateColumns={{ xs: "1fr", md: "500px 1fr" }}
-          gap={2}
-          minHeight={520}
-          sx={{ flex: 1, overflow: "hidden" }}
-        >
-          <Paper
-            elevation={0}
-            variant="outlined"
-            sx={{
-              overflow: "hidden",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <Box px={2} py={1.5}>
-              <Grid container spacing={2} alignItems="flex-start">
-                <Grid item xs={12} sm={6}>
-                  <FormControl size="small" fullWidth>
-                    <RHFSelect
-                      label={t("responses.filter_by_type")}
-                      value={status}
-                      onChange={(e) => {
-                        goToPage(1);
-                        setStatus(e.target.value);
-                      }}
-                    >
-                      <MenuItem value="all">
-                        {t("responses.filter_completed_show_all")}
-                      </MenuItem>
-                      <MenuItem value="preview">
-                        {t("responses.filter_preview_show_preview")}
-                      </MenuItem>
-                      <MenuItem value="complete">
-                        {t("responses.filter_completed_show_completed")}
-                      </MenuItem>
-                      <MenuItem value="incomplete">
-                        {t("responses.filter_completed_show_incomplete")}
-                      </MenuItem>
-                      <MenuItem value="disqualified">
-                        {t("responses.filter_completed_show_disqualified")}
-                      </MenuItem>
-                    </RHFSelect>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Box
-                    display="flex"
-                    flexWrap="wrap"
-                    justifyContent="flex-end"
-                    gap={1}
-                  >
-                    <ButtonGroup size="small" variant="contained">
-                      <Button disabled={exporting} onClick={quickExport}>
-                        {t("responses.export")}
-                      </Button>
-                      <Button
-                        aria-label={t("responses.export_options")}
-                        title={t("responses.export_options")}
-                        onClick={() => setExportDlgOpen(true)}
-                        sx={{ "&&": { minWidth: 0, px: 1 } }}
-                      >
-                        <MoreHorizIcon fontSize="small" />
-                      </Button>
-                    </ButtonGroup>
-
-                    {canExportFiles && (
-                      <ButtonGroup size="small" variant="contained">
-                        <Button
-                          disabled={downloading}
-                          onClick={quickDownloadFiles}
-                        >
-                          {t("responses.download_files")}
-                        </Button>
-                        <Button
-                          aria-label={t("responses.download_options")}
-                          title={t("responses.download_options")}
-                          onClick={() => setDownloadDlgOpen(true)}
-                          sx={{ "&&": { minWidth: 0, px: 1 } }}
-                        >
-                          <MoreHorizIcon fontSize="small" />
-                        </Button>
-                      </ButtonGroup>
-                    )}
-                  </Box>
-                </Grid>
-              </Grid>
-            </Box>
-            <Divider />
-            {fetching ? (
-              <Box p={2}>
-                {[...Array(8)].map((_, i) => (
-                  <Box
-                    key={i}
-                    display="flex"
-                    alignItems="center"
-                    gap={2}
-                    py={1}
-                  >
-                    <Skeleton variant="rounded" width={28} height={24} />
-                    <Skeleton variant="text" width="50%" />
-                    <Skeleton
-                      variant="rounded"
-                      width={80}
-                      height={22}
-                      style={{ marginLeft: "auto" }}
-                    />
-                  </Box>
-                ))}
-              </Box>
-            ) : (
-              <>
-                <List dense disablePadding sx={{ overflowY: "auto", flex: 1 }}>
-                  {allResponse?.responses.map((r) => {
-                    const isSelected = responseId && responseId === r.id;
-
-                    return (
-                      <ListItemButton
-                        key={r.id}
-                        selected={isSelected}
-                        onClick={() => setResponseId(r.id)}
-                        sx={{ alignItems: "flex-start" }}
-                      >
-                        <ListItemText
-                          primary={
-                            <Box display="flex" gap={1} alignItems="center">
-                              <Typography fontWeight={600}>
-                                #{r.index}
-                              </Typography>
-                              {r.preview ? (
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                  fontWeight={500}
-                                >
-                                  {t("responses.test_response")}
-                                </Typography>
-                              ) : r.disqualified ? (
-                                <Chip
-                                  size="small"
-                                  variant="outlined"
-                                  color="error"
-                                  label={t("responses.disqualified")}
-                                />
-                              ) : r.submitDate ? (
-                                <Typography
-                                  variant="body2"
-                                  color="success.main"
-                                  fontWeight={500}
-                                >
-                                  {t("responses.complete_response")}
-                                </Typography>
-                              ) : (
-                                <Typography
-                                  variant="body2"
-                                  color="warning.main"
-                                  fontWeight={500}
-                                >
-                                  {t("responses.incomplete_response")}
-                                </Typography>
-                              )}
-                            </Box>
-                          }
-                          secondary={
-                            <>
-                              <Typography variant="body2">
-                                {formatlocalDateTime(
-                                  serverDateTimeToLocalDateTime(r.startDate),
-                                )}
-                              </Typography>
-                              {r.surveyorName && (
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                >
-                                  {t("label.surveyor")}:{" "}
-                                  <Link
-                                    to="#"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      onSurveyorClicked(r);
-                                    }}
-                                  >
-                                    {r.surveyorName}
-                                  </Link>
-                                </Typography>
-                              )}
-                            </>
-                          }
-                        />
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setResponseToDelete(r);
-                          }}
-                          aria-label="delete"
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </ListItemButton>
-                    );
-                  })}
-                </List>
-
-                <Divider />
-                {lastPage * rowsPerPage < totalCount && (
-                  <Box px={2} pt={1} display="flex" justifyContent="center">
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      disabled={loadingMore}
-                      endIcon={
-                        loadingMore ? (
-                          <CircularProgress size={16} color="inherit" />
-                        ) : null
-                      }
-                      onClick={() => {
-                        setLoadingMore(true);
-                        keepListRef.current = true;
-                        setPaging((prev) => ({
-                          ...prev,
-                          lastPage: prev.lastPage + 1,
-                        }));
-                      }}
-                    >
-                      {t("responses.show_more")}
-                    </Button>
-                  </Box>
-                )}
-                <TablePagination
-                  rowsPerPageOptions={PAGE_SIZES}
-                  component="div"
-                  labelDisplayedRows={({ to, count }) =>
-                    t("responses.label_displayed_rows", {
-                      from: count === 0 ? 0 : (page - 1) * rowsPerPage + 1,
-                      to,
-                      count,
-                    })
-                  }
-                  labelRowsPerPage={t("responses.label_rows_per_page")}
-                  count={totalCount}
-                  rowsPerPage={rowsPerPage}
-                  page={lastPage - 1}
-                  onPageChange={(_, newPage) =>
-                    goToPage(
-                      newPage >= lastPage
-                        ? newPage + 1
-                        : Math.max(page - 1, 1),
-                    )
-                  }
-                  onRowsPerPageChange={(e) => {
-                    const size = parseInt(e.target.value, 10);
-                    writePageSize(size);
-                    setPaging({ page: 1, lastPage: 1, rowsPerPage: size });
-                  }}
-                />
-              </>
-            )}
-          </Paper>
-
-          <Paper
-            elevation={0}
-            variant="outlined"
-            sx={{ p: 2, overflow: "auto" }}
-          >
-            {!selected ? (
-              <Box p={4} textAlign="center">
-                <Typography color="text.secondary">
-                  {t("responses.no_selection", "Select a response")}
-                </Typography>
-              </Box>
-            ) : (
-              <Box display="flex" flexDirection="column" gap={3}>
-                <Box
-                  display="grid"
-                  gridTemplateColumns={{ xs: "1fr", lg: "1fr 1fr" }}
-                >
-                  <InfoItem label="ID" value={`#${selected.index}`} />
-                  <InfoItem
-                    label={t("label.surveyor")}
-                    value={
-                      selected.surveyorName ? (
-                        <Link
-                          to="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            onSurveyorClicked(selected);
-                          }}
-                        >
-                          {selected.surveyorName}
-                        </Link>
-                      ) : (
-                        "—"
-                      )
-                    }
-                  />
-                  <InfoItem
-                    label={t("responses.ip_addr")}
-                    value={selected.ipAddress || "—"}
-                  />
-                  <InfoItem
-                    label={t("responses.start_date")}
-                    value={formatlocalDateTime(
-                      serverDateTimeToLocalDateTime(selected.startDate),
-                    )}
-                  />
-                  <InfoItem
-                    label={t("responses.submit_date")}
-                    value={
-                      selected.submitDate
-                        ? formatlocalDateTime(
-                            serverDateTimeToLocalDateTime(selected.submitDate),
-                          )
-                        : "—"
-                    }
-                  />
-                  <InfoItem
-                    label={t("responses.lang")}
-                    value={t(`language.${selected.lang}`) || "—"}
-                  />
-                  <InfoItem
-                    label={t("responses.status") || "Status"}
-                    value={
-                      selected.preview ? (
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          fontWeight={500}
-                        >
-                          {t("responses.test_response")}
-                        </Typography>
-                      ) : selected.submitDate ? (
-                        <Typography
-                          variant="body2"
-                          color="success.main"
-                          fontWeight={500}
-                        >
-                          {t("responses.complete_response")}
-                        </Typography>
-                      ) : (
-                        <Typography
-                          variant="body2"
-                          color="warning.main"
-                          fontWeight={500}
-                        >
-                          {t("responses.incomplete_response")}
-                        </Typography>
-                      )
-                    }
-                  />
-                  <InfoItem
-                    label={t("responses.disqualified")}
-                    value={
-                      selected.disqualified ? (
-                        <Typography
-                          variant="body2"
-                          color="error.main"
-                          fontWeight={500}
-                        >
-                          {t("responses.yes")}
-                        </Typography>
-                      ) : (
-                        t("responses.no")
-                      )
-                    }
-                  />
-                  <InfoItem
-                    label={t("responses.voice_recordings")}
-                    value={renderVoiceRecordings(selected.id, selected.events)}
-                  />
-                  <InfoItem
-                    label={t("responses.locations")}
-                    value={renderLocations(selected.events)}
-                  />
-                </Box>
-
-                <Box sx={{ minWidth: 0 }}>
-                  <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                    <Tabs
-                      value={activeTab}
-                      onChange={(_, newValue) => setActiveTab(newValue)}
-                    >
-                      <Tab label={t("responses.answers", "Answers")} />
-                      <Tab label={t("responses.events", "Events")} />
-                    </Tabs>
-                  </Box>
-
-                  {activeTab === 0 && (
-                    <Box sx={{ py: 2 }}>
-                      {selected.values && selected.values.length > 0 ? (
-                        <TableContainer component={Paper} variant="outlined">
-                          <Table size="small" aria-label={t("aria.answers_table")}>
-                            <TableHead>
-                              <TableRow>
-                                <TableCell sx={{ width: "50%", backgroundColor: "#212B36", color: "white" }}>
-                                  {t("responses.question")}
-                                </TableCell>
-                                <TableCell sx={{ width: "50%", backgroundColor: "#212B36", color: "white" }}>
-                                  {t("responses.answer")}
-                                </TableCell>
-                              </TableRow>
-                            </TableHead>
-                            <TableBody>
-                              {selected.values.map((val) => {
-                                const answerTooltip = getTooltipString(val.value);
-                                const questionTooltip = getTooltipString(val.key);
-                                return (
-                                  <TableRow
-                                    key={val.code}
-                                    hover
-                                    sx={{
-                                      backgroundColor: val.code.startsWith("G") ? "action.hover" : "transparent",
-                                    }}
-                                  >
-                                    <TableCell
-                                      colSpan={val.code.startsWith("G") ? 2 : 1}
-                                      sx={{
-                                        verticalAlign: "top",
-                                        maxWidth: 0,
-                                      }}
-                                    >
-                                      <ClampTwoLines>
-                                        <CustomTooltip
-                                          showIcon={false}
-                                          title={questionTooltip}
-                                        >
-                                          <Typography
-                                            variant="body2"
-                                            color="text.secondary"
-                                            fontWeight={val.code.startsWith("G") ? 700 : 400}
-                                            sx={{
-                                              wordBreak: "break-word",
-                                              whiteSpace: "pre-wrap",
-                                            }}
-                                          >
-                                            {val.key}
-                                          </Typography>
-                                        </CustomTooltip>
-                                      </ClampTwoLines>
-                                    </TableCell>
-                                    {!val.code.startsWith("G") && (
-                                      <TableCell
-                                        sx={{
-                                          verticalAlign: "top",
-                                          maxWidth: 0,
-                                        }}
-                                      >
-                                        {answerTooltip.length > 20 ? (
-                                          <CustomTooltip
-                                            showIcon={false}
-                                            title={answerTooltip}
-                                          >
-                                            <Box>
-                                              {renderAnswerClamped(
-                                                val.code,
-                                                selected.id,
-                                                val.value,
-                                              )}
-                                            </Box>
-                                          </CustomTooltip>
-                                        ) : (
-                                          <Box>
-                                            {renderAnswerClamped(
-                                              val.code,
-                                              selected.id,
-                                              val.value,
-                                            )}
-                                          </Box>
-                                        )}
-                                      </TableCell>
-                                    )}
-                                  </TableRow>
-                                );
-                              })}
-                            </TableBody>
-                          </Table>
-                        </TableContainer>
-                      ) : (
-                        <Box p={4} textAlign="center">
-                          <Typography color="text.secondary">
-                            {t("responses.no_answers", "No answers found")}
-                          </Typography>
-                        </Box>
-                      )}
-
-                      {selected.calculations?.length > 0 && (
-                        <Box sx={{ mt: 3 }}>
-                          <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                            {t("calculations.title", "Calculated fields")}
-                          </Typography>
-                          <TableContainer component={Paper} variant="outlined">
-                            <Table size="small">
-                              <TableHead>
-                                <TableRow>
-                                  <TableCell sx={{ width: "50%", backgroundColor: "#212B36", color: "white" }}>
-                                    {t("calculations.label", "Label")}
-                                  </TableCell>
-                                  <TableCell sx={{ width: "50%", backgroundColor: "#212B36", color: "white" }}>
-                                    {t("calculations.value", "Value")}
-                                  </TableCell>
-                                </TableRow>
-                              </TableHead>
-                              <TableBody>
-                                {selected.calculations.map((calc) => (
-                                  <TableRow key={calc.code} hover>
-                                    <TableCell sx={{ verticalAlign: "top" }}>
-                                      <Typography variant="body2" color="text.secondary">
-                                        {calc.label}
-                                      </Typography>
-                                    </TableCell>
-                                    <TableCell sx={{ verticalAlign: "top" }}>
-                                      <CalculationValue state={calc.state} value={calc.value} />
-                                    </TableCell>
-                                  </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
-                          </TableContainer>
-                        </Box>
-                      )}
-                    </Box>
-                  )}
-
-                  {activeTab === 1 && (
-                    <Box sx={{ py: 2 }}>
-                      <ResponseEvents events={eventsData} loading={loadingEvents} />
-                    </Box>
-                  )}
-                </Box>
-              </Box>
-            )}
-          </Paper>
-          {Boolean(responseToDelete) && (
-            <ConfirmActionModal
-              open={Boolean(responseToDelete)}
-              onClose={onCloseModal}
-              onConfirm={deleteResponse}
-              title={t("responses.title_delete_response")}
-              cancelLabel={t("action_btn.cancel")}
-              confirmLabel={t("action_btn.delete")}
-            />
-          )}
-        </Box>
-      </Box>
+      {Boolean(responseToDelete) && (
+        <ConfirmActionModal
+          open={Boolean(responseToDelete)}
+          onClose={onCloseModal}
+          onConfirm={deleteResponse}
+          title={t("responses.title_delete_response")}
+          cancelLabel={t("action_btn.cancel")}
+          confirmLabel={t("action_btn.delete")}
+        />
+      )}
 
       <Snackbar
         open={notice.open}

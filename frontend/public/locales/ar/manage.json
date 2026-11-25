@@ -382,7 +382,18 @@
     "tab_individual": "الاستجابات الفردية",
     "tab_analytics": "التحليلات",
     "tab_crosstabs": "الجداول المتقاطعة",
-    "tab_calculations": "الحقول المحسوبة"
+    "tab_calculations": "الحقول المحسوبة",
+    "response_title": "الرد #{{index}}",
+    "previous_response": "الرد السابق",
+    "next_response": "الرد التالي",
+    "previous_page": "الصفحة السابقة",
+    "next_page": "الصفحة التالية",
+    "delete_response_n": "حذف الرد #{{index}}",
+    "no_response_title": "لا يوجد رد لعرضه",
+    "no_response_hint": "اختر نوعًا آخر في «تصفية حسب النوع» لعرض الردود.",
+    "export_button": "تصدير",
+    "download_button": "تنزيل",
+    "status_preview": "معاينة"
   },
   "crosstabs": {
     "rows": "الصفوف",
