@@ -289,6 +289,7 @@
   "processed_successes": {
     "copied": "Copié dans le presse-papiers",
     "invitation_resent": "Invitation renvoyée",
+    "no_changes": "Aucune modification à enregistrer",
     "updated": "Mis à jour avec succès"
   },
   "profile": {
