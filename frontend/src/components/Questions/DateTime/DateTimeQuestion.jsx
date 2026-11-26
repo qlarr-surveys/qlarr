@@ -43,13 +43,14 @@ function DateTimeQuestion(props) {
   const dispatch = useDispatch();
 
   const handleDateChange = (date) => {
-    let finalDate = date === null ? undefined : date.toDate();
+    const finalDate = date ? date.toDate() : undefined;
     dispatch(
       valueChange({
         componentCode: props.component.qualifiedCode,
 
-        value:
-          props.component.type == "date_time"
+        value: !finalDate
+          ? undefined
+          : props.component.type == "date_time"
             ? window.QlarrScripts.toSqlDateTime(finalDate)
             : props.component.type == "time"
               ? window.QlarrScripts.toSqlDateTimeIgnoreDate(finalDate)
