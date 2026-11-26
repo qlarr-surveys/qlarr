@@ -326,6 +326,7 @@
   "processed_successes": {
     "copied": "In die Zwischenablage kopiert",
     "invitation_resent": "Einladung erneut gesendet",
+    "no_changes": "Keine Änderungen zum Speichern",
     "updated": "Erfolgreich aktualisiert"
   },
   "profile": {

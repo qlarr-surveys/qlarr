@@ -51,7 +51,7 @@ export default function ProfileView() {
   const [disableNameFields, setDisableNameFields] = useState(false);
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [updated, setUpdated] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(null);
 
   const [operation, setOperation] = useState(OPERATION.NONE);
 
@@ -153,7 +153,7 @@ export default function ProfileView() {
   const watchedEmail = watch("email");
 
   useEffect(() => {
-    if (watchedEmail !== user.email) {
+    if (watchedEmail?.trim().toLowerCase() !== user.email?.trim().toLowerCase()) {
       reset({
         ...methods.getValues(),
         firstName: user.firstName,
@@ -197,27 +197,33 @@ export default function ProfileView() {
       model.lastName = lastName;
     }
 
-    if (user.email !== email) {
+    if (user.email.trim().toLowerCase() !== email.trim().toLowerCase()) {
       model.email = email;
     }
 
-    if (currentPassword !== "") {
+    if (currentPassword) {
       model.password = currentPassword;
     }
 
-    if (newPassword !== "") {
+    if (newPassword) {
       model.newPassword = newPassword;
     }
+
+    if (Object.keys(model).every((key) => key === "password")) {
+      setSuccessMessage({ name: "no_changes", key: Date.now() });
+      return;
+    }
+
     dispatch(setLoading(true));
     userService
       .updateUserProfile(model)
       .then(() => {
-        if (model.email && model.email !== user.email) {
+        if (model.email) {
           setVerifyEmailOpen(true);
-        } else if (criticalChange) {
+        } else if (model.newPassword) {
           logout();
         } else {
-          setUpdated(true);
+          setSuccessMessage({ name: "updated", key: Date.now() });
         }
 
       })
@@ -263,9 +269,10 @@ export default function ProfileView() {
   return (
     <Box className={styles.mainContainer}>
     <Container className={styles.content}>
-      {updated && (
+      {successMessage && (
         <SuccessSnackbar
-          success="updated"
+          key={successMessage.key}
+          success={successMessage.name}
           left="56"
         />
       )}

@@ -293,6 +293,7 @@
   "processed_successes": {
     "copied": "نسخ إلى الحافظة",
     "invitation_resent": "تمت إعادة إرسال الدعوة",
+    "no_changes": "لا توجد تغييرات لحفظها",
     "updated": "تم التحديث بنجاح"
   },
   "profile": {

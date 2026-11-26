@@ -289,6 +289,7 @@
   "processed_successes": {
     "copied": "Gekopieerd naar klembord",
     "invitation_resent": "Uitnodiging opnieuw verzonden",
+    "no_changes": "Geen wijzigingen om op te slaan",
     "updated": "Succesvol bijgewerkt"
   },
   "profile": {
