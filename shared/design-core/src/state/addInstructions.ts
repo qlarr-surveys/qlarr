@@ -793,14 +793,14 @@ const validationEquation = (qualifiedCode, component, key, validation) => {
       return booleanActiveInstruction(key, instructionText);
     case "validation_file_types":
       const mimes = fileTypesToMimesArray(validation.fileTypes);
-      instructionText = `[${mimes
+      instructionText = `!QlarrScripts.safeAccess(${qualifiedCode}.value,"stored_filename") || [${mimes
         .map((el) => '"' + el + '"')
         .join(
           ",",
         )}].includes(QlarrScripts.safeAccess(${qualifiedCode}.value,"type"))`;
       return booleanActiveInstruction(key, instructionText);
     case "validation_max_file_size":
-      instructionText = `QlarrScripts.safeAccess(${qualifiedCode}.value,"size")/ 1024 < ${validation.max_size}`;
+      instructionText = `!QlarrScripts.safeAccess(${qualifiedCode}.value,"stored_filename") || QlarrScripts.safeAccess(${qualifiedCode}.value,"size")/ 1024 < ${validation.max_size}`;
       return booleanActiveInstruction(key, instructionText);
     case "validation_pattern":
       if (!isValidRegex(validation.pattern)) {
