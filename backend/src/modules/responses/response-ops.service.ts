@@ -28,6 +28,7 @@ import {
   IncompleteResponse,
   InvalidQuestionId,
   InvalidResponse,
+  ResponseAlreadySubmittedException,
   ResponseAlreadySyncedException,
   ResponseNotFoundException,
 } from './response.exceptions';
@@ -169,15 +170,7 @@ export class ResponseOpsService {
     isPreview: boolean,
     file: UploadedFile,
   ): Promise<ResponseUploadFile> {
-    // The survey must exist regardless of mode (else 404 — and no orphan file
-    // written to storage for a nonexistent survey); the ACTIVE + date-window
-    // check is skipped only in preview.
-    if (isPreview) {
-      await this.assertSurveyExists(surveyId);
-    } else {
-      await this.assertActive(surveyId);
-    }
-    await this.assertResponseExists(responseId);
+    await this.assertCanChangeResponseFiles(surveyId, responseId, isPreview);
 
     const mimeType = resolveMimeType(file);
     this.checkMaxFileSize(file.size, mimeType);
@@ -198,6 +191,24 @@ export class ResponseOpsService {
     };
     await this.responses.setFileValue(responseId, questionId, uploaded);
     return uploaded;
+  }
+
+  async removeResponseFile(
+    surveyId: string,
+    responseId: string,
+    questionId: string,
+    isPreview: boolean,
+  ): Promise<void> {
+    await this.assertCanChangeResponseFiles(surveyId, responseId, isPreview);
+
+    const row = await this.responses.findFileValue(responseId, questionId);
+    const cleared = await this.responses.clearFileValue(responseId, questionId);
+    if (!cleared) throw new ResponseAlreadySubmittedException();
+
+    const storedFilename = row?.value?.stored_filename;
+    if (storedFilename) {
+      await this.files.delete(surveyId, SurveyFolder.Responses(responseId), storedFilename);
+    }
   }
 
   /**
@@ -284,6 +295,22 @@ export class ResponseOpsService {
     if (size > maxSize) {
       throw new FileTooBigException(size, maxSize, mimeType);
     }
+  }
+
+  private async assertCanChangeResponseFiles(
+    surveyId: string,
+    responseId: string,
+    isPreview: boolean,
+  ): Promise<void> {
+    // The survey must exist regardless of mode (else 404 — and no orphan file
+    // written to storage for a nonexistent survey); the ACTIVE + date-window
+    // check is skipped only in preview.
+    if (isPreview) {
+      await this.assertSurveyExists(surveyId);
+    } else {
+      await this.assertActive(surveyId);
+    }
+    await this.assertResponseExists(responseId);
   }
 
   private async assertResponseExists(responseId: string): Promise<void> {

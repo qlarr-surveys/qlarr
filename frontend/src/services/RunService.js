@@ -88,6 +88,16 @@ class RunService extends BaseService {
     return response.data;
   }
 
+  async removeResponseFile(key, preview) {
+    const surveyId = sessionStorage.getItem("surveyId");
+    const responseId = sessionStorage.getItem("responseId");
+    const api = preview ? authenticatedApi : publicApi;
+    const url = preview
+      ? `/survey/${surveyId}/response/preview/attach/${responseId}/${key}`
+      : `/survey/${surveyId}/response/attach/${responseId}/${key}`;
+    await api.delete(url);
+  }
+
   async searchAutoComplete(uuid, query) {
     const surveyId = sessionStorage.getItem("surveyId");
     const response = await this.handleRequest(() =>

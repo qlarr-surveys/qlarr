@@ -172,6 +172,13 @@ export const uploadFile = (runService, key, preview, selectedFile) => {
   return runService.uploadResponseFile(key, preview, selectedFile);
 };
 
+export const removeFile = (runService, key, preview) => {
+  if (window["Android"]) {
+    return Promise.resolve();
+  }
+  return runService.removeResponseFile(key, preview);
+};
+
 export const uploadDataUrl = (runService, key, preview, dataurl, fileName) => {
   if (window["Android"]) {
     return new Promise((resolve, reject) => {

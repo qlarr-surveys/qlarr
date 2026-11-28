@@ -10,10 +10,12 @@ const SURVEY_BIG = '10000000-0000-0000-0000-000000000002';
 const SURVEY_INACTIVE = '10000000-0000-0000-0000-000000000003';
 // ACTIVE status but past its end date — offline sync must still accept files.
 const SURVEY_ENDED = '10000000-0000-0000-0000-000000000004';
+const SURVEY_OPEN = '10000000-0000-0000-0000-000000000005';
 const R_FILE = '20000000-0000-0000-0000-000000000001';
 const R_BIG = '20000000-0000-0000-0000-000000000002';
 const R_PREVIEW = '20000000-0000-0000-0000-000000000003';
 const R_ENDED = '20000000-0000-0000-0000-000000000004';
+const R_OPEN = '20000000-0000-0000-0000-000000000005';
 
 const SUPER = bearer({ authorities: ['super_admin'] });
 
@@ -78,6 +80,7 @@ describe('Response file ops + bulk download', () => {
     await addSurvey(SURVEY, 'ACTIVE');
     await addSurvey(SURVEY_BIG, 'ACTIVE');
     await addSurvey(SURVEY_INACTIVE, 'DRAFT');
+    await addSurvey(SURVEY_OPEN, 'ACTIVE');
     // ACTIVE but ended two days ago: online uploads must 400 (window check),
     // offline sync must still succeed (status-only check).
     await root.query(
@@ -115,6 +118,12 @@ describe('Response file ops + bulk download', () => {
       true,
     );
     await addResponse(R_ENDED, SURVEY_ENDED, '{}');
+    await addResponse(
+      R_OPEN,
+      SURVEY_OPEN,
+      '{"q1.value":{"filename":"draft.png","stored_filename":"stored-open","size":100,"type":"image/png"},"q2.value":{"filename":"keep.png","stored_filename":"stored-keep","size":100,"type":"image/png"}}',
+    );
+    await root.query(`UPDATE responses SET submit_date = NULL WHERE id = $1`, [R_OPEN]);
   }, 180_000);
 
   afterAll(async () => {
@@ -330,6 +339,52 @@ describe('Response file ops + bulk download', () => {
         .attach('file', Buffer.from('bytes'), 'p.pdf')
         .expect(404);
       expect(files.upload).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('attach remove', () => {
+    const fileValue = async (responseId: string, questionId: string) => {
+      const [row] = await root.query(
+        `SELECT "values" -> $2 AS v FROM responses WHERE id = $1`,
+        [responseId, `${questionId}.value`],
+      );
+      return row.v;
+    };
+
+    it('clears the file answer and deletes the stored file', async () => {
+      await request(server())
+        .delete(`/survey/${SURVEY_OPEN}/response/attach/${R_OPEN}/q1`)
+        .expect(204);
+      expect(await fileValue(R_OPEN, 'q1')).toBeNull();
+      expect(await fileValue(R_OPEN, 'q2')).toMatchObject({ stored_filename: 'stored-keep' });
+      expect(files.delete).toHaveBeenCalledWith(SURVEY_OPEN, expect.anything(), 'stored-open');
+    });
+
+    it('refuses to remove a file from a submitted response (400)', async () => {
+      await request(server())
+        .delete(`/survey/${SURVEY}/response/attach/${R_FILE}/q1`)
+        .expect(400);
+      expect(await fileValue(R_FILE, 'q1')).toMatchObject({ stored_filename: 'stored-1' });
+      expect(files.delete).not.toHaveBeenCalled();
+    });
+
+    it('rejects a remove on a non-active survey (400)', () =>
+      request(server())
+        .delete(`/survey/${SURVEY_INACTIVE}/response/attach/${R_OPEN}/q2`)
+        .expect(400));
+
+    it('rejects an unauthenticated preview remove (401)', () =>
+      request(server())
+        .delete(`/survey/${SURVEY_OPEN}/response/preview/attach/${R_OPEN}/q2`)
+        .expect(401));
+
+    it('accepts a preview remove from a permitted caller (204)', async () => {
+      await request(server())
+        .delete(`/survey/${SURVEY_OPEN}/response/preview/attach/${R_OPEN}/q2`)
+        .set('Authorization', SUPER)
+        .expect(204);
+      expect(await fileValue(R_OPEN, 'q2')).toBeNull();
+      expect(files.delete).toHaveBeenCalledWith(SURVEY_OPEN, expect.anything(), 'stored-keep');
     });
   });
 
