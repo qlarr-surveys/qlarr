@@ -34,6 +34,7 @@
     },
     "upload": "Télécharger",
     "uploading": "Téléchargement",
+    "upload_failed": "Le fichier n'a pas pu être envoyé. Veuillez réessayer.",
     "validation_between": "Doit être entre {{lower_limit}} et {{upper_limit}}",
     "validation_contains": "Doit contenir \"{{contains}}\"",
     "validation_equals": "Doit être {{number}}",

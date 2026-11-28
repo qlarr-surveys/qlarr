@@ -34,6 +34,7 @@
     },
     "upload": "Upload",
     "uploading": "Uploading",
+    "upload_failed": "The file couldn't be uploaded. Please try again.",
     "validation_between": "Must be between {{lower_limit}} and {{upper_limit}}",
     "validation_contains": "Must contain \"{{contains}}\"",
     "validation_equals": "Must be {{number}}",

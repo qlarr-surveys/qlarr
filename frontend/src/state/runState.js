@@ -20,8 +20,10 @@ export const runState = createSlice({
       keys.forEach((key) => (state.order[key] = action.payload[key]));
     },
     stateReceived: (state, action) => {
+      const uploading = state.uploading;
       let keys = Object.keys(state);
       keys.forEach((key) => delete state[key]);
+      state.uploading = uploading;
       state.preview = action.payload.preview;
       state.singleQuestion = !!action.payload.singleQuestion;
       let response = action.payload.response;
@@ -57,6 +59,12 @@ export const runState = createSlice({
         navigationDirection: { name: "RESUME" },
       };
     },
+    uploadStarted: (state, action) => {
+      state.uploading = { ...state.uploading, [action.payload]: true };
+    },
+    uploadFinished: (state, action) => {
+      delete state.uploading?.[action.payload];
+    },
     navigateNext: (state) => {
       next(state);
     },
@@ -64,6 +72,7 @@ export const runState = createSlice({
       previous(state);
     },
     jump: (state, action) => {
+      if (Object.keys(state.uploading ?? {}).length) return;
       state.navigation = {
         events: state.timings,
         values: getValues(state.values),
@@ -80,12 +89,17 @@ export const {
   stateReceived,
   langChange,
   previewModeChange,
+  uploadStarted,
+  uploadFinished,
   navigateNext,
   navigatePrevious,
   jump,
 } = runState.actions;
 
 export default runState.reducer;
+
+export const uploadInProgress = (state) =>
+  Object.keys(state.runState.uploading ?? {}).length > 0;
 
 // The question shown by a single-question preview. It stays on screen whatever
 // its relevance says, so the designer can see it under any answers.
