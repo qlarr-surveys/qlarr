@@ -34,6 +34,7 @@
     },
     "upload": "Enviar",
     "uploading": "Enviando",
+    "upload_failed": "Não foi possível enviar o arquivo. Tente novamente.",
     "validation_between": "Deve estar entre {{lower_limit}} e {{upper_limit}}",
     "validation_contains": "Deve conter \"{{contains}}\"",
     "validation_equals": "Deve ser {{number}}",

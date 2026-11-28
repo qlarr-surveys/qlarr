@@ -4,7 +4,7 @@ import { useDispatch, shallowEqual } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
 import Button from "@mui/material/Button";
-import { navigateNext, navigatePrevious } from "~/state/runState";
+import { navigateNext, navigatePrevious, uploadInProgress } from "~/state/runState";
 import { rtlLanguage } from "~/utils/common";
 import styles from "./Navigation.module.css";
 
@@ -18,6 +18,7 @@ function Navigation(props) {
       can_save: state.runState.data.survey.allowIncomplete,
       has_errors: state.runState.values.Survey.show_errors,
       invalid_next_attempts: state.runState.invalidNextAttempts,
+      uploading: uploadInProgress(state),
     };
   }, shallowEqual);
   const dispatch = useDispatch();
@@ -73,6 +74,7 @@ function Navigation(props) {
           <Button
             variant="contained"
             className={isRtl ? "ml-14" : "mr-14"}
+            disabled={state.uploading}
             onClick={() => {
               previous();
             }}
@@ -84,11 +86,16 @@ function Navigation(props) {
         )}
         <Button
           variant="contained"
+          disabled={state.uploading}
           onClick={() => {
             next();
           }}
         >
-          {state.has_next ? t("next") : t("finish")}
+          {state.uploading
+            ? t("uploading")
+            : state.has_next
+              ? t("next")
+              : t("finish")}
         </Button>
       </div>
     </>

@@ -5,7 +5,7 @@ import { previewUrlByFilename, uploadFile } from "~/networking/run";
 import styles from "./FileUpload.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import ValidationItem from "~/components/run/ValidationItem";
-import { valueChange } from "~/state/runState";
+import { uploadFinished, uploadStarted, valueChange } from "~/state/runState";
 import { setDirty } from "~/state/templateState";
 import { useTranslation } from "react-i18next";
 import { NAMESPACES } from "~/hooks/useNamespaceLoader";
@@ -47,6 +47,7 @@ function FileUpload(props) {
 
   const [selectedFile, setSelectedFile] = useState();
   const [isUploading, setUploading] = useState(false);
+  const [uploadFailed, setUploadFailed] = useState(false);
 
   const previewAndroid = () => {
     window["Android"].previewFileUpload(state.stored_filename, state.filename);
@@ -70,6 +71,7 @@ function FileUpload(props) {
 
     dispatch(setDirty(props.component.qualifiedCode));
     setSelectedFile(file);
+    setUploadFailed(false);
 
     const invalidType = accepted.length > 0 && !accepted.includes(file.type);
     const tooBig = maxFileSize > 0 && file.size / 1024 > maxFileSize;
@@ -82,6 +84,9 @@ function FileUpload(props) {
   const uploadSelectedFile = (file) => {
     if (!file) return;
     setUploading(true);
+    if (!window["Android"]) {
+      dispatch(uploadStarted(props.component.qualifiedCode));
+    }
     uploadFile(runService, props.component.qualifiedCode, preview, file)
       .then((response) => {
         setUploading(false);
@@ -95,12 +100,17 @@ function FileUpload(props) {
       })
       .catch((err) => {
         setUploading(false);
+        setUploadFailed(true);
         console.error(err);
+      })
+      .finally(() => {
+        dispatch(uploadFinished(props.component.qualifiedCode));
       });
   };
 
   const resetSelectedFile = () => {
     setSelectedFile(undefined);
+    setUploadFailed(false);
   };
 
   const onButtonClick = (event) => {
@@ -116,6 +126,7 @@ function FileUpload(props) {
         const fileLike = { name, size, type };
         dispatch(setDirty(code));
         setSelectedFile(fileLike);
+        setUploadFailed(false);
 
         const invalidType = accepted.length > 0 && !accepted.includes(type);
         const tooBig = maxFileSize > 0 && size / 1024 > maxFileSize;
@@ -181,6 +192,13 @@ function FileUpload(props) {
             name="validation_file_types"
             validation={props.component.validation?.validation_file_types}
           />
+        </React.Fragment>
+      )}
+
+      {uploadFailed && (
+        <React.Fragment>
+          <br />
+          <ValidationItem name="upload_failed" />
         </React.Fragment>
       )}
 

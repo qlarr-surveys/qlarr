@@ -34,6 +34,7 @@
     "none": "بدون إجابة"
   },
   "uploading": "جاري التحميل",
+  "upload_failed": "تعذّر رفع الملف. يرجى المحاولة مرة أخرى.",
   "validation_between": "يجب أن يكون بين {{lower_limit}} و {{upper_limit}}",
   "validation_contains": "يجب أن يحتوي على  \"{{contains}}\"",
   "validation_equals": "يجب أن يكون {{number}}",
