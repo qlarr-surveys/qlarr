@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Header,
   HttpCode,
@@ -48,7 +49,7 @@ function streamFile(res: Response, file: FileDownload, disposition?: string): vo
 
 /**
  * Response file up/download (engine-independent subset). The respondent-facing
- * attach up/download are public (tenant from the survey); the offline-sync
+ * attach up/download/remove are public (tenant from the survey); the offline-sync
  * routes are role-gated. `uploadOfflineSurveyResponse`
  * navigates via the engine and is deferred to Phase 5.
  */
@@ -79,6 +80,27 @@ export class ResponseOpsController {
   ): Promise<ResponseUploadFile> {
     if (!file) throw new BadRequestException('file is required');
     return this.ops.uploadResponseFile(surveyId, responseId, questionId, true, file);
+  }
+
+  @Public()
+  @Delete(':surveyId/response/attach/:responseId/:questionId')
+  @HttpCode(204)
+  removeResponseFile(
+    @Param('surveyId') surveyId: string,
+    @Param('responseId') responseId: string,
+    @Param('questionId') questionId: string,
+  ): Promise<void> {
+    return this.ops.removeResponseFile(surveyId, responseId, questionId, false);
+  }
+
+  @Delete(':surveyId/response/preview/attach/:responseId/:questionId')
+  @HttpCode(204)
+  removePreviewFile(
+    @Param('surveyId') surveyId: string,
+    @Param('responseId') responseId: string,
+    @Param('questionId') questionId: string,
+  ): Promise<void> {
+    return this.ops.removeResponseFile(surveyId, responseId, questionId, true);
   }
 
   @Public()

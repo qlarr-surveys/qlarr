@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
-import { previewUrlByFilename, uploadFile } from "~/networking/run";
+import { previewUrlByFilename, removeFile, uploadFile } from "~/networking/run";
 import styles from "./FileUpload.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import ValidationItem from "~/components/run/ValidationItem";
@@ -212,14 +212,19 @@ function FileUpload(props) {
           <Button
             variant="text"
             size="small"
-            onClick={() =>
+            onClick={() => {
               dispatch(
                 valueChange({
                   componentCode: props.component.qualifiedCode,
                   value: {},
                 })
-              )
-            }
+              );
+              removeFile(
+                runService,
+                props.component.qualifiedCode,
+                preview
+              ).catch((err) => console.error(err));
+            }}
           >
             {t("remove_file", "Remove")}
           </Button>

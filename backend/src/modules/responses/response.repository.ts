@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DeepPartial, Repository } from 'typeorm';
+import { returnedRows } from '../../common/returned-rows';
 import { UUID_RE } from '../../common/validation';
 import { DbContext } from '../../database/db-context';
 import { SurveyResponseEntity } from '../run/survey-response.entity';
@@ -232,6 +233,19 @@ export class ResponseRepository {
        WHERE id = $1`,
       [responseId, `${questionId}.value`, JSON.stringify(uploaded)],
     );
+  }
+
+  async clearFileValue(responseId: string, questionId: string): Promise<boolean> {
+    const rows = returnedRows(
+      await this.db.manager.query(
+        `UPDATE responses
+           SET "values" = "values" - $2
+         WHERE id = $1 AND submit_date IS NULL
+         RETURNING id`,
+        [responseId, `${questionId}.value`],
+      ),
+    );
+    return rows.length > 0;
   }
 
   /** The stored-file descriptor a question holds, plus the response index. */

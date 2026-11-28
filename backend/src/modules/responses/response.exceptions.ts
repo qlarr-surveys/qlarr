@@ -37,6 +37,15 @@ export class SizeLimitExceededException extends HttpException {
   }
 }
 
+export class ResponseAlreadySubmittedException extends HttpException {
+  constructor() {
+    super(
+      { message: 'Response already submitted', error: 'ResponseAlreadySubmittedException' },
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+}
+
 /** The question id has no stored file value. 400. */
 export class InvalidQuestionId extends HttpException {
   constructor() {
